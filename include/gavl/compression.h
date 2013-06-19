@@ -95,6 +95,10 @@ typedef enum
     GAVL_CODEC_ID_DIRAC,          //!< Complete DIRAC frames, sequence end code appended to last packet
     GAVL_CODEC_ID_DV,             //!< DV (several variants)
     GAVL_CODEC_ID_VP8,            //!< VP8 (as used in webm)
+
+    /* Subtitle (some video codecs can handle subtitles also */
+    GAVL_CODEC_ID_DVDSUB = 0x20000, //!< DVD subtitles, palette is in header
+    
   } gavl_codec_id_t;
 
 #define GAVL_BITRATE_VBR      -1 //!< Use this to specify a VBR stream
