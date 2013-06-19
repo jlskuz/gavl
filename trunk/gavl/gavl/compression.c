@@ -79,6 +79,9 @@ compression_ids[] =
     { GAVL_CODEC_ID_DIRAC,     NULL,       "dirac",  "Dirac"        },
     { GAVL_CODEC_ID_DV,        "dv",       "dv",     "DV",          FLAG_NEEDS_PIXELFORMAT },
     { GAVL_CODEC_ID_VP8,       NULL,       "vp8",    "VP8"          },
+
+    { GAVL_CODEC_ID_DVDSUB,    NULL,       "dvdsub",    "DVD subtitles"  },
+
   };
 
 #define NUM_CODEC_IDS (sizeof(compression_ids)/sizeof(compression_ids[0]))
