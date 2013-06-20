@@ -35,8 +35,12 @@ gavl_packet_t * gavf_packet_buffer_get_write(gavf_packet_buffer_t * b)
     }
   ret = b->packets[b->num_packets];
   gavl_packet_reset(ret);
-  b->num_packets++;
   return ret;
+  }
+
+void gavf_packet_buffer_done_write(gavf_packet_buffer_t * b)
+  {
+  b->num_packets++;
   }
 
 gavl_packet_t * gavf_packet_buffer_get_read(gavf_packet_buffer_t * b)

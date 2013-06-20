@@ -143,6 +143,8 @@ typedef struct gavf_packet_buffer_s gavf_packet_buffer_t;
 gavf_packet_buffer_t * gavf_packet_buffer_create(int timescale);
 
 gavl_packet_t * gavf_packet_buffer_get_write(gavf_packet_buffer_t *);
+void gavf_packet_buffer_done_write(gavf_packet_buffer_t * b);
+
 gavl_packet_t * gavf_packet_buffer_get_read(gavf_packet_buffer_t *);
 gavl_packet_t * gavf_packet_buffer_peek_read(gavf_packet_buffer_t * b);
 
