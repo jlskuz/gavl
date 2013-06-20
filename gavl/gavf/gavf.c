@@ -147,7 +147,9 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
   int write_sync = 0;
   gavf_stream_t * s = &g->streams[stream];
 #if 0
-  if(p->data_len == 0)
+  fprintf(stderr, "write_packet %d\n", s->h->id);
+
+  if(s->h->id == 5)
     {
     fprintf(stderr, "write_packet %p\n", p);
     gavl_packet_dump(p);

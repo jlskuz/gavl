@@ -53,6 +53,7 @@ read_packet_func_buffer_cont(void * priv, gavl_packet_t ** p)
       //  fprintf(stderr, "gavf_read_gavl_packet failed\n");
       return GAVL_SOURCE_EOF;
       }
+    gavf_packet_buffer_done_write(read_stream->pb);
     //    fprintf(stderr, "Got packet id: %d\n", read_stream->h->id);
     //    gavl_packet_dump(read_packet);
     
@@ -122,7 +123,7 @@ static gavl_sink_status_t
 put_packet_func(void * priv, gavl_packet_t * p)
   {
   gavf_stream_t * s = priv;
-
+  gavf_packet_buffer_done_write(s->pb);
   p->id = s->h->id;
   
   /* Update footer */
