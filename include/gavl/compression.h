@@ -129,6 +129,9 @@ typedef struct
   uint32_t video_buffer_size;   //!< VBV buffer size for video (in BYTES)
   
   uint32_t max_packet_size;     //!< Maximum packet size or 0 if unknown
+
+  uint32_t max_ref_frames;      //!< Maximum reference frames (if > 2)
+  
   } gavl_compression_info_t;
 
 /** \brief Initialize a compression info
