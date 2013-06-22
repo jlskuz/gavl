@@ -295,6 +295,7 @@ int gavf_extension_write(gavf_io_t * io, uint32_t key, uint32_t len,
 #define GAVF_EXT_CI_PRE_SKIP          2
 #define GAVF_EXT_CI_MAX_PACKET_SIZE   3
 #define GAVF_EXT_CI_VIDEO_BUFFER_SIZE 4
+#define GAVF_EXT_CI_MAX_REF_FRAMES    5
 
 /* Packet */
 

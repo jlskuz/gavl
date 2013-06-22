@@ -225,6 +225,8 @@ void gavl_compression_info_dumpi(const gavl_compression_info_t * info, int inden
     do_indent(indent+2);
     fprintf(stderr, "VBV size:        %d bytes\n",
             info->video_buffer_size);
+    do_indent(indent+2);
+    fprintf(stderr, "max ref frames:  %d\n", info->max_ref_frames);
 
     do_indent(indent+2);
     fprintf(stderr, "Frame types:     I");
