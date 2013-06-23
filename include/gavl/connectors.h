@@ -122,28 +122,7 @@ typedef gavl_source_status_t
 typedef gavl_source_status_t
 (*gavl_packet_source_func_t)(void * priv, gavl_packet_t ** p);
 
-  
-/** \brief Forward declaration of the video source
- *
- *  You don't want to know what's inside
- */
-  
-typedef struct gavl_video_source_s gavl_video_source_t;
 
-/** \brief Forward declaration of the audio source
- *
- *  You don't want to know what's inside
- */
-  
-typedef struct gavl_audio_source_s gavl_audio_source_t;
-
-/** \brief Forward declaration of the packet source
- *
- *  You don't want to know what's inside
- */
-
-typedef struct gavl_packet_source_s gavl_packet_source_t;
-  
 /** \brief Source provides a pointer to an internal structure
  */
 
@@ -590,13 +569,6 @@ typedef enum
     GAVL_SINK_OK,    //!< Frame was successfully processed
   } gavl_sink_status_t;
 
-/** \brief Audio sink
- *
- *  You don't want to know what's inside
- */
-
-typedef struct 
-gavl_audio_sink_s gavl_audio_sink_t;
 
 /** \brief Prototype for getting a frame buffer
  *  \param priv Private data
@@ -686,13 +658,6 @@ GAVL_PUBLIC void
 gavl_audio_sink_destroy(gavl_audio_sink_t * s);
 
   
-/** \brief Video sink
- *
- *  You don't want to know what's inside
- */
-  
-typedef struct 
-gavl_video_sink_s gavl_video_sink_t;
 
 /** \brief Prototype for getting a frame buffer
  *  \param priv Private data
@@ -781,13 +746,6 @@ GAVL_PUBLIC void
 gavl_video_sink_destroy(gavl_video_sink_t * s);
 
 
-/** \brief Packet sink
- *
- *  You don't want to know what's inside
- */
-  
-typedef struct 
-gavl_packet_sink_s gavl_packet_sink_t;
 
 /** \brief Prototype for getting a packet buffer
  *  \param priv Private data

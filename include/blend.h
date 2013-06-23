@@ -19,6 +19,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * *****************************************************************/
 
+#include <gavl/connectors.h>
+
 typedef void (*gavl_blend_func_t)(gavl_overlay_blend_context_t * ctx,
                                   gavl_video_frame_t * frame,
                                   gavl_video_frame_t * overlay);
@@ -41,6 +43,7 @@ struct gavl_overlay_blend_context_s
   /* Chroma subsampling of the destination format */  
   int dst_sub_h, dst_sub_v;
   
+  gavl_video_sink_t * sink;
   };
 
 gavl_blend_func_t
