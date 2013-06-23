@@ -47,6 +47,9 @@ void gavl_overlay_blend_context_destroy(gavl_overlay_blend_context_t * ctx)
   
   gavl_video_frame_null(ctx->ovl_win);
   gavl_video_frame_destroy(ctx->ovl_win);
+
+  if(ctx->sink)
+    gavl_video_sink_destroy(ctx->sink);
   
   free(ctx);
   }
@@ -57,50 +60,18 @@ gavl_overlay_blend_context_get_options(gavl_overlay_blend_context_t * ctx)
   return &ctx->opt;
   }
 
-int
-gavl_overlay_blend_context_init(gavl_overlay_blend_context_t * ctx,
-                                const gavl_video_format_t * dst_format,
-                                gavl_video_format_t * ovl_format)
-  {
-  /* Clean up from previous initializations */
-
-  if(ctx->ovl_win)
-    ctx->ovl = NULL;
-  
-  /* Check for non alpha capable overlay format */
-
-  //  if(!gavl_pixelformat_has_alpha(ovl_format->pixelformat))
-  //    return 0;
-  
-  /* Copy formats */
-  gavl_video_format_copy(&ctx->dst_format, dst_format);
-  gavl_video_format_copy(&ctx->ovl_format, ovl_format);
-
-  /* Get chroma subsampling of the destination */
-  gavl_pixelformat_chroma_sub(dst_format->pixelformat,
-                              &ctx->dst_sub_h, &ctx->dst_sub_v);
-
-  /* Get blend function */
-
-  ctx->func = 
-    gavl_find_blend_func_c(ctx,
-                           dst_format->pixelformat,
-                           &ctx->ovl_format.pixelformat);
-  
-  gavl_video_format_copy(ovl_format, &ctx->ovl_format);
-  return 1;
-  }
-
-void gavl_overlay_blend_context_set_overlay(gavl_overlay_blend_context_t * ctx,
-                                            gavl_overlay_t * ovl)
+gavl_sink_status_t
+put_frame(void * priv,
+          gavl_overlay_t * ovl)
   {
   int diff;
+  gavl_overlay_blend_context_t * ctx = priv;
   /* Save overlay */
-
+  
   if(!ovl || !ovl->src_rect.w || !ovl->src_rect.h)
     {
     ctx->ovl = NULL;
-    return;
+    return GAVL_SINK_OK;
     }
   ctx->ovl = ovl;
   
@@ -171,6 +142,61 @@ void gavl_overlay_blend_context_set_overlay(gavl_overlay_blend_context_t * ctx,
                                 ovl,
                                 ctx->ovl_win,
                                 &ctx->ovl->src_rect);
+  return GAVL_SINK_OK;
+  }
+
+
+void gavl_overlay_blend_context_set_overlay(gavl_overlay_blend_context_t * ctx,
+                                            gavl_overlay_t * ovl)
+  {
+  gavl_video_sink_put_frame(ctx->sink, ovl);
+  }
+
+int
+gavl_overlay_blend_context_init(gavl_overlay_blend_context_t * ctx,
+                                const gavl_video_format_t * dst_format,
+                                gavl_video_format_t * ovl_format)
+  {
+  /* Clean up from previous initializations */
+
+  if(ctx->ovl_win)
+    ctx->ovl = NULL;
+
+  if(ctx->sink)
+    gavl_video_sink_destroy(ctx->sink);
+  
+  /* Check for non alpha capable overlay format */
+
+  //  if(!gavl_pixelformat_has_alpha(ovl_format->pixelformat))
+  //    return 0;
+  
+  /* Copy formats */
+  gavl_video_format_copy(&ctx->dst_format, dst_format);
+  gavl_video_format_copy(&ctx->ovl_format, ovl_format);
+
+  /* Get chroma subsampling of the destination */
+  gavl_pixelformat_chroma_sub(dst_format->pixelformat,
+                              &ctx->dst_sub_h, &ctx->dst_sub_v);
+
+  /* Get blend function */
+
+  ctx->func = 
+    gavl_find_blend_func_c(ctx,
+                           dst_format->pixelformat,
+                           &ctx->ovl_format.pixelformat);
+  
+  gavl_video_format_copy(ovl_format, &ctx->ovl_format);
+  
+  ctx->sink = 
+    gavl_video_sink_create(NULL, put_frame, ctx, &ctx->ovl_format);
+  return 1;
+  }
+
+
+gavl_video_sink_t *
+gavl_overlay_blend_context_get_sink(gavl_overlay_blend_context_t * ctx)
+  {
+  return ctx->sink;
   }
 
 void gavl_overlay_blend(gavl_overlay_blend_context_t * ctx,

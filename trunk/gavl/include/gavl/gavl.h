@@ -37,7 +37,58 @@
 extern "C" {
 #endif
 
+  /* Forward declarations */
 
+/** \ingroup sources
+ *  \brief Forward declaration of the video source
+ *
+ *  You don't want to know what's inside
+ */
+  
+typedef struct gavl_video_source_s gavl_video_source_t;
+
+/** \ingroup sources
+ * \brief Forward declaration of the audio source
+ *
+ *  You don't want to know what's inside
+ */
+  
+typedef struct gavl_audio_source_s gavl_audio_source_t;
+
+/** \ingroup sources
+ * \brief Forward declaration of the packet source
+ *
+ *  You don't want to know what's inside
+ */
+
+typedef struct gavl_packet_source_s gavl_packet_source_t;
+  
+/** \ingroup sinks
+ *  \brief Audio sink
+ *
+ *  You don't want to know what's inside
+ */
+
+typedef struct 
+gavl_audio_sink_s gavl_audio_sink_t;
+
+/** \ingroup sinks
+ * \brief Video sink
+ *
+ *  You don't want to know what's inside
+ */
+  
+typedef struct 
+gavl_video_sink_s gavl_video_sink_t;
+
+/** \ingroup sinks
+ *  \brief Packet sink
+ *
+ *  You don't want to know what's inside
+ */
+  
+typedef struct 
+gavl_packet_sink_s gavl_packet_sink_t;
 
 /** \defgroup mt Multithreading
  *  \brief Multithreading
@@ -3720,6 +3771,15 @@ void gavl_overlay_blend_context_set_overlay(gavl_overlay_blend_context_t * ctx,
 GAVL_PUBLIC
 void gavl_overlay_blend(gavl_overlay_blend_context_t * ctx,
                         gavl_video_frame_t * dst_frame);
+
+/*! \ingroup video_blend
+ *  \brief Get the sink for overlays
+ *  \param ctx A blend context
+ *  \return A video sink
+ */
+
+GAVL_PUBLIC gavl_video_sink_t *
+gavl_overlay_blend_context_get_sink(gavl_overlay_blend_context_t * ctx);
   
 /*! \defgroup video_transform Image transformation
  * \ingroup video
