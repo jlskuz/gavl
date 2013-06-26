@@ -1031,6 +1031,12 @@ const int64_t * gavf_seek(gavf_t * g, int64_t time, int scale)
       index_position--;
       }
     stream++;
+
+    if(stream >= g->ph.num_streams)
+      {
+      done = 1;
+      break;
+      }
     }
   
   /* Seek to the positon */
