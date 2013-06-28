@@ -154,22 +154,36 @@ void gavl_video_source_destroy(gavl_video_source_t * s)
   free(s);
   }
 
-#define SCALE_PTS(f)                                           \
-  if(s->flags & FLAG_SCALE_TIMESTAMPS)                                      \
-    {                                                          \
-    int64_t next_pts;                                          \
-    if(s->next_pts == GAVL_TIME_UNDEFINED)                     \
-      s->next_pts = gavl_time_rescale(s->src_format.timescale, \
-                                      s->dst_format.timescale, \
-                                      (f)->timestamp);               \
-    next_pts = gavl_time_rescale(s->src_format.timescale,      \
-                                 s->dst_format.timescale,      \
-                                 (f)->timestamp + (f)->duration);    \
-    (f)->timestamp = s->next_pts;                                    \
-    (f)->duration = next_pts - (f)->timestamp;                       \
-    s->next_pts = next_pts;                                    \
-    }
+static void scale_pts(gavl_video_source_t * s,
+                      gavl_video_frame_t * f)
+  {
+  int64_t next_pts;
+  if(!(s->flags & FLAG_SCALE_TIMESTAMPS))
+    return;
 
+  if(s->src_flags & GAVL_SOURCE_SRC_DISCONTINUOUS)
+    {
+    f->timestamp = gavl_time_rescale(s->src_format.timescale,
+                                     s->dst_format.timescale,
+                                     f->timestamp);
+    f->duration = gavl_time_rescale(s->src_format.timescale,
+                                    s->dst_format.timescale,
+                                    f->duration);
+    }
+  else
+    {
+    if(s->next_pts == GAVL_TIME_UNDEFINED)
+      s->next_pts = gavl_time_rescale(s->src_format.timescale,
+                                      s->dst_format.timescale,
+                                      f->timestamp);
+    next_pts = gavl_time_rescale(s->src_format.timescale,
+                                 s->dst_format.timescale,
+                                 f->timestamp + f->duration);
+    f->timestamp = s->next_pts;
+    f->duration = next_pts - f->timestamp;
+    s->next_pts = next_pts;            
+    }
+  }
 static gavl_source_status_t do_read(gavl_video_source_t * s,
                                   gavl_video_frame_t ** frame)
   {
@@ -207,7 +221,7 @@ read_video_simple(gavl_video_source_t * s,
     {
     if((st = do_read(s, frame)) != GAVL_SOURCE_OK)
       return st;
-    SCALE_PTS(*frame);
+    scale_pts(s, *frame);
     return GAVL_SOURCE_OK;
     }
   
@@ -230,7 +244,7 @@ read_video_simple(gavl_video_source_t * s,
   gavl_video_frame_copy(&s->src_format, *frame, in_frame);
   gavl_video_frame_copy_metadata(*frame, in_frame);
   
-  SCALE_PTS(*frame);
+  scale_pts(s, *frame);
   return GAVL_SOURCE_OK;
   }
 
@@ -254,7 +268,7 @@ read_video_cnv(gavl_video_source_t * s,
     *frame = gavl_video_frame_pool_get(s->dst_fp);
     }
   gavl_video_convert(s->cnv, in_frame, *frame);
-  SCALE_PTS(*frame);
+  scale_pts(s, *frame);
   return GAVL_SOURCE_OK;
   }
 
