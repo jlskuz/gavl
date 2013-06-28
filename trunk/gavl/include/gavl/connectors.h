@@ -135,6 +135,13 @@ typedef gavl_source_status_t
 
 #define GAVL_SOURCE_SRC_FRAMESIZE_MAX       (1<<2)
 
+/** \brief Stream is discontinuous. Set this for video
+ *  sources delivering graphical subtitles 
+ */
+
+#define GAVL_SOURCE_SRC_DISCONTINUOUS       (1<<3)
+
+
 /* Called by the source */
 
 /** \brief Create a video source
