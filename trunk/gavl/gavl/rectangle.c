@@ -306,8 +306,8 @@ void gavl_rectangle_fit_aspect(gavl_rectangle_i_t * r,
     r->w = (int)((float)(dst_format->image_width) * zoom + 0.5);
     r->h = (int)((float)dst_format->image_width   * zoom * dst_pixel_aspect / src_display_aspect + 0.5);
     }
-  r->x = (dst_format->image_width - r->w)/2;
-  r->y = (dst_format->image_height - r->h)/2;
+  r->x = ((int)dst_format->image_width - r->w)/2;
+  r->y = ((int)dst_format->image_height - r->h)/2;
   gavl_rectangle_i_align_to_format(r, dst_format);
   }
 
