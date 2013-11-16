@@ -178,10 +178,26 @@ void gavl_edl_destroy(gavl_edl_t * e);
 GAVL_PUBLIC
 void gavl_edl_dump(const gavl_edl_t * e);
 
+/** \brief Convert a source time to a destination time
+    \param st An EDL stream
+    \param seg An EDL Segment
+    \param src_time The time in source coordinates
+    \returns The time in destination coordinates
+ */
+  
 GAVL_PUBLIC
 int64_t gavl_edl_src_time_to_dst(const gavl_edl_stream_t * st,
                                  const gavl_edl_segment_t * seg,
                                  int64_t src_time);
+
+/** \brief Convert a destination time to a source time
+    \param t An EDL track
+    \param st An EDL stream
+    \param seg An EDL Segment
+    \param src_time The time in source coordinates
+    \returns The time in destination coordinates
+ */
+
   
 GAVL_PUBLIC
 const gavl_edl_segment_t *

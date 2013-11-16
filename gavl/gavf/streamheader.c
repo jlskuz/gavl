@@ -42,7 +42,10 @@ void gavf_stream_header_apply_footer(gavf_stream_header_t * h)
       /* Detect constant framerate */
       if((h->foot.duration_min == h->foot.duration_max) &&
          (h->format.video.framerate_mode == GAVL_FRAMERATE_VARIABLE))
+        {
         h->format.video.framerate_mode = GAVL_FRAMERATE_CONSTANT;
+        h->format.video.frame_duration = h->foot.duration_min;
+        }
       break;
     case GAVF_STREAM_OVERLAY:
     case GAVF_STREAM_TEXT:
