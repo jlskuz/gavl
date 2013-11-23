@@ -370,6 +370,9 @@ void gavl_packet_dump(const gavl_packet_t * p)
   if(p->flags & GAVL_PACKET_NOOUTPUT)
     fprintf(stderr, " nooutput");
 
+  if(p->flags & GAVL_PACKET_REF)
+    fprintf(stderr, " ref");
+  
   if(p->src_rect.w && p->src_rect.h)
     {
     fprintf(stderr, " src_rect: ");
