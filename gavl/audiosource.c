@@ -424,7 +424,7 @@ read_frame_internal(void * sp, gavl_audio_frame_t ** frame, int num_samples)
                               s->frame,                                   // src
                               0,                                          // dst_pos
                               s->frame_samples - s->frame->valid_samples, // src_pos
-                              s->src_format.samples_per_frame,           // dst_size
+                              s->src_format.samples_per_frame,            // dst_size
                               s->frame->valid_samples);                   // src_size
       
       s->frame = s->buffer_frame;
