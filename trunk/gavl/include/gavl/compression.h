@@ -95,6 +95,7 @@ typedef enum
     GAVL_CODEC_ID_DIRAC,          //!< Complete DIRAC frames, sequence end code appended to last packet
     GAVL_CODEC_ID_DV,             //!< DV (several variants)
     GAVL_CODEC_ID_VP8,            //!< VP8 (as used in webm)
+    GAVL_CODEC_ID_DIV3,           //!< Old style Divx (aka MSMPEG4V3)
 
     /* Subtitle (some video codecs can handle subtitles also */
     GAVL_CODEC_ID_DVDSUB = 0x20000, //!< DVD subtitles, palette is in header
