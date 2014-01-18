@@ -65,6 +65,7 @@ compression_ids[] =
     { GAVL_CODEC_ID_FLAC,      NULL,       "flac",   "Flac"         },
     { GAVL_CODEC_ID_OPUS,      NULL,       "opus",   "Opus"         },
     { GAVL_CODEC_ID_SPEEX,     NULL,       "speex",  "Speex",        FLAG_CFS },
+    { GAVL_CODEC_ID_DTS,       NULL,       "dts",    "DTS",         },
     
     /* Video */
     { GAVL_CODEC_ID_JPEG,      "jpg",      "jpeg",   "JPEG image",  FLAG_SEPARATE | FLAG_NEEDS_PIXELFORMAT },
