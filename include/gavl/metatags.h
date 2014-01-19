@@ -111,6 +111,11 @@
 
 #define GAVL_META_URL         "URL"
 
+/** \brief Referenced URL (means: Redirector)
+ */
+
+#define GAVL_META_REFURL      "RefURL"
+
 /** \brief Software
  *
  *  For media files, this is the multiplexer software.
