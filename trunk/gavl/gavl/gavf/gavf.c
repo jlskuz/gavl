@@ -1316,10 +1316,8 @@ void gavf_close(gavf_t * g)
       write_sync_header(g, -1, NULL);
       }
     
-    /* Write footer */
-    
-    if(!gavf_footer_write(g))
-      return;
+    /* Write footer (might fail silently) */
+    gavf_footer_write(g);
     }
   
   /* Free stuff */

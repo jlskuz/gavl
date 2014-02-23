@@ -45,6 +45,8 @@ gavf_io_t * gavf_io_create(gavf_read_func  r,
 
 void gavf_io_destroy(gavf_io_t * io)
   {
+  if(io->flush_func)
+    io->flush_func(io->priv);
   if(io->close_func)
     io->close_func(io->priv);
   if(io->filename)
