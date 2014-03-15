@@ -239,6 +239,11 @@ static void check_out_frame(gavl_audio_source_t * s)
 
 static int process_input(gavl_audio_source_t * s, gavl_audio_frame_t * f)
   {
+  if(s->next_pts == GAVL_TIME_UNDEFINED)
+    s->next_pts = gavl_time_rescale(s->src_format.samplerate,
+                                    s->dst_format.samplerate,
+                                    f->timestamp);
+
   if(s->skip_samples)
     {
     int skipped = gavl_audio_frame_skip(&s->src_format,
@@ -253,11 +258,6 @@ static int process_input(gavl_audio_source_t * s, gavl_audio_frame_t * f)
                                       s->dst_format.samplerate,
                                       f->timestamp);
     }
-
-  if(s->next_pts == GAVL_TIME_UNDEFINED)
-    s->next_pts = gavl_time_rescale(s->src_format.samplerate,
-                                    s->dst_format.samplerate,
-                                    f->timestamp);
 
   //  fprintf(stderr, "Process input %ld\n", f->valid_samples);
   
