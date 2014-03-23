@@ -401,7 +401,13 @@ void gavl_audio_convert(gavl_audio_converter_t * cnv,
   {
   int i;
   gavl_audio_convert_context_t * ctx;
-  
+
+  /* return early */
+  if(!input_frame->valid_samples)
+    {
+    output_frame->valid_samples = 0;
+    return;
+    }
   cnv->contexts->input_frame = input_frame;
   cnv->last_context->output_frame = output_frame;
   
