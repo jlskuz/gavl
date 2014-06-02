@@ -69,6 +69,8 @@ int gavl_accel_supported()
      int rval = 0;
     int eax, ebx, ecx, edx;
     int max_std_level, max_ext_level, std_caps=0, ext_caps=0;
+
+#ifndef ARCH_X86_64
     long a, c;
 
     __asm__ __volatile__ (
@@ -94,6 +96,7 @@ int gavl_accel_supported()
 
     if (a == c)
         return 0; /* CPUID not supported */
+#endif // !ARCH_X86_64
 
     cpuid(0, max_std_level, ebx, ecx, edx);
 
