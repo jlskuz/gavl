@@ -1,10 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(include/gavl/gavl.h)
+AC_INIT([gavl], [1.4.0])
+AC_CONFIG_SRCDIR([include/gavl/gavl.h])
+AM_INIT_AUTOMAKE
 
 AM_CONFIG_HEADER(include/gavl/config.h)
-
-AM_INIT_AUTOMAKE(gavl, 1.4.0)
 
 GAVL_VERSION=$VERSION
 
@@ -277,8 +277,8 @@ dnl
 dnl Output variables
 dnl
 
-INCLUDES='-I$(top_srcdir)/include -I$(top_srcdir)/include/gavl -I$(top_builddir)/include'
-AC_SUBST(INCLUDES)
+AM_CPPFLAGS='-I$(top_srcdir)/include -I$(top_srcdir)/include/gavl -I$(top_builddir)/include'
+AC_SUBST(AM_CPPFLAGS)
 
 LIBGAVL_CFLAGS="-D__GAVL__ -D_FILE_OFFSET_BITS=64"
 AC_SUBST(LIBGAVL_CFLAGS)
