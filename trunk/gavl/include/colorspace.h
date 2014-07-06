@@ -1270,12 +1270,6 @@ gavl_init_yuv_rgb_funcs_mmxext(gavl_pixelformat_function_table_t *,
 
 #endif
 
-#ifdef HAVE_SSE
-void gavl_init_rgb_yuv_funcs_sse(gavl_pixelformat_function_table_t *,
-                                 const gavl_video_options_t * opt);
-
-#endif
-
 #ifdef HAVE_SSE3
 void gavl_init_rgb_yuv_funcs_sse3(gavl_pixelformat_function_table_t *,
                                   const gavl_video_options_t * opt);

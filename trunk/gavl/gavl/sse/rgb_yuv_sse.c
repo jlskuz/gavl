@@ -97,42 +97,14 @@ static const sse_t rgb_2_v = { .sf = { r_float_to_v, g_float_to_v, b_float_to_v,
     movaps_m2r(*src, xmm3);\
     RGB_FLOAT_TO_YUV_FLOAT_SSE; \
     OUTPUT_YUVA\
-   dst[3] = src[3];
+    dst[3] = src[3];
 
 #include "../csp_packed_packed.h"
-
-#if 0
-/* rgb_float_to_yuva_float_c */
-
-#define FUNC_NAME   rgb_float_to_yuva_float_sse
-#define IN_TYPE     float
-#define OUT_TYPE    float
-#define IN_ADVANCE  3
-#define OUT_ADVANCE 4
-#define NUM_PIXELS  1
-
-#define INIT sse_t in_sse; INIT_RGB_YUV; in_sse.sf[3] = 0.0;
-
-#define CONVERT                                                    \
-    /* We can assume, that src and dst are always aligned */\
-    in_sse.sf[0] = src[0];\
-    in_sse.sf[1] = src[1];\
-    in_sse.sf[2] = src[2];\
-    movaps_m2r(in_sse, xmm3);\
-    RGB_FLOAT_TO_YUV_FLOAT_SSE; \
-    OUTPUT_YUVA\
-    dst[3] = 1.0;
-
-#include "../csp_packed_packed.h"
-
-#endif
 
 #ifdef SSE3
 void gavl_init_rgb_yuv_funcs_sse3(gavl_pixelformat_function_table_t * tab, const gavl_video_options_t * opt)
-#else
-void gavl_init_rgb_yuv_funcs_sse(gavl_pixelformat_function_table_t * tab, const gavl_video_options_t * opt)
-#endif
   {
   tab->rgba_float_to_yuva_float = rgba_float_to_yuva_float_sse;
   //  tab->rgb_float_to_yuva_float = rgb_float_to_yuva_float_sse;
   }
+#endif

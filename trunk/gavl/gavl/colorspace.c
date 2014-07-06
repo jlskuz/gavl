@@ -296,7 +296,7 @@ create_pixelformat_function_table(const gavl_video_options_t * opt,
     {
     //    fprintf(stderr, "Init MMXEXT functions %08x\n", real_accel_flags);
     //    gavl_init_rgb_rgb_funcs_sse(csp_tab, opt);
-    gavl_init_rgb_yuv_funcs_sse(csp_tab, opt);
+    //    gavl_init_rgb_yuv_funcs_sse(csp_tab, opt);
     //    gavl_init_yuv_yuv_funcs_sse(csp_tab, opt);
     //    gavl_init_yuv_rgb_funcs_sse(csp_tab, opt);
     }

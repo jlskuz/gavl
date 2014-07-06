@@ -220,7 +220,7 @@ dnl
 dnl Build optimization flags
 dnl
 
-LQT_OPT_CFLAGS($host_cpu, ["-O3 -funroll-all-loops -fomit-frame-pointer -ffast-math"])
+LQT_OPT_CFLAGS($host_cpu, ["-O3 -fomit-frame-pointer"])
 
 dnl
 dnl Check for SIMD
@@ -237,7 +237,7 @@ CFLAGS="$CFLAGS $OPT_CFLAGS"
 LQT_TRY_CFLAGS([-Wall], CFLAGS="$CFLAGS -Wall")
 LQT_TRY_CFLAGS([-Wmissing-declarations], CFLAGS="$CFLAGS -Wmissing-declarations" )
 LQT_TRY_CFLAGS([-Wdeclaration-after-statement], CFLAGS="$CFLAGS -Wdeclaration-after-statement")
-LQT_TRY_CFLAGS([-mfpmath=387], CFLAGS="$CFLAGS -mfpmath=387")
+dnl LQT_TRY_CFLAGS([-mfpmath=387], CFLAGS="$CFLAGS -mfpmath=387")
 LQT_TRY_CFLAGS([-fvisibility=hidden], CFLAGS="$CFLAGS -fvisibility=hidden")
 
 dnl

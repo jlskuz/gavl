@@ -26,12 +26,10 @@ static void (FUNC_NAME)(gavl_video_scale_context_t * ctx, int scanline, uint8_t 
   int i, imax;
   uint8_t * src, *src_start;
   uint8_t * dst;
-
+  int32_t tmp;
+  
 #if NUM_TAPS <= 0
   int j;
-#endif
-#ifdef INIT_GLOBAL
-  INIT_GLOBAL;
 #endif
 
   dst = dest_start;
@@ -87,6 +85,11 @@ static void (FUNC_NAME)(gavl_video_scale_context_t * ctx, int scanline, uint8_t 
     }
   
   imax = (ctx->dst_size * BYTES * WIDTH_MUL - (dst - dest_start)) / (16*BYTES);
+
+#ifdef INIT_GLOBAL
+  INIT_GLOBAL;
+#endif
+
   for(i = 0; i < imax; i++)
     {
     INIT;
