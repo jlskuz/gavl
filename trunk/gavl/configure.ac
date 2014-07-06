@@ -220,7 +220,7 @@ dnl
 dnl Build optimization flags
 dnl
 
-LQT_OPT_CFLAGS($host_cpu, ["-O3 -fomit-frame-pointer"])
+LQT_OPT_CFLAGS(["-O3 -fomit-frame-pointer"])
 
 dnl
 dnl Check for SIMD
