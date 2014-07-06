@@ -27,7 +27,7 @@
 
 #include <accel.h>
 
-//#define ALL_PIXELFORMATS
+// #define ALL_PIXELFORMATS
 #define IN_PIXELFORMAT GAVL_RGBA_FLOAT
 #define OUT_PIXELFORMAT GAVL_YUVA_FLOAT
 

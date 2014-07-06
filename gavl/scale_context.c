@@ -917,10 +917,8 @@ gavl_video_scale_context_init_convolve(gavl_video_scale_context_t* ctx,
   gavl_rectangle_i_t src_rect_i;
 
   int h_radius_real;
-  const float * h_coeffs_real;
   float *h_c = NULL;
   int v_radius_real;
-  const float * v_coeffs_real;
   float *v_c = NULL;
 
   int src_width, src_height; /* Needed for generating the scale table */
@@ -1007,10 +1005,7 @@ gavl_video_scale_context_init_convolve(gavl_video_scale_context_t* ctx,
       {
       downsample_coeffs(fac_h, h_coeffs, h_radius,
                         &h_c, &h_radius_real);
-      h_coeffs_real = h_c;
       }
-    else
-      h_coeffs_real = h_coeffs;
     }
   if(scale_y)
     {
@@ -1018,10 +1013,7 @@ gavl_video_scale_context_init_convolve(gavl_video_scale_context_t* ctx,
       {
       downsample_coeffs(fac_v, v_coeffs, v_radius,
                         &v_c, &v_radius_real);
-      v_coeffs_real = v_c;
       }
-    else
-      v_coeffs_real = v_coeffs;
     }
  
   ctx->func1 = NULL;
@@ -1422,6 +1414,18 @@ static void scale_context_scale_mt(gavl_video_scale_context_t * ctx,
     }
   }
 
+#ifdef HAVE_MMX
+#define EMMS                       \
+  if(ctx->need_emms)               \
+    {                              \
+    __asm__ __volatile__ ("emms"); \
+    ctx->need_emms = 0;            \
+    }
+#else
+#define EMMS
+#endif
+
+
 void gavl_video_scale_context_scale(gavl_video_scale_context_t * ctx,
                                     const gavl_video_frame_t * src,
                                     gavl_video_frame_t * dst)
@@ -1452,6 +1456,7 @@ void gavl_video_scale_context_scale(gavl_video_scale_context_t * ctx,
         ctx->func1(ctx, i, dst_save);
         dst_save += dst->strides[ctx->dst_frame_plane];
         }
+      EMMS
       break;
     case 2:
       /* First step */
@@ -1475,6 +1480,7 @@ void gavl_video_scale_context_scale(gavl_video_scale_context_t * ctx,
         ctx->func1(ctx, i, dst_save);
         dst_save += ctx->buffer_stride;
         }
+      EMMS
       //      fprintf(stderr, "done\n");
 
       /* Second step */
@@ -1495,15 +1501,9 @@ void gavl_video_scale_context_scale(gavl_video_scale_context_t * ctx,
         ctx->func2(ctx, i, dst_save);
         dst_save += dst->strides[ctx->dst_frame_plane];
         }
+      EMMS
       //      fprintf(stderr, "done\n");
       break;
     }
-#ifdef HAVE_MMX
-  if(ctx->need_emms)
-    {
-    __asm__ __volatile__ ("emms");
-    ctx->need_emms = 0;
-    }
-#endif
   }
 

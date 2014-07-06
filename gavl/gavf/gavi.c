@@ -19,9 +19,23 @@ int gavl_image_write_header(gavf_io_t * io,
                             const gavl_metadata_t * m,
                             const gavl_video_format_t * v)
   {
-  if((gavf_io_write_data(io, sig, 8) < 8) ||
-     !gavf_write_metadata(io, m) ||
-     !gavf_write_video_format(io, v))
+  if((gavf_io_write_data(io, sig, 8) < 8))
+    return 0;
+
+  if(m)
+    {
+    if(!gavf_write_metadata(io, m))
+      return 0;
+    }
+  else
+    {
+    gavl_metadata_t m1;
+    gavl_metadata_init(&m1);
+    if(!gavf_write_metadata(io, &m1))
+      return 0;
+    }
+  
+  if(!gavf_write_video_format(io, v))
     return 0;
   return 1;
   }

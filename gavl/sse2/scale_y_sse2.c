@@ -59,7 +59,6 @@ static mmx_t mm_tmp;
  */
 
 #define INIT_8_GLOBAL \
-  int32_t tmp; \
   pxor_r2r(xmm6, xmm6);\
   movaps_m2r(factor_mask, xmm7);
 
@@ -68,7 +67,6 @@ static mmx_t mm_tmp;
   pxor_r2r(xmm4, xmm4);
 
 #define INIT_16_GLOBAL \
-  int32_t tmp; \
   pxor_r2r(xmm6, xmm6);\
   movaps_m2r(factor_mask, xmm7);
 
@@ -311,9 +309,9 @@ static mmx_t mm_tmp;
 #define INIT        INIT_8
 #define ACCUM       ACCUM_8
 #define OUTPUT      OUTPUT_8
-#define INIT_C        INIT_C_8
-#define ACCUM_C       ACCUM_C_8
-#define OUTPUT_C      OUTPUT_C_8
+#define INIT_C      INIT_C_8
+#define ACCUM_C     ACCUM_C_8
+#define OUTPUT_C    OUTPUT_C_8
 
 #include "scale_y.h"
 
@@ -756,7 +754,7 @@ void gavl_init_scale_funcs_generic_y_sse2(gavl_scale_funcs_t * tab,
   {
   if((src_advance == 1) && (dst_advance == 1))
     {
-    tab->funcs_y.scale_uint8_x_1_noadvance =  scale_uint8_x_1_y_generic_sse2;
+    tab->funcs_y.scale_uint8_x_1_noadvance = scale_uint8_x_1_y_generic_sse2;
     tab->funcs_y.bits_uint8_noadvance = 14;
     }
   else if((src_advance == 3) && (dst_advance == 3))
@@ -783,70 +781,7 @@ void gavl_init_scale_funcs_generic_y_sse2(gavl_scale_funcs_t * tab,
   
   }
 
-#if 0
-
-/* scale_uint8_x_1_y_bilinear_sse2  */
-
-#define FUNC_NAME scale_uint8_x_1_y_bilinear_sse2
-#define WIDTH_MUL 1
-#define BYTES 1
-#define NUM_TAPS -1
-
-#include "scale_y_linear_8.h"
-
-/* scale_uint8_x_2_y_bilinear_sse2  */
-
-#define FUNC_NAME scale_uint8_x_2_y_bilinear_sse2
-#define WIDTH_MUL 2
-#define BYTES 1
-#define NUM_TAPS -1
-
-#include "scale_y_linear_8.h"
-
-/* scale_uint8_x_4_y_bilinear_sse2  */
-
-#define FUNC_NAME scale_uint8_x_4_y_bilinear_sse2
-#define WIDTH_MUL 4
-#define BYTES 1
-#define NUM_TAPS -1
-
-#include "scale_y_linear_8.h"
-
-/* scale_uint8_x_3_y_bilinear_sse2  */
-
-#define FUNC_NAME scale_uint8_x_3_y_bilinear_sse2
-#define WIDTH_MUL 3
-#define BYTES 1
-#define NUM_TAPS -1
-
-#include "scale_y_linear_8.h"
-
-#endif
-
 void gavl_init_scale_funcs_bilinear_y_sse2(gavl_scale_funcs_t * tab,
                                          int src_advance, int dst_advance)
   {
-#if 0 // Too slow
-  if((src_advance == 1) && (dst_advance == 1))
-    {
-    tab->funcs_y.scale_uint8_x_1_noadvance =  scale_uint8_x_1_y_bilinear_sse2;
-    tab->funcs_y.bits_uint8_noadvance = 14;
-    }
-  else if((src_advance == 3) && (dst_advance == 3))
-    {
-    tab->funcs_y.scale_uint8_x_3 =  scale_uint8_x_3_y_bilinear_sse2;
-    tab->funcs_y.bits_uint8_noadvance = 14;
-    }
-  else if((src_advance == 2) && (dst_advance == 2))
-    {
-    tab->funcs_y.scale_uint8_x_2 =  scale_uint8_x_2_y_bilinear_sse2;
-    tab->funcs_y.bits_uint8_noadvance = 14;
-    }
-  else if((src_advance == 4) && (dst_advance == 4))
-    {
-    tab->funcs_y.scale_uint8_x_3 =  scale_uint8_x_4_y_bilinear_sse2;
-    tab->funcs_y.scale_uint8_x_4 =  scale_uint8_x_4_y_bilinear_sse2;
-    tab->funcs_y.bits_uint8_noadvance  = 14;
-    }
-#endif
   }
