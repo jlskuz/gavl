@@ -57,6 +57,16 @@ GAVL_PUBLIC
 gavf_io_t * gavf_io_create_file(FILE * f, int wr, int can_seek, int close);
 
 GAVL_PUBLIC
+uint8_t * gavf_io_mem_get_buf(gavf_io_t * io, int * len);
+
+GAVL_PUBLIC
+gavf_io_t * gavf_io_create_mem_read(const uint8_t * ptr, int len);
+
+GAVL_PUBLIC
+gavf_io_t * gavf_io_create_mem_write();
+
+
+GAVL_PUBLIC
 void gavf_io_set_cb(gavf_io_t * io, gavf_io_cb_func cb, void * cb_priv);
 
 GAVL_PUBLIC
@@ -401,5 +411,32 @@ GAVL_PUBLIC
 int gavl_image_read_image(gavf_io_t * io,
                           gavl_video_format_t * v,
                           gavl_video_frame_t * f);
+
+/* (de-)serialize gavl structs to/from buffers */
+
+GAVL_PUBLIC
+int gavl_audio_format_from_buffer(const uint8_t * buf, int len, gavl_audio_format_t * fmt);
+
+GAVL_PUBLIC
+uint8_t * gavl_audio_format_to_buffer(int * len, const gavl_audio_format_t * fmt);
+
+GAVL_PUBLIC
+int gavl_video_format_from_buffer(const uint8_t * buf, int len, gavl_video_format_t * fmt);
+  
+GAVL_PUBLIC
+uint8_t * gavl_video_format_to_buffer(int * len, const gavl_video_format_t * fmt);
+
+GAVL_PUBLIC
+int gavl_metadata_from_buffer(const uint8_t * buf, int len, gavl_metadata_t * fmt);
+  
+GAVL_PUBLIC
+uint8_t * gavl_metadata_to_buffer(int * len, const gavl_metadata_t * fmt);
+
+GAVL_PUBLIC
+int gavl_compression_info_from_buffer(const uint8_t * buf, int len, gavl_compression_info_t * fmt);
+ 
+GAVL_PUBLIC
+uint8_t * gavl_compression_info_to_buffer(int * len, const gavl_compression_info_t * fmt);
+
 
 #endif // GAVF_H_INCLUDED
