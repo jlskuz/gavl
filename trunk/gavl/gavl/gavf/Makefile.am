@@ -11,6 +11,7 @@ gavfoptions.c   \
 gavi.c          \
 gavlstructs.c   \
 io.c            \
+io_mem.c        \
 io_stdio.c      \
 packetbuffer.c  \
 packetindex.c   \

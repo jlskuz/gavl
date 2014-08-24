@@ -265,7 +265,7 @@ gavl_sampleformat_context_create(gavl_audio_options_t * opt,
 
   dither_type = get_dither_type(opt);
   
-  if((dither_type == GAVL_AUDIO_DITHER_NONE) ||
+  if((dither_type == GDitherNone) ||
      (gavl_bytes_per_sample(out_format->sample_format) > 2) ||
      (in_format->sample_format < GAVL_SAMPLE_FLOAT))
     {

@@ -51,7 +51,7 @@
   RECLIP_H(tmp,2);                                                        \
   dst->b = tmp;                                                    \
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 #define FUNC_NAME scale_rgb_16_x_bilinear_c
@@ -74,7 +74,7 @@
   RECLIP_H(tmp,2);                                                     \
   dst->b = tmp;                                               \
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 #define FUNC_NAME scale_uint8_x_1_x_bilinear_c
@@ -87,7 +87,7 @@
   RECLIP_H(tmp,ctx->plane);                                                \
   dst[0] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 #define FUNC_NAME scale_uint8_x_2_x_bilinear_c
@@ -105,7 +105,7 @@
   RECLIP_H(tmp,1);                                                          \
   dst[1] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 #define FUNC_NAME scale_uint8_x_3_x_bilinear_c
@@ -128,7 +128,7 @@
   RECLIP_H(tmp,2);                                                          \
   dst[2] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 #define FUNC_NAME scale_uint8_x_4_x_bilinear_c
@@ -156,7 +156,7 @@
   RECLIP_H(tmp,3);                                                          \
   dst[3] = tmp;
  
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 #define FUNC_NAME scale_uint16_x_1_x_bilinear_c
@@ -169,7 +169,7 @@
   RECLIP_H(tmp,ctx->plane);                                             \
   dst[0] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 #define FUNC_NAME scale_uint16_x_2_x_bilinear_c
@@ -187,7 +187,7 @@
   RECLIP_H(tmp,1);                                               \
   dst[1] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 
@@ -211,7 +211,7 @@
   RECLIP_H(tmp,2);                                               \
   dst[2] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 #define FUNC_NAME scale_uint16_x_4_x_bilinear_c
@@ -239,7 +239,7 @@
   RECLIP_H(tmp,3);                                                       \
   dst[3] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 #define FUNC_NAME scale_float_x_1_x_bilinear_c
@@ -249,7 +249,7 @@
             ctx->table_h.pixels[i].factor_f[1] * src_2[0]);         \
   RECLIP_FLOAT(dst[0], 0);
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 
@@ -263,7 +263,7 @@
             ctx->table_h.pixels[i].factor_f[1] * src_2[1]);         \
   RECLIP_FLOAT(dst[1], 1);
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 
@@ -282,7 +282,7 @@
   RECLIP_FLOAT(dst[2], 2);                                        \
 
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 #define FUNC_NAME scale_float_x_4_x_bilinear_c
@@ -301,7 +301,7 @@
             ctx->table_h.pixels[i].factor_f[1] * src_2[3]);\
   RECLIP_FLOAT(dst[3], 3);                                        \
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_x.h"
 
 /* y-Direction */
@@ -332,7 +332,7 @@
   RECLIP_V(tmp, 2);                                       \
   dst->b = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #define FUNC_NAME scale_rgb_16_y_bilinear_c
@@ -362,7 +362,7 @@
   RECLIP_V(tmp, 2);                                       \
   dst->b = tmp;                                     \
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #define FUNC_NAME scale_uint8_x_1_y_bilinear_c
@@ -378,7 +378,7 @@
   RECLIP_V(tmp, ctx->plane);                      \
   dst[0] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #define FUNC_NAME scale_uint8_x_2_y_bilinear_c
@@ -399,7 +399,7 @@
   RECLIP_V(tmp, ctx->plane);                      \
   dst[1] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 
@@ -426,7 +426,7 @@
   RECLIP_V(tmp, ctx->plane);                              \
   dst[2] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #define FUNC_NAME scale_uint8_x_4_y_bilinear_c
@@ -459,7 +459,7 @@
 
 
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #define FUNC_NAME scale_uint16_x_1_y_bilinear_c
@@ -478,7 +478,7 @@
   RECLIP_V(tmp, ctx->plane);                    \
   dst[0] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #define FUNC_NAME scale_uint16_x_2_y_bilinear_c
@@ -502,7 +502,7 @@
   RECLIP_V(tmp, ctx->plane);                    \
   dst[1] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #define FUNC_NAME scale_uint16_x_3_y_bilinear_c
@@ -531,7 +531,7 @@
   RECLIP_V(tmp, 2);                              \
   dst[2] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #define FUNC_NAME scale_uint16_x_4_y_bilinear_c
@@ -565,7 +565,7 @@
   RECLIP_V(tmp, 3);                              \
   dst[3] = tmp;
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #define FUNC_NAME scale_float_x_1_y_bilinear_c
@@ -581,7 +581,7 @@
             fac_2 * src_2[0]); \
   RECLIP_FLOAT(dst[0], 0);
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 
@@ -601,7 +601,7 @@
             fac_2 * src_2[1]); \
   RECLIP_FLOAT(dst[1], 1);
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #define FUNC_NAME scale_float_x_3_y_bilinear_c
@@ -623,7 +623,7 @@
             fac_2 * src_2[2]);\
   RECLIP_FLOAT(dst[2], 2);
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #define FUNC_NAME scale_float_x_4_y_bilinear_c
@@ -648,7 +648,7 @@
             fac_2 * src_2[3]);                    \
   RECLIP_FLOAT(dst[3], 3);
 
-#define NUM_TAPS 3
+#define NUM_TAPS 2
 #include "scale_y.h"
 
 #ifdef NOCLIP

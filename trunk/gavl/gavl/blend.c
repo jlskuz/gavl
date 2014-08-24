@@ -60,7 +60,7 @@ gavl_overlay_blend_context_get_options(gavl_overlay_blend_context_t * ctx)
   return &ctx->opt;
   }
 
-gavl_sink_status_t
+static gavl_sink_status_t
 put_frame(void * priv,
           gavl_overlay_t * ovl)
   {

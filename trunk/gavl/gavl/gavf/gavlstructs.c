@@ -878,3 +878,81 @@ int gavf_write_chapter_list(gavf_io_t * io,
     }
   return 1;
   }
+
+/* From / To Buffer */
+
+int gavl_audio_format_from_buffer(const uint8_t * buf, int len, gavl_audio_format_t * fmt)
+  {
+  int result;
+  gavf_io_t * io = gavf_io_create_mem_read(buf, len);
+  result = gavf_read_audio_format(io, fmt);
+  gavf_io_destroy(io);
+  return result;
+  }
+  
+uint8_t * gavl_audio_format_to_buffer(int * len, const gavl_audio_format_t * fmt)
+  {
+  uint8_t * ret;
+  gavf_io_t * io = gavf_io_create_mem_write();
+  gavf_write_audio_format(io, fmt);
+  ret = gavf_io_mem_get_buf(io, len);
+  gavf_io_destroy(io);
+  return ret;
+  }
+
+int gavl_video_format_from_buffer(const uint8_t * buf, int len, gavl_video_format_t * fmt)
+  {
+  int result;
+  gavf_io_t * io = gavf_io_create_mem_read(buf, len);
+  result = gavf_read_video_format(io, fmt);
+  gavf_io_destroy(io);
+  return result;
+  }
+  
+uint8_t * gavl_video_format_to_buffer(int * len, const gavl_video_format_t * fmt)
+  {
+  uint8_t * ret;
+  gavf_io_t * io = gavf_io_create_mem_write();
+  gavf_write_video_format(io, fmt);
+  ret = gavf_io_mem_get_buf(io, len);
+  gavf_io_destroy(io);
+  return ret;
+  }
+
+int gavl_metadata_from_buffer(const uint8_t * buf, int len, gavl_metadata_t * fmt)
+  {
+  int result;
+  gavf_io_t * io = gavf_io_create_mem_read(buf, len);
+  result = gavf_read_metadata(io, fmt);
+  gavf_io_destroy(io);
+  return result;
+  }
+  
+uint8_t * gavl_metadata_to_buffer(int * len, const gavl_metadata_t * fmt)
+  {
+  uint8_t * ret;
+  gavf_io_t * io = gavf_io_create_mem_write();
+  gavf_write_metadata(io, fmt);
+  ret = gavf_io_mem_get_buf(io, len);
+  gavf_io_destroy(io);
+  return ret;
+  }
+
+int gavl_compression_info_from_buffer(const uint8_t * buf, int len, gavl_compression_info_t * fmt)
+  {
+  int result;
+  gavf_io_t * io = gavf_io_create_mem_read(buf, len);
+  result = gavf_read_compression_info(io, fmt);
+  gavf_io_destroy(io);
+  return result;
+  }
+  
+uint8_t * gavl_compression_info_to_buffer(int * len, const gavl_compression_info_t * fmt)
+  {
+  uint8_t * ret;
+  gavf_io_t * io = gavf_io_create_mem_write();
+  gavf_write_compression_info(io, fmt);
+  ret = gavf_io_mem_get_buf(io, len);
+  gavf_io_destroy(io);
+  return ret;
+  }
