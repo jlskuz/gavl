@@ -57,7 +57,7 @@ read_audio_func(void * priv, gavl_audio_frame_t ** frame)
   if(!s->aframe)
     s->aframe = gavl_audio_frame_create(NULL);
 
-  gavf_packet_to_audio_frame(p, s->aframe, &s->h->format.audio);
+  gavf_packet_to_audio_frame(p, s->aframe, &s->h->format.audio, &s->h->m, &s->dsp);
   *frame = s->aframe;
   return GAVL_SOURCE_OK;
   }
@@ -100,7 +100,7 @@ read_video_func(void * priv, gavl_video_frame_t ** frame)
   if(!s->vframe)
     s->vframe = gavl_video_frame_create(NULL);
   
-  gavf_packet_to_video_frame(p, s->vframe, &s->h->format.video);
+  gavf_packet_to_video_frame(p, s->vframe, &s->h->format.video, &s->h->m, &s->dsp);
   *frame = s->vframe;
   return GAVL_SOURCE_OK;
   }

@@ -398,7 +398,7 @@ gavl_dsp_video_frame_shift_bits(gavl_dsp_context_t * ctx,
     
     for(j = 0; j < height; j++)
       {
-      ctx->funcs.shift_up_16(src, len, bits);
+      shift_func(src, len, bits);
       src += frame->strides[i];
       }
     }

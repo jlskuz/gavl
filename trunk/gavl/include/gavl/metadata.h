@@ -392,6 +392,25 @@ gavl_metadata_equal(const gavl_metadata_t * m1,
 GAVL_PUBLIC void
 gavl_metadata_delete_compression_fields(gavl_metadata_t * m);
 
+/** \brief Set the enddian tag
+ *  \arg m Metadata
+ *
+ *  This sets the "Endian" field to 1 on big endian architectures
+ *  0 else
+ */
+
+GAVL_PUBLIC void
+gavl_metadata_set_endian(gavl_metadata_t * m);
+
+/** \brief Check if endianess needs to be swapped
+ *  \arg m Metadata
+ *  \returns 1 if the stream was generated on a machine with different endianess, 0 else.
+ */
+
+GAVL_PUBLIC int
+gavl_metadata_do_swap_endian(const gavl_metadata_t * m);
+
+
   
 /**
  * @}

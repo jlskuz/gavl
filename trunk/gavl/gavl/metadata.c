@@ -473,3 +473,36 @@ gavl_metadata_delete_compression_fields(gavl_metadata_t * m)
   {
   delete_fields(m, compression_fields);
   }
+
+void
+gavl_metadata_set_endian(gavl_metadata_t * m)
+  {
+  int val;
+#ifdef WORDS_BIGENDIAN
+  val = 1;
+#else
+  val = 0;
+#endif
+  gavl_metadata_set_int(m, "BigEndian", val);
+  }
+
+int
+gavl_metadata_do_swap_endian(const gavl_metadata_t * m)
+  {
+  int val;
+
+  if(!m)
+    return 0;
+  
+  if(!gavl_metadata_get_int(m, "BigEndian", &val))
+    val = 0;
+#ifdef WORDS_BIGENDIAN
+  if(!val)
+    return 1;
+#else
+  if(val)
+    return 1;
+#endif
+  else
+    return 0;
+  }

@@ -204,6 +204,8 @@ typedef struct
   
   gavl_packet_t * p; // For sink
 
+  gavl_dsp_context_t * dsp; // For swapping endianess
+  
   gavf_stream_skip_func skip_func;
   void * skip_priv;
   
