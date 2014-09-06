@@ -926,7 +926,9 @@ int gavf_update_metadata(gavf_t * g, const gavl_metadata_t * m)
 
   if(g->opt.flags & GAVF_OPT_FLAG_DUMP_METADATA)
     {
+#if 0
     fprintf(stderr, "Got inline metadata\n");
+#endif
     gavl_metadata_dump(m, 2);
     }
   
