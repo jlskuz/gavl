@@ -416,12 +416,12 @@ static void gavf_stream_init_audio(gavf_t * g, gavf_stream_t * s)
     s->packet_duration = s->h->format.audio.samples_per_frame;
   else
     s->flags |= STREAM_FLAG_HAS_DURATION;
-  
-  
   if(g->wr)
     {
     /* Create packet sink */
     gavf_stream_create_packet_sink(g, s);
+    if(s->h->ci.id == GAVL_CODEC_ID_NONE)
+      gavl_metadata_set_endian(&s->h->m);
     }
   else
     {
@@ -480,6 +480,8 @@ static void gavf_stream_init_video(gavf_t * g, gavf_stream_t * s,
     {
     /* Create packet sink */
     gavf_stream_create_packet_sink(g, s);
+    if(s->h->ci.id == GAVL_CODEC_ID_NONE)
+      gavl_metadata_set_endian(&s->h->m);
     }
   else
     {
