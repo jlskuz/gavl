@@ -282,7 +282,6 @@ int main(int argc, char ** argv)
 
   gavl_video_frame_t * frame, * overlay;
 
-  gavl_video_options_t * opt;
     
   gavl_pixelformat_t frame_csp;
   gavl_pixelformat_t overlay_csp;
@@ -300,8 +299,7 @@ int main(int argc, char ** argv)
   imax = gavl_num_pixelformats();
   blend = gavl_overlay_blend_context_create();
   
-  opt = gavl_overlay_blend_context_get_options(blend);
-
+  
   //  imax = 1;
   
   for(i = 0; i < imax; i++)

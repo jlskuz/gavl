@@ -576,6 +576,8 @@ static void gavf_stream_free(gavf_stream_t * s)
     gavl_video_frame_null(s->vframe);
     gavl_video_frame_destroy(s->vframe);
     }
+  if(s->dsp)
+    gavl_dsp_context_destroy(s->dsp);
   }
 
 
@@ -1167,7 +1169,9 @@ int gavf_write_video_frame(gavf_t * g,
   }
 
 void gavf_packet_to_video_frame(gavl_packet_t * p, gavl_video_frame_t * frame,
-                                const gavl_video_format_t * format)
+                                const gavl_video_format_t * format,
+                                const gavl_metadata_t * m,
+                                gavl_dsp_context_t ** ctx)
   {
   frame->timestamp = p->pts;
   frame->duration = p->duration;
@@ -1181,6 +1185,13 @@ void gavf_packet_to_video_frame(gavl_packet_t * p, gavl_video_frame_t * frame,
   
   frame->strides[0] = 0;
   gavl_video_frame_set_planes(frame, format, p->data);
+
+  if(gavl_metadata_do_swap_endian(m))
+    {
+    if(!(*ctx))
+      *ctx = gavl_dsp_context_create();
+    gavl_dsp_video_frame_swap_endian(*ctx, frame, format);
+    }
   }
 
 static void get_overlay_format(const gavl_video_format_t * src,
@@ -1291,12 +1302,23 @@ int gavf_write_audio_frame(gavf_t * g, int stream, gavl_audio_frame_t * frame)
   return (gavl_audio_sink_put_frame(s->asink, frame_internal) == GAVL_SINK_OK);
   }
 
-void gavf_packet_to_audio_frame(gavl_packet_t * p, gavl_audio_frame_t * frame,
-                                const gavl_audio_format_t * format)
+void gavf_packet_to_audio_frame(gavl_packet_t * p,
+                                gavl_audio_frame_t * frame,
+                                const gavl_audio_format_t * format,
+                                const gavl_metadata_t * m,
+                                gavl_dsp_context_t ** ctx)
   {
   frame->valid_samples = p->duration;
   frame->timestamp = p->pts;
   gavl_audio_frame_set_channels(frame, format, p->data);
+
+  if(gavl_metadata_do_swap_endian(m))
+    {
+    if(!(*ctx))
+      *ctx = gavl_dsp_context_create();
+    gavl_dsp_audio_frame_swap_endian(*ctx, frame, format);
+    }
+
   }
 
 
