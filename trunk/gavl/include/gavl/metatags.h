@@ -189,6 +189,11 @@
  */
 #define GAVL_META_MIMETYPE         "MimeType"
 
+/** \brief Location used for opening this resource
+ */
+#define GAVL_META_LOCATION         "Location"
+
+
 /**
  * @}
  */
