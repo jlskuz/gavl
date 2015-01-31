@@ -236,10 +236,17 @@ const char * gavl_compression_get_extension(gavl_codec_id_t id, int * separate);
  *  is sufficient or if the pixelformat must be valid in the associated video format.
  *
  */
-  
+    
 GAVL_PUBLIC
 int gavl_compression_need_pixelformat(gavl_codec_id_t id);
 
+/** \brief Get the mimetype for the corresponding elementary format
+ *  \param ci A compression info
+ *  \returns The mimetype (can be NULL)
+ */
+
+const char * gavl_compression_get_mimetype(const gavl_compression_info_t * ci);
+  
 /** \brief Check if an audio compression constant frame samples 
  *  \param id A codec ID
  *  \returns 1 if the compression has the same number of samples in each frame, 0 else

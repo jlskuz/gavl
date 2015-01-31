@@ -22,7 +22,6 @@ int gavf_footer_check(gavf_t * g)
   char sig[8];
   int ret = 0;
 
-  gavf_footer_init(g);
   
   if(!g->io->seek_func)
     return 0;
@@ -94,14 +93,14 @@ int gavf_footer_check(gavf_t * g)
     
   }
 
-void gavf_footer_init(gavf_t * g)
+void gavf_footer_init(gavf_program_header_t * ph)
   {
   int i;
   gavf_stream_header_t * s;
 
-  for(i = 0; i < g->ph.num_streams; i++)
+  for(i = 0; i < ph->num_streams; i++)
     {
-    s = g->ph.streams + i;
+    s = ph->streams + i;
     
     /* Initialize footer */
     s->foot.duration_min = GAVL_TIME_UNDEFINED;

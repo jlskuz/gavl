@@ -1,7 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <config.h>
+
 #include <gavfprivate.h>
+#include <metatags.h>
 
 // #define DUMP_EOF
 
@@ -397,10 +400,28 @@ int gavf_get_max_audio_packet_size(const gavl_audio_format_t * fmt,
   return fmt->samples_per_frame * fmt->num_channels * sample_size;
   }
 
+
+static void set_implicit_stream_fields(gavf_stream_t * s)
+  {
+  const char * var;
+
+  var = gavl_compression_get_mimetype(&s->h->ci);
+  if(var)
+    gavl_metadata_set(&s->h->m, GAVL_META_MIMETYPE, var);
+  
+  var = gavl_compression_get_long_name(s->h->ci.id);
+  if(var)
+    gavl_metadata_set(&s->h->m, GAVL_META_FORMAT, var);
+
+  if(s->h->ci.bitrate)
+    gavl_metadata_set_int(&s->h->m, GAVL_META_BITRATE, s->h->ci.bitrate);
+  }
+
 /* Streams */
 
 static void gavf_stream_init_audio(gavf_t * g, gavf_stream_t * s)
   {
+  
   int sample_size;
   s->timescale = s->h->format.audio.samplerate;
   
@@ -427,6 +448,9 @@ static void gavf_stream_init_audio(gavf_t * g, gavf_stream_t * s)
     {
     /* Create packet source */
     gavf_stream_create_packet_src(g, s);
+
+    /* Set redundant metadata fields */
+    set_implicit_stream_fields(s);
     }
   }
 
@@ -487,6 +511,9 @@ static void gavf_stream_init_video(gavf_t * g, gavf_stream_t * s,
     {
     /* Create packet source */
     gavf_stream_create_packet_src(g, s);
+    
+    /* Set redundant metadata fields */
+    set_implicit_stream_fields(s);
     }
   }
 
@@ -510,7 +537,28 @@ static void gavf_stream_init_text(gavf_t * g, gavf_stream_t * s,
     {
     /* Create packet source */
     gavf_stream_create_packet_src(g, s);
+
+    /* Set redundant metadata fields */
+    set_implicit_stream_fields(s);
     }
+  }
+
+int gavf_stream_get_timescale(const gavf_stream_header_t * sh)
+  {
+  switch(sh->type)
+    {
+    case GAVF_STREAM_AUDIO:
+      return sh->format.audio.samplerate;
+      break;
+    case GAVF_STREAM_VIDEO:
+    case GAVF_STREAM_OVERLAY:
+      return sh->format.video.timescale;
+      break;
+    case GAVF_STREAM_TEXT:
+      return sh->format.text.timescale;
+      break;
+    }
+  return 0;
   }
 
 static void init_streams(gavf_t * g)
@@ -547,6 +595,14 @@ static void init_streams(gavf_t * g)
       }
     g->streams[i].pb =
       gavf_packet_buffer_create(g->streams[i].timescale);
+    }
+
+  if(!g->wr)
+    {
+    gavl_time_t duration;
+    if(gavf_program_header_get_duration(&g->ph, NULL, &duration))
+      gavl_metadata_set_long(&g->ph.m, GAVL_META_APPROX_DURATION, duration);
+    
     }
   }
 
@@ -766,7 +822,6 @@ const gavl_chapter_list_t * gavf_get_chapter_list(gavf_t * g)
   {
   return g->cl;
   }
-
 
 const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
   {
@@ -1122,7 +1177,7 @@ int gavf_start(gavf_t * g)
   
   init_streams(g);
   
-  gavf_footer_init(g);
+  gavf_footer_init(&g->ph);
   
   if(g->ph.num_streams == 1)
     {
@@ -1138,6 +1193,9 @@ int gavf_start(gavf_t * g)
     else
       g->final_encoding_mode = ENC_SYNCHRONOUS;
     }
+  
+  gavl_metadata_delete_implicit_fields(&g->ph.m);
+  gavl_metadata_set(&g->ph.m, GAVL_META_SOFTWARE, PACKAGE"-"VERSION);
   
   if(g->opt.flags & GAVF_OPT_FLAG_DUMP_HEADERS)
     gavf_program_header_dump(&g->ph);

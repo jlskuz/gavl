@@ -31,6 +31,8 @@ int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph)
   /* Read metadata */
   if(!gavf_read_metadata(&bufio, &ph->m))
     goto fail;
+
+  gavf_footer_init(ph);
   
   if(!gavf_io_cb(io, GAVF_IO_CB_PROGRAM_HEADER_END, ph))
     goto fail;
@@ -68,7 +70,7 @@ int gavf_program_header_write(gavf_io_t * io,
     if(!gavf_stream_header_write(&bufio, &ph->streams[i]))
       goto fail;
     }
-
+  
   /* Write metadata */
   if(!gavf_write_metadata(&bufio, &ph->m))
     goto fail;
@@ -100,9 +102,10 @@ add_stream(gavf_program_header_t * ph, const gavl_metadata_t * m)
   ret = &ph->streams[ph->num_streams-1];
   memset(ret, 0, sizeof(*ret));
   gavl_metadata_copy(&ret->m, m);
-
+  gavl_metadata_delete_implicit_fields(&ret->m);
+  
   ret->id = ph->num_streams;
-
+  
   /* Initialize footer */
   ret->foot.duration_min = GAVL_TIME_UNDEFINED;
   ret->foot.duration_max = GAVL_TIME_UNDEFINED;
@@ -285,3 +288,36 @@ void gavf_program_header_copy(gavf_program_header_t * dst,
     gavl_compression_info_copy(&dst->streams[i].ci, &src->streams[i].ci);
     }
   }
+ 
+int gavf_program_header_get_duration(const gavf_program_header_t * ph,
+                                     gavl_time_t * start_p,
+                                     gavl_time_t * duration_p)
+  {
+  int i, ts;
+  gavl_time_t start = GAVL_TIME_UNDEFINED;
+  gavl_time_t end   = GAVL_TIME_UNDEFINED;
+  gavl_time_t test;
+  
+  for(i = 0; i < ph->num_streams; i++)
+    {
+    if(ph->streams[i].foot.pts_start == GAVL_TIME_UNDEFINED)
+      return 0;
+
+    ts = gavf_stream_get_timescale(&ph->streams[i]);
+    
+    test = gavl_time_unscale(ts, ph->streams[i].foot.pts_start);
+    if((start == GAVL_TIME_UNDEFINED) || (start > test))
+      start = test;
+
+    test = gavl_time_unscale(ts, ph->streams[i].foot.pts_end);
+    if((start == GAVL_TIME_UNDEFINED) || (end < test))
+      end = test;
+    }
+  
+  if(start_p)
+    *start_p = start;
+  if(duration_p)
+    *duration_p = end - start;
+  return 1;
+  }
+

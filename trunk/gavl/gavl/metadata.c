@@ -432,11 +432,19 @@ gavl_metadata_equal(const gavl_metadata_t * m1,
 static const char * compression_fields[] =
   {
     GAVL_META_SOFTWARE,
+    NULL,
+  };
+
+const char * implicit_fields[] =
+  {
     GAVL_META_FORMAT,
     GAVL_META_BITRATE,
     GAVL_META_AUDIO_BITS,
     GAVL_META_VIDEO_BPP,
-    GAVL_META_VENDOR,
+    GAVL_META_MIMETYPE,
+    GAVL_META_APPROX_DURATION,
+    GAVL_META_LOCATION,
+    GAVL_META_BIG_ENDIAN,
     NULL,
   };
 
@@ -472,6 +480,13 @@ void
 gavl_metadata_delete_compression_fields(gavl_metadata_t * m)
   {
   delete_fields(m, compression_fields);
+  delete_fields(m, implicit_fields);
+  }
+
+void
+gavl_metadata_delete_implicit_fields(gavl_metadata_t * m)
+  {
+  delete_fields(m, implicit_fields);
   }
 
 void

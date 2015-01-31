@@ -49,39 +49,40 @@ struct
   const char * extension;
   const char * short_name; // Has no spaces
   const char * long_name;
+  const char * mimetype;
   int flags;
   int sample_size;
   }
 compression_ids[] =
   {
     /* Audio */
-    { GAVL_CODEC_ID_ALAW,      NULL,       "alaw",   "alaw",         0,       1 },
-    { GAVL_CODEC_ID_ULAW,      NULL,       "ulaw",   "ulaw",         0,       1 },
-    { GAVL_CODEC_ID_MP2,       "mp2",      "mp2",    "MPEG layer 2", FLAG_CFS },
-    { GAVL_CODEC_ID_MP3,       "mp3",      "mp3",    "MPEG layer 3", FLAG_CFS },
-    { GAVL_CODEC_ID_AC3,       "ac3",      "ac3",    "AC3",          FLAG_CFS },
-    { GAVL_CODEC_ID_AAC,       NULL,       "aac",    "AAC",          FLAG_CFS },
-    { GAVL_CODEC_ID_VORBIS,    NULL,       "vorbis", "Vorbis"       },
-    { GAVL_CODEC_ID_FLAC,      NULL,       "flac",   "Flac"         },
-    { GAVL_CODEC_ID_OPUS,      NULL,       "opus",   "Opus"         },
-    { GAVL_CODEC_ID_SPEEX,     NULL,       "speex",  "Speex",        FLAG_CFS },
-    { GAVL_CODEC_ID_DTS,       NULL,       "dts",    "DTS",         },
+    { GAVL_CODEC_ID_ALAW,      NULL,       "alaw",   "alaw",         "audio/x-alaw", 0,       1 },
+    { GAVL_CODEC_ID_ULAW,      NULL,       "ulaw",   "ulaw",         "audio/x-mulaw", 0,       1 },
+    { GAVL_CODEC_ID_MP2,       "mp2",      "mp2",    "MPEG layer 2", "audio/mpeg", FLAG_CFS },
+    { GAVL_CODEC_ID_MP3,       "mp3",      "mp3",    "MPEG layer 3", "audio/mpeg", FLAG_CFS },
+    { GAVL_CODEC_ID_AC3,       "ac3",      "ac3",    "AC3",          "audio/x-ac3",FLAG_CFS },
+    { GAVL_CODEC_ID_AAC,       NULL,       "aac",    "AAC",          NULL, FLAG_CFS },
+    { GAVL_CODEC_ID_VORBIS,    NULL,       "vorbis", "Vorbis",       "audio/x-vorbis", },
+    { GAVL_CODEC_ID_FLAC,      NULL,       "flac",   "Flac",         "audio/x-flac", },
+    { GAVL_CODEC_ID_OPUS,      NULL,       "opus",   "Opus",         "audio/opus", },
+    { GAVL_CODEC_ID_SPEEX,     NULL,       "speex",  "Speex",        "audio/x-speex", FLAG_CFS },
+    { GAVL_CODEC_ID_DTS,       NULL,       "dts",    "DTS",          NULL, },
     
     /* Video */
-    { GAVL_CODEC_ID_JPEG,      "jpg",      "jpeg",   "JPEG image",  FLAG_SEPARATE | FLAG_NEEDS_PIXELFORMAT },
-    { GAVL_CODEC_ID_PNG,       "png",      "png",    "PNG image",   FLAG_SEPARATE | FLAG_NEEDS_PIXELFORMAT },
-    { GAVL_CODEC_ID_TIFF,      "tif",      "tiff",   "TIFF image",  FLAG_SEPARATE | FLAG_NEEDS_PIXELFORMAT },
-    { GAVL_CODEC_ID_TGA,       "tga",      "tga",    "TGA image",   FLAG_SEPARATE | FLAG_NEEDS_PIXELFORMAT },
-    { GAVL_CODEC_ID_MPEG1,     "mpv",      "mpeg1",  "MPEG-1"       },
-    { GAVL_CODEC_ID_MPEG2,     "mpv",      "mpeg2",  "MPEG-2",      FLAG_NEEDS_PIXELFORMAT },
-    { GAVL_CODEC_ID_MPEG4_ASP, "m4v",      "mpeg4",  "MPEG-4 ASP"   },
-    { GAVL_CODEC_ID_H264,      "h264",     "h264",   "H.264"        },
-    { GAVL_CODEC_ID_THEORA,    NULL,       "theora", "Theora"       },
-    { GAVL_CODEC_ID_DIRAC,     NULL,       "dirac",  "Dirac"        },
-    { GAVL_CODEC_ID_DV,        "dv",       "dv",     "DV",          FLAG_NEEDS_PIXELFORMAT },
-    { GAVL_CODEC_ID_VP8,       NULL,       "vp8",    "VP8"          },
-    { GAVL_CODEC_ID_DIV3,      NULL,       "divx3",  "DivX 3"       },
-    { GAVL_CODEC_ID_DVDSUB,    NULL,       "dvdsub",    "DVD subtitles"  },
+    { GAVL_CODEC_ID_JPEG,      "jpg",      "jpeg",   "JPEG image",    "image/jpeg", FLAG_SEPARATE | FLAG_NEEDS_PIXELFORMAT },
+    { GAVL_CODEC_ID_PNG,       "png",      "png",    "PNG image",     "image/png",  FLAG_SEPARATE | FLAG_NEEDS_PIXELFORMAT },
+    { GAVL_CODEC_ID_TIFF,      "tif",      "tiff",   "TIFF image",    "image/tiff", FLAG_SEPARATE | FLAG_NEEDS_PIXELFORMAT },
+    { GAVL_CODEC_ID_TGA,       "tga",      "tga",    "TGA image",     "image/x-tga",  FLAG_SEPARATE | FLAG_NEEDS_PIXELFORMAT },
+    { GAVL_CODEC_ID_MPEG1,     "mpv",      "mpeg1",  "MPEG-1",        "video/mpeg", },
+    { GAVL_CODEC_ID_MPEG2,     "mpv",      "mpeg2",  "MPEG-2",        "video/mpeg", NULL, FLAG_NEEDS_PIXELFORMAT },
+    { GAVL_CODEC_ID_MPEG4_ASP, "m4v",      "mpeg4",  "MPEG-4",        NULL, }, // ISO/IEC 14496-2
+    { GAVL_CODEC_ID_H264,      "h264",     "h264",   "H.264",         NULL, },
+    { GAVL_CODEC_ID_THEORA,    NULL,       "theora", "Theora",        NULL, },
+    { GAVL_CODEC_ID_DIRAC,     NULL,       "dirac",  "Dirac",         "video/x-dirac", },
+    { GAVL_CODEC_ID_DV,        "dv",       "dv",     "DV",            NULL, FLAG_NEEDS_PIXELFORMAT },
+    { GAVL_CODEC_ID_VP8,       NULL,       "vp8",    "VP8",           "video/x-vp8", },
+    { GAVL_CODEC_ID_DIV3,      NULL,       "divx3",  "DivX 3",        NULL, },
+    { GAVL_CODEC_ID_DVDSUB,    NULL,       "dvdsub", "DVD subtitles", NULL, },
 
   };
 
@@ -98,6 +99,34 @@ const char * gavl_compression_get_extension(gavl_codec_id_t id, int * separate)
         *separate = !!(compression_ids[i].flags & FLAG_SEPARATE);
       return compression_ids[i].extension;
       }
+    }
+  return NULL;
+  }
+
+static const char * MIME_AACP = "audio/aacp";
+static const char * MIME_AAC  = "audio/aac";
+
+const char * gavl_compression_get_mimetype(const gavl_compression_info_t * ci)
+  {
+  int i;
+  for(i = 0; i < NUM_CODEC_IDS; i++)
+    {
+    if(compression_ids[i].id == ci->id)
+      {
+      if(compression_ids[i].mimetype)
+        return compression_ids[i].extension;
+      break;
+      }
+    }
+
+  /* Special cases */
+
+  if(compression_ids[i].id == GAVL_CODEC_ID_AAC)
+    {
+    if(ci->flags & GAVL_COMPRESSION_SBR)
+      return MIME_AACP;
+    else
+      return MIME_AAC;
     }
   return NULL;
   }
