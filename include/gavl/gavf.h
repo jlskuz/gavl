@@ -169,6 +169,11 @@ void gavf_program_header_copy(gavf_program_header_t * dst,
 GAVL_PUBLIC
 void gavf_program_header_free(gavf_program_header_t * ph);
 
+GAVL_PUBLIC
+int gavf_program_header_get_duration(const gavf_program_header_t * ph,
+                                     gavl_time_t * start_p,
+                                     gavl_time_t * duration_p);
+
 
 typedef struct
   {

@@ -193,6 +193,10 @@
  */
 #define GAVL_META_LOCATION         "Location"
 
+/** \brief "1"  is big endian, 0 else
+ */
+#define GAVL_META_BIG_ENDIAN       "BigEndian"
+
 
 /**
  * @}

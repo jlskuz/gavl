@@ -392,6 +392,15 @@ gavl_metadata_equal(const gavl_metadata_t * m1,
 GAVL_PUBLIC void
 gavl_metadata_delete_compression_fields(gavl_metadata_t * m);
 
+/** \brief Clear fields, which are obtained implicitly
+ *  \arg m Metadata
+ *
+ *  This deletes fields, which can implicitly obtainecd from the file
+ */
+
+GAVL_PUBLIC void
+gavl_metadata_delete_implicit_fields(gavl_metadata_t * m);
+  
 /** \brief Set the enddian tag
  *  \arg m Metadata
  *

@@ -219,6 +219,9 @@ gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s);
 
 gavf_stream_t * gavf_find_stream_by_id(gavf_t * g, uint32_t id);
 
+int gavf_stream_get_timescale(const gavf_stream_header_t * sh);
+
+
 /* Formats */
 
 int gavf_read_audio_format(gavf_io_t * io, gavl_audio_format_t * format);
@@ -439,5 +442,5 @@ struct gavf_s
 /* Footer */
 
 int gavf_footer_check(gavf_t * g);
-void gavf_footer_init(gavf_t * g);
+void gavf_footer_init(gavf_program_header_t * ph);
 int gavf_footer_write(gavf_t * g);
