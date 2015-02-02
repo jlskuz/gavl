@@ -597,13 +597,6 @@ static void init_streams(gavf_t * g)
       gavf_packet_buffer_create(g->streams[i].timescale);
     }
 
-  if(!g->wr)
-    {
-    gavl_time_t duration;
-    if(gavf_program_header_get_duration(&g->ph, NULL, &duration))
-      gavl_metadata_set_long(&g->ph.m, GAVL_META_APPROX_DURATION, duration);
-    
-    }
   }
 
 static void gavf_stream_free(gavf_stream_t * s)
@@ -741,6 +734,7 @@ static void calc_pts_offset(gavf_t * g)
 
 int gavf_open_read(gavf_t * g, gavf_io_t * io)
   {
+  gavl_time_t duration;
   char sig[8];
   
   g->io = io;
@@ -792,6 +786,9 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
 
   if(!(g->opt.flags & GAVF_OPT_FLAG_ORIG_PTS))
     calc_pts_offset(g);
+
+  if(gavf_program_header_get_duration(&g->ph, NULL, &duration))
+    gavl_metadata_set_long(&g->ph.m, GAVL_META_APPROX_DURATION, duration);
   
   return 1;
   }
