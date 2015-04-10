@@ -74,7 +74,7 @@ compression_ids[] =
     { GAVL_CODEC_ID_TIFF,      "tif",      "tiff",   "TIFF image",    "image/tiff", FLAG_SEPARATE | FLAG_NEEDS_PIXELFORMAT },
     { GAVL_CODEC_ID_TGA,       "tga",      "tga",    "TGA image",     "image/x-tga",  FLAG_SEPARATE | FLAG_NEEDS_PIXELFORMAT },
     { GAVL_CODEC_ID_MPEG1,     "mpv",      "mpeg1",  "MPEG-1",        "video/mpeg", },
-    { GAVL_CODEC_ID_MPEG2,     "mpv",      "mpeg2",  "MPEG-2",        "video/mpeg", NULL, FLAG_NEEDS_PIXELFORMAT },
+    { GAVL_CODEC_ID_MPEG2,     "mpv",      "mpeg2",  "MPEG-2",        "video/mpeg", FLAG_NEEDS_PIXELFORMAT },
     { GAVL_CODEC_ID_MPEG4_ASP, "m4v",      "mpeg4",  "MPEG-4",        NULL, }, // ISO/IEC 14496-2
     { GAVL_CODEC_ID_H264,      "h264",     "h264",   "H.264",         NULL, },
     { GAVL_CODEC_ID_THEORA,    NULL,       "theora", "Theora",        NULL, },

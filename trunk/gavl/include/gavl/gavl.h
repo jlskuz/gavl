@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-  /* Forward declarations */
+/* Forward declarations */
 
 /** \ingroup sources
  *  \brief Forward declaration of the video source
@@ -62,7 +62,7 @@ typedef struct gavl_audio_source_s gavl_audio_source_t;
  */
 
 typedef struct gavl_packet_source_s gavl_packet_source_t;
-  
+
 /** \ingroup sinks
  *  \brief Audio sink
  *
@@ -89,6 +89,28 @@ gavl_video_sink_s gavl_video_sink_t;
   
 typedef struct 
 gavl_packet_sink_s gavl_packet_sink_t;
+
+/*! \ingroup video_format
+ *\brief Video format
+ */
+
+typedef struct gavl_video_format_s gavl_video_format_t;
+
+/*! \ingroup video_format
+ *\brief Pixelformat
+ */
+
+typedef enum gavl_pixelformat_e gavl_pixelformat_t;
+  
+/** \ingroup video_frame
+ *  \brief Packet sink
+ *
+ *  You don't want to know what's inside
+ */
+
+typedef struct gavl_video_frame_s gavl_video_frame_t;
+ 
+#include <gavl/hw.h> // Needs forward declarations
 
 /** \defgroup mt Multithreading
  *  \brief Multithreading
@@ -146,11 +168,6 @@ typedef void (*gavl_video_stop_func)(void * client_data, int thread);
  * @}
  */
   
-/*! \ingroup video_format
- *\brief Video format
- */
-
-typedef struct gavl_video_format_s gavl_video_format_t;
 
   
 /* Quality levels */
@@ -1710,7 +1727,7 @@ void gavl_rectangle_f_dump(const gavl_rectangle_f_t * r);
  * \brief Pixelformat definition
  */
   
-typedef enum 
+enum gavl_pixelformat_e
   {
     /*! \brief Undefined 
      */
@@ -1840,7 +1857,7 @@ typedef enum
      */
     GAVL_YUV_422_P_16 = 10 | GAVL_PIXFMT_PLANAR | GAVL_PIXFMT_YUV,
     
-  } gavl_pixelformat_t;
+  };
 
 /*! \ingroup video_format
  *  \brief Pixelformat for storing 1-dimensional integer data with 8 bits each */
@@ -2410,7 +2427,7 @@ void gavl_video_format_dumpi(const gavl_video_format_t * format, int indent);
  * Video frame
  */
   
-typedef struct gavl_video_frame_s
+struct gavl_video_frame_s
   {
   uint8_t * planes[GAVL_MAX_PLANES]; /*!< Pointers to the planes */
   int strides[GAVL_MAX_PLANES];      /*!< For each plane, this stores the byte offset between the scanlines */
@@ -2422,14 +2439,15 @@ typedef struct gavl_video_frame_s
   gavl_timecode_t timecode; /*!< Timecode associated with this frame */
 
   int refcount;             /*!< Reference count: Means that the frame is still used (since 1.5.0) */
-  void (*destroy)(struct gavl_video_frame_s*, void*priv); /*!< Function for destroying this frame (since 1.5.0) */
-  void * destroy_priv;      /*!< Private data to pass to destroy() (since 1.5.0) */
+  //   void (*destroy)(struct gavl_video_frame_s*, void*priv); /*!< Function for destroying this frame (since 1.5.0) */
+  //  void * destroy_priv;      /*!< Private data to pass to destroy() (since 1.5.0) */
   
   gavl_rectangle_i_t src_rect;   //!< Valid rectangle in this frame (since 1.5.0)      */
   int32_t dst_x;                     //!< x offset in the destination frame. (since 1.5.0) */
   int32_t dst_y;                     //!< y offset in the destination frame. (since 1.5.0) */
-  
-  } gavl_video_frame_t;
+
+  gavl_hw_context_t * hwctx;
+  };
 
 
 /*!
