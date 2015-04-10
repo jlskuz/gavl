@@ -1,4 +1,3 @@
-AM_CFLAGS = @LIBGAVL_CFLAGS@
 
 if HAVE_MMX
 mmx_libs = mmx/libgavl_mmx.la mmxext/libgavl_mmxext.la
@@ -41,6 +40,28 @@ threednow_subdirs =
 endif
 
 
+if HAVE_LIBVA
+hw_libva_sources = hw_vaapi.c
+hw_libva_cflags = @LIBVA_CFLAGS@
+hw_libva_libs   = @LIBVA_LIBS@
+else
+hw_libva_cflags =
+hw_libva_libs   =
+endif
+
+if HAVE_LIBVA_X11
+hw_libva_x11_sources = hw_vaapi_x11.c
+hw_libva_x11_cflags = @LIBVA_X11_CFLAGS@
+hw_libva_x11_libs   = @LIBVA_X11_LIBS@
+else
+hw_libva_x11_sources = 
+hw_libva_x11_cflags =
+hw_libva_x11_libs   =
+endif
+
+AM_CFLAGS = @LIBGAVL_CFLAGS@ $(hw_libva_cflags) $(hw_libva_x11_cflags) 
+
+
 SUBDIRS = hq c gavf libgdither libsamplerate $(mmx_subdirs) \
 $(sse_subdirs) \
 $(sse2_subdirs) \
@@ -51,6 +72,8 @@ lib_LTLIBRARIES= libgavl.la
 #noinst_LTLIBRARIES = libgavl.la
 
 libgavl_la_SOURCES = \
+$(hw_libva_sources) \
+$(hw_libva_x11_sources) \
 absdiff.c \
 arith128.c \
 audioconnector.c \
@@ -74,6 +97,7 @@ dsp.c \
 dsputils.c \
 edl.c \
 frametable.c \
+hw.c \
 interleave.c \
 memalign.c \
 memcpy.c \
@@ -119,6 +143,8 @@ ssim_tab.h
 AM_LDFLAGS = -export-symbols-regex 'gav(l|f)' -version-info \
 @LTVERSION_CURRENT@:@LTVERSION_REVISION@:@LTVERSION_AGE@ \
 @LIBGAVL_LDFLAGS@ @GMERLIN_LIB_LDFLAGS@
+
+
 
 libgavl_la_LIBADD = \
 @GMERLIN_DEP_LIBS@ \

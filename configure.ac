@@ -99,6 +99,7 @@ fi
 LDFLAGS="$GMERLIN_DEP_RPATH"
 AC_SUBST(GMERLIN_DEP_LIBS)
 
+LIBGAVL_CFLAGS=""
 LIBGAVL_LIBS=""
 LIBGAVL_LDFLAGS=""
 
@@ -229,6 +230,29 @@ dnl
 GAVL_CHECK_SIMD($host_cpu, "$OPT_CFLAGS")
 
 dnl
+dnl X11
+dnl
+
+GMERLIN_CHECK_X11
+
+dnl
+dnl Check for libva
+dnl
+
+GMERLIN_CHECK_LIBVA
+
+if test "x$have_libva_x11" = "xtrue"; then
+LIBGAVL_CFLAGS="$LIBGAVL_CFLAGS $X_CFLAGS"
+LIBGAVL_LIBS="$LIBGAVL_LIBS $X_LIBS"
+fi
+
+if test "x$have_libva" = "xtrue"; then
+LIBGAVL_CFLAGS="$LIBGAVL_CFLAGS $LIBVA_CFLAGS"
+LIBGAVL_LIBS="$LIBGAVL_LIBS $LIBVA_LIBS"
+fi
+
+
+dnl
 dnl Now, build the final CFLAGS.
 dnl 
 
@@ -280,7 +304,8 @@ dnl
 AM_CPPFLAGS='-I$(top_srcdir)/include -I$(top_srcdir)/include/gavl -I$(top_builddir)/include'
 AC_SUBST(AM_CPPFLAGS)
 
-LIBGAVL_CFLAGS="-D__GAVL__ -D_FILE_OFFSET_BITS=64"
+LIBGAVL_CFLAGS="$LIBGAVL_CFLAGS -D__GAVL__ -D_FILE_OFFSET_BITS=64"
+
 AC_SUBST(LIBGAVL_CFLAGS)
 
 AC_SUBST(LIBGAVL_LIBS)	

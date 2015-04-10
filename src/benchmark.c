@@ -1623,7 +1623,6 @@ static void benchmark_image_transform()
   {
   image_transform_context_t ctx;
   gavl_benchmark_t b;
-  int num_pixelformats;
   int i, j;
   memset(&ctx, 0, sizeof(ctx));
   memset(&b, 0, sizeof(b));
@@ -1660,8 +1659,6 @@ static void benchmark_image_transform()
   
   /* Disable autoselection */
   gavl_video_options_set_quality(ctx.opt, 0);
-
-  num_pixelformats = gavl_num_pixelformats();
 
   for(j = 0; j < sizeof(transform_modes)/sizeof(transform_modes[0]); j++)
     {
