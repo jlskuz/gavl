@@ -19,6 +19,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * *****************************************************************/
 
+#ifndef HW_PRIVATE_H_INCLUDED
+#define HW_PRIVATE_H_INCLUDED
+
 #include <gavl/gavl.h> // Includes hw.h
 
 /* Functions */
@@ -39,13 +42,13 @@ typedef struct
 
   void (*video_frame_destroy)(gavl_video_frame_t * f);
   
-  void (*video_frame_to_ram)(const gavl_video_format_t * fmt,
-                             gavl_video_frame_t * dst,
-                             gavl_video_frame_t * src);
-
-  void (*video_frame_to_hw)(const gavl_video_format_t * fmt,
+  int (*video_frame_to_ram)(const gavl_video_format_t * fmt,
                             gavl_video_frame_t * dst,
                             gavl_video_frame_t * src);
+
+  int (*video_frame_to_hw)(const gavl_video_format_t * fmt,
+                           gavl_video_frame_t * dst,
+                           gavl_video_frame_t * src);
 
   } gavl_hw_funcs_t;
 
@@ -56,6 +59,11 @@ struct gavl_hw_context_s
   gavl_pixelformat_t * pixelformats;
   };
 
-gavl_hw_context_t * gavl_hw_context_create_internal(void * native,
-                                                    const gavl_hw_funcs_t * funcs);
+gavl_hw_context_t *
+gavl_hw_context_create_internal(void * native,
+                                const gavl_hw_funcs_t * funcs);
 
+void 
+gavl_hw_destroy_video_frame(gavl_hw_context_t * ctx,
+                            gavl_video_frame_t * frame);
+#endif

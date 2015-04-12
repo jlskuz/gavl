@@ -2116,6 +2116,16 @@ gavl_pixelformat_t gavl_string_to_pixelformat(const char * name);
 GAVL_PUBLIC
 gavl_pixelformat_t gavl_short_string_to_pixelformat(const char * name);
 
+/*! \ingroup video_format
+ * \brief Get the masks for the components
+ * \param pixelformat A pixelformat
+ * \returns The masks for R, G, B and A (in this order) or NULL
+ */
+
+GAVL_PUBLIC
+const uint32_t * gavl_pixelformat_get_masks(gavl_pixelformat_t pixelformat);
+
+  
   
 /*! \ingroup video_format
  * \brief Get total number of supported pixelformats

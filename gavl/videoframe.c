@@ -122,6 +122,12 @@ gavl_video_frame_t * gavl_video_frame_create_nopad(const gavl_video_format_t * f
 
 void gavl_video_frame_destroy(gavl_video_frame_t * frame)
   {
+  if(frame->hwctx)
+    {
+    gavl_hw_destroy_video_frame(frame->hwctx, frame);
+    return;
+    }
+  
   video_frame_free(frame);
   free(frame);
   }

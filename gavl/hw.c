@@ -28,6 +28,7 @@ gavl_hw_context_t * gavl_hw_context_create_internal(void * native,
   gavl_hw_context_t * ret = calloc(1, sizeof(*ret));
   ret->native = native;
   ret->funcs = funcs;
+  ret->pixelformats = ret->funcs->get_pixelformats(ret);
   return ret;
   }
 
@@ -44,8 +45,6 @@ void gavl_hw_ctx_destroy(gavl_hw_context_t * ctx)
 
 const gavl_pixelformat_t * gavl_hw_ctx_get_pixelformats(gavl_hw_context_t * ctx)
   {
-  if(!ctx->pixelformats)
-    ctx->pixelformats = ctx->funcs->get_pixelformats(ctx);
   return ctx->pixelformats;
   }
 
@@ -98,20 +97,37 @@ gavl_video_frame_t * gavl_hw_video_frame_create_ram(gavl_hw_context_t * ctx,
   }
 
 /* Load a video frame from RAM into the hardware */
-void gavl_video_frame_ram_to_hw(const gavl_video_format_t * fmt,
+int gavl_video_frame_ram_to_hw(const gavl_video_format_t * fmt,
                                 gavl_video_frame_t * dst,
-                                const gavl_video_frame_t * src)
+                                gavl_video_frame_t * src)
   {
   gavl_hw_context_t * ctx = dst->hwctx;
-  
-  
+  gavl_video_frame_copy_metadata(dst, src);
+  return ctx->funcs->video_frame_to_hw ?
+    ctx->funcs->video_frame_to_hw(fmt, dst, src) : 0;
   }
 
 /* Load a video frame from the hardware into RAM */
-void gavl_video_frame_hw_to_ram(const gavl_video_format_t * fmt,
-                                gavl_video_frame_t * dst,
-                                const gavl_video_frame_t * src)
+int gavl_video_frame_hw_to_ram(const gavl_video_format_t * fmt,
+                               gavl_video_frame_t * dst,
+                               gavl_video_frame_t * src)
   {
   gavl_hw_context_t * ctx = dst->hwctx;
+  gavl_video_frame_copy_metadata(dst, src);
+  return ctx->funcs->video_frame_to_ram ?
+    ctx->funcs->video_frame_to_ram(fmt, dst, src) : 0;
   }
 
+
+void 
+gavl_hw_destroy_video_frame(gavl_hw_context_t * ctx,
+                            gavl_video_frame_t * frame)
+  {
+  if(ctx->funcs->video_frame_destroy)
+    ctx->funcs->video_frame_destroy(frame);
+  else
+    {
+    frame->hwctx = NULL;
+    gavl_video_frame_destroy(frame);
+    }
+  }

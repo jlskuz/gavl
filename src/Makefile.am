@@ -1,5 +1,12 @@
 AM_LDFLAGS = @GMERLIN_EXE_LDFLAGS@
 
+if HAVE_LIBVA_X11
+libva_x11_programs = vaapi_x11
+else
+libva_x11_programs = 
+endif
+
+
 if HAVE_LIBPNG
 png_programs = \
 colorspace_test \
@@ -14,6 +21,7 @@ endif
 
 noinst_PROGRAMS = \
 $(png_programs) \
+$(libva_x11_programs) \
 benchmark \
 colorspace_time \
 deinterlace_time \
@@ -29,6 +37,10 @@ gavfdump
 
 pixelformat_penalty_SOURCES = pixelformat_penalty.c
 pixelformat_penalty_LDADD = ../gavl/libgavl.la
+
+vaapi_x11_CFLAGS = @X_CFLAGS@ @LIBVA_CFLAGS@
+vaapi_x11_SOURCES = vaapi_x11.c
+vaapi_x11_LDADD = ../gavl/libgavl.la @LIBVA_LIBS@ @X_LIBS@
 
 benchmark_SOURCES = benchmark.c
 benchmark_LDADD = ../gavl/libgavl.la @RT_LIBS@

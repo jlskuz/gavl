@@ -19,6 +19,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * *****************************************************************/
 
+#ifndef HW_H_INCLUDED
+#define HW_H_INCLUDED
+
+#include <gavl/gavldefs.h>
+
 /**
  * @file hw.h
  * external api header.
@@ -34,35 +39,36 @@ typedef enum
 /* Global handle for accessing a piece of hardware */
 typedef struct gavl_hw_context_s gavl_hw_context_t;
 
-void gavl_hw_supported(gavl_hw_type_t type);
+GAVL_PUBLIC void gavl_hw_supported(gavl_hw_type_t type);
 
-void gavl_hw_ctx_destroy(gavl_hw_context_t * ctx);
+GAVL_PUBLIC void gavl_hw_ctx_destroy(gavl_hw_context_t * ctx);
 
 /* Return type is one of the structs in the backend specific headers */
-void * gavl_hw_ctx_get_native_handle(gavl_hw_context_t * ctx);
+GAVL_PUBLIC void * gavl_hw_ctx_get_native_handle(gavl_hw_context_t * ctx);
 
-const gavl_pixelformat_t * gavl_hw_ctx_get_pixelformats(gavl_hw_context_t * ctx);
+GAVL_PUBLIC const gavl_pixelformat_t * gavl_hw_ctx_get_pixelformats(gavl_hw_context_t * ctx);
 
 /* Format will be adjusted if it's not supported by the hardware */
-void gavl_hw_video_format_adjust(gavl_hw_context_t * ctx,
-                                 gavl_video_format_t * fmt);
+GAVL_PUBLIC void gavl_hw_video_format_adjust(gavl_hw_context_t * ctx,
+                                             gavl_video_format_t * fmt);
 
 /* Create a video frame. The frame will be a reference for a hardware surface */
-gavl_video_frame_t * gavl_hw_video_frame_create_hw(gavl_hw_context_t * ctx,
+GAVL_PUBLIC gavl_video_frame_t * gavl_hw_video_frame_create_hw(gavl_hw_context_t * ctx,
                                                    gavl_video_format_t * fmt);
 
 /* Create a video frame. The frame will have data available for CPU access but is
  suitable for transfer to a hardware surface */
-gavl_video_frame_t * gavl_hw_video_frame_create_ram(gavl_hw_context_t * ctx,
+GAVL_PUBLIC gavl_video_frame_t * gavl_hw_video_frame_create_ram(gavl_hw_context_t * ctx,
                                                     gavl_video_format_t * fmt);
 
 /* Load a video frame from RAM into the hardware */
-void gavl_video_frame_ram_to_hw(const gavl_video_format_t * fmt,
-                                gavl_video_frame_t * dst,
-                                const gavl_video_frame_t * src);
+GAVL_PUBLIC int gavl_video_frame_ram_to_hw(const gavl_video_format_t * fmt,
+                                           gavl_video_frame_t * dst,
+                                           gavl_video_frame_t * src);
 
 /* Load a video frame from the hardware into RAM */
-void gavl_video_frame_hw_to_ram(const gavl_video_format_t * fmt,
-                                gavl_video_frame_t * dst,
-                                const gavl_video_frame_t * src);
+GAVL_PUBLIC int gavl_video_frame_hw_to_ram(const gavl_video_format_t * fmt,
+                                           gavl_video_frame_t * dst,
+                                           gavl_video_frame_t * src);
 
+#endif

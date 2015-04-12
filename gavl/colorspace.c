@@ -28,11 +28,20 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef WORDS_BIGENDIAN
+static const uint32_t rgb32_masks[4] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
+static const uint32_t bgr32_masks[4] = { 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF };
+#else
+static const uint32_t rgb32_masks[4] = { 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF };
+static const uint32_t bgr32_masks[4] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
+#endif
+
 typedef struct
   {
   gavl_pixelformat_t pixelformat;
   const char * name;
   const char * short_name;
+  const uint32_t * masks;
   } pixelformat_tab_t;
 
 const pixelformat_tab_t pixelformat_tab[] =
@@ -43,15 +52,15 @@ const pixelformat_tab_t pixelformat_tab[] =
     { GAVL_GRAYA_16,  "16 bpp gray + alpha",        "graya16"   },
     { GAVL_GRAYA_32, "32 bpp gray + alpha",         "graya32"   },
     { GAVL_GRAYA_FLOAT, "Float gray + alpha",       "grayaf"    },
-    { GAVL_RGB_15, "15 bpp RGB",                    "rgb15",    },
+    { GAVL_RGB_15, "15 bpp RGB",                    "rgb15"     },
     { GAVL_BGR_15, "15 bpp BGR",                    "bgr15"     },
     { GAVL_RGB_16, "16 bpp RGB",                    "rgb16"     },
     { GAVL_BGR_16, "16 bpp BGR",                    "bgr16"     },
     { GAVL_RGB_24, "24 bpp RGB",                    "rgb24"     },
     { GAVL_BGR_24, "24 bpp BGR",                    "bgr24"     },
-    { GAVL_RGB_32, "32 bpp RGB",                    "rgb32"     },
-    { GAVL_BGR_32, "32 bpp BGR",                    "bgr32"     },
-    { GAVL_RGBA_32, "32 bpp RGBA",                  "rgba32"    },
+    { GAVL_RGB_32, "32 bpp RGB",                    "rgb32",    rgb32_masks },
+    { GAVL_BGR_32, "32 bpp BGR",                    "bgr32",    bgr32_masks },
+    { GAVL_RGBA_32, "32 bpp RGBA",                  "rgba32",   rgb32_masks },
     { GAVL_RGB_48, "48 bpp RGB",                    "rgb48"     },
     { GAVL_RGBA_64, "64 bpp RGBA",                  "rgba64"    },
     { GAVL_RGB_FLOAT, "Float RGB",                  "rgbf"      },
@@ -246,6 +255,16 @@ gavl_pixelformat_t gavl_short_string_to_pixelformat(const char * name)
   return GAVL_PIXELFORMAT_NONE;
   }
 
+const uint32_t * gavl_pixelformat_get_masks(gavl_pixelformat_t pixelformat)
+  {
+  int i;
+  for(i = 0; i < num_pixelformats; i++)
+    {
+    if(pixelformat_tab[i].pixelformat == pixelformat)
+      return pixelformat_tab[i].masks;
+    }
+  return NULL;
+  }
 
 static gavl_pixelformat_function_table_t *
 create_pixelformat_function_table(const gavl_video_options_t * opt,
