@@ -19,20 +19,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * *****************************************************************/
 
-#include <gavl/gavldefs.h>
+#include <string.h>
+#include <X11/Xlib.h>
+#include <va/va.h>
 
-/**
- * @file hw_vaapi_x11.h
- * external api header.
- */
+#include <gavl/gavl.h>
+#include <gavl/hw_vaapi_x11.h>
 
-/* Structure returned by gavl_hw_get_native_handle */
-typedef struct
+int main(int argc, char ** argv)
   {
-  VADisplay dpy; // Must be first
-  } gavl_hw_vaapi_x11_t;
+  gavl_video_frame_t * f;
+  gavl_video_format_t fmt;
+  gavl_hw_context_t * ctx;
 
-GAVL_PUBLIC gavl_hw_context_t * gavl_hw_ctx_create_vaapi_x11(Display * dpy);
+  ctx = gavl_hw_ctx_create_vaapi_x11(NULL);
 
-GAVL_PUBLIC Display * gavl_hw_ctx_vaapi_x11_get_display(gavl_hw_context_t *);
+  memset(&fmt, 0, sizeof(fmt));
+  fmt.image_width  = 320;
+  fmt.image_height = 240;
+  fmt.frame_width  = 320;
+  fmt.frame_height = 240;
+  fmt.pixel_width  = 1;
+  fmt.pixel_height = 1;
+  fmt.pixelformat = GAVL_YUV_420_P;
 
+  f = gavl_hw_video_frame_create_ram(ctx, &fmt);
+
+  gavl_video_frame_destroy(f);
+  
+  gavl_hw_ctx_destroy(ctx);
+  return 0;
+  }

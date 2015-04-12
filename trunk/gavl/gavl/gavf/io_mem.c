@@ -55,7 +55,7 @@ static int write_mem(void * priv, const uint8_t * data, int len)
 static int64_t seek_mem(void * priv, int64_t pos, int whence)
   {
   mem_t * m = priv;
-  int64_t real_pos;
+  int64_t real_pos = 0;
   switch(whence)
     {
     case SEEK_SET:

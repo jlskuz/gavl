@@ -450,6 +450,15 @@ typedef struct
    *  \param bits Number of bits to shift
    */
   void (*shift_down_16)(void * ptr, int num, int bits);
+
+  /** \brief Shuffle bytes in 4 byte words
+   *  \param ptr Pointer
+   *  \param len Number of 32 bit elements
+   *  \param mask 4 bytes with sources indices. 0x80 means clear.
+   */
+
+  void (*shuffle_8_4)(void * ptr, int num, uint8_t * mask);
+  
   
   } gavl_dsp_funcs_t;
 
@@ -604,6 +613,24 @@ gavl_dsp_video_frame_shift_bits(gavl_dsp_context_t * ctx,
                                 gavl_video_frame_t * frame,
                                 const gavl_video_format_t * format, int bits);
 
+
+/*!
+  \brief Shuffle bytes in a video frame.
+  \param ctx An initialized dsp context
+  \param frame A video frame
+  \param format The format of the frame
+  \param src_masks 4 Masks for the single componts in the source format
+  \param dst_masks 4 Masks for the single componts in the destination format  
+
+  Since 1.5.0
+*/
+
+void
+gavl_dsp_video_frame_shuffle_bytes(gavl_dsp_context_t * ctx,
+                                   gavl_video_frame_t * frame,
+                                   const gavl_video_format_t * format,
+                                   const uint32_t * src_masks,
+                                   const uint32_t * dst_masks);
 
 /**
  * @}

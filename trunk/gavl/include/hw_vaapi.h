@@ -20,30 +20,37 @@
  * *****************************************************************/
 
 #include <va/va.h>
-
 #include <hw_private.h>
+
+#include <gavl/gavldsp.h>
 
 typedef struct
   {
   VADisplay dpy; // Must be first
+
+  int num_image_formats;
+  VAImageFormat * image_formats;
+  
+  gavl_dsp_context_t * dsp;
   } gavl_hw_vaapi_t;
 
 gavl_video_frame_t * gavl_vaapi_video_frame_create_hw(gavl_hw_context_t * ctx,
-                                       gavl_video_format_t * fmt);
+                                                      gavl_video_format_t * fmt);
 
 gavl_video_frame_t * gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
-                                       gavl_video_format_t * fmt);
+                                                       gavl_video_format_t * fmt);
 
 void gavl_vaapi_video_frame_destroy(gavl_video_frame_t * f);
 
-void gavl_vaapi_video_frame_to_ram(const gavl_video_format_t * fmt,
-                                   gavl_video_frame_t * dst,
-                                   gavl_video_frame_t * src);
-
-void gavl_vaapi_video_frame_to_hw(const gavl_video_format_t * fmt,
+int gavl_vaapi_video_frame_to_ram(const gavl_video_format_t * fmt,
                                   gavl_video_frame_t * dst,
                                   gavl_video_frame_t * src);
+
+int gavl_vaapi_video_frame_to_hw(const gavl_video_format_t * fmt,
+                                 gavl_video_frame_t * dst,
+                                 gavl_video_frame_t * src);
 
 gavl_pixelformat_t *
 gavl_vaapi_get_pixelformats(gavl_hw_context_t * ctx);
                             
+void gavl_vaapi_cleanup(void * priv);

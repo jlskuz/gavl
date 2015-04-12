@@ -740,6 +740,40 @@ static void shift_down_16_c(void * _ptr, int num, int bits)
   
   }
 
+static void shuffle_8_4_c(void * ptr, int num, uint8_t * mask)
+  {
+  union
+    {
+    uint8_t u8[4];
+    uint32_t u32;
+    } buf;
+
+  union
+    {
+    uint8_t * u8;
+    uint32_t * u32;
+    } buf_ptr;
+  
+  num++;
+
+  mask[0] &= (0x80 | 0x03);
+  mask[1] &= (0x80 | 0x03);
+  mask[2] &= (0x80 | 0x03);
+  mask[3] &= (0x80 | 0x03);
+  
+  buf_ptr.u8 = ptr;
+  
+  while(--num)
+    {
+    buf.u8[0] = mask[0] & 0x80 ? 0 : buf_ptr.u8[mask[0]];
+    buf.u8[1] = mask[1] & 0x80 ? 0 : buf_ptr.u8[mask[1]];
+    buf.u8[2] = mask[2] & 0x80 ? 0 : buf_ptr.u8[mask[2]];
+    buf.u8[3] = mask[3] & 0x80 ? 0 : buf_ptr.u8[mask[3]];
+    
+    *(buf_ptr.u32) = buf.u32;
+    buf_ptr.u32++;
+    }
+  }
 
 void gavl_dsp_init_c(gavl_dsp_funcs_t * funcs, 
                      int quality)
@@ -788,5 +822,7 @@ void gavl_dsp_init_c(gavl_dsp_funcs_t * funcs,
 
   funcs->shift_up_16       = shift_up_16_c;
   funcs->shift_down_16     = shift_down_16_c;
+
+  funcs->shuffle_8_4       = shuffle_8_4_c;
   
   }

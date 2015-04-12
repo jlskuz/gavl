@@ -19,6 +19,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * *****************************************************************/
 
+#include <config.h>
+
 #include <gavl/gavl.h>
 #include <gavl/gavldsp.h>
 #include <dsp.h>
@@ -401,6 +403,58 @@ gavl_dsp_video_frame_shift_bits(gavl_dsp_context_t * ctx,
       shift_func(src, len, bits);
       src += frame->strides[i];
       }
+    }
+  
+  }
+
+static int get_byte_index(uint32_t b)
+  {
+  int ret = 0;
+
+  while(b >>= 1)
+    ret++;
+
+  ret /= 8;
+  
+#ifdef WORDS_BIGENDIAN
+  return 3 - ret;
+#else
+  return ret;
+#endif
+  }
+
+void
+gavl_dsp_video_frame_shuffle_bytes(gavl_dsp_context_t * ctx,
+                                   gavl_video_frame_t * frame,
+                                   const gavl_video_format_t * format,
+                                   const uint32_t * src_masks, const uint32_t * dst_masks)
+  {
+  uint8_t * ptr;
+  int i;
+  int src_byte, dst_byte;
+  int do_convert = 0;
+  uint8_t mask[4] = { 0, 0, 0, 0 };
+  
+  
+  for(i = 0; i < 4; i++)
+    {
+    src_byte = get_byte_index(src_masks[i]);
+    dst_byte = get_byte_index(dst_masks[i]);
+    if(src_byte != dst_byte)
+      do_convert = 1;
+
+    mask[dst_byte] = src_byte;
+    }
+
+  if(!do_convert) // Nothing to do
+    return;
+  
+  ptr = frame->planes[0];
+  
+  for(i = 0; i < format->image_height; i++)
+    {
+    ctx->funcs.shuffle_8_4(ptr, format->image_width, mask);
+    ptr += frame->strides[0];
     }
   
   }

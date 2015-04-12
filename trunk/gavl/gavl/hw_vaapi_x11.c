@@ -22,25 +22,31 @@
 #include <stdlib.h>
 
 #include <X11/Xlib.h>
-#include <hw_vaapi_x11.h>
 #include <va/va_x11.h>
+
+#include <gavl/gavl.h>
+#include <gavl/hw_vaapi_x11.h>
+
+#include <hw_private.h>
+#include <hw_vaapi.h>
+
 
 typedef struct
   {
-  gavl_hw_vaapi_x11_t x11;
+  gavl_hw_vaapi_t va;
   
   Display * private_display;
+  Display * display;
   } vaapi_x11_t;
 
 static void destroy_native(void * native)
   {
   vaapi_x11_t * priv = native;
-  vaTerminate(priv->x11.dpy);
+  gavl_vaapi_cleanup(native);
   if(priv->private_display)
     XCloseDisplay(priv->private_display);
   free(priv);
   }
-
 
 static const gavl_hw_funcs_t funcs =
   {
@@ -54,7 +60,7 @@ static const gavl_hw_funcs_t funcs =
     
   };
 
-gavl_hw_context_t * gavl_hw_create_vaapi_x11(Display * dpy)
+gavl_hw_context_t * gavl_hw_ctx_create_vaapi_x11(Display * dpy)
   {
   int major, minor;
   vaapi_x11_t * priv;
@@ -62,9 +68,9 @@ gavl_hw_context_t * gavl_hw_create_vaapi_x11(Display * dpy)
   
   priv = calloc(1, sizeof(*priv));
 
-  if(!dpy)
+  if(dpy)
     {
-    priv->x11.x11_dpy = dpy;
+    priv->display = dpy;
     }
   else
     {
@@ -73,15 +79,15 @@ gavl_hw_context_t * gavl_hw_create_vaapi_x11(Display * dpy)
     if(!priv->private_display)
       return NULL;
     
-    priv->x11.x11_dpy = priv->private_display;
+    priv->display = priv->private_display;
     }
   
-  priv->x11.dpy = vaGetDisplay(priv->x11.x11_dpy);
+  priv->va.dpy = vaGetDisplay(priv->display);
 
-  if(!priv->x11.dpy)
+  if(!priv->va.dpy)
     return NULL;
   
-  if((result = vaInitialize(priv->x11.dpy,
+  if((result = vaInitialize(priv->va.dpy,
                             &major,
                             &minor)) != VA_STATUS_SUCCESS)
     {
@@ -90,3 +96,10 @@ gavl_hw_context_t * gavl_hw_create_vaapi_x11(Display * dpy)
 
   return gavl_hw_context_create_internal(priv, &funcs);
   }
+
+GAVL_PUBLIC Display * gavl_hw_ctx_vaapi_x11_get_display(gavl_hw_context_t * ctx)
+  {
+  vaapi_x11_t * p = ctx->native;
+  return p->display;
+  }
+
