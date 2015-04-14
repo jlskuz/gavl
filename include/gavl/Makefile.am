@@ -8,6 +8,8 @@ gavl.h \
 gavltime.h \
 gavl_version.h \
 gavldsp.h \
+hw.h \
+hw_vaapi_x11.h \
 numptr.h \
 timecode.h \
 gavldefs.h \
