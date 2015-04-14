@@ -48,6 +48,8 @@ GAVL_PUBLIC void * gavl_hw_ctx_get_native_handle(gavl_hw_context_t * ctx);
 
 GAVL_PUBLIC const gavl_pixelformat_t * gavl_hw_ctx_get_pixelformats(gavl_hw_context_t * ctx);
 
+GAVL_PUBLIC gavl_hw_type_t gavl_hw_ctx_get_type(gavl_hw_context_t * ctx);
+
 /* Format will be adjusted if it's not supported by the hardware */
 GAVL_PUBLIC void gavl_hw_video_format_adjust(gavl_hw_context_t * ctx,
                                              gavl_video_format_t * fmt);
