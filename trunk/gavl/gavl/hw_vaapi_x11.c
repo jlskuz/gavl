@@ -97,9 +97,15 @@ gavl_hw_context_t * gavl_hw_ctx_create_vaapi_x11(Display * dpy)
   return gavl_hw_context_create_internal(priv, &funcs);
   }
 
-GAVL_PUBLIC Display * gavl_hw_ctx_vaapi_x11_get_display(gavl_hw_context_t * ctx)
+Display * gavl_hw_ctx_vaapi_x11_get_display(gavl_hw_context_t * ctx)
   {
   vaapi_x11_t * p = ctx->native;
   return p->display;
+  }
+
+VADisplay gavl_hw_ctx_vaapi_x11_get_va_display(gavl_hw_context_t * ctx)
+  {
+  vaapi_x11_t * p = ctx->native;
+  return p->va.dpy;
   }
 
