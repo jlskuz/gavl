@@ -2261,6 +2261,9 @@ struct gavl_video_format_s
   gavl_interlace_mode_t   interlace_mode;/*!< Interlace mode */
 
   gavl_timecode_format_t  timecode_format;/*!< Optional timecode format */
+
+  gavl_hw_context_t * hwctx;         //!< Handle for accessing the frames. If NULL, frames are in regular RAM
+
   };
 
 /*!
@@ -2456,7 +2459,8 @@ struct gavl_video_frame_s
   int32_t dst_x;                     //!< x offset in the destination frame. (since 1.5.0) */
   int32_t dst_y;                     //!< y offset in the destination frame. (since 1.5.0) */
 
-  gavl_hw_context_t * hwctx;
+  gavl_hw_context_t * hwctx;         //!< Handle for accessing the frame
+
   };
 
 

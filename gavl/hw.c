@@ -23,9 +23,11 @@
 #include <hw_private.h>
 
 gavl_hw_context_t * gavl_hw_context_create_internal(void * native,
-                                                    const gavl_hw_funcs_t * funcs)
+                                                    const gavl_hw_funcs_t * funcs,
+                                                    gavl_hw_type_t type)
   {
   gavl_hw_context_t * ret = calloc(1, sizeof(*ret));
+  ret->type = type;
   ret->native = native;
   ret->funcs = funcs;
   ret->pixelformats = ret->funcs->get_pixelformats(ret);
@@ -130,4 +132,9 @@ gavl_hw_destroy_video_frame(gavl_hw_context_t * ctx,
     frame->hwctx = NULL;
     gavl_video_frame_destroy(frame);
     }
+  }
+
+gavl_hw_type_t gavl_hw_ctx_get_type(gavl_hw_context_t * ctx)
+  {
+  return ctx->type;
   }

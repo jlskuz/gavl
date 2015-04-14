@@ -55,13 +55,15 @@ typedef struct
 struct gavl_hw_context_s
   {
   void * native;
+  gavl_hw_type_t type;
   const gavl_hw_funcs_t * funcs;
   gavl_pixelformat_t * pixelformats;
   };
 
 gavl_hw_context_t *
 gavl_hw_context_create_internal(void * native,
-                                const gavl_hw_funcs_t * funcs);
+                                const gavl_hw_funcs_t * funcs,
+                                gavl_hw_type_t type);
 
 void 
 gavl_hw_destroy_video_frame(gavl_hw_context_t * ctx,
