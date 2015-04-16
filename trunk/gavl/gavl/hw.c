@@ -138,3 +138,28 @@ gavl_hw_type_t gavl_hw_ctx_get_type(gavl_hw_context_t * ctx)
   {
   return ctx->type;
   }
+
+static const struct
+  {
+  gavl_hw_type_t type;
+  const char * name;
+  }
+types[] = 
+  {
+    { GAVL_HW_GLX, "GLX Texture" },
+    { GAVL_HW_VAAPI_X11, "vaapi through X11" },
+    { /* End  */ },
+  };
+  
+const char * gavl_hw_type_to_string(gavl_hw_type_t type)
+  {
+  int i = 0;
+
+  while(types[i].name)
+    {
+    if(types[i].type == type)
+      return types[i].name;
+    i++;
+    }
+  return NULL;
+  }
