@@ -55,7 +55,11 @@ void gavl_video_format_dumpi(const gavl_video_format_t * format, int indent)
   do_indent(indent);
   fprintf(stderr, "  Pixel format:     %s\n",
           gavl_pixelformat_to_string(format->pixelformat));
-
+  
+  fprintf(stderr, "  Pixel format:     %s\n",
+          gavl_pixelformat_to_string(format->pixelformat));
+  
+  
   if(format->framerate_mode != GAVL_FRAMERATE_STILL)
     {
     if((!format->frame_duration) &&
@@ -106,6 +110,9 @@ void gavl_video_format_dumpi(const gavl_video_format_t * format, int indent)
       fprintf(stderr, "Drop");
     fprintf(stderr, "\n");
     }
+  
+  if(format->hwctx)
+    fprintf(stderr, "  Frame storage:    %s\n", gavl_hw_type_to_string(gavl_hw_ctx_get_type(format->hwctx)));
   }
 
 /* We always enlarge the image */

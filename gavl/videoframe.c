@@ -24,6 +24,8 @@
 #include <video.h>
 #include <config.h>
 #include <accel.h>
+#include <hw_private.h>
+
 
 #define DO_ROUND
 #include "c/colorspace_tables.h"

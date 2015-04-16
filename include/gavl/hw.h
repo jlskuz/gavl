@@ -41,6 +41,8 @@ typedef struct gavl_hw_context_s gavl_hw_context_t;
 
 GAVL_PUBLIC void gavl_hw_supported(gavl_hw_type_t type);
 
+GAVL_PUBLIC const char * gavl_hw_type_to_string(gavl_hw_type_t type);
+
 GAVL_PUBLIC void gavl_hw_ctx_destroy(gavl_hw_context_t * ctx);
 
 /* Return type is one of the structs in the backend specific headers */
