@@ -219,6 +219,18 @@ void gavl_video_source_destroy(gavl_video_source_t * s);
   
 /* Called by the destination */
 
+/** \brief Enable hardware surfaces
+ *  \param s A video source
+ *
+ *  Call this function if you can handle hardware surfaces
+ *  on the destination side. If this function is not called,
+ *  hardware surfaces are copied to RAM before they are 
+ *  passed to the destination.
+ */
+
+GAVL_PUBLIC
+void gavl_video_source_support_hw(gavl_video_source_t * s);
+
 /** \brief Get the native format
  *  \param s A video source
  *  \returns The native video format
