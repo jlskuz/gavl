@@ -28,10 +28,15 @@
 #define FLAG_DO_CONVERT       (1<<0)
 #define FLAG_DST_SET          (1<<1)
 #define FLAG_SCALE_TIMESTAMPS (1<<2)
+#define FLAG_SUPPORT_HW       (1<<3) /* Support HW storage */
+
+#define FLAG_HW_TO_RAM        (1<<4) /* Transfer frames from hardware to RAM */
 
 struct gavl_video_source_s
   {
   gavl_video_format_t src_format;
+  gavl_video_format_t src_format_nohw; // RAM only format
+
   gavl_video_format_t dst_format;
   int src_flags;
   int dst_flags;
@@ -53,11 +58,17 @@ struct gavl_video_source_s
   
   gavl_video_frame_t * fps_frame;
   gavl_video_frame_t * next_still_frame;
-  
+ 
+  gavl_video_frame_t * transfer_frame;
+ 
   gavl_video_frame_pool_t * src_fp;
   gavl_video_frame_pool_t * dst_fp;
 
-  /* Callback set according to the configuration */
+  /* Callbacks set according to the configuration */
+
+  gavl_source_status_t (*read_frame)(gavl_video_source_t * s,
+                                     gavl_video_frame_t ** frame);
+
   gavl_source_status_t (*read_video)(gavl_video_source_t * s,
                                      gavl_video_frame_t ** frame);
 
@@ -74,12 +85,23 @@ gavl_video_source_create(gavl_video_source_func_t func,
                          int src_flags,
                          const gavl_video_format_t * src_format)
   {
-  gavl_video_source_t * ret = calloc(1, sizeof(*ret));
+  gavl_video_source_t * ret;
+
+  if(src_format->hwctx && !(src_flags & GAVL_SOURCE_SRC_ALLOC))
+    {
+    fprintf(stderr, "Hardware based formats need to have GAVL_SOURCE_SRC_ALLOC set\n");
+    return NULL;
+    }
+
+  ret = calloc(1, sizeof(*ret));
 
   ret->func = func;
   ret->priv = priv;
   ret->src_flags = src_flags;
   gavl_video_format_copy(&ret->src_format, src_format);
+  gavl_video_format_copy(&ret->src_format_nohw, src_format);
+  ret->src_format_nohw.hwctx = NULL;
+ 
   ret->cnv = gavl_video_converter_create();
   
   return ret;
@@ -114,16 +136,21 @@ gavl_video_source_set_lock_funcs(gavl_video_source_t * src,
 
 /* Called by the destination */
 
+void gavl_video_source_support_hw(gavl_video_source_t * s)
+  {
+  s->flags |= FLAG_SUPPORT_HW;
+  }
+
 const gavl_video_format_t *
 gavl_video_source_get_src_format(gavl_video_source_t * s)
   {
-  return &s->src_format;
+  return (s->flags & FLAG_SUPPORT_HW) ? &s->src_format : &s->src_format_nohw;
   }
 
 const gavl_video_format_t *
 gavl_video_source_get_dst_format(gavl_video_source_t * s)
   {
-  return (s->flags & FLAG_DST_SET) ? &s->dst_format : &s->src_format;
+  return (s->flags & FLAG_DST_SET) ? &s->dst_format : gavl_video_source_get_src_format(s);
   }
 
 gavl_video_options_t * gavl_video_source_get_options(gavl_video_source_t * s)
@@ -150,6 +177,10 @@ void gavl_video_source_destroy(gavl_video_source_t * s)
     gavl_video_frame_pool_destroy(s->src_fp);
   if(s->dst_fp)
     gavl_video_frame_pool_destroy(s->dst_fp);
+
+  if(s->transfer_frame)
+    gavl_video_frame_destroy(s->transfer_frame);
+  
   gavl_video_converter_destroy(s->cnv);
   free(s);
   }
@@ -184,10 +215,12 @@ static void scale_pts(gavl_video_source_t * s,
     s->next_pts = next_pts;            
     }
   }
-static gavl_source_status_t do_read(gavl_video_source_t * s,
-                                  gavl_video_frame_t ** frame)
+
+static gavl_source_status_t read_frame(gavl_video_source_t * s,
+                                       gavl_video_frame_t ** frame)
   {
   gavl_source_status_t ret;
+
   if(s->lock_func)
     s->lock_func(s->lock_priv);
 
@@ -198,6 +231,36 @@ static gavl_source_status_t do_read(gavl_video_source_t * s,
   return ret;
   }
 
+static gavl_source_status_t read_frame_transfer(gavl_video_source_t * s,
+                                                gavl_video_frame_t ** frame)
+  {
+  gavl_source_status_t ret;
+  gavl_video_frame_t * tmp_frame = NULL;
+
+  if(s->lock_func)
+    s->lock_func(s->lock_priv);
+
+  ret = s->func(s->priv, &tmp_frame);
+
+  if(ret == GAVL_SOURCE_OK)
+    {
+    if(!s->transfer_frame)
+      s->transfer_frame = gavl_hw_video_frame_create_ram(s->src_format.hwctx,
+                                                         &s->src_format);
+
+    if(!gavl_video_frame_hw_to_ram(&s->src_format,
+                                   s->transfer_frame,
+                                   tmp_frame))
+      ret = GAVL_SOURCE_EOF;
+    }
+  
+  *frame = s->transfer_frame;
+
+  if(s->unlock_func)
+    s->unlock_func(s->lock_priv);
+  return ret;
+
+  }
 
 static gavl_source_status_t
 read_video_simple(gavl_video_source_t * s,
@@ -219,7 +282,7 @@ read_video_simple(gavl_video_source_t * s,
   
   if(direct)
     {
-    if((st = do_read(s, frame)) != GAVL_SOURCE_OK)
+    if((st = s->read_frame(s, frame)) != GAVL_SOURCE_OK)
       return st;
     scale_pts(s, *frame);
     return GAVL_SOURCE_OK;
@@ -238,7 +301,7 @@ read_video_simple(gavl_video_source_t * s,
       s->dst_fp = gavl_video_frame_pool_create(NULL, &s->dst_format);
     *frame = gavl_video_frame_pool_get(s->dst_fp);
     }
-  if((st = do_read(s, &in_frame)) != GAVL_SOURCE_OK)
+  if((st = s->read_frame(s, &in_frame)) != GAVL_SOURCE_OK)
     return st;
 
   gavl_video_frame_copy(&s->src_format, *frame, in_frame);
@@ -258,7 +321,7 @@ read_video_cnv(gavl_video_source_t * s,
   if(!(s->src_flags & GAVL_SOURCE_SRC_ALLOC))
     in_frame = gavl_video_frame_pool_get(s->src_fp);
 
-  if((st = do_read(s, &in_frame)) != GAVL_SOURCE_OK)
+  if((st = s->read_frame(s, &in_frame)) != GAVL_SOURCE_OK)
     return st;
 
   if(!(*frame))
@@ -285,7 +348,7 @@ read_frame_fps(gavl_video_source_t * s)
   else
     s->fps_frame = NULL;
   
-  if((st = do_read(s, &s->fps_frame)) != GAVL_SOURCE_OK)
+  if((st = s->read_frame(s, &s->fps_frame)) != GAVL_SOURCE_OK)
     return st;
     
   s->fps_pts      = s->fps_frame->timestamp;
@@ -403,7 +466,7 @@ read_video_still(gavl_video_source_t * s,
     if(!(s->src_flags & GAVL_SOURCE_SRC_ALLOC))
       s->next_still_frame = gavl_video_frame_pool_get(s->src_fp);
     
-    st = do_read(s, &s->next_still_frame);
+    st = s->read_frame(s, &s->next_still_frame);
     
     switch(st)
       {
@@ -513,6 +576,13 @@ void gavl_video_source_set_dst(gavl_video_source_t * s, int dst_flags,
     if(s->src_format.timescale != s->dst_format.timescale)
       s->flags |= FLAG_SCALE_TIMESTAMPS;
     }
+
+  /* Check if we need to transfer frames to RAM */
+  if(convert_fps || convert_still || (s->flags & FLAG_DO_CONVERT))
+    s->dst_format.hwctx = NULL;
+
+  if(s->src_format.hwctx && !s->dst_format.hwctx)
+    s->flags |= FLAG_HW_TO_RAM;
   
   if(convert_fps)
     s->read_video = read_video_fps;
@@ -523,10 +593,21 @@ void gavl_video_source_set_dst(gavl_video_source_t * s, int dst_flags,
   else
     s->read_video = read_video_simple;
 
+  if(s->flags & FLAG_HW_TO_RAM) 
+    s->read_frame = read_frame_transfer;
+  else
+    s->read_frame = read_frame;
+
   if(s->src_fp)
     {
     gavl_video_frame_pool_destroy(s->src_fp);
     s->src_fp = NULL;
+    }
+
+  if(s->transfer_frame)
+    {
+    gavl_video_frame_destroy(s->transfer_frame);
+    s->transfer_frame = NULL;
     }
   
   gavl_video_source_reset(s);
@@ -551,7 +632,7 @@ gavl_video_source_read_frame(void * sp, gavl_video_frame_t ** frame)
     gavl_video_source_reset(s);
     
     /* Skip one frame as cheaply as possible */
-    return do_read(s, NULL);
+    return s->read_frame(s, NULL);
     }
   else
     return s->read_video(s, frame);
