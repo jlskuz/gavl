@@ -137,14 +137,28 @@ static int map_frame(gavl_hw_vaapi_t * priv, gavl_video_frame_t * f)
     }
 
   buf_i = buf;
-  
-  f->planes[0] = buf_i + image->offsets[0];
-  f->planes[1] = buf_i + image->offsets[1];
-  f->planes[2] = buf_i + image->offsets[2];
 
+  f->planes[0] = buf_i + image->offsets[0];
   f->strides[0] = image->pitches[0];
-  f->strides[1] = image->pitches[1];
-  f->strides[2] = image->pitches[2];
+  
+  if(image->format.fourcc == VA_FOURCC('Y','V','1','2'))
+    {
+    f->planes[2] = buf_i + image->offsets[1];
+    f->strides[2] = image->pitches[1];
+  
+    f->planes[1] = buf_i + image->offsets[2];
+    f->strides[1] = image->pitches[2];
+    
+    }
+  else
+    {
+    f->planes[1] = buf_i + image->offsets[1];
+    f->strides[1] = image->pitches[1];
+  
+    f->planes[2] = buf_i + image->offsets[2];
+    f->strides[2] = image->pitches[2];
+    }
+  
   return 1;
   }
 
@@ -174,7 +188,7 @@ gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
     goto fail;
 
   ret->user_data = image;
-
+#if 0
   fprintf(stderr, "Created Image: %dx%d Datasize: %d, planes: %d\n",
           image->width, image->height, image->data_size, image->num_planes);
   fprintf(stderr, "Pitches: %d %d %d\n",
@@ -190,7 +204,7 @@ gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
           image->component_order[1],
           image->component_order[2],
           image->component_order[3]);
-
+#endif
   if(!map_frame(priv, ret))
     goto fail;
   
@@ -234,23 +248,55 @@ int gavl_vaapi_video_frame_to_ram(const gavl_video_format_t * fmt,
   VASurfaceID * surf;
   VAImage * image;
   VAStatus result;
+  VAImageFormat * format;
   gavl_hw_vaapi_t * priv = src->hwctx->native;
 
   image = dst->user_data;
   surf = src->user_data;
   
   vaUnmapBuffer(priv->dpy, image->buf);
-
-  if((result = vaGetImage(priv->dpy,
-                          *surf,
-                          0,
-                          0,
-                          fmt->image_width,
-                          fmt->image_height,
-                          image->image_id)) != VA_STATUS_SUCCESS)
+  
+  if(!priv->no_derive)
     {
-    return 0;
+    vaDestroyImage(priv->dpy, image->image_id);
+
+    if((result = vaDeriveImage(priv->dpy,
+                               *surf,
+                               image)) != VA_STATUS_SUCCESS)
+      {
+      // fprintf(stderr, "vaDeriveImage Failed: %s\n", vaErrorStr(result));
+      priv->no_derive = 1;
+
+      if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat)))
+        return 0;
+      
+      /* Create image */
+      if((result = vaCreateImage(priv->dpy,
+                                 format,
+                                 fmt->image_width,
+                                 fmt->image_height,
+                                 image)) != VA_STATUS_SUCCESS)
+        return 0;
+      }
     }
+  
+  if(priv->no_derive)
+    {
+    // fprintf(stderr, "vaGetImage (Dpy: %p, ImageID: %08x, Surface ID: %08x)", priv->dpy,
+    //        image->image_id, *surf);
+    if((result = vaGetImage(priv->dpy,
+                            *surf,
+                            0,
+                            0,
+                            fmt->image_width,
+                            fmt->image_height,
+                            image->image_id)) != VA_STATUS_SUCCESS)
+      {
+      // fprintf(stderr, " failed: %s\n", vaErrorStr(result));
+      return 0;
+      }
+    }
+  
   map_frame(priv, dst);
   return 1;
   }

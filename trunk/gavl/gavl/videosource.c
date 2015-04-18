@@ -168,6 +168,14 @@ void gavl_video_source_reset(gavl_video_source_t * s)
     gavl_video_frame_pool_reset(s->dst_fp);
   s->next_still_frame = NULL;
   s->fps_frame = NULL;
+
+#if 0
+  if(s->transfer_frame)
+    {
+    gavl_video_frame_destroy(s->transfer_frame);
+    s->transfer_frame = NULL;
+    }
+#endif
   }
 
 GAVL_PUBLIC
@@ -251,9 +259,11 @@ static gavl_source_status_t read_frame_transfer(gavl_video_source_t * s,
     if(!gavl_video_frame_hw_to_ram(&s->src_format,
                                    s->transfer_frame,
                                    tmp_frame))
+      {
+      fprintf(stderr, "Frame transfer failed\n");
       ret = GAVL_SOURCE_EOF;
+      }
     }
-  
   *frame = s->transfer_frame;
 
   if(s->unlock_func)

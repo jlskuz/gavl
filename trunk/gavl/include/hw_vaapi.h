@@ -32,6 +32,8 @@ typedef struct
   VAImageFormat * image_formats;
   
   gavl_dsp_context_t * dsp;
+  int no_derive;
+  
   } gavl_hw_vaapi_t;
 
 gavl_video_frame_t * gavl_vaapi_video_frame_create_hw(gavl_hw_context_t * ctx,
