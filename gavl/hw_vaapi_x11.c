@@ -83,7 +83,8 @@ gavl_hw_context_t * gavl_hw_ctx_create_vaapi_x11(Display * dpy)
     }
   
   priv->va.dpy = vaGetDisplay(priv->display);
-
+  priv->va.no_derive = 1;
+  
   if(!priv->va.dpy)
     return NULL;
   
