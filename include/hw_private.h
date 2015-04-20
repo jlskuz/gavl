@@ -29,7 +29,8 @@ typedef struct
   {
   void (*destroy_native)(void * native);
 
-  gavl_pixelformat_t * (*get_pixelformats)(gavl_hw_context_t * ctx);
+  gavl_pixelformat_t * (*get_image_formats)(gavl_hw_context_t * ctx);
+  gavl_pixelformat_t * (*get_overlay_formats)(gavl_hw_context_t * ctx);
   
   void (*video_format_adjust)(gavl_hw_context_t * ctx,
                               gavl_video_format_t * fmt);
@@ -38,6 +39,9 @@ typedef struct
                                                  gavl_video_format_t * fmt);
 
   gavl_video_frame_t *  (*video_frame_create_ram)(gavl_hw_context_t * ctx,
+                                                  gavl_video_format_t * fmt);
+
+  gavl_video_frame_t *  (*video_frame_create_ovl)(gavl_hw_context_t * ctx,
                                                   gavl_video_format_t * fmt);
 
   void (*video_frame_destroy)(gavl_video_frame_t * f);
@@ -57,7 +61,8 @@ struct gavl_hw_context_s
   void * native;
   gavl_hw_type_t type;
   const gavl_hw_funcs_t * funcs;
-  gavl_pixelformat_t * pixelformats;
+  gavl_pixelformat_t * image_formats;
+  gavl_pixelformat_t * overlay_formats;
   };
 
 gavl_hw_context_t *

@@ -28,7 +28,7 @@
 #include <gavl/hw_vaapi_x11.h>
 
 #include <hw_private.h>
-#include <hw_vaapi.h>
+#include <vaapi.h>
 
 
 typedef struct
@@ -51,9 +51,11 @@ static void destroy_native(void * native)
 static const gavl_hw_funcs_t funcs =
   {
     .destroy_native = destroy_native,
-    .get_pixelformats = gavl_vaapi_get_pixelformats,
+    .get_image_formats = gavl_vaapi_get_image_formats,
+    .get_overlay_formats = gavl_vaapi_get_overlay_formats,
     .video_frame_create_hw = gavl_vaapi_video_frame_create_hw,
     .video_frame_create_ram = gavl_vaapi_video_frame_create_ram,
+    .video_frame_create_ovl = gavl_vaapi_video_frame_create_ovl,
     .video_frame_destroy = gavl_vaapi_video_frame_destroy,
     .video_frame_to_ram = gavl_vaapi_video_frame_to_ram,
     .video_frame_to_hw  = gavl_vaapi_video_frame_to_hw
