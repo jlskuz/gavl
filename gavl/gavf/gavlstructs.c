@@ -17,7 +17,9 @@ int gavf_read_audio_format(gavf_io_t * io, gavl_audio_format_t * format)
   uint32_t num_extensions;
   
   gavl_extension_header_t eh;
-  
+
+  memset(format, 0, sizeof(*format));
+
   if(!gavf_io_read_uint32v(io, &format->samplerate) ||
      !gavf_io_read_uint32v(io, &format->num_channels))
     return 0;
