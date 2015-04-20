@@ -23,7 +23,10 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include <hw_vaapi.h>
+#include <vaapi.h>
+#include <gavl/hw_vaapi.h>
+
+#define DUMP_FORMATS
 
 static struct
   {
@@ -33,7 +36,10 @@ static struct
   }
 formats[] =
   {
-    { GAVL_RGBA_32, VA_FOURCC('R','G','B','A'), VA_RT_FORMAT_RGB32 },
+    { GAVL_RGB_32,     VA_FOURCC('R','G','B','X'), VA_RT_FORMAT_RGB32 },
+    { GAVL_BGR_32,     VA_FOURCC('B','G','R','X'), VA_RT_FORMAT_RGB32 },
+    { GAVL_RGBA_32,    VA_FOURCC('R','G','B','A'), VA_RT_FORMAT_RGB32 },
+    { GAVL_RGBA_32,    VA_FOURCC('B','G','R','A'), VA_RT_FORMAT_RGB32 },
     { GAVL_YUV_420_P,  VA_FOURCC('I','4','2','0'), VA_RT_FORMAT_YUV420 },
     { GAVL_YUV_420_P,  VA_FOURCC('Y','V','1','2'), VA_RT_FORMAT_YUV420 },
     { GAVL_PIXELFORMAT_NONE, 0, 0 }, // End
@@ -67,6 +73,43 @@ static VAImageFormat * pixelformat_to_image_format(gavl_hw_vaapi_t * priv,
                                                    gavl_pixelformat_t pfmt)
   {
   int i;
+
+  /* Try to find identical masks */
+
+  const uint32_t * masks = gavl_pixelformat_get_masks(pfmt);
+  
+  if(masks)
+    {
+    if(gavl_pixelformat_has_alpha(pfmt))
+      {
+      for(i = 0; i < priv->num_image_formats; i++)
+        {
+        if(fourcc_to_pixelformat(priv->image_formats[i].fourcc) != pfmt)
+          continue;
+
+        if((masks[0] == priv->image_formats[i].red_mask) &&
+           (masks[1] == priv->image_formats[i].green_mask) &&
+           (masks[2] == priv->image_formats[i].blue_mask) &&
+           (masks[3] == priv->image_formats[i].alpha_mask))
+          return &priv->image_formats[i];
+        }
+      
+      }
+    else
+      {
+      for(i = 0; i < priv->num_image_formats; i++)
+        {
+        if(fourcc_to_pixelformat(priv->image_formats[i].fourcc) != pfmt)
+          continue;
+
+        if((masks[0] == priv->image_formats[i].red_mask) &&
+           (masks[1] == priv->image_formats[i].green_mask) &&
+           (masks[2] == priv->image_formats[i].blue_mask))
+          return &priv->image_formats[i];
+        }
+      }
+    }
+  
   for(i = 0; i < priv->num_image_formats; i++)
     {
     if(fourcc_to_pixelformat(priv->image_formats[i].fourcc) == pfmt)
@@ -148,9 +191,8 @@ static int map_frame(gavl_hw_vaapi_t * priv, gavl_video_frame_t * f)
   
     f->planes[1] = buf_i + image->offsets[2];
     f->strides[1] = image->pitches[2];
-    
     }
-  else
+  else if(image->offsets[1] + image->pitches[1])
     {
     f->planes[1] = buf_i + image->offsets[1];
     f->strides[1] = image->pitches[1];
@@ -166,7 +208,7 @@ gavl_video_frame_t *
 gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
                                   gavl_video_format_t * fmt)
   {
-  VAImage * image;
+  vaapi_frame_t * image;
   gavl_video_frame_t * ret;
   VAImageFormat * format;
   VAStatus result;
@@ -178,15 +220,16 @@ gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
   
   ret = create_common(ctx);
   image = calloc(1, sizeof(*image));
-
+  image->ovl = VA_INVALID_ID;
+  
   /* Create image */
   if((result = vaCreateImage(priv->dpy,
                              format,
                              fmt->image_width,
                              fmt->image_height,
-                             image)) != VA_STATUS_SUCCESS)
+                             &image->image)) != VA_STATUS_SUCCESS)
     goto fail;
-
+  
   ret->user_data = image;
 #if 0
   fprintf(stderr, "Created Image: %dx%d Datasize: %d, planes: %d\n",
@@ -222,19 +265,52 @@ gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
   return NULL;
   }
 
+gavl_video_frame_t *
+gavl_vaapi_video_frame_create_ovl(gavl_hw_context_t * ctx,
+                                  gavl_video_format_t * fmt)
+  {
+  vaapi_frame_t * image;
+  VAStatus result;
+  gavl_hw_vaapi_t * priv = ctx->native;
+  gavl_video_frame_t * ret;
+
+  if(!(ret = gavl_vaapi_video_frame_create_ram(ctx, fmt)))
+    goto fail;
+  
+  image = ret->user_data;
+
+  if((result = vaCreateSubpicture(priv->dpy,
+                                  image->image.image_id,
+                                  &image->ovl)) != VA_STATUS_SUCCESS)
+    goto fail;
+  
+  return ret;
+  
+  fail:
+  
+  if(ret)
+    gavl_video_frame_destroy(ret);
+  return NULL;
+  }
+
 void gavl_vaapi_video_frame_destroy(gavl_video_frame_t * f)
   {
   gavl_hw_vaapi_t * priv = f->hwctx->native;
   
   if(f->planes[0])
     {
-    VAImage * image = f->user_data;
-    vaDestroyImage(priv->dpy, image->image_id);
+    vaapi_frame_t * image;
+    image = f->user_data;
+
+    if(image->ovl != VA_INVALID_ID)
+      vaDestroySubpicture(priv->dpy, image->ovl);
+    vaDestroyImage(priv->dpy, image->image.image_id);
     free(image);
     }
   else
     {
-    
+    VASurfaceID * surf = f->user_data;
+    vaDestroySurfaces(priv->dpy, surf, 1);
     }
   gavl_video_frame_null(f);
   f->hwctx = NULL;
@@ -333,8 +409,26 @@ int gavl_vaapi_video_frame_to_hw(const gavl_video_format_t * fmt,
   return 1;
   }
 
+#ifdef DUMP_FORMATS
+static void dump_image_format(const VAImageFormat * f)
+  {
+  fprintf(stderr, "  fourcc: %c%c%c%c\n",
+          (f->fourcc) & 0xff,
+          (f->fourcc >> 8) & 0xff,
+          (f->fourcc >> 16) & 0xff,
+          (f->fourcc >> 24) & 0xff);
+  fprintf(stderr, "  byte_order:     %d\n", f->byte_order);
+  fprintf(stderr, "  bits_per_pixel: %d\n", f->bits_per_pixel);
+  fprintf(stderr, "  depth:          %d\n", f->depth);
+  fprintf(stderr, "  red_mask:       %08x\n", f->red_mask);
+  fprintf(stderr, "  green_mask:     %08x\n", f->green_mask);
+  fprintf(stderr, "  blue_mask:      %08x\n", f->blue_mask);
+  fprintf(stderr, "  alpha_mask:     %08x\n", f->alpha_mask);
+  }
+#endif
+
 gavl_pixelformat_t *
-gavl_vaapi_get_pixelformats(gavl_hw_context_t * ctx)
+gavl_vaapi_get_image_formats(gavl_hw_context_t * ctx)
   {
   int num, i;
   gavl_pixelformat_t * ret;
@@ -353,22 +447,63 @@ gavl_vaapi_get_pixelformats(gavl_hw_context_t * ctx)
   
   for(i = 0; i < p->num_image_formats; i++)
     {
-
-    fprintf(stderr, "Format %d\n", i);
-    fprintf(stderr, "  fourcc: %c%c%c%c\n",
-            (p->image_formats[i].fourcc) & 0xff,
-            (p->image_formats[i].fourcc >> 8) & 0xff,
-            (p->image_formats[i].fourcc >> 16) & 0xff,
-            (p->image_formats[i].fourcc >> 24) & 0xff);
-    fprintf(stderr, "  byte_order:     %d\n", p->image_formats[i].byte_order);
-    fprintf(stderr, "  bits_per_pixel: %d\n", p->image_formats[i].bits_per_pixel);
-    fprintf(stderr, "  depth:          %d\n", p->image_formats[i].depth);
-    fprintf(stderr, "  red_mask:       %08x\n", p->image_formats[i].red_mask);
-    fprintf(stderr, "  green_mask:     %08x\n", p->image_formats[i].green_mask);
-    fprintf(stderr, "  blue_mask:      %08x\n", p->image_formats[i].blue_mask);
-    fprintf(stderr, "  alpha_mask:     %08x\n", p->image_formats[i].alpha_mask);
-    
+#ifdef DUMP_FORMATS
+    fprintf(stderr, "Image Format %d\n", i);
+    dump_image_format(&p->image_formats[i]);
+#endif
     if((fmt = fourcc_to_pixelformat(p->image_formats[i].fourcc)) == GAVL_PIXELFORMAT_NONE)
+      continue;
+
+    j = 0;
+    take_it = 1;
+    
+    while(j < num_ret)
+      {
+      if(ret[j] == fmt)
+        {
+        take_it = 0;
+        break;
+        }
+      j++;
+      }
+
+    if(take_it)
+      {
+      ret[num_ret] = fmt;
+      num_ret++;
+      }
+    }
+  ret[num_ret] = GAVL_PIXELFORMAT_NONE;
+  return ret;
+  }
+
+gavl_pixelformat_t *
+gavl_vaapi_get_overlay_formats(gavl_hw_context_t * ctx)
+  {
+  int num, i;
+  gavl_pixelformat_t * ret;
+  gavl_hw_vaapi_t * p = ctx->native;
+  int num_ret = 0;
+  gavl_pixelformat_t fmt;
+  int j;
+  int take_it;
+  
+  num = vaMaxNumSubpictureFormats(p->dpy);
+  p->subpicture_formats = malloc(num * sizeof(*p->subpicture_formats));
+
+  vaQuerySubpictureFormats(p->dpy, p->subpicture_formats,
+                           p->subpicture_flags,
+                           (unsigned int*)&p->num_subpicture_formats);
+
+  ret = calloc(p->num_subpicture_formats + 1, sizeof(*ret));
+  
+  for(i = 0; i < p->num_subpicture_formats; i++)
+    {
+#ifdef DUMP_FORMATS
+    fprintf(stderr, "Overlay format %d\n", i);
+    dump_image_format(&p->subpicture_formats[i]);
+#endif
+    if((fmt = fourcc_to_pixelformat(p->subpicture_formats[i].fourcc)) == GAVL_PIXELFORMAT_NONE)
       continue;
 
     j = 0;
@@ -399,7 +534,44 @@ void gavl_vaapi_cleanup(void * priv)
   gavl_hw_vaapi_t * p = priv;
   if(p->image_formats)
     free(p->image_formats);
+  if(p->subpicture_formats)
+    free(p->subpicture_formats);
+  if(p->subpicture_flags)
+    free(p->subpicture_flags);
   if(p->dpy)
     vaTerminate(p->dpy);
   }
   
+
+VASurfaceID gavl_vaapi_get_surface_id(const gavl_video_frame_t * f)
+  {
+  VASurfaceID * surf = f->user_data;
+  return *surf;
+  }
+
+/* Use only in specific create routines */
+void gavl_vaapi_set_surface_id(gavl_video_frame_t * f, VASurfaceID id)
+  {
+  VASurfaceID * surf;
+  if(!f->user_data)
+    {
+    surf = malloc(sizeof(*surf));
+    f->user_data = surf;
+    }
+  else
+    surf = f->user_data;
+  
+  *surf = id;
+  }
+
+VASubpictureID gavl_vaapi_get_subpicture_id(const gavl_video_frame_t * f)
+  {
+  vaapi_frame_t * frame = f->user_data;
+  return frame->ovl;
+  }
+
+VAImageID   gavl_vaapi_get_image_id(const gavl_video_frame_t * f)
+  {
+  vaapi_frame_t * frame = f->user_data;
+  return frame->image.image_id;
+  }

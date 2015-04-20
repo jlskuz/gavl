@@ -48,7 +48,11 @@ GAVL_PUBLIC void gavl_hw_ctx_destroy(gavl_hw_context_t * ctx);
 /* Return type is one of the structs in the backend specific headers */
 GAVL_PUBLIC void * gavl_hw_ctx_get_native_handle(gavl_hw_context_t * ctx);
 
-GAVL_PUBLIC const gavl_pixelformat_t * gavl_hw_ctx_get_pixelformats(gavl_hw_context_t * ctx);
+GAVL_PUBLIC const gavl_pixelformat_t *
+gavl_hw_ctx_get_image_formats(gavl_hw_context_t * ctx);
+
+GAVL_PUBLIC const gavl_pixelformat_t *
+gavl_hw_ctx_get_overlay_formats(gavl_hw_context_t * ctx);
 
 GAVL_PUBLIC gavl_hw_type_t gavl_hw_ctx_get_type(gavl_hw_context_t * ctx);
 
@@ -63,7 +67,11 @@ GAVL_PUBLIC gavl_video_frame_t * gavl_hw_video_frame_create_hw(gavl_hw_context_t
 /* Create a video frame. The frame will have data available for CPU access but is
  suitable for transfer to a hardware surface */
 GAVL_PUBLIC gavl_video_frame_t * gavl_hw_video_frame_create_ram(gavl_hw_context_t * ctx,
-                                                    gavl_video_format_t * fmt);
+                                                                gavl_video_format_t * fmt);
+
+/* Create a video frame for use as an overlay */
+GAVL_PUBLIC gavl_video_frame_t * gavl_hw_video_frame_create_ovl(gavl_hw_context_t * ctx,
+                                                                gavl_video_format_t * fmt);
 
 /* Load a video frame from RAM into the hardware */
 GAVL_PUBLIC int gavl_video_frame_ram_to_hw(const gavl_video_format_t * fmt,

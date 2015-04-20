@@ -13,7 +13,7 @@ dsp.h \
 float_cast.h \
 gavfprivate.h \
 hw_private.h \
-hw_vaapi.h \
+vaapi.h \
 interleave.h \
 macros.h \
 memalign.h \

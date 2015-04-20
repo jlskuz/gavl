@@ -30,7 +30,8 @@ gavl_hw_context_t * gavl_hw_context_create_internal(void * native,
   ret->type = type;
   ret->native = native;
   ret->funcs = funcs;
-  ret->pixelformats = ret->funcs->get_pixelformats(ret);
+  ret->image_formats = ret->funcs->get_image_formats(ret);
+  ret->overlay_formats = ret->funcs->get_overlay_formats(ret);
   return ret;
   }
 
@@ -39,15 +40,24 @@ void gavl_hw_ctx_destroy(gavl_hw_context_t * ctx)
   if(ctx->funcs->destroy_native)
     ctx->funcs->destroy_native(ctx->native);
 
-  if(ctx->pixelformats)
-    free(ctx->pixelformats);
+  if(ctx->image_formats)
+    free(ctx->image_formats);
+  if(ctx->overlay_formats)
+    free(ctx->overlay_formats);
   
   free(ctx);
   }
 
-const gavl_pixelformat_t * gavl_hw_ctx_get_pixelformats(gavl_hw_context_t * ctx)
+const gavl_pixelformat_t *
+gavl_hw_ctx_get_image_formats(gavl_hw_context_t * ctx)
   {
-  return ctx->pixelformats;
+  return ctx->image_formats;
+  }
+
+const gavl_pixelformat_t *
+gavl_hw_ctx_get_overlay_formats(gavl_hw_context_t * ctx)
+  {
+  return ctx->overlay_formats;
   }
 
 
@@ -60,7 +70,7 @@ void gavl_hw_video_format_adjust(gavl_hw_context_t * ctx,
                                  gavl_video_format_t * fmt)
   {
   fmt->pixelformat = gavl_pixelformat_get_best(fmt->pixelformat,
-                                               gavl_hw_ctx_get_pixelformats(ctx),
+                                               gavl_hw_ctx_get_image_formats(ctx),
                                                NULL);
 
   if(ctx->funcs->video_format_adjust)
@@ -73,12 +83,22 @@ gavl_video_frame_t * gavl_hw_video_frame_create_hw(gavl_hw_context_t * ctx,
   {
   gavl_video_frame_t * ret;
   gavl_hw_video_format_adjust(ctx, fmt);
-  
   if(ctx->funcs->video_frame_create_hw)
     ret = ctx->funcs->video_frame_create_hw(ctx, fmt);
   else
     ret = gavl_video_frame_create(fmt);
+  return ret;
+  }
 
+GAVL_PUBLIC gavl_video_frame_t * gavl_hw_video_frame_create_ovl(gavl_hw_context_t * ctx,
+                                                                gavl_video_format_t * fmt)
+  {
+  gavl_video_frame_t * ret;
+  gavl_hw_video_format_adjust(ctx, fmt);
+  if(ctx->funcs->video_frame_create_ovl)
+    ret = ctx->funcs->video_frame_create_ovl(ctx, fmt);
+  else
+    ret = gavl_video_frame_create(fmt);
   return ret;
   }
 
