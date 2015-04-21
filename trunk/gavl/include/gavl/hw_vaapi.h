@@ -29,3 +29,9 @@ GAVL_PUBLIC VASurfaceID gavl_vaapi_get_surface_id(const gavl_video_frame_t *);
 GAVL_PUBLIC void gavl_vaapi_set_surface_id(gavl_video_frame_t *, VASurfaceID id);
 
 GAVL_PUBLIC VASubpictureID gavl_vaapi_get_subpicture_id(const gavl_video_frame_t *);
+
+/* Map into userspace for CPU access */
+GAVL_PUBLIC void gavl_vaapi_map_frame(gavl_video_frame_t *);
+
+/* Unmap */
+GAVL_PUBLIC void gavl_vaapi_unmap_frame(gavl_video_frame_t *);

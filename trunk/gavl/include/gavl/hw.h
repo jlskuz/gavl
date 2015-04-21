@@ -60,6 +60,10 @@ GAVL_PUBLIC gavl_hw_type_t gavl_hw_ctx_get_type(gavl_hw_context_t * ctx);
 GAVL_PUBLIC void gavl_hw_video_format_adjust(gavl_hw_context_t * ctx,
                                              gavl_video_format_t * fmt);
 
+GAVL_PUBLIC void gavl_hw_overlay_format_adjust(gavl_hw_context_t * ctx,
+                                               gavl_video_format_t * fmt);
+
+
 /* Create a video frame. The frame will be a reference for a hardware surface */
 GAVL_PUBLIC gavl_video_frame_t * gavl_hw_video_frame_create_hw(gavl_hw_context_t * ctx,
                                                    gavl_video_format_t * fmt);

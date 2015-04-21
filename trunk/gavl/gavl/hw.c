@@ -77,6 +77,18 @@ void gavl_hw_video_format_adjust(gavl_hw_context_t * ctx,
     ctx->funcs->video_format_adjust(ctx, fmt);
   }
 
+void gavl_hw_overlay_format_adjust(gavl_hw_context_t * ctx,
+                                   gavl_video_format_t * fmt)
+  {
+  fmt->pixelformat = gavl_pixelformat_get_best(fmt->pixelformat,
+                                               gavl_hw_ctx_get_overlay_formats(ctx),
+                                               NULL);
+
+  if(ctx->funcs->overlay_format_adjust)
+    ctx->funcs->overlay_format_adjust(ctx, fmt);
+  }
+
+
 /* Create a video frame. The frame will be a reference for a hardware surface */
 gavl_video_frame_t * gavl_hw_video_frame_create_hw(gavl_hw_context_t * ctx,
                                                    gavl_video_format_t * fmt)
@@ -94,7 +106,7 @@ GAVL_PUBLIC gavl_video_frame_t * gavl_hw_video_frame_create_ovl(gavl_hw_context_
                                                                 gavl_video_format_t * fmt)
   {
   gavl_video_frame_t * ret;
-  gavl_hw_video_format_adjust(ctx, fmt);
+  gavl_hw_overlay_format_adjust(ctx, fmt);
   if(ctx->funcs->video_frame_create_ovl)
     ret = ctx->funcs->video_frame_create_ovl(ctx, fmt);
   else

@@ -70,7 +70,8 @@ static unsigned int pixelformat_to_rt_format(gavl_pixelformat_t pfmt)
   }
 
 static VAImageFormat * pixelformat_to_image_format(gavl_hw_vaapi_t * priv,
-                                                   gavl_pixelformat_t pfmt)
+                                                   gavl_pixelformat_t pfmt, 
+                                                   VAImageFormat * fmts, int num_fmts)
   {
   int i;
 
@@ -82,38 +83,38 @@ static VAImageFormat * pixelformat_to_image_format(gavl_hw_vaapi_t * priv,
     {
     if(gavl_pixelformat_has_alpha(pfmt))
       {
-      for(i = 0; i < priv->num_image_formats; i++)
+      for(i = 0; i < num_fmts; i++)
         {
-        if(fourcc_to_pixelformat(priv->image_formats[i].fourcc) != pfmt)
+        if(fourcc_to_pixelformat(fmts[i].fourcc) != pfmt)
           continue;
 
-        if((masks[0] == priv->image_formats[i].red_mask) &&
-           (masks[1] == priv->image_formats[i].green_mask) &&
-           (masks[2] == priv->image_formats[i].blue_mask) &&
-           (masks[3] == priv->image_formats[i].alpha_mask))
-          return &priv->image_formats[i];
+        if((masks[0] == fmts[i].red_mask) &&
+           (masks[1] == fmts[i].green_mask) &&
+           (masks[2] == fmts[i].blue_mask) &&
+           (masks[3] == fmts[i].alpha_mask))
+          return &fmts[i];
         }
       
       }
     else
       {
-      for(i = 0; i < priv->num_image_formats; i++)
+      for(i = 0; i < num_fmts; i++)
         {
-        if(fourcc_to_pixelformat(priv->image_formats[i].fourcc) != pfmt)
+        if(fourcc_to_pixelformat(fmts[i].fourcc) != pfmt)
           continue;
 
-        if((masks[0] == priv->image_formats[i].red_mask) &&
-           (masks[1] == priv->image_formats[i].green_mask) &&
-           (masks[2] == priv->image_formats[i].blue_mask))
-          return &priv->image_formats[i];
+        if((masks[0] == fmts[i].red_mask) &&
+           (masks[1] == fmts[i].green_mask) &&
+           (masks[2] == fmts[i].blue_mask))
+          return &fmts[i];
         }
       }
     }
   
-  for(i = 0; i < priv->num_image_formats; i++)
+  for(i = 0; i < num_fmts; i++)
     {
-    if(fourcc_to_pixelformat(priv->image_formats[i].fourcc) == pfmt)
-      return &priv->image_formats[i];
+    if(fourcc_to_pixelformat(fmts[i].fourcc) == pfmt)
+      return &fmts[i];
     }
   return NULL;
   }
@@ -204,6 +205,20 @@ static int map_frame(gavl_hw_vaapi_t * priv, gavl_video_frame_t * f)
   return 1;
   }
 
+void gavl_vaapi_map_frame(gavl_video_frame_t * f)
+  {
+  map_frame(f->hwctx->native, f);  
+  }
+
+/* Unmap */
+void gavl_vaapi_unmap_frame(gavl_video_frame_t * f)
+  {
+  VAImage * image;
+  gavl_hw_vaapi_t * priv = f->hwctx->native;
+  image = f->user_data;
+  vaUnmapBuffer(priv->dpy, image->buf);
+  }
+
 gavl_video_frame_t *
 gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
                                   gavl_video_format_t * fmt)
@@ -215,7 +230,8 @@ gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
   
   gavl_hw_vaapi_t * priv = ctx->native;
 
-  if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat)))
+  if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat, priv->image_formats, priv->num_image_formats)) &&
+     !(format = pixelformat_to_image_format(priv, fmt->pixelformat, priv->subpicture_formats, priv->num_subpicture_formats)))
     return NULL;
   
   ret = create_common(ctx);
@@ -282,8 +298,10 @@ gavl_vaapi_video_frame_create_ovl(gavl_hw_context_t * ctx,
   if((result = vaCreateSubpicture(priv->dpy,
                                   image->image.image_id,
                                   &image->ovl)) != VA_STATUS_SUCCESS)
+    {
+    fprintf(stderr, "vaCreateSubpicture failed: %s\n",  vaErrorStr(result));
     goto fail;
-  
+    }
   return ret;
   
   fail:
@@ -343,7 +361,7 @@ int gavl_vaapi_video_frame_to_ram(const gavl_video_format_t * fmt,
       // fprintf(stderr, "vaDeriveImage Failed: %s\n", vaErrorStr(result));
       priv->no_derive = 1;
 
-      if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat)))
+      if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat, priv->image_formats, priv->num_image_formats)))
         return 0;
       
       /* Create image */

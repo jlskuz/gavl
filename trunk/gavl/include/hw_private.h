@@ -34,6 +34,10 @@ typedef struct
   
   void (*video_format_adjust)(gavl_hw_context_t * ctx,
                               gavl_video_format_t * fmt);
+
+  void (*overlay_format_adjust)(gavl_hw_context_t * ctx,
+                                gavl_video_format_t * fmt);
+
   
   gavl_video_frame_t *  (*video_frame_create_hw)(gavl_hw_context_t * ctx,
                                                  gavl_video_format_t * fmt);
