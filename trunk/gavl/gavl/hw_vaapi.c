@@ -26,7 +26,7 @@
 #include <vaapi.h>
 #include <gavl/hw_vaapi.h>
 
-#define DUMP_FORMATS
+// #define DUMP_FORMATS
 
 static struct
   {
