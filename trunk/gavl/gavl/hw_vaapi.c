@@ -26,7 +26,7 @@
 #include <vaapi.h>
 #include <gavl/hw_vaapi.h>
 
-// #define DUMP_FORMATS
+#define DUMP_FORMATS
 
 static struct
   {
@@ -219,9 +219,9 @@ void gavl_vaapi_unmap_frame(gavl_video_frame_t * f)
   vaUnmapBuffer(priv->dpy, image->buf);
   }
 
-gavl_video_frame_t *
-gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
-                                  gavl_video_format_t * fmt)
+static gavl_video_frame_t *
+video_frame_create_ram(gavl_hw_context_t * ctx,
+                       gavl_video_format_t * fmt, int ovl)
   {
   vaapi_frame_t * image;
   gavl_video_frame_t * ret;
@@ -230,9 +230,16 @@ gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
   
   gavl_hw_vaapi_t * priv = ctx->native;
 
-  if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat, priv->image_formats, priv->num_image_formats)) &&
-     !(format = pixelformat_to_image_format(priv, fmt->pixelformat, priv->subpicture_formats, priv->num_subpicture_formats)))
-    return NULL;
+  if(ovl)
+    {
+    if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat, priv->subpicture_formats, priv->num_subpicture_formats)))
+      return NULL;
+    }
+  else
+    {
+    if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat, priv->image_formats, priv->num_image_formats)))
+      return NULL;
+    }
   
   ret = create_common(ctx);
   image = calloc(1, sizeof(*image));
@@ -281,6 +288,14 @@ gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
   return NULL;
   }
 
+
+gavl_video_frame_t *
+gavl_vaapi_video_frame_create_ram(gavl_hw_context_t * ctx,
+                                  gavl_video_format_t * fmt)
+  {
+  return video_frame_create_ram(ctx, fmt, 0);
+  }
+
 gavl_video_frame_t *
 gavl_vaapi_video_frame_create_ovl(gavl_hw_context_t * ctx,
                                   gavl_video_format_t * fmt)
@@ -290,11 +305,11 @@ gavl_vaapi_video_frame_create_ovl(gavl_hw_context_t * ctx,
   gavl_hw_vaapi_t * priv = ctx->native;
   gavl_video_frame_t * ret;
 
-  if(!(ret = gavl_vaapi_video_frame_create_ram(ctx, fmt)))
+  if(!(ret = video_frame_create_ram(ctx, fmt, 1)))
     goto fail;
   
   image = ret->user_data;
-
+  
   if((result = vaCreateSubpicture(priv->dpy,
                                   image->image.image_id,
                                   &image->ovl)) != VA_STATUS_SUCCESS)
