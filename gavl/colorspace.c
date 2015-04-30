@@ -29,13 +29,13 @@
 #include <string.h>
 
 #ifdef WORDS_BIGENDIAN
-static const uint32_t rgb32_masks[4]  = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000 };
-static const uint32_t rgba32_masks[4] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
-static const uint32_t bgr32_masks[4]  = { 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF };
+static const uint32_t rgb32_masks[4]  = { 0xff000000, 0x00ff0000, 0x0000ff00, 0x00000000 };
+static const uint32_t rgba32_masks[4] = { 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff };
+static const uint32_t bgr32_masks[4]  = { 0x0000ff00, 0x00ff0000, 0xff000000, 0x00000000 };
 #else
-static const uint32_t rgb32_masks[4]  = { 0xFF000000, 0x00FF0000, 0x0000FF00, 0x00000000 };
-static const uint32_t rgba32_masks[4] = { 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF };
-static const uint32_t bgr32_masks[4]  = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
+static const uint32_t rgb32_masks[4]  = { 0x000000ff, 0x0000ff00, 0x00ff0000, 0x00000000 };
+static const uint32_t rgba32_masks[4] = { 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000 };
+static const uint32_t bgr32_masks[4]  = { 0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000 };
 #endif
 
 typedef struct
@@ -62,7 +62,7 @@ const pixelformat_tab_t pixelformat_tab[] =
     { GAVL_BGR_24, "24 bpp BGR",                    "bgr24"     },
     { GAVL_RGB_32, "32 bpp RGB",                    "rgb32",    rgb32_masks },
     { GAVL_BGR_32, "32 bpp BGR",                    "bgr32",    bgr32_masks },
-    { GAVL_RGBA_32, "32 bpp RGBA",                  "rgba32",   rgb32_masks },
+    { GAVL_RGBA_32, "32 bpp RGBA",                  "rgba32",   rgba32_masks },
     { GAVL_RGB_48, "48 bpp RGB",                    "rgb48"     },
     { GAVL_RGBA_64, "64 bpp RGBA",                  "rgba64"    },
     { GAVL_RGB_FLOAT, "Float RGB",                  "rgbf"      },
