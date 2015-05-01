@@ -35,3 +35,7 @@ GAVL_PUBLIC void gavl_vaapi_map_frame(gavl_video_frame_t *);
 
 /* Unmap */
 GAVL_PUBLIC void gavl_vaapi_unmap_frame(gavl_video_frame_t *);
+
+GAVL_PUBLIC void gavl_vaapi_video_frame_swap_bytes(const gavl_video_format_t * fmt,
+                                                   gavl_video_frame_t * f,
+                                                   int to_gavl);
