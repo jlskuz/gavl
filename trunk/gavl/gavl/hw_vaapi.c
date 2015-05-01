@@ -232,12 +232,16 @@ video_frame_create_ram(gavl_hw_context_t * ctx,
 
   if(ovl)
     {
-    if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat, priv->subpicture_formats, priv->num_subpicture_formats)))
+    if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat,
+                                              priv->subpicture_formats,
+                                              priv->num_subpicture_formats)))
       return NULL;
     }
   else
     {
-    if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat, priv->image_formats, priv->num_image_formats)))
+    if(!(format = pixelformat_to_image_format(priv, fmt->pixelformat,
+                                              priv->image_formats,
+                                              priv->num_image_formats)))
       return NULL;
     }
   
@@ -254,23 +258,7 @@ video_frame_create_ram(gavl_hw_context_t * ctx,
     goto fail;
   
   ret->user_data = image;
-#if 0
-  fprintf(stderr, "Created Image: %dx%d Datasize: %d, planes: %d\n",
-          image->width, image->height, image->data_size, image->num_planes);
-  fprintf(stderr, "Pitches: %d %d %d\n",
-          image->pitches[0], 
-          image->pitches[1], 
-          image->pitches[2]);
-  fprintf(stderr, "Offsets: %d %d %d\n",
-          image->offsets[0], 
-          image->offsets[1], 
-          image->offsets[2]);
-  fprintf(stderr, "Components: %c %c %c %c\n",
-          image->component_order[0],
-          image->component_order[1],
-          image->component_order[2],
-          image->component_order[3]);
-#endif
+
   if(!map_frame(priv, ret))
     goto fail;
   
@@ -407,6 +395,8 @@ int gavl_vaapi_video_frame_to_ram(const gavl_video_format_t * fmt,
     }
   
   map_frame(priv, dst);
+
+  gavl_vaapi_video_frame_swap_bytes(fmt, dst, 1);
   return 1;
   }
 
@@ -421,6 +411,8 @@ int gavl_vaapi_video_frame_to_hw(const gavl_video_format_t * fmt,
 
   image = src->user_data;
   surf = dst->user_data;
+
+  gavl_vaapi_video_frame_swap_bytes(fmt, src, 0);
   
   vaUnmapBuffer(priv->dpy, image->buf);
 
@@ -573,6 +565,8 @@ void gavl_vaapi_cleanup(void * priv)
     free(p->subpicture_flags);
   if(p->dpy)
     vaTerminate(p->dpy);
+  if(p->dsp)
+    gavl_dsp_context_destroy(p->dsp);
   }
   
 
@@ -603,8 +597,36 @@ VASubpictureID gavl_vaapi_get_subpicture_id(const gavl_video_frame_t * f)
   return frame->ovl;
   }
 
-VAImageID   gavl_vaapi_get_image_id(const gavl_video_frame_t * f)
+VAImageID gavl_vaapi_get_image_id(const gavl_video_frame_t * f)
   {
   vaapi_frame_t * frame = f->user_data;
   return frame->image.image_id;
   }
+
+void gavl_vaapi_video_frame_swap_bytes(const gavl_video_format_t * fmt,
+                                       gavl_video_frame_t * f,
+                                       int to_gavl)
+  {
+  const uint32_t * gavl_masks;
+  uint32_t vaapi_masks[4];
+  gavl_hw_vaapi_t * priv = f->hwctx->native;
+  
+  vaapi_frame_t * frame = f->user_data;
+  
+  if(!(gavl_masks = gavl_pixelformat_get_masks(fmt->pixelformat)))
+    return;
+  
+  vaapi_masks[0] = frame->image.format.red_mask;
+  vaapi_masks[1] = frame->image.format.green_mask;
+  vaapi_masks[2] = frame->image.format.blue_mask;
+  vaapi_masks[3] = frame->image.format.alpha_mask;
+
+  if(!priv->dsp)
+    priv->dsp = gavl_dsp_context_create(GAVL_QUALITY_DEFAULT);
+
+  if(to_gavl)
+    gavl_dsp_video_frame_shuffle_bytes(priv->dsp, f, fmt, vaapi_masks, gavl_masks);
+  else
+    gavl_dsp_video_frame_shuffle_bytes(priv->dsp, f, fmt, gavl_masks, vaapi_masks);
+  }
+  
