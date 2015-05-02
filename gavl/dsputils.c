@@ -19,6 +19,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * *****************************************************************/
 
+#include <stdio.h>
+
+
 #include <config.h>
 
 #include <gavl/gavl.h>
@@ -434,8 +437,13 @@ gavl_dsp_video_frame_shuffle_bytes(gavl_dsp_context_t * ctx,
   int src_byte, dst_byte;
   int do_convert = 0;
   uint8_t mask[4] = { 0, 0, 0, 0 };
-  
-  
+
+#if 0
+  fprintf(stderr, "gavl_dsp_video_frame_shuffle_bytes\n");
+  fprintf(stderr, "  src: %08x %08x %08x %08x\n", src_masks[0], src_masks[1], src_masks[2], src_masks[3]);
+  fprintf(stderr, "  dst: %08x %08x %08x %08x\n", dst_masks[0], dst_masks[1], dst_masks[2], dst_masks[3]);
+#endif
+
   for(i = 0; i < 4; i++)
     {
     src_byte = get_byte_index(src_masks[i]);
