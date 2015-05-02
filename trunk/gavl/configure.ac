@@ -334,5 +334,6 @@ gavl/mmxext/Makefile \
 gavl/3dnow/Makefile \
 gavl/sse/Makefile \
 gavl/sse2/Makefile \
-gavl/sse3/Makefile )
+gavl/sse3/Makefile \
+gavl/ssse3/Makefile )
 

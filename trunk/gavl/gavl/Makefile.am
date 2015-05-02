@@ -31,6 +31,15 @@ sse3_libs =
 sse3_subdirs =
 endif
 
+if HAVE_SSSE3
+ssse3_libs = ssse3/libgavl_ssse3.la
+ssse3_subdirs = ssse3
+else
+ssse3_libs = 
+ssse3_subdirs =
+endif
+
+
 if HAVE_3DNOW
 threednow_libs = 3dnow/libgavl_3dnow.la
 threednow_subdirs = 3dnow
@@ -62,10 +71,17 @@ endif
 AM_CFLAGS = @LIBGAVL_CFLAGS@ $(hw_libva_cflags) $(hw_libva_x11_cflags) 
 
 
-SUBDIRS = hq c gavf libgdither libsamplerate $(mmx_subdirs) \
+SUBDIRS = \
+hq \
+c \
+gavf \
+libgdither \
+libsamplerate \
+$(mmx_subdirs) \
 $(sse_subdirs) \
 $(sse2_subdirs) \
 $(sse3_subdirs) \
+$(ssse3_subdirs) \
 $(threednow_subdirs)
 
 lib_LTLIBRARIES= libgavl.la
@@ -152,6 +168,7 @@ $(mmx_libs) \
 $(sse_libs) \
 $(sse2_libs) \
 $(sse3_libs) \
+$(ssse3_libs) \
 $(threednow_libs) \
 c/libgavl_c.la \
 gavf/libgavf.la \
