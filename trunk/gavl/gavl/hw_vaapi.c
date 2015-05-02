@@ -26,7 +26,7 @@
 #include <vaapi.h>
 #include <gavl/hw_vaapi.h>
 
-#define DUMP_FORMATS
+// #define DUMP_FORMATS
 
 static struct
   {
@@ -38,7 +38,7 @@ formats[] =
   {
     { GAVL_RGB_32,     VA_FOURCC('R','G','B','X'), VA_RT_FORMAT_RGB32 },
     { GAVL_BGR_32,     VA_FOURCC('B','G','R','X'), VA_RT_FORMAT_RGB32 },
-    { GAVL_RGBA_32,    VA_FOURCC('R','G','B','A'), VA_RT_FORMAT_RGB32 },
+    //    { GAVL_RGBA_32,    VA_FOURCC('R','G','B','A'), VA_RT_FORMAT_RGB32 },
     { GAVL_RGBA_32,    VA_FOURCC('B','G','R','A'), VA_RT_FORMAT_RGB32 },
     { GAVL_YUV_420_P,  VA_FOURCC('I','4','2','0'), VA_RT_FORMAT_YUV420 },
     { GAVL_YUV_420_P,  VA_FOURCC('Y','V','1','2'), VA_RT_FORMAT_YUV420 },
