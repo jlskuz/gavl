@@ -252,8 +252,8 @@ video_frame_create_ram(gavl_hw_context_t * ctx,
   /* Create image */
   if((result = vaCreateImage(priv->dpy,
                              format,
-                             fmt->image_width,
-                             fmt->image_height,
+                             fmt->frame_width,
+                             fmt->frame_height,
                              &image->image)) != VA_STATUS_SUCCESS)
     goto fail;
   
@@ -630,3 +630,8 @@ void gavl_vaapi_video_frame_swap_bytes(const gavl_video_format_t * fmt,
     gavl_dsp_video_frame_shuffle_bytes(priv->dsp, f, fmt, gavl_masks, vaapi_masks);
   }
   
+void gavl_vaapi_video_format_adjust(gavl_hw_context_t * ctx,
+                                    gavl_video_format_t * fmt)
+  {
+  gavl_video_format_set_frame_size(fmt, 16, 16);
+  }
