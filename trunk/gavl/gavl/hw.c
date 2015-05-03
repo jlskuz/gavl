@@ -102,8 +102,8 @@ gavl_video_frame_t * gavl_hw_video_frame_create_hw(gavl_hw_context_t * ctx,
   return ret;
   }
 
-GAVL_PUBLIC gavl_video_frame_t * gavl_hw_video_frame_create_ovl(gavl_hw_context_t * ctx,
-                                                                gavl_video_format_t * fmt)
+gavl_video_frame_t * gavl_hw_video_frame_create_ovl(gavl_hw_context_t * ctx,
+                                                    gavl_video_format_t * fmt)
   {
   gavl_video_frame_t * ret;
   gavl_hw_overlay_format_adjust(ctx, fmt);

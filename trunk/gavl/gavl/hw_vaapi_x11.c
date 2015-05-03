@@ -58,7 +58,8 @@ static const gavl_hw_funcs_t funcs =
     .video_frame_create_ovl = gavl_vaapi_video_frame_create_ovl,
     .video_frame_destroy = gavl_vaapi_video_frame_destroy,
     .video_frame_to_ram = gavl_vaapi_video_frame_to_ram,
-    .video_frame_to_hw  = gavl_vaapi_video_frame_to_hw
+    .video_frame_to_hw  = gavl_vaapi_video_frame_to_hw,
+    .video_format_adjust  = gavl_vaapi_video_format_adjust,
     
   };
 

@@ -72,3 +72,6 @@ gavl_pixelformat_t *
 gavl_vaapi_get_overlay_formats(gavl_hw_context_t * ctx);
 
 void gavl_vaapi_cleanup(void * priv);
+
+void gavl_vaapi_video_format_adjust(gavl_hw_context_t * ctx,
+                                    gavl_video_format_t * fmt);
