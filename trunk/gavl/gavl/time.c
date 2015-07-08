@@ -107,8 +107,7 @@ gavl_time_prettyprint_ms(gavl_time_t t, char str[GAVL_TIME_STRING_LEN_MS])
   minutes = t % 60;
   t /= 60;
 
-  hours = t % 60;
-  t /= 60;
+  hours = t % 1000;
   
   if(hours)
     sprintf(pos, "%d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds);
