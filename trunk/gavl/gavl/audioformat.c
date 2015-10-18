@@ -29,17 +29,18 @@ static const struct
   {
   gavl_sample_format_t format;
   char * name;
+  char * short_name;
   }
 sample_format_names[] =
   {
-    { GAVL_SAMPLE_U8,     "Unsigned 8 bit"},
-    { GAVL_SAMPLE_S8,     "Signed 8 bit"},
-    { GAVL_SAMPLE_U16,    "Unsigned 16 bit"},
-    { GAVL_SAMPLE_S16,    "Signed 16 bit"},
-    { GAVL_SAMPLE_S32,    "Signed 32 bit"},
-    { GAVL_SAMPLE_FLOAT,  "Floating point"},
-    { GAVL_SAMPLE_DOUBLE, "Double precision"},
-    { GAVL_SAMPLE_NONE,   "Not specified" },
+    { GAVL_SAMPLE_NONE,   "Not specified", "unknown" }, // Must be first
+    { GAVL_SAMPLE_U8,     "Unsigned 8 bit", "u8" },
+    { GAVL_SAMPLE_S8,     "Signed 8 bit", "s8" },
+    { GAVL_SAMPLE_U16,    "Unsigned 16 bit", "u16" },
+    { GAVL_SAMPLE_S16,    "Signed 16 bit", "s16" },
+    { GAVL_SAMPLE_S32,    "Signed 32 bit", "s32" },
+    { GAVL_SAMPLE_FLOAT,  "Floating point", "float"},
+    { GAVL_SAMPLE_DOUBLE, "Double precision", "double"},
   };
 
 const char * gavl_sample_format_to_string(gavl_sample_format_t format)
@@ -53,12 +54,34 @@ const char * gavl_sample_format_to_string(gavl_sample_format_t format)
   return NULL;
   }
 
+const char * gavl_sample_format_to_short_string(gavl_sample_format_t format)
+  {
+  int i;
+  for(i = 0; i < sizeof(sample_format_names)/sizeof(sample_format_names[0]); i++)
+    {
+    if(format == sample_format_names[i].format)
+      return sample_format_names[i].short_name;
+    }
+  return sample_format_names[0].short_name;
+  }
+
 gavl_sample_format_t gavl_string_to_sample_format(const char * str)
   {
   int i;
   for(i = 0; i < sizeof(sample_format_names)/sizeof(sample_format_names[0]); i++)
     {
     if(!strcmp(str, sample_format_names[i].name))
+       return sample_format_names[i].format;
+    }
+  return GAVL_SAMPLE_NONE;
+  }
+
+gavl_sample_format_t gavl_short_string_to_sample_format(const char * str)
+  {
+  int i;
+  for(i = 0; i < sizeof(sample_format_names)/sizeof(sample_format_names[0]); i++)
+    {
+    if(!strcmp(str, sample_format_names[i].short_name))
        return sample_format_names[i].format;
     }
   return GAVL_SAMPLE_NONE;
@@ -81,14 +104,14 @@ static const struct
   {
   gavl_interleave_mode_t mode;
   char * name;
+  char * short_name;
   }
 interleave_mode_names[] =
   {
-    { GAVL_INTERLEAVE_NONE, "Not interleaved" },
-    { GAVL_INTERLEAVE_2,    "Interleaved channel pairs" },
-    { GAVL_INTERLEAVE_ALL,  "All channels interleaved" },
+    { GAVL_INTERLEAVE_NONE, "Not interleaved", "none" },
+    { GAVL_INTERLEAVE_2,    "Interleaved channel pairs", "pairs" },
+    { GAVL_INTERLEAVE_ALL,  "All channels interleaved", "all" },
   };
-
 
 const char * gavl_interleave_mode_to_string(gavl_interleave_mode_t mode)
   {
@@ -103,26 +126,53 @@ const char * gavl_interleave_mode_to_string(gavl_interleave_mode_t mode)
   return NULL;
   }
 
+const char * gavl_interleave_mode_to_short_string(gavl_interleave_mode_t mode)
+  {
+  int i;
+  for(i = 0;
+      i < sizeof(interleave_mode_names)/sizeof(interleave_mode_names[0]);
+      i++)
+    {
+    if(mode == interleave_mode_names[i].mode)
+      return interleave_mode_names[i].short_name;
+    }
+  return interleave_mode_names[0].short_name;
+  }
+
+gavl_interleave_mode_t gavl_short_string_to_interleave_mode(const char * mode)
+  {
+  int i;
+  for(i = 0;
+      i < sizeof(interleave_mode_names)/sizeof(interleave_mode_names[0]);
+      i++)
+    {
+    if(!strcmp(mode, interleave_mode_names[i].short_name))
+      return interleave_mode_names[i].mode;
+    }
+  return interleave_mode_names[0].mode;
+  }
+
 static const struct
   {
   gavl_channel_id_t id;
   char * name;
+  char * short_name;
   }
 channel_id_names[] =
   {
-    { GAVL_CHID_NONE,                "Unknown channel" },
-    { GAVL_CHID_FRONT_CENTER,        "Front C" },
-    { GAVL_CHID_FRONT_LEFT,          "Front L" },
-    { GAVL_CHID_FRONT_RIGHT,         "Front R" },
-    { GAVL_CHID_FRONT_CENTER_LEFT,   "Front CL" },
-    { GAVL_CHID_FRONT_CENTER_RIGHT,  "Front CR" },
-    { GAVL_CHID_REAR_CENTER,         "Rear C" },
-    { GAVL_CHID_REAR_LEFT,           "Rear L" },
-    { GAVL_CHID_REAR_RIGHT,          "Rear R" },
-    { GAVL_CHID_SIDE_LEFT,           "Side L" },
-    { GAVL_CHID_SIDE_RIGHT,          "Side R" },
-    { GAVL_CHID_LFE,                 "LFE" },
-    { GAVL_CHID_AUX,                 "AUX" },
+    { GAVL_CHID_NONE,                "Unknown channel", "unknown" },
+    { GAVL_CHID_FRONT_CENTER,        "Front C", "fc" },
+    { GAVL_CHID_FRONT_LEFT,          "Front L", "fl"  },
+    { GAVL_CHID_FRONT_RIGHT,         "Front R", "fr"  },
+    { GAVL_CHID_FRONT_CENTER_LEFT,   "Front CL", "fcl"  },
+    { GAVL_CHID_FRONT_CENTER_RIGHT,  "Front CR", "fcr"  },
+    { GAVL_CHID_REAR_CENTER,         "Rear C", "rc"  },
+    { GAVL_CHID_REAR_LEFT,           "Rear L", "rl"  },
+    { GAVL_CHID_REAR_RIGHT,          "Rear R", "rr"  },
+    { GAVL_CHID_SIDE_LEFT,           "Side L", "sl"  },
+    { GAVL_CHID_SIDE_RIGHT,          "Side R", "sr"  },
+    { GAVL_CHID_LFE,                 "LFE", "lfe"  },
+    { GAVL_CHID_AUX,                 "AUX", "aux"  },
   };
 
 const char * gavl_channel_id_to_string(gavl_channel_id_t id)
@@ -137,6 +187,34 @@ const char * gavl_channel_id_to_string(gavl_channel_id_t id)
       return channel_id_names[i].name;
     }
   return NULL;
+  }
+
+const char * gavl_channel_id_to_short_string(gavl_channel_id_t id)
+  {
+  int i;
+  for(i = 0;
+      i < sizeof(channel_id_names)/sizeof(channel_id_names[0]);
+      i++)
+    {
+    //    fprintf(stderr, "ID: %d\n", id);
+    if(id == channel_id_names[i].id)
+      return channel_id_names[i].short_name;
+    }
+  return channel_id_names[0].short_name;
+  }
+
+gavl_channel_id_t gavl_short_string_to_channel_id(const char * id)
+  {
+  int i;
+  for(i = 0;
+      i < sizeof(channel_id_names)/sizeof(channel_id_names[0]);
+      i++)
+    {
+    //    fprintf(stderr, "ID: %d\n", id);
+    if(!strcmp(id, channel_id_names[i].short_name))
+      return channel_id_names[i].id;
+    }
+  return channel_id_names[0].id;
   }
 
 static void do_indent(int num)

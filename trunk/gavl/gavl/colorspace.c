@@ -48,6 +48,7 @@ typedef struct
 
 const pixelformat_tab_t pixelformat_tab[] =
   {
+    { GAVL_PIXELFORMAT_NONE, "Undefined",           "unknown"   }, // Must be first
     { GAVL_GRAY_8,  "8 bpp gray",                   "gray8"     },
     { GAVL_GRAY_16, "16 bpp gray",                  "gray16"    },
     { GAVL_GRAY_FLOAT, "Float gray",                "grayf"     },
@@ -82,8 +83,7 @@ const pixelformat_tab_t pixelformat_tab[] =
     { GAVL_YUV_444_P_16, "YUV 444 Planar (16 bit)", "yuv444p16" },
     { GAVL_YUVJ_420_P, "YUVJ 420 Planar",           "yuvj420p8" },
     { GAVL_YUVJ_422_P, "YUVJ 422 Planar",           "yuvj422p8" },
-    { GAVL_YUVJ_444_P, "YUVJ 444 Planar",           "yuvj444p8" },
-    { GAVL_PIXELFORMAT_NONE, "Undefined",           "none"      }
+    { GAVL_YUVJ_444_P, "YUVJ 444 Planar",           "yuvj444p8" }
   };
 
 static const int num_pixelformats =
@@ -232,7 +232,7 @@ const char * gavl_pixelformat_to_short_string(gavl_pixelformat_t pixelformat)
     if(pixelformat_tab[i].pixelformat == pixelformat)
       return pixelformat_tab[i].short_name;
     }
-  return NULL;
+  return pixelformat_tab[0].short_name;
   }
 
 gavl_pixelformat_t gavl_string_to_pixelformat(const char * name)

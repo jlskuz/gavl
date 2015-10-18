@@ -347,11 +347,21 @@ typedef struct
   \ingroup audio_format
   \brief Convert a gavl_sample_format_t to a human readable string
   \param format A sample format
-  \returns A string describing the format
+  \returns A human readable string describing the format
  */
   
 GAVL_PUBLIC 
 const char * gavl_sample_format_to_string(gavl_sample_format_t format);
+
+/*! 
+  \ingroup audio_format
+  \brief Convert a gavl_sample_format_t to a human readable string
+  \param format A sample format
+  \returns A short string describing the format
+ */
+  
+GAVL_PUBLIC 
+const char * gavl_sample_format_to_short_string(gavl_sample_format_t format);
 
 /*! 
   \ingroup audio_format
@@ -363,6 +373,17 @@ const char * gavl_sample_format_to_string(gavl_sample_format_t format);
 
 GAVL_PUBLIC 
 gavl_sample_format_t gavl_string_to_sample_format(const char * str);
+
+/*! 
+  \ingroup audio_format
+  \brief Convert a short string to a gavl_sample_format_t
+  \param format A string returned by \ref gavl_sample_format_to_short_string
+  \returns A short string describing the format
+ */
+  
+GAVL_PUBLIC 
+gavl_sample_format_t gavl_short_string_to_sample_format(const char * format);
+  
 
 /*! \ingroup audio_format
  * \brief Get total number of supported sample formats
@@ -385,21 +406,64 @@ gavl_sample_format_t gavl_get_sample_format(int index);
   \ingroup audio_format
   \brief Convert a gavl_channel_id_t to a human readable string
   \param id A channel id
+  \returns A human readable string
  */
 
 GAVL_PUBLIC
 const char * gavl_channel_id_to_string(gavl_channel_id_t id);
 
+/*! 
+  \ingroup audio_format
+  \brief Convert a gavl_channel_id_t to a short string
+  \param id A channel id
+  \returns A short string
+ */
+
+GAVL_PUBLIC
+const char * gavl_channel_id_to_short_string(gavl_channel_id_t id);
+
+/*! 
+  \ingroup audio_format
+  \brief Convert short string to a gavl_channel_id_t
+  \param id A short string
+  \returns A channel id
+ */
+
+GAVL_PUBLIC
+gavl_channel_id_t gavl_short_string_to_channel_id(const char * id);
+
+  
 
 /*! 
   \ingroup audio_format
   \brief Convert a gavl_interleave_mode_t to a human readable string
   \param mode An interleave mode
+  \returns A human readable string
  */
 
 GAVL_PUBLIC
 const char * gavl_interleave_mode_to_string(gavl_interleave_mode_t mode);
 
+/*! 
+  \ingroup audio_format
+  \brief Convert a gavl_interleave_mode_t to a short string
+  \param mode An interleave mode
+  \returns A short string
+ */
+
+GAVL_PUBLIC
+const char * gavl_interleave_mode_to_short_string(gavl_interleave_mode_t mode);
+
+/*! 
+  \ingroup audio_format
+  \brief Convert a short string to a gavl_interleave_mode_t
+  \param mode A short string
+  \returns An interleave mode
+ */
+
+GAVL_PUBLIC
+gavl_interleave_mode_t gavl_short_string_to_interleave_mode(const char * mode);
+  
 /*! 
   \ingroup audio_format
   \brief Dump an audio format to stderr
@@ -2164,11 +2228,30 @@ typedef enum
 /*! \ingroup video_format
  * \brief Translate a chroma placement into a human readable string
  * \param mode A chroma placement
- * \returns A string describing the chroma placement
+ * \returns A human readable string describing the chroma placement
  */
 
 GAVL_PUBLIC
 const char * gavl_chroma_placement_to_string(gavl_chroma_placement_t mode);
+
+/*! \ingroup video_format
+ * \brief Translate a chroma placement into a short string
+ * \param mode A chroma placement
+ * \returns A short string describing the chroma placement
+ */
+
+GAVL_PUBLIC
+const char * gavl_chroma_placement_to_short_string(gavl_chroma_placement_t mode);
+
+/*! \ingroup video_format
+ * \brief Translate a short string into a chroma placement
+ * \param mode A short string describing the chroma placement
+ * \returns A chroma placement
+ */
+
+GAVL_PUBLIC
+gavl_chroma_placement_t gavl_short_string_to_chroma_placement(const char * mode);
+
   
 /*! \ingroup video_format
  * \brief Framerate mode
@@ -2187,11 +2270,29 @@ typedef enum
 /*! \ingroup video_format
  * \brief Translate a framerate mode into a human readable string
  * \param mode A framerate mode
- * \returns A string describing the framerate mode
+ * \returns A human readable string describing the framerate mode
  */
 
 GAVL_PUBLIC
 const char * gavl_framerate_mode_to_string(gavl_framerate_mode_t mode);
+
+/*! \ingroup video_format
+ * \brief Translate a framerate mode into a short string
+ * \param mode A framerate mode
+ * \returns A short string describing the framerate mode
+ */
+
+GAVL_PUBLIC
+const char * gavl_framerate_mode_to_short_string(gavl_framerate_mode_t mode);
+
+/*! \ingroup video_format
+ * \brief Translate a short string into a framerate mode
+ * \param mode A short string describing the framerate mode
+ * \returns A framerate mode
+ */
+
+GAVL_PUBLIC
+gavl_framerate_mode_t gavl_short_string_to_framerate_mode(const char * mode);
   
 /*! \ingroup video_format
  * \brief Interlace mode
@@ -2213,12 +2314,30 @@ typedef enum
 /*! \ingroup video_format
  * \brief Translate an interlace mode into a human readable string
  * \param mode An interlace mode
- * \returns A string describing the interlace mode
+ * \returns A human readable string describing the interlace mode
  */
 
 GAVL_PUBLIC
 const char * gavl_interlace_mode_to_string(gavl_interlace_mode_t mode);
 
+/*! \ingroup video_format
+ * \brief Translate an interlace mode into a short string
+ * \param mode An interlace mode
+ * \returns A short string describing the interlace mode
+ */
+
+GAVL_PUBLIC
+const char * gavl_interlace_mode_to_short_string(gavl_interlace_mode_t mode);
+
+/*! \ingroup video_format
+ * \brief Translate a short string to an interlace mode 
+ * \param mode A short string describing the interlace mode
+ * \returns An interlace mode
+ */
+
+GAVL_PUBLIC
+gavl_interlace_mode_t gavl_short_string_to_interlace_mode(const char * mode);
+  
 /*! \ingroup video_format
  * \brief Check if an interlace mode is mixed
  * \param mode An interlace mode
