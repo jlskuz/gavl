@@ -146,18 +146,19 @@ void gavl_video_format_fit_to_source(gavl_video_format_t * dst,
 typedef const struct
   {
   gavl_interlace_mode_t mode;
-  char * name;
+  const char * name;
+  const char * short_name;
   } interlace_mode_tab_t;
 
 interlace_mode_tab_t interlace_mode_tab[] =
   {
-    { GAVL_INTERLACE_UNKNOWN,      "Unknown" },
-    { GAVL_INTERLACE_NONE,         "None (Progressive)" },
-    { GAVL_INTERLACE_TOP_FIRST,    "Top field first" },
-    { GAVL_INTERLACE_BOTTOM_FIRST, "Bottom field first" },
-    { GAVL_INTERLACE_MIXED,        "Mixed" },
-    { GAVL_INTERLACE_MIXED_TOP,    "Top first + progressive" },
-    { GAVL_INTERLACE_MIXED_BOTTOM, "Bottom first + progressive" }
+    { GAVL_INTERLACE_UNKNOWN,      "Unknown", "unknown" },
+    { GAVL_INTERLACE_NONE,         "None (Progressive)", "p" },
+    { GAVL_INTERLACE_TOP_FIRST,    "Top field first", "t" },
+    { GAVL_INTERLACE_BOTTOM_FIRST, "Bottom field first", "b" },
+    { GAVL_INTERLACE_MIXED,        "Mixed", "mixed" },
+    { GAVL_INTERLACE_MIXED_TOP,    "Top first + progressive", "t+p"  },
+    { GAVL_INTERLACE_MIXED_BOTTOM, "Bottom first + progressive", "b+p" }
   };
 
 static const int num_interlace_modes =
@@ -174,6 +175,28 @@ const char * gavl_interlace_mode_to_string(gavl_interlace_mode_t mode)
   return NULL;
   }
 
+const char * gavl_interlace_mode_to_short_string(gavl_interlace_mode_t mode)
+  {
+  int i;
+  for(i = 0; i < num_interlace_modes; i++)
+    {
+    if(interlace_mode_tab[i].mode == mode)
+      return interlace_mode_tab[i].name;
+    }
+  return interlace_mode_tab[i].short_name;
+  }
+
+gavl_interlace_mode_t gavl_short_string_to_interlace_mode(const char * mode)
+  {
+  int i;
+  for(i = 0; i < num_interlace_modes; i++)
+    {
+    if(!strcmp(interlace_mode_tab[i].short_name, mode))
+      return interlace_mode_tab[i].mode;
+    }
+  return interlace_mode_tab[0].mode;
+  }
+
 int gavl_interlace_mode_is_mixed(gavl_interlace_mode_t mode)
   {
   return !!(mode & 0x10);
@@ -183,19 +206,19 @@ int gavl_interlace_mode_is_mixed(gavl_interlace_mode_t mode)
 typedef const struct
   {
   gavl_framerate_mode_t mode;
-  char * name;
+  const char * name;
+  const char * short_name;
   } framerate_mode_tab_t;
 
 framerate_mode_tab_t framerate_mode_tab[] =
   {
-    { GAVL_FRAMERATE_UNKNOWN,      "Unknown" },
-    { GAVL_FRAMERATE_CONSTANT,     "Constant" },
-    { GAVL_FRAMERATE_VARIABLE,     "Variable" },
-    { GAVL_FRAMERATE_STILL,        "Still" },
+    { GAVL_FRAMERATE_UNKNOWN,      "Unknown",   "unknown" },
+    { GAVL_FRAMERATE_CONSTANT,     "Constant" , "constant"},
+    { GAVL_FRAMERATE_VARIABLE,     "Variable",  "vfr" },
+    { GAVL_FRAMERATE_STILL,        "Still",     "still"  },
   };
 
 static const int num_framerate_modes = sizeof(framerate_mode_tab)/sizeof(framerate_mode_tab[0]);
-
 
 const char * gavl_framerate_mode_to_string(gavl_framerate_mode_t mode)
   {
@@ -206,22 +229,42 @@ const char * gavl_framerate_mode_to_string(gavl_framerate_mode_t mode)
       return framerate_mode_tab[i].name;
     }
   return NULL;
-  
   }
 
+const char * gavl_framerate_mode_to_short_string(gavl_framerate_mode_t mode)
+  {
+  int i;
+  for(i = 0; i < num_framerate_modes; i++)
+    {
+    if(framerate_mode_tab[i].mode == mode)
+      return framerate_mode_tab[i].short_name;
+    }
+  return framerate_mode_tab[0].short_name;
+  }
 
+gavl_framerate_mode_t gavl_short_string_to_framerate_mode(const char * mode)
+  {
+  int i;
+  for(i = 0; i < num_framerate_modes; i++)
+    {
+    if(!strcmp(framerate_mode_tab[i].short_name, mode))
+      return framerate_mode_tab[i].mode;
+    }
+  return framerate_mode_tab[0].mode;
+  }
 
 typedef struct
   {
   gavl_chroma_placement_t mode;
   char * name;
+  char * short_name;
   } chroma_placement_tab_t;
 
 const chroma_placement_tab_t chroma_placement_tab[] =
   {
-    { GAVL_CHROMA_PLACEMENT_DEFAULT, "MPEG-1/JPEG" },
-    { GAVL_CHROMA_PLACEMENT_MPEG2, "MPEG-2" },
-    { GAVL_CHROMA_PLACEMENT_DVPAL, "DV PAL" }
+    { GAVL_CHROMA_PLACEMENT_DEFAULT, "MPEG-1/JPEG", "mpeg1" },
+    { GAVL_CHROMA_PLACEMENT_MPEG2, "MPEG-2",        "mpeg2" },
+    { GAVL_CHROMA_PLACEMENT_DVPAL, "DV PAL",        "dvpal"  }
   };
 
 static const int num_chroma_placements = sizeof(chroma_placement_tab)/sizeof(chroma_placement_tab_t);
@@ -235,7 +278,28 @@ const char * gavl_chroma_placement_to_string(gavl_chroma_placement_t mode)
       return chroma_placement_tab[i].name;
     }
   return NULL;
-  
+  }
+
+const char * gavl_chroma_placement_to_short_string(gavl_chroma_placement_t mode)
+  {
+  int i;
+  for(i = 0; i < num_chroma_placements; i++)
+    {
+    if(chroma_placement_tab[i].mode == mode)
+      return chroma_placement_tab[i].short_name;
+    }
+  return chroma_placement_tab[0].short_name;
+  }
+
+gavl_chroma_placement_t gavl_short_string_to_chroma_placement(const char * mode)
+  {
+  int i;
+  for(i = 0; i < num_chroma_placements; i++)
+    {
+    if(!strcmp(chroma_placement_tab[i].short_name, mode))
+      return chroma_placement_tab[i].mode;
+    }
+  return chroma_placement_tab[0].mode;
   }
 
 void gavl_video_format_get_chroma_offset(const gavl_video_format_t * format,
