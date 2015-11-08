@@ -159,6 +159,15 @@ char * gavl_strcat(char * old, const char * tail);
 GAVL_PUBLIC
 char * gavl_strncat(char * old, const char * start, const char * end);
 
+/** \brief Cut leading and trailing spaces
+ *  \param str The string to trim inplace
+ *  
+ * 
+ */
+
+GAVL_PUBLIC
+void gavl_strtrim(char * str);
+
 /** \brief Escape a string
  *  \param old Old string (will be freed)
  *  \param escape_chars Characters to escape

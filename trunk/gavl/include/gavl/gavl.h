@@ -1421,6 +1421,25 @@ GAVL_PUBLIC
 void gavl_volume_control_apply(gavl_volume_control_t *ctrl,
                                gavl_audio_frame_t * frame);
 
+/*! \ingroup volume_control
+ *  \brief Convert an audio volume (in dB) to an integer
+ *  \param volume dB value
+ *  \param one The dB value corresponding to an integer value of 1
+ *  \param steps The number of steps
+ */
+
+GAVL_PUBLIC
+int gavl_volume_to_int(float volume, float one, int steps);
+
+/*! \ingroup volume_control
+ *  \brief Convert an integer audio volume  to a float (in dB)
+ *  \param volume dB value
+ *  \param one The dB value corresponding to an integer value of 1
+ *  \param steps The number of steps
+ */
+
+GAVL_PUBLIC
+float gavl_volume_to_float(int volume, float one, int steps);
   
 /** \defgroup video Video
  *
