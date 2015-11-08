@@ -200,3 +200,28 @@ void gavl_volume_funcs_destroy(gavl_volume_funcs_t * funcs)
   {
   free(funcs);
   }
+
+/*
+ *   one e.g. is -40.0
+ *
+ *   < -40.0 -> 0
+ *     -40.0 -> 1
+ *       0.0 -> steps - 1
+ *   > one -> (int)((volume - one)/(0.0 - one) * (steps - 2)+0.5) + 1;
+ */
+
+int gavl_volume_to_int(float volume, float one, int steps)
+  {
+  if(volume < one)
+    return 0;
+  return (int)((volume - one)/(0.0 - one) * (steps - 2)+0.5) + 1;
+  }
+
+float gavl_volume_to_float(int volume, float one, int steps)
+  {
+  if(volume < 1)
+    return -500.0; // Should be small enough even for double precision
+ 
+  return (float)(volume - 1) / ( (float)(steps - 2) ) + one;
+  }
+

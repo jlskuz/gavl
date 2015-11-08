@@ -263,6 +263,34 @@ int gavl_string_ends_with_i(const char * str, const char * end)
   return !strcasecmp(str + slen - elen, end) ? 1 : 0;
   }
 
+void gavl_strtrim(char * str)
+  {
+  char * pos = str;
+  while(isspace(*pos) && (*pos != '\0'))
+    pos++;
+
+  if(*pos == '\0') // String consists of whitespace
+    {
+    *str = '\0';
+    return;
+    }
+
+  if(pos > str)
+    memmove(str, pos, strlen(pos) + 1);
+
+  /* Trailing */
+
+  pos = str[strlen(str)-1];
+  while(pos >= str)
+    {
+    if(isspace(*pos))
+      *pos = '\0';
+    else
+      break;
+    pos--;
+    }
+  }
+
 
 /* TODO */
 char *
