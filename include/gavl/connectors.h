@@ -349,6 +349,14 @@ GAVL_PUBLIC
 const gavl_audio_format_t *
 gavl_audio_source_get_dst_format(gavl_audio_source_t * s);
 
+/** \brief Get the output flags
+ *  \param s An audio source
+ *  \returns The flags, which were passed to \ref gavl_audio_source_set_dst
+ */
+  
+GAVL_PUBLIC int
+gavl_audio_source_get_dst_flags(gavl_audio_source_t * s);
+  
 /** \brief Set the destination mode
  *  \param s An audio source
  *  \param dst_flags Flags
