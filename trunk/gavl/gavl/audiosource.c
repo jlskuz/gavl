@@ -128,6 +128,12 @@ gavl_audio_source_get_dst_format(gavl_audio_source_t * s)
   return (s->flags & FLAG_DST_SET) ? &s->dst_format : &s->src_format;
   }
 
+int
+gavl_audio_source_get_dst_flags(gavl_audio_source_t * s)
+  {
+  return s->dst_flags;
+  }
+
 gavl_audio_options_t * gavl_audio_source_get_options(gavl_audio_source_t * s)
   {
   return gavl_audio_converter_get_options(s->cnv);
@@ -155,13 +161,6 @@ void gavl_audio_source_reset(gavl_audio_source_t * s)
 
 void gavl_audio_source_destroy(gavl_audio_source_t * s)
   {
-#if 0
-  if(s->src_fp)
-    gavl_audio_frame_pool_destroy(s->src_fp);
-  if(s->dst_fp)
-    gavl_audio_frame_pool_destroy(s->dst_fp);
-#endif
-
   if(s->out_frame)
     gavl_audio_frame_destroy(s->out_frame);
   if(s->in_frame)
