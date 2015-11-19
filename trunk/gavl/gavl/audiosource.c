@@ -194,7 +194,7 @@ gavl_audio_source_set_dst(gavl_audio_source_t * s, int dst_flags,
     s->flags &= ~FLAG_DO_CONVERT;
   
   if(!(s->flags & FLAG_DO_CONVERT) &&
-     (s->src_format.samples_per_frame == s->src_format.samples_per_frame) &&
+     (s->src_format.samples_per_frame == s->dst_format.samples_per_frame) &&
      !(s->src_flags & GAVL_SOURCE_SRC_FRAMESIZE_MAX))
     s->flags |= (FLAG_PASSTHROUGH | FLAG_PASSTHROUGH_INIT);
   else
@@ -282,6 +282,10 @@ static gavl_source_status_t do_read(gavl_audio_source_t * s,
   
   if(s->unlock_func)
     s->unlock_func(s->lock_priv);
+
+  //  if(frame && *frame)
+  //    fprintf(stderr, "Read frame %p [%d samples]\n", *frame, (*frame)->valid_samples);
+  
   return ret;
   }
 
