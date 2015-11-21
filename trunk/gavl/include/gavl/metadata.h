@@ -67,6 +67,7 @@ typedef struct
   {
   char * key; //!< Key
   char * val; //!< Value
+  char ** val_arr; //!< Additional values as array
   } gavl_metadata_tag_t;
 
 /** \brief Single metadata structure
