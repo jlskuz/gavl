@@ -68,6 +68,9 @@ typedef struct
   char * key; //!< Key
   char * val; //!< Value
   char ** val_arr; //!< Additional values as array
+
+  int arr_len;   //!< length of array
+  int arr_alloc; //!< allocated values of array
   } gavl_metadata_tag_t;
 
 /** \brief Single metadata structure
@@ -126,6 +129,35 @@ gavl_metadata_set_nocpy(gavl_metadata_t * m,
                         const char * key,
                         char * val);
 
+/** \brief Append values of a tag
+ *  \arg m A metadata structure
+ *  \arg key Key
+ *  \arg val Value
+ *
+ *  Appends a value to a tag, making it implicitly an array type.
+ *  The tag is created if not already existent. The value is copied.
+ */
+
+GAVL_PUBLIC void
+gavl_metadata_append(gavl_metadata_t * m,
+                     const char * key,
+                     const char * val);
+
+/** \brief Append values of a tag without copying
+ *  \arg m A metadata structure
+ *  \arg key Key
+ *  \arg val Value
+ *
+ *  Like \ref gavl_metadata_append except that the
+ *  value is not copied.
+ */
+
+GAVL_PUBLIC void
+gavl_metadata_append_nocpy(gavl_metadata_t * m,
+                        const char * key,
+                        char * val);
+
+  
 /** \brief Get the value of a tag
  *  \arg m A metadata structure
  *  \arg key Key
@@ -136,6 +168,33 @@ GAVL_PUBLIC
 const char * gavl_metadata_get(const gavl_metadata_t * m,
                                const char * key);
 
+/** \brief Get the array value of a tag
+ *  \arg m A metadata structure
+ *  \arg key Key
+ *  \arg i Index (starting with zero).
+ *  \returns Array element if i > 0, else val
+ */
+ 
+const char * 
+gavl_metadata_get_arr(gavl_metadata_t * m,
+                      const char * key,
+                      int i);
+
+/** \brief Get the array value of a tag
+ *  \arg m A metadata structure
+ *  \arg key Key
+ *  \arg i Index (starting with zero).
+ *  \returns Array element if i > 0, else val
+ *
+ *  Like \ref gavl_metadata_get_arr but ignoring the case of key
+ */
+  
+const char * 
+gavl_metadata_get_arr_i(gavl_metadata_t * m,
+                        const char * key,
+                        int i);
+
+  
 /** \brief Get the value of a tag ignrong case
  *  \arg m A metadata structure
  *  \arg key Key

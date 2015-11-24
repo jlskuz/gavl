@@ -22,6 +22,7 @@
 #include <config.h>
 #include <gavl/metadata.h>
 #include <gavl/metatags.h>
+#include <gavl/utils.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -37,19 +38,54 @@ static char * my_strdup(const char * str)
   return ret;
   }
 
+static void free_val(gavl_metadata_tag_t * tag)
+  {
+  int j;
+  free(tag->val);
+  
+  if(tag->val_arr)
+    {
+    for(j = 0; j < tag->arr_len; j++)
+      free(tag->val_arr[j]);
+    free(tag->val_arr);
+    }
+  }
+
+static void init_val(gavl_metadata_tag_t * tag)
+  {
+  char * key = tag->key;
+  memset(tag, 0, sizeof(*tag));
+  tag->key = key;
+  }
+
+static void free_tag(gavl_metadata_tag_t * tag)
+  {
+  free(tag->key);
+  free_val(tag);
+  }
 
 void
 gavl_metadata_free(gavl_metadata_t * m)
   {
   int i;
   for(i = 0; i < m->num_tags; i++)
-    {
-    free(m->tags[i].key);
-    free(m->tags[i].val);
-    }
+    free_tag(&m->tags[i]);
+  
   if(m->tags)
     free(m->tags);
   gavl_metadata_init(m);
+  }
+
+static void gavl_metadata_copy_tag(gavl_metadata_t * dst,
+                                   gavl_metadata_tag_t * src)
+  {
+  int i;
+  gavl_metadata_set(dst, src->key, src->val);
+
+  for(i = 0; i < src->arr_len; i++)
+    {
+    gavl_metadata_append(dst, src->key, src->val_arr[i]);
+    }
   }
 
 void
@@ -57,12 +93,10 @@ gavl_metadata_copy(gavl_metadata_t * dst,
                    const gavl_metadata_t * src)
   {
   int i;
-
   if(!src->tags_alloc)
     return;
-
   for(i = 0; i < src->num_tags; i++)
-    gavl_metadata_set(dst, src->tags[i].key, src->tags[i].val); 
+    gavl_metadata_copy_tag(dst, &src->tags[i]);
   }
 
 void
@@ -107,6 +141,34 @@ gavl_metadata_set(gavl_metadata_t * m,
   gavl_metadata_set_nocpy(m, key, val);
   }
 
+static gavl_metadata_tag_t * create_tag(gavl_metadata_t * m,
+                                        const char * key)
+  {
+  gavl_metadata_tag_t * ret;
+  if(m->num_tags + 1 > m->tags_alloc)
+    {
+    m->tags_alloc = m->num_tags + 16;
+    m->tags = realloc(m->tags,
+                      m->tags_alloc * sizeof(*m->tags));
+    memset(m->tags + m->num_tags,
+           0, (m->tags_alloc - m->num_tags) * sizeof(*m->tags));
+    }
+  
+  ret = &m->tags[m->num_tags];
+  ret->key = my_strdup(key);
+  m->num_tags++;
+  return ret;
+  }
+
+static gavl_metadata_tag_t * ensure_tag(gavl_metadata_t * m,
+                                        const char * key)
+  {
+  int idx;
+  if((idx = find_tag(m, key)) > 0)
+    return &m->tags[idx];
+  else
+    return create_tag(m, key);
+  }
 
 void
 gavl_metadata_set_nocpy(gavl_metadata_t * m,
@@ -117,15 +179,14 @@ gavl_metadata_set_nocpy(gavl_metadata_t * m,
 
   if(idx >= 0) // Tag exists
     {
-    if(m->tags[idx].val)
-      free(m->tags[idx].val);
+    free_val(&m->tags[idx]);
+    init_val(&m->tags[idx]);
+    
     if(val && (*val != '\0')) // Replace tag
       m->tags[idx].val = val;
     else // Delete tag
       {
-      if(m->tags[idx].key)
-        free(m->tags[idx].key);
-      
+      free_tag(&m->tags[idx]);
       if(idx < (m->num_tags - 1))
         {
         memmove(m->tags + idx, m->tags + idx + 1,
@@ -136,18 +197,8 @@ gavl_metadata_set_nocpy(gavl_metadata_t * m,
     }
   else
     {
-    if(val && (*val != '\0')) // Add new tag
-      {
-      if(m->num_tags + 1 > m->tags_alloc)
-        {
-        m->tags_alloc = m->num_tags + 16;
-        m->tags = realloc(m->tags,
-                          m->tags_alloc * sizeof(*m->tags));
-        }
-      m->tags[m->num_tags].key = my_strdup(key);
-      m->tags[m->num_tags].val = val;
-      m->num_tags++;
-      }
+    gavl_metadata_tag_t * tag = create_tag(m, key);
+    tag->val = val;
     }
   }
 
@@ -379,7 +430,7 @@ void gavl_metadata_merge2(gavl_metadata_t * dst,
 GAVL_PUBLIC void
 gavl_metadata_dump(const gavl_metadata_t * m, int indent)
   {
-  int len, i, j;
+  int len, i, j, k;
   int max_key_len = 0;
   
   for(i = 0; i < m->num_tags; i++)
@@ -402,6 +453,18 @@ gavl_metadata_dump(const gavl_metadata_t * m, int indent)
       fprintf(stderr, " ");
 
     fprintf(stderr, "%s\n", m->tags[i].val);
+
+    for(k = 0; k < m->tags[i].arr_len; k++)
+      {
+      for(j = 0; j < indent; j++)
+        fprintf(stderr, " ");
+
+      fprintf(stderr, "%s: ", m->tags[i].key);
+
+      for(j = 0; j < max_key_len - len; j++)
+        fprintf(stderr, " ");
+      fprintf(stderr, "%s\n", m->tags[i].val_arr[k]);
+      }
     }
   }
 
@@ -519,4 +582,83 @@ gavl_metadata_do_swap_endian(const gavl_metadata_t * m)
 #endif
   else
     return 0;
+  }
+
+/* Array functions */
+
+void
+gavl_metadata_append_nocpy(gavl_metadata_t * m,
+                           const char * key,
+                           char * val)
+  {
+  gavl_metadata_tag_t * tag = ensure_tag(m, key);
+  if(!val)
+    return;
+  
+  if(!tag->val)
+    {
+    tag->val = val;
+    return;
+    }
+
+  if(tag->arr_len + 1 > tag->arr_alloc)
+    {
+    tag->arr_alloc += 64;
+    tag->val_arr = realloc(tag->val_arr,
+                           tag->arr_alloc * sizeof(*tag->val_arr));
+    
+    memset(tag->val_arr + tag->arr_len, 0,
+           (tag->arr_alloc - tag->arr_len) * sizeof(*tag->val_arr));
+    }
+  
+  tag->val_arr[tag->arr_len] = val;
+  tag->arr_len++;
+  }
+
+
+void
+gavl_metadata_append(gavl_metadata_t * m,
+                     const char * key,
+                     const char * val)
+  {
+  gavl_metadata_append_nocpy(m, key, gavl_strdup(val));
+  }
+
+static const char * get_arr(gavl_metadata_tag_t * tag, int idx)
+  {
+  if(idx < 0)
+    return NULL;
+
+  if(!idx)
+    return tag->val;
+
+  idx--;
+  
+  if(idx >= tag->arr_len)
+    return NULL;
+
+  return tag->val_arr[idx];
+  }
+
+const char * 
+gavl_metadata_get_arr(gavl_metadata_t * m,
+                      const char * key,
+                      int i)
+  {
+  int idx = find_tag(m, key);
+  if(idx < 0)
+    return NULL;
+  return get_arr(&m->tags[idx], i);
+  }
+
+
+const char * 
+gavl_metadata_get_arr_i(gavl_metadata_t * m,
+                        const char * key,
+                        int i)
+  {
+  int idx = find_tag_i(m, key);
+  if(idx < 0)
+    return NULL;
+  return get_arr(&m->tags[idx], i);
   }

@@ -197,6 +197,34 @@
  */
 #define GAVL_META_BIG_ENDIAN       "BigEndian"
 
+/** \brief Movie Actor. Can be array for multiple entries
+ */
+#define GAVL_META_ACTOR            "Actor"
+
+/** \brief Movie Director. Can be array for multiple entries
+ */
+
+#define GAVL_META_DIRECTOR         "Director"
+
+/** \brief Production country. Can be array for multiple entries
+ */
+
+#define GAVL_META_COUNTRY          "Country"
+
+/** \brief Movie plot.
+ */
+
+#define GAVL_META_PLOT             "Plot"
+
+/** \brief Audio language
+ */
+
+#define GAVL_META_AUDIO_LANGUAGE   "AudioLanguage"
+
+/** \brief Subtitle language
+ */
+
+#define GAVL_META_SUBTITLE_LANGUAGE   "SubtitleLanguage"
 
 /**
  * @}
