@@ -547,11 +547,22 @@ int gavf_read_metadata(gavf_io_t * io, gavl_metadata_t * m)
 int gavf_write_metadata(gavf_io_t * io, const gavl_metadata_t * m)
   {
   int i, j;
-  if(!gavf_io_write_uint32v(io, m->num_tags))
-    return 0;
-
+  uint32_t num = 0;
+  
   for(i = 0; i < m->num_tags; i++)
     {
+    if(m->tags[i].val)
+      num++;
+    }
+  
+  if(!gavf_io_write_uint32v(io, num))
+    return 0;
+  
+  for(i = 0; i < m->num_tags; i++)
+    {
+    if(!m->tags[i].val)
+      continue;
+    
     if(!gavf_io_write_string(io, m->tags[i].key) ||
        !gavf_io_write_string(io, m->tags[i].val) ||
        !gavf_io_write_uint32v(io, m->tags[i].arr_len))
