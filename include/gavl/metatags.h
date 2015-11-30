@@ -226,6 +226,17 @@
 
 #define GAVL_META_SUBTITLE_LANGUAGE   "SubtitleLanguage"
 
+/* Images associated with media content */
+
+/** \brief Cover art
+ *
+ *  Format is w:h:mimetype:url
+ *  Multiple formats and resolutions can be in arrays
+ */
+
+#define GAVL_META_COVER      "Cover"
+#define GAVL_META_WALLPAPER  "Wallpaper"
+
 /**
  * @}
  */
