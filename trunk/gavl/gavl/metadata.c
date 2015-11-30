@@ -662,3 +662,23 @@ gavl_metadata_get_arr_i(gavl_metadata_t * m,
     return NULL;
   return get_arr(&m->tags[idx], i);
   }
+
+void gavl_metadata_add_image_uri(gavl_metadata_t * m,
+                                 const char * key,
+                                 int w, int h,
+                                 const char * mimetype,
+                                 const char * uri)
+  {
+  
+  }
+                                 
+const char * gavl_metadata_get_image_uri(const gavl_metadata_t * m,
+                                         const char * key,
+                                         int i,
+                                         int * w, int * h,
+                                         char ** mimetype,
+                                         const char * uri)
+  {
+  
+  }
+                                 
