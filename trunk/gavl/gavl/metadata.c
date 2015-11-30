@@ -641,7 +641,7 @@ static const char * get_arr(gavl_metadata_tag_t * tag, int idx)
   }
 
 const char * 
-gavl_metadata_get_arr(gavl_metadata_t * m,
+gavl_metadata_get_arr(const gavl_metadata_t * m,
                       const char * key,
                       int i)
   {
@@ -650,6 +650,17 @@ gavl_metadata_get_arr(gavl_metadata_t * m,
     return NULL;
   return get_arr(&m->tags[idx], i);
   }
+
+int gavl_metadata_get_arr_len(const gavl_metadata_t * m,
+                              const char * key)
+  {
+  int idx = find_tag(m, key);
+  if(idx < 0)
+    return 0;
+  
+  return m->tags[idx].arr_len + 1;
+  }
+  
 
 
 const char * 
@@ -663,22 +674,116 @@ gavl_metadata_get_arr_i(gavl_metadata_t * m,
   return get_arr(&m->tags[idx], i);
   }
 
+// Format is w|h|mimetype|url
+
+
 void gavl_metadata_add_image_uri(gavl_metadata_t * m,
                                  const char * key,
                                  int w, int h,
                                  const char * mimetype,
                                  const char * uri)
   {
+  char * value;
+  char * ptr;
+  int len = strlen(uri) + 32;
+  if(mimetype)
+    len += strlen(mimetype);
+
+  value = malloc(len);
+
+  ptr = value;
+
+  if(w > 0)
+    {
+    snprintf(ptr, len - (ptr - value), "%d", w);
+    ptr += strlen(ptr);
+    }
+  strncpy(ptr, "|", len - (ptr - value));
+  ptr++;
+  
+  if(h > 0)
+    {
+    snprintf(ptr, len - (ptr - value), "%d", h);
+    ptr += strlen(ptr);
+    }
+  strncpy(ptr, "|", len - (ptr - value));
+  ptr++;
+
+  if(mimetype)
+    {
+    strncpy(ptr, mimetype, len - (ptr - value));
+    ptr += strlen(ptr);
+    }
+  strncpy(ptr, "|", len - (ptr - value));
+  ptr++;
+  
+  strncpy(ptr, uri, len - (ptr - value));
+
+  gavl_metadata_append_nocpy(m, key, value);
   
   }
                                  
 const char * gavl_metadata_get_image_uri(const gavl_metadata_t * m,
                                          const char * key,
                                          int i,
-                                         int * w, int * h,
-                                         char ** mimetype,
-                                         const char * uri)
+                                         int * wp, int * hp,
+                                         char ** mimetype)
   {
+  int w = -1, h = -1;
+  const char * val;
+  const char * pos;
+  char * end;
+
+  if(mimetype)
+    *mimetype = NULL;
   
+  if(!(val = gavl_metadata_get_arr(m, key, i)))
+    return NULL;
+
+  pos = val;
+  
+  if(*pos != '|')
+    {
+    w = strtol(pos, &end, 10);
+    if(end == pos)
+      return NULL;
+    pos = end;
+    }
+  pos++;
+
+  if(*pos != '|')
+    {
+    h = strtol(pos, &end, 10);
+    if(end == pos)
+      return NULL;
+    pos = end;
+    }
+  pos++;
+
+  if(*pos != '|')
+    {
+    pos++;
+    end = strchr(pos, '|');
+    
+    if(!end)
+      return NULL;
+    
+    if(end)
+      {
+      if(mimetype)
+        *mimetype = gavl_strndup(pos, end);
+      }
+    pos = end;
+    }
+  pos++;
+
+  if(wp)
+    *wp = w;
+  if(hp)
+    *hp = h;
+  
+  return pos;
   }
-                                 
+
+
+
