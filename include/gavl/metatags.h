@@ -230,7 +230,7 @@
 
 /** \brief Cover art
  *
- *  Format is w:h:mimetype:url
+ *  Format is w|h|mimetype|url
  *  Multiple formats and resolutions can be in arrays
  */
 

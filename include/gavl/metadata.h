@@ -175,8 +175,8 @@ const char * gavl_metadata_get(const gavl_metadata_t * m,
  *  \returns Array element if i > 0, else val
  */
  
-const char * 
-gavl_metadata_get_arr(gavl_metadata_t * m,
+GAVL_PUBLIC const char * 
+gavl_metadata_get_arr(const gavl_metadata_t * m,
                       const char * key,
                       int i);
 
@@ -188,11 +188,21 @@ gavl_metadata_get_arr(gavl_metadata_t * m,
  *
  *  Like \ref gavl_metadata_get_arr but ignoring the case of key
  */
-  
-const char * 
+
+GAVL_PUBLIC const char * 
 gavl_metadata_get_arr_i(gavl_metadata_t * m,
                         const char * key,
                         int i);
+
+/** \brief Get the length of an array value of a tag
+ *  \arg m A metadata structure
+ *  \arg key Key
+ *  \returns The length
+ */
+
+GAVL_PUBLIC int
+gavl_metadata_get_arr_len(const gavl_metadata_t * m,
+                          const char * key);
 
   
 /** \brief Get the value of a tag ignrong case
@@ -479,7 +489,21 @@ gavl_metadata_set_endian(gavl_metadata_t * m);
 GAVL_PUBLIC int
 gavl_metadata_do_swap_endian(const gavl_metadata_t * m);
 
+GAVL_PUBLIC void
+gavl_metadata_add_image_uri(gavl_metadata_t * m,
+                            const char * key,
+                            int w, int h,
+                            const char * mimetype,
+                            const char * uri);
 
+GAVL_PUBLIC const char *
+gavl_metadata_get_image_uri(const gavl_metadata_t * m,
+                            const char * key,
+                            int i,
+                            int * wp, int * hp,
+                            char ** mimetype);
+
+  
   
 /**
  * @}
