@@ -234,8 +234,12 @@
  *  Multiple formats and resolutions can be in arrays
  */
 
-#define GAVL_META_COVER      "Cover"
-#define GAVL_META_WALLPAPER  "Wallpaper"
+#define GAVL_META_COVER_URL      "CoverURL"
+#define GAVL_META_WALLPAPER_URL  "WallpaperURL"
+#define GAVL_META_POSTER_URL     "PosterURL"
+
+#define GAVL_META_CAN_SEEK   "CanSeek"
+#define GAVL_META_CAN_PAUSE  "CanPause"
 
 /**
  * @}
