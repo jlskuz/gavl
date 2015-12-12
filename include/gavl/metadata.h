@@ -503,7 +503,12 @@ gavl_metadata_get_image_uri(const gavl_metadata_t * m,
                             int * wp, int * hp,
                             char ** mimetype);
 
-  
+GAVL_PUBLIC const char *
+gavl_metadata_get_image_max(const gavl_metadata_t * m,
+                            const char * key,
+                            int w, int h,
+                            const char * mimetype);
+ 
   
 /**
  * @}
