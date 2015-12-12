@@ -1,4 +1,4 @@
-/*****************************************************************
+ /*****************************************************************
  * gavl - a general purpose audio/video processing library
  *
  * Copyright (c) 2001 - 2012 Members of the Gmerlin project
@@ -195,7 +195,7 @@ gavl_metadata_set_nocpy(gavl_metadata_t * m,
       m->num_tags--;
       }
     }
-  else
+  else if(val)
     {
     gavl_metadata_tag_t * tag = create_tag(m, key);
     tag->val = val;
@@ -403,14 +403,13 @@ void gavl_metadata_merge(gavl_metadata_t * dst,
   int i;
   /* src1 has priority */
   for(i = 0; i < src1->num_tags; i++)
-    gavl_metadata_set(dst, src1->tags[i].key, src1->tags[i].val);
+    gavl_metadata_copy_tag(dst, &src1->tags[i]);
 
   /* From src2 we take only the tags, which aren't available */
   for(i = 0; i < src2->num_tags; i++)
     {
     if(!gavl_metadata_get(dst, src2->tags[i].key))
-      gavl_metadata_set(dst, src2->tags[i].key,
-                        src2->tags[i].val);
+      gavl_metadata_copy_tag(dst, &src2->tags[i]);
     }
   }
 
@@ -421,9 +420,7 @@ void gavl_metadata_merge2(gavl_metadata_t * dst,
   for(i = 0; i < src->num_tags; i++)
     {
     if(!gavl_metadata_get(dst, src->tags[i].key))
-      gavl_metadata_set(dst,
-                        src->tags[i].key,
-                        src->tags[i].val);
+      gavl_metadata_copy_tag(dst, &src->tags[i]);
     }
   }
 
@@ -785,5 +782,69 @@ const char * gavl_metadata_get_image_uri(const gavl_metadata_t * m,
   return pos;
   }
 
+const char *
+gavl_metadata_get_image_max(const gavl_metadata_t * m,
+                            const char * key,
+                            int w, int h,
+                            const char * mimetype)
+  {
+  const char * var;
+  int w_test, h_test;
+  int i;
+  const char * pos;
+  
+  int w_max = 0, i_max = -1;
+  
+  int num = gavl_metadata_get_arr_len(m, key);
 
+  if(!num)
+    return NULL;
 
+  for(i = 0; i < num; i++)
+    {
+    var = gavl_metadata_get_arr(m, key, i);
+
+    pos = var;
+    
+    if(*pos == '|')
+      continue;
+
+    if(sscanf(pos, "%d|%d|", &w_test, &h_test) < 2)
+      continue;
+
+    pos = strchr(pos, '|');
+    pos++;
+    pos = strchr(pos, '|');
+    pos++;
+
+    if(mimetype)
+      {
+      if((*pos != '|') && strncmp(mimetype, pos, strlen(mimetype)))
+        continue;
+      }
+    
+    if(((w > 0) && (w_test > w)) ||
+       ((h > 0) && (h_test > h)))
+      continue;
+    
+    if(w_max < w_test)
+      {
+      i_max = i;
+      w_max = w_test;
+      }
+    }
+  
+  if(i_max < 0)
+    i_max = 0;
+  
+  var = gavl_metadata_get_arr(m, key, i_max);
+  pos = var;
+  pos = strchr(pos, '|');
+  pos++;
+  pos = strchr(pos, '|');
+  pos++;
+  pos = strchr(pos, '|');
+  pos++;
+  
+  return pos;
+  }
