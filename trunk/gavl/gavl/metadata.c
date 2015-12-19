@@ -1,4 +1,4 @@
- /*****************************************************************
+/*****************************************************************
  * gavl - a general purpose audio/video processing library
  *
  * Copyright (c) 2001 - 2012 Members of the Gmerlin project
@@ -497,7 +497,6 @@ static const char * compression_fields[] =
     GAVL_META_BITRATE,
     GAVL_META_AUDIO_BITS,
     GAVL_META_VIDEO_BPP,
-    GAVL_META_APPROX_DURATION,
     NULL,
   };
 
