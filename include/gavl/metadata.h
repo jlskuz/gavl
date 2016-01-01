@@ -194,6 +194,18 @@ gavl_metadata_get_arr_i(gavl_metadata_t * m,
                         const char * key,
                         int i);
 
+/** \brief Get the array value of a tag
+ *  \arg m A metadata structure
+ *  \arg key Key
+ *  \arg glue Glue string (e.g. ", ")
+ *  \returns Array elements concacenated with the glue string between them
+ */
+
+GAVL_PUBLIC char * 
+gavl_metadata_join_arr(const gavl_metadata_t * m,
+                       const char * key, const char * glue);
+
+  
 /** \brief Get the length of an array value of a tag
  *  \arg m A metadata structure
  *  \arg key Key

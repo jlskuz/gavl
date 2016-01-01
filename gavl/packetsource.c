@@ -203,7 +203,11 @@ gavl_packet_source_read_packet(void*sp, gavl_packet_t ** p)
 
   if(st != GAVL_SOURCE_OK)
     return st;
-
+  
+  /* Kick out error packets */
+  if(p_src->duration < 0)
+    return GAVL_SOURCE_EOF;
+  
   /* Memcpy (if necessary) */
   if(p_src != p_dst)
     gavl_packet_copy(p_dst, p_src);
