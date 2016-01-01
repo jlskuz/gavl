@@ -657,6 +657,34 @@ int gavl_metadata_get_arr_len(const gavl_metadata_t * m,
   return m->tags[idx].arr_len + 1;
   }
   
+char * 
+gavl_metadata_join_arr(const gavl_metadata_t * m,
+                       const char * key, const char * glue)
+  {
+  char * ret;
+  int ret_len;
+  int glue_len;
+  int i;
+  int idx = find_tag(m, key);
+  if(idx < 0)
+    return NULL;
+  
+  glue_len = strlen(glue);
+  
+  ret_len = strlen(m->tags[idx].val) + 1;
+  
+  for(i = 0; i < m->tags[idx].arr_len; i++)
+    ret_len += strlen(m->tags[idx].val_arr[i]) + glue_len;
+
+  ret = malloc(ret_len);
+  strncpy(ret, m->tags[idx].val, ret_len);
+  for(i = 0; i < m->tags[idx].arr_len; i++)
+    {
+    strncat(ret, glue, ret_len - strlen(ret));
+    strncat(ret, m->tags[idx].val_arr[i], ret_len - strlen(ret));
+    }
+  return ret;
+  }
 
 
 const char * 
@@ -671,7 +699,6 @@ gavl_metadata_get_arr_i(gavl_metadata_t * m,
   }
 
 // Format is w|h|mimetype|url
-
 
 void gavl_metadata_add_image_uri(gavl_metadata_t * m,
                                  const char * key,

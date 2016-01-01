@@ -321,7 +321,9 @@ gavl_codec_id_t gavl_get_compression(int index);
 #define GAVL_PACKET_REF      (1<<5) //!< B-frame used as reference (can't savely be skipped)
 #define GAVL_PACKET_NOOUTPUT (1<<6) //!< Packet will produce no decoder output (e.g. VP8 alternate reference)
 
-#define GAVL_PACKET_PADDING  32 //!< Packets are padded with this many zero bytes
+#define GAVL_PACKET_FLAG_PRIV (1<<16) //!< Private flag (defined outside of gavl)
+  
+#define GAVL_PACKET_PADDING  32 //!< Packets are padded in memory with this many zero bytes
   
 /** \brief Packet structure
  *
