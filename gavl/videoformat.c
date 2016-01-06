@@ -183,7 +183,7 @@ const char * gavl_interlace_mode_to_short_string(gavl_interlace_mode_t mode)
     if(interlace_mode_tab[i].mode == mode)
       return interlace_mode_tab[i].name;
     }
-  return interlace_mode_tab[i].short_name;
+  return interlace_mode_tab[0].short_name;
   }
 
 gavl_interlace_mode_t gavl_short_string_to_interlace_mode(const char * mode)
