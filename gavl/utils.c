@@ -281,7 +281,7 @@ void gavl_strtrim(char * str)
 
   /* Trailing */
 
-  pos = str[strlen(str)-1];
+  pos = str + (int)(strlen(str)-1);
   while(pos >= str)
     {
     if(isspace(*pos))
