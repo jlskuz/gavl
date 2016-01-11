@@ -224,8 +224,18 @@ gavl_metadata_set_long(gavl_metadata_t * m,
   gavl_metadata_set(m, key, str);
   }
 
+void
+gavl_metadata_set_float(gavl_metadata_t * m,
+                        const char * key,
+                        float val)
+  {
+  char str[STR_SIZE];
+  snprintf(str, STR_SIZE, "%.6f", val);
+  gavl_metadata_set(m, key, str);
+  }
 
 #undef STR_SIZE
+
 
 const char * gavl_metadata_get(const gavl_metadata_t * m,
                                const char * key)
@@ -294,6 +304,30 @@ int gavl_metadata_get_long_i(const gavl_metadata_t * m,
     return 0;
   *ret = strtoll(val_str, &rest, 10);
   if(*rest != '\0')
+    return 0;
+  return 1;
+  }
+
+int gavl_metadata_get_float(const gavl_metadata_t * m,
+                           const char * key, float * ret)
+  {
+  char * rest;
+  const char * val_str = gavl_metadata_get(m, key);
+  if(!val_str)
+    return 0;
+  if(sscanf(val_str, "%f", ret) != 1)
+    return 0;
+  return 1;
+  }
+
+int gavl_metadata_get_float_i(const gavl_metadata_t * m,
+                             const char * key, float * ret)
+  {
+  char * rest;
+  const char * val_str = gavl_metadata_get_i(m, key);
+  if(!val_str)
+    return 0;
+  if(sscanf(val_str, "%f", ret) != 1)
     return 0;
   return 1;
   }
@@ -504,6 +538,8 @@ const char * implicit_fields[] =
   {
     GAVL_META_LOCATION,
     GAVL_META_BIG_ENDIAN,
+    GAVL_META_AVG_BITRATE,
+    GAVL_META_AVG_FRAMERATE,
     NULL,
   };
 

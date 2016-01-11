@@ -241,6 +241,10 @@
 #define GAVL_META_CAN_SEEK   "CanSeek"
 #define GAVL_META_CAN_PAUSE  "CanPause"
 
+#define GAVL_META_AVG_BITRATE    "AVGBitrate"   // Float, kbps
+#define GAVL_META_AVG_FRAMERATE  "AVGFramerate" // Float
+
+
 /**
  * @}
  */

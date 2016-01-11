@@ -249,6 +249,17 @@ gavl_metadata_set_long(gavl_metadata_t * m,
                        const char * key,
                        int64_t val);
 
+/** \brief Set a float tag
+ *  \arg m A metadata structure
+ *  \arg key Key
+ *  \arg val Value
+ */
+
+void
+gavl_metadata_set_float(gavl_metadata_t * m,
+                        const char * key,
+                        float val);
+  
 /** \brief Get an integer tag
  *  \arg m A metadata structure
  *  \arg key Key
@@ -271,6 +282,17 @@ GAVL_PUBLIC
 int gavl_metadata_get_long(const gavl_metadata_t * m,
                            const char * key, int64_t * ret);
 
+/** \brief Get a float tag
+ *  \arg m A metadata structure
+ *  \arg key Key
+ *  \arg ret Returns the value
+ *  \returns 1 if ret contains a valid tag, 0 if the tag doesn't exist or is not numeric
+ */
+  
+GAVL_PUBLIC 
+int gavl_metadata_get_float(const gavl_metadata_t * m,
+                           const char * key, float * ret);
+  
 /** \brief Get an integer tag ignoring case
  *  \arg m A metadata structure
  *  \arg key Key
@@ -292,6 +314,17 @@ int gavl_metadata_get_int_i(const gavl_metadata_t * m,
 GAVL_PUBLIC 
 int gavl_metadata_get_long_i(const gavl_metadata_t * m,
                              const char * key, int64_t * ret);
+
+/** \brief Get a float tag ignoring case
+ *  \arg m A metadata structure
+ *  \arg key Key
+ *  \arg ret Returns the value
+ *  \returns 1 if ret contains a valid tag, 0 if the tag doesn't exist or is not numeric
+ */
+  
+GAVL_PUBLIC 
+int gavl_metadata_get_float_i(const gavl_metadata_t * m,
+                              const char * key, float * ret);
 
   
   
