@@ -123,7 +123,29 @@ typedef struct
   int64_t  duration_max;
   int64_t  pts_start;
   int64_t  pts_end;
+
+  int64_t total_bytes;   // For average bitrate 
+  int64_t total_packets; // For average framerate
+  
   } gavf_stream_footer_t;
+
+GAVL_PUBLIC
+void gavf_stream_footer_init(gavf_stream_footer_t*);
+
+GAVL_PUBLIC
+void gavf_stream_footer_update(gavf_stream_footer_t*,gavl_packet_t*p);
+
+GAVL_PUBLIC
+void gavf_stream_footer_apply_audio(gavf_stream_footer_t * f, 
+                                    gavl_audio_format_t * fmt,
+                                    gavl_compression_info_t * ci,
+                                    gavl_metadata_t * m);
+
+GAVL_PUBLIC
+void gavf_stream_footer_apply_video(gavf_stream_footer_t * f, 
+                                    gavl_video_format_t * fmt,
+                                    gavl_compression_info_t * ci,
+                                    gavl_metadata_t * m);
 
 typedef struct
   {

@@ -133,38 +133,10 @@ put_packet_func(void * priv, gavl_packet_t * p)
 #endif
   /* Fist packet */
   if(s->h->foot.pts_start == GAVL_TIME_UNDEFINED)
-    {
-    s->h->foot.pts_start    = p->pts;
-    s->h->foot.pts_end      = p->pts + p->duration;
-    s->h->foot.duration_min = p->duration;
-    s->h->foot.duration_max = p->duration;
-    s->h->foot.size_min     = p->data_len;
-    s->h->foot.size_max     = p->data_len;
     s->next_sync_pts = p->pts;
-    }
-  /* Subsequent packets */
-  else
-    {
-    if(!(p->flags & GAVL_PACKET_NOOUTPUT))
-      {
-      if(s->h->foot.duration_min > p->duration)
-        s->h->foot.duration_min = p->duration;
-
-      if(s->h->foot.duration_max < p->duration)
-        s->h->foot.duration_max = p->duration;
-
-      if(s->h->foot.pts_end < p->pts + p->duration)
-        s->h->foot.pts_end = p->pts + p->duration;
-      }
-
-    if(s->h->foot.size_min > p->data_len)
-      s->h->foot.size_min = p->data_len;
-
-    if(s->h->foot.size_max < p->data_len)
-      s->h->foot.size_max = p->data_len;
-    
-    }
-
+  
+  gavf_stream_footer_update(&s->h->foot, p);
+  
   return gavf_flush_packets(s->g, s);
   
   // return gavf_write_packet(s->g, (int)(s - s->g->streams), p) ?
