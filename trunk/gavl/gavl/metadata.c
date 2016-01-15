@@ -311,7 +311,6 @@ int gavl_metadata_get_long_i(const gavl_metadata_t * m,
 int gavl_metadata_get_float(const gavl_metadata_t * m,
                            const char * key, float * ret)
   {
-  char * rest;
   const char * val_str = gavl_metadata_get(m, key);
   if(!val_str)
     return 0;
@@ -323,7 +322,6 @@ int gavl_metadata_get_float(const gavl_metadata_t * m,
 int gavl_metadata_get_float_i(const gavl_metadata_t * m,
                              const char * key, float * ret)
   {
-  char * rest;
   const char * val_str = gavl_metadata_get_i(m, key);
   if(!val_str)
     return 0;
