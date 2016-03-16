@@ -96,12 +96,6 @@ gavl_packet_sink_s gavl_packet_sink_t;
 
 typedef struct gavl_video_format_s gavl_video_format_t;
 
-/*! \ingroup video_format
- *\brief Pixelformat
- */
-
-typedef enum gavl_pixelformat_e gavl_pixelformat_t;
-  
 /** \ingroup video_frame
  *  \brief Packet sink
  *
@@ -110,8 +104,6 @@ typedef enum gavl_pixelformat_e gavl_pixelformat_t;
 
 typedef struct gavl_video_frame_s gavl_video_frame_t;
  
-#include <gavl/hw.h> // Needs forward declarations
-
 /** \defgroup mt Multithreading
  *  \brief Multithreading
  *
@@ -1943,6 +1935,12 @@ enum gavl_pixelformat_e
   };
 
 /*! \ingroup video_format
+ *\brief Pixelformat
+ */
+
+typedef enum gavl_pixelformat_e gavl_pixelformat_t;
+  
+/*! \ingroup video_format
  *  \brief Pixelformat for storing 1-dimensional integer data with 8 bits each */
 #define GAVL_PIXELFORMAT_1D_8 GAVL_GRAY_8
 /*! \ingroup video_format
@@ -2368,6 +2366,8 @@ gavl_interlace_mode_t gavl_short_string_to_interlace_mode(const char * mode);
 GAVL_PUBLIC
 int gavl_interlace_mode_is_mixed(gavl_interlace_mode_t mode);
   
+#include <gavl/hw.h> // Needs forward declarations
+
 /* Video format structure */
   
 /*! \ingroup video_format
