@@ -119,6 +119,7 @@ memalign.c \
 memcpy.c \
 metadata.c \
 mix.c \
+numptr.c \
 packetconnector.c \
 packetsink.c \
 packetsource.c \
