@@ -28,6 +28,34 @@ typedef struct gavf_options_s gavf_options_t;
 
 #define GAVF_IO_CB_TYPE_END(t) (!!(t & 0x100))
 
+/* Buffer */
+
+typedef struct
+  {
+  uint8_t * buf;
+  int len;
+  int alloc;
+  int alloc_static;
+  int pos;
+  } gavf_buffer_t;
+
+GAVL_PUBLIC
+void gavf_buffer_init(gavf_buffer_t * buf);
+
+GAVL_PUBLIC
+void gavf_buffer_init_static(gavf_buffer_t * buf, uint8_t * data, int size);
+
+GAVL_PUBLIC
+int gavf_buffer_alloc(gavf_buffer_t * buf,
+                      int size);
+
+GAVL_PUBLIC
+void gavf_buffer_free(gavf_buffer_t * buf);
+
+GAVL_PUBLIC
+void gavf_buffer_reset(gavf_buffer_t * buf);
+
+
 /* I/O Structure */
 
 typedef int (*gavf_read_func)(void * priv, uint8_t * data, int len);
@@ -95,11 +123,59 @@ GAVL_PUBLIC
 const char * gavf_io_mimetype(gavf_io_t * io);
 
 GAVL_PUBLIC
-void gavf_io_set_info(gavf_io_t * io, int64_t total_bytes, const char * filename, const char * mimetype);
+void gavf_io_set_info(gavf_io_t * io, int64_t total_bytes,
+                      const char * filename, const char * mimetype);
 
 GAVL_PUBLIC
 int64_t gavf_io_position(gavf_io_t * io);
 
+GAVL_PUBLIC
+int gavf_io_write_uint64f(gavf_io_t * io, uint64_t num);
+
+GAVL_PUBLIC
+int gavf_io_read_uint64f(gavf_io_t * io, uint64_t * num);
+
+GAVL_PUBLIC
+int gavf_io_write_uint64v(gavf_io_t * io, uint64_t num);
+
+GAVL_PUBLIC
+int gavf_io_read_uint64v(gavf_io_t * io, uint64_t * num);
+
+GAVL_PUBLIC
+int gavf_io_write_uint32v(gavf_io_t * io, uint32_t num);
+
+GAVL_PUBLIC
+int gavf_io_read_uint32v(gavf_io_t * io, uint32_t * num);
+
+GAVL_PUBLIC
+int gavf_io_write_int64v(gavf_io_t * io, int64_t num);
+
+GAVL_PUBLIC
+int gavf_io_read_int64v(gavf_io_t * io, int64_t * num);
+
+GAVL_PUBLIC
+int gavf_io_write_int32v(gavf_io_t * io, int32_t num);
+
+GAVL_PUBLIC
+int gavf_io_read_int32v(gavf_io_t * io, int32_t * num);
+
+GAVL_PUBLIC
+int gavf_io_read_string(gavf_io_t * io, char **);
+
+GAVL_PUBLIC
+int gavf_io_write_string(gavf_io_t * io, const char * );
+
+GAVL_PUBLIC
+int gavf_io_read_buffer(gavf_io_t * io, gavf_buffer_t * ret);
+
+GAVL_PUBLIC
+int gavf_io_write_buffer(gavf_io_t * io,  const gavf_buffer_t * buf);
+
+GAVL_PUBLIC
+int gavf_io_read_float(gavf_io_t * io, float * num);
+
+GAVL_PUBLIC
+int gavf_io_write_float(gavf_io_t * io, float num);
 
 /* Stream information */
 
@@ -470,5 +546,34 @@ int gavl_compression_info_from_buffer(const uint8_t * buf, int len, gavl_compres
 GAVL_PUBLIC
 uint8_t * gavl_compression_info_to_buffer(int * len, const gavl_compression_info_t * fmt);
 
+/* Formats */
+GAVL_PUBLIC
+int gavf_read_audio_format(gavf_io_t * io, gavl_audio_format_t * format);
+GAVL_PUBLIC
+int gavf_write_audio_format(gavf_io_t * io, const gavl_audio_format_t * format);
+
+GAVL_PUBLIC
+int gavf_read_video_format(gavf_io_t * io, gavl_video_format_t * format);
+
+GAVL_PUBLIC
+int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format);
+
+/* Compression info */
+
+GAVL_PUBLIC
+int gavf_read_compression_info(gavf_io_t * io,
+                               gavl_compression_info_t * ci);
+
+GAVL_PUBLIC
+int gavf_write_compression_info(gavf_io_t * io,
+                                const gavl_compression_info_t * ci);
+
+/* Metadata */
+
+GAVL_PUBLIC
+int gavf_read_metadata(gavf_io_t * io, gavl_metadata_t * ci);
+
+GAVL_PUBLIC
+int gavf_write_metadata(gavf_io_t * io, const gavl_metadata_t * ci);
 
 #endif // GAVF_H_INCLUDED

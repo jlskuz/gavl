@@ -1,29 +1,6 @@
 
 #include "gavf.h"
 
-/* Buffer */
-
-typedef struct
-  {
-  uint8_t * buf;
-  int len;
-  int alloc;
-  int alloc_static;
-  
-  int pos;
-  } gavf_buffer_t;
-
-void gavf_buffer_init(gavf_buffer_t * buf);
-
-void gavf_buffer_init_static(gavf_buffer_t * buf, uint8_t * data, int size);
-
-
-int gavf_buffer_alloc(gavf_buffer_t * buf,
-                      int size);
-
-void gavf_buffer_free(gavf_buffer_t * buf);
-
-void gavf_buffer_reset(gavf_buffer_t * buf);
 
 /* I/O */
 
@@ -57,29 +34,6 @@ void gavf_io_init(gavf_io_t * ret,
                   gavf_flush_func f,
                   void * priv);
 
-int gavf_io_write_uint64f(gavf_io_t * io, uint64_t num);
-int gavf_io_read_uint64f(gavf_io_t * io, uint64_t * num);
-
-int gavf_io_write_uint64v(gavf_io_t * io, uint64_t num);
-int gavf_io_read_uint64v(gavf_io_t * io, uint64_t * num);
-
-int gavf_io_write_uint32v(gavf_io_t * io, uint32_t num);
-int gavf_io_read_uint32v(gavf_io_t * io, uint32_t * num);
-
-int gavf_io_write_int64v(gavf_io_t * io, int64_t num);
-int gavf_io_read_int64v(gavf_io_t * io, int64_t * num);
-
-int gavf_io_write_int32v(gavf_io_t * io, int32_t num);
-int gavf_io_read_int32v(gavf_io_t * io, int32_t * num);
-
-int gavf_io_read_string(gavf_io_t * io, char **);
-int gavf_io_write_string(gavf_io_t * io, const char * );
-
-int gavf_io_read_buffer(gavf_io_t * io, gavf_buffer_t * ret);
-int gavf_io_write_buffer(gavf_io_t * io,  const gavf_buffer_t * buf);
-
-int gavf_io_read_float(gavf_io_t * io, float * num);
-int gavf_io_write_float(gavf_io_t * io, float num);
 
 void gavf_io_skip(gavf_io_t * io, int bytes);
 
@@ -220,28 +174,6 @@ gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s);
 gavf_stream_t * gavf_find_stream_by_id(gavf_t * g, uint32_t id);
 
 int gavf_stream_get_timescale(const gavf_stream_header_t * sh);
-
-
-/* Formats */
-
-int gavf_read_audio_format(gavf_io_t * io, gavl_audio_format_t * format);
-int gavf_write_audio_format(gavf_io_t * io, const gavl_audio_format_t * format);
-
-int gavf_read_video_format(gavf_io_t * io, gavl_video_format_t * format);
-int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format);
-
-/* Compression info */
-
-int gavf_read_compression_info(gavf_io_t * io,
-                               gavl_compression_info_t * ci);
-
-int gavf_write_compression_info(gavf_io_t * io,
-                                const gavl_compression_info_t * ci);
-
-/* Metadata */
-
-int gavf_read_metadata(gavf_io_t * io, gavl_metadata_t * ci);
-int gavf_write_metadata(gavf_io_t * io, const gavl_metadata_t * ci);
 
 /* Packet */
 int gavf_read_gavl_packet(gavf_io_t * io,

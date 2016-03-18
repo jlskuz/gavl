@@ -19,6 +19,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * *****************************************************************/
 
+#include <gavldefs.h>
+
 /* ptr -> integer */
 
 #define GAVL_PTR_2_16LE(p) \
@@ -122,3 +124,27 @@
   (p)[2] = ((i)>>40) & 0xff;  \
   (p)[1] = ((i)>>48) & 0xff;  \
   (p)[0] = ((i)>>56) & 0xff
+
+GAVL_PUBLIC void
+GAVL_FLOAT32BE_2_PTR(float f, void * p);
+
+GAVL_PUBLIC void
+GAVL_FLOAT32LE_2_PTR(float f, void * p);
+
+GAVL_PUBLIC void
+GAVL_DOUBLE64BE_2_PTR(double d, void * p);
+
+GAVL_PUBLIC void
+GAVL_DOUBLE64LE_2_PTR(double d, void * p);
+
+GAVL_PUBLIC float
+GAVL_PTR_2_FLOAT32BE(const void * p);
+
+GAVL_PUBLIC float
+GAVL_PTR_2_FLOAT32LE(const void * p);
+
+GAVL_PUBLIC double
+GAVL_PTR_2_DOUBLE64BE(const void * p);
+
+GAVL_PUBLIC double
+GAVL_PTR_2_DOUBLE64LE(const void * p);
