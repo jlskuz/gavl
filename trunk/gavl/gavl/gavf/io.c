@@ -539,6 +539,7 @@ int gavf_io_cb(gavf_io_t * io, int type, const void * data)
 typedef struct
   {
   gavl_packet_source_t * psrc;
+  gavl_metadata_t m;
   } audio_source_priv_t;
 
 typedef struct
@@ -550,6 +551,7 @@ typedef struct
 typedef struct
   {
   gavl_packet_source_t * psrc;
+  gavl_metadata_t m;
   } video_source_priv_t;
 
 typedef struct
@@ -569,7 +571,20 @@ audio_source_func(void * data, gavl_audio_frame_t ** frame)
 static gavl_source_status_t
 video_source_func(void * data, gavl_video_frame_t ** frame)
   {
-  video_source_priv_t * p = data;
+  video_source_priv_t * priv = data;
+  gavl_packet_t * p = NULL;
+  gavl_source_status_t st;
+
+  if((st = gavl_packet_source_read_packet(priv->psrc, &p)) != GAVL_SOURCE_OK)
+    return st;
+
+  //  if(!priv->frame)
+  //    priv->frame = gavl_video_frame_create(NULL);
+  
+  //  gavf_packet_to_video_frame(p, priv->frame, , &s->h->m, &s->dsp);
+  //  *frame = s->vframe;
+  return GAVL_SOURCE_OK;
+
   
   }
 
@@ -623,13 +638,29 @@ gavl_audio_source_t * gavl_audio_source_create_io(gavf_io_t * io,
   return ret;
   }
 
+gavl_audio_frame_t * audio_sink_get(void * priv)
+  {
+
+  }
+
+gavl_sink_status_t
+audio_sink_put(void * priv, gavl_audio_frame_t * f)
+  {
+  
+  }
+
 gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
                                               gavl_audio_format_t * fmt,
                                               gavl_metadata_t * m)
   {
   gavl_audio_sink_t * ret;
   audio_sink_priv_t * priv = calloc(1, sizeof(*priv));
-  
+
+  priv->psink = gavl_packet_sink_create_io(io,
+                                           fmt->samples_per_frame,
+                                           GAVF_PACKET_WRITE_PTS);
+
+  ret = gavl_audio_sink_create(audio_sink_get, audio_sink_put, priv, fmt);
   }
   
 gavl_video_source_t * gavl_video_source_create_io(gavf_io_t * io,
@@ -662,7 +693,22 @@ gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,
                                               gavl_metadata_t * m)
   {
   gavl_video_sink_t * ret;
+  int src_flags = 0;
+  int default_duration;
+  int packet_flags = GAVF_PACKET_WRITE_PTS;
+
   video_sink_priv_t * priv = calloc(1, sizeof(*priv));
+
+  if(fmt->framerate_mode == GAVL_FRAMERATE_CONSTANT)
+    default_duration = fmt->frame_duration;
+  else
+    {
+    default_duration = 0;
+    packet_flags |= GAVF_PACKET_WRITE_DURATION;
+    }
+
+  priv->psink = gavl_packet_sink_create_io(io, default_duration,
+                                           packet_flags);
   
   }
 
