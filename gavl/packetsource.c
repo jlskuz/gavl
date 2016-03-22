@@ -50,9 +50,9 @@ struct gavl_packet_source_s
   gavl_connector_free_func_t free_func;
   };
 
-static gavl_packet_source_t *
-create_common(gavl_packet_source_func_t func,
-              void * priv, int src_flags)
+gavl_packet_source_t *
+gavl_packet_source_create(gavl_packet_source_func_t func,
+                          void * priv, int src_flags)
   {
   gavl_packet_source_t * ret;
   ret = calloc(1, sizeof(*ret));
@@ -68,7 +68,7 @@ gavl_packet_source_create_audio(gavl_packet_source_func_t func,
                                 const gavl_compression_info_t * ci,
                                 const gavl_audio_format_t * afmt)
   {
-  gavl_packet_source_t * ret = create_common(func, priv, src_flags);
+  gavl_packet_source_t * ret = gavl_packet_source_create(func, priv, src_flags);
   
   gavl_compression_info_copy(&ret->ci, ci);
   ret->flags |= FLAG_HAS_CI;
@@ -84,7 +84,7 @@ gavl_packet_source_create_video(gavl_packet_source_func_t func,
                                 const gavl_compression_info_t * ci,
                                 const gavl_video_format_t * vfmt)
   {
-  gavl_packet_source_t * ret = create_common(func, priv, src_flags);
+  gavl_packet_source_t * ret = gavl_packet_source_create(func, priv, src_flags);
   
   gavl_compression_info_copy(&ret->ci, ci);
   ret->flags |= FLAG_HAS_CI;
@@ -99,7 +99,7 @@ gavl_packet_source_create_text(gavl_packet_source_func_t func,
                                void * priv, int src_flags,
                                int timescale)
   {
-  gavl_packet_source_t * ret = create_common(func, priv, src_flags);
+  gavl_packet_source_t * ret = gavl_packet_source_create(func, priv, src_flags);
   ret->timescale = timescale;
   ret->flags |= FLAG_HAS_TIMESCALE;
   return ret;
@@ -110,7 +110,7 @@ gavl_packet_source_create_source(gavl_packet_source_func_t func,
                                  void * priv, int src_flags,
                                  gavl_packet_source_t * src)
   {
-  gavl_packet_source_t * ret = create_common(func, priv, src_flags);
+  gavl_packet_source_t * ret = gavl_packet_source_create(func, priv, src_flags);
   ret->timescale = src->timescale;
   ret->flags = src->flags;
   gavl_compression_info_copy(&ret->ci, &src->ci);

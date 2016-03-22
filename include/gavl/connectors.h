@@ -482,6 +482,22 @@ void gavl_audio_source_destroy(gavl_audio_source_t * s);
 
 /* Packet source */
 
+/** \brief Create a packet source
+ *  \param func Callback for reading one frame
+ *  \param priv Client data to be passed to func
+ *  \param src_flags Flags
+ *
+ *  Typically, you'll use the more specific functions
+ *  \ref gavl_packet_source_create_audio, \ref gavl_packet_source_create_video,
+ *  \ref gavl_packet_source_create_text and \ref gavl_packet_source_create_source
+ */
+
+GAVL_PUBLIC
+gavl_packet_source_t *
+gavl_packet_source_create(gavl_packet_source_func_t func,
+                          void * priv, int src_flags);
+
+  
 /** \brief Create an audio packet source
  *  \param func Callback for reading one frame
  *  \param priv Client data to be passed to func

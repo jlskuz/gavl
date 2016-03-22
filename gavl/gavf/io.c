@@ -538,39 +538,131 @@ int gavf_io_cb(gavf_io_t * io, int type, const void * data)
 
 typedef struct
   {
-  
-  } video_conn_t;
+  gavl_packet_source_t * psrc;
+  } audio_source_priv_t;
 
 typedef struct
   {
+  gavl_packet_sink_t * psink;
+  } audio_sink_priv_t;
+
+
+typedef struct
+  {
+  gavl_packet_source_t * psrc;
+  } video_source_priv_t;
+
+typedef struct
+  {
+  gavl_packet_sink_t * psink;
+  } video_sink_priv_t;
+
+static gavl_source_status_t
+audio_source_func(void * data, gavl_audio_frame_t ** frame)
+  {
+  audio_source_priv_t * p = data;
+
   
-  } audio_conn_t;
+  
+  }
+
+static gavl_source_status_t
+video_source_func(void * data, gavl_video_frame_t ** frame)
+  {
+  video_source_priv_t * p = data;
+  
+  }
+
+static void audio_source_free(void * data)
+  {
+  audio_source_priv_t * p = data;
+  if(p->psrc)
+    gavl_packet_source_destroy(p->psrc);
+  free(p);
+  }
+
+static void audio_sink_free(void * data)
+  {
+  audio_sink_priv_t * p = data;
+  if(p->psink)
+    gavl_packet_sink_destroy(p->psink);
+  free(p);
+  }
+
+static void video_source_free(void * data)
+  {
+  video_source_priv_t * p = data;
+  if(p->psrc)
+    gavl_packet_source_destroy(p->psrc);
+  free(p);
+  }
+
+static void video_sink_free(void * data)
+  {
+  video_sink_priv_t * p = data;
+  if(p->psink)
+    gavl_packet_sink_destroy(p->psink);
+  free(p);
+  }
 
 
 gavl_audio_source_t * gavl_audio_source_create_io(gavf_io_t * io,
-                                                  gavl_audio_format_t * fmt)
+                                                  gavl_audio_format_t * fmt,
+                                                  gavl_metadata_t * m)
   {
   gavl_audio_source_t * ret;
+  int src_flags = 0;
+  audio_source_priv_t * priv = calloc(1, sizeof(*priv));
+  priv->psrc = gavl_packet_source_create_io(io, fmt->samples_per_frame,
+                                            GAVF_PACKET_WRITE_PTS);
+  
+  ret = gavl_audio_source_create(audio_source_func, priv, src_flags, fmt);
+
+  gavl_audio_source_set_free_func(ret, audio_source_free);
+  
+  return ret;
   }
 
 gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
-                                              gavl_audio_format_t * fmt)
+                                              gavl_audio_format_t * fmt,
+                                              gavl_metadata_t * m)
   {
   gavl_audio_sink_t * ret;
+  audio_sink_priv_t * priv = calloc(1, sizeof(*priv));
   
   }
-
+  
 gavl_video_source_t * gavl_video_source_create_io(gavf_io_t * io,
-                                                  gavl_video_format_t * fmt)
+                                                  gavl_video_format_t * fmt,
+                                                  gavl_metadata_t * m)
   {
   gavl_video_source_t * ret;
+  int src_flags = 0;
+  int default_duration;
+  int packet_flags = GAVF_PACKET_WRITE_PTS;
+  video_source_priv_t * priv = calloc(1, sizeof(*priv));
+
+  if(fmt->framerate_mode == GAVL_FRAMERATE_CONSTANT)
+    default_duration = fmt->frame_duration;
+  else
+    {
+    default_duration = 0;
+    packet_flags |= GAVF_PACKET_WRITE_DURATION;
+    }
   
+  priv->psrc = gavl_packet_source_create_io(io, default_duration,
+                                            packet_flags);
+  
+  ret = gavl_video_source_create(video_source_func, priv, src_flags, fmt);
+  return ret;
   }
 
 gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,
-                                              gavl_video_format_t * fmt)
+                                              gavl_video_format_t * fmt,
+                                              gavl_metadata_t * m)
   {
   gavl_video_sink_t * ret;
+  video_sink_priv_t * priv = calloc(1, sizeof(*priv));
   
   }
 
@@ -581,17 +673,35 @@ typedef struct
   gavf_io_t * io;
   int default_duration;
   int packet_flags;
+  int64_t pts;
   } packet_source_priv_t;
+
+static gavl_source_status_t
+packet_source_func(void * data, gavl_packet_t ** p)
+  {
+  packet_source_priv_t * priv = data;
+
+  if(!gavf_read_gavl_packet(priv->io,
+                            priv->default_duration,
+                            priv->packet_flags,
+                            0, &priv->pts, 0, *p))
+    return GAVL_SOURCE_EOF;
+  else
+    return GAVL_SOURCE_OK;
+  }
 
 gavl_packet_source_t * gavl_packet_source_create_io(gavf_io_t * io,
                                                     int default_duration,
                                                     int packet_flags)
   {
+  gavl_packet_source_t * ret;
   packet_source_priv_t * priv = calloc(1, sizeof(*priv));
   priv->io               = io;
   priv->default_duration = default_duration;
   priv->packet_flags     = packet_flags;
 
+  ret = gavl_packet_source_create(packet_source_func, priv, 0);
+  gavl_packet_source_set_free_func(ret, free);
   }
 
 /* Packet sink */
@@ -608,34 +718,49 @@ typedef struct
   } packet_sink_priv_t;
 
 static gavl_packet_t *
-packet_sink_get_func(void * priv)
+packet_sink_get_func(void * data)
   {
-  packet_sink_priv_t * p = priv;
+  packet_sink_priv_t * p = data;
   return &p->p;
   }
 
 static gavl_sink_status_t
-packet_sink_put_func(void * priv, gavl_packet_t * p)
+packet_sink_put_func(void * data, gavl_packet_t * p)
   {
-  packet_sink_priv_t * p = priv;
-
+  packet_sink_priv_t * priv = data;
   
-  if(!gavf_write_gavl_packet(p->io, p->hdr_io, p->default_duration, p->packet_flags, 0,
-                             &p->p))
+  if(!gavf_write_gavl_packet(priv->io, priv->hdr_io, priv->default_duration, priv->packet_flags, 0,
+                             &priv->p))
     return GAVL_SINK_ERROR;
-  return
+  else
     return GAVL_SINK_OK;
-  
+  }
 
+static void packet_sink_free_func(void * data)
+  {
+  packet_sink_priv_t * p = data;
+  if(p->hdr_io)
+    gavf_io_destroy(p->hdr_io);
+  gavl_packet_free(&p->p);
+  free(p);
   }
 
 gavl_packet_sink_t * gavl_packet_sink_create_io(gavf_io_t * io,
                                                 int default_duration,
                                                 int packet_flags)
   {
+  gavl_packet_sink_t * ret;
   packet_sink_priv_t * priv = calloc(1, sizeof(*priv));
   priv->io               = io;
   priv->default_duration = default_duration;
   priv->packet_flags     = packet_flags;
+  priv->hdr_io = gavf_io_create_buf_write();
+
+  ret = gavl_packet_sink_create(packet_sink_get_func,
+                                packet_sink_put_func,
+                                priv);
+
+  gavl_packet_sink_set_free_func(ret, packet_sink_free_func);
   
+  return ret;
   }
