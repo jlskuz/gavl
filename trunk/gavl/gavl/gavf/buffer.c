@@ -66,8 +66,6 @@ static int read_buf(void * priv, uint8_t * data, int len)
   return len;
   }
 
-
-
 static int write_buf(void * priv, const uint8_t * data, int len)
   {
   gavf_buffer_t * buf = priv;
@@ -80,26 +78,45 @@ static int write_buf(void * priv, const uint8_t * data, int len)
   return len;
   }
 
-
-gavf_io_t * gavf_io_create_buf_read(gavf_buffer_t * buf)
+static void close_buf(void * priv)
   {
+  gavf_buffer_free(priv);
+  free(priv);
+  }
+
+gavf_io_t * gavf_io_create_buf_read()
+  {
+  gavf_buffer_t * buf = calloc(1, sizeof(*buf));
+  
   return gavf_io_create(read_buf,
                         NULL,
                         NULL,
-                        NULL,
+                        close_buf,
                         NULL,
                         buf);
   }
 
-gavf_io_t * gavf_io_create_buf_write(gavf_buffer_t * buf)
+gavf_io_t * gavf_io_create_buf_write()
   {
+  gavf_buffer_t * buf = calloc(1, sizeof(*buf));
+
   return gavf_io_create(NULL,
                         write_buf,
                         NULL,
-                        NULL,
+                        close_buf,
                         NULL,
                         buf);
   
+  }
+
+gavf_buffer_t * gavf_io_buf_get(gavf_io_t * io)
+  {
+  return io->priv;
+  }
+
+void gavf_io_buf_reset(gavf_io_t * io)
+  {
+  gavf_buffer_reset(io->priv);
   }
 
 void gavf_io_init_buf_read(gavf_io_t * io, gavf_buffer_t * buf)

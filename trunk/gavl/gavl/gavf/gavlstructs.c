@@ -580,7 +580,11 @@ int gavf_write_metadata(gavf_io_t * io, const gavl_metadata_t * m)
 /* Packet */
 
 int gavf_read_gavl_packet(gavf_io_t * io,
-                          gavf_stream_t * s,
+                          int default_duration,
+                          int packet_flags,
+                          int64_t last_sync_pts,
+                          int64_t * next_pts,
+                          int64_t pts_offset,
                           gavl_packet_t * p)
   {
   uint64_t start_pos;
@@ -593,44 +597,42 @@ int gavf_read_gavl_packet(gavf_io_t * io,
 
   gavl_packet_reset(p);
 
-  p->id = s->h->id;
   
   /* Flags */
   if(!gavf_io_read_uint32v(io, (uint32_t*)&p->flags))
     goto fail;
   
   /* PTS */
-  if(s->flags & STREAM_FLAG_HAS_PTS)
+  if(packet_flags & GAVF_PACKET_WRITE_PTS)
     {
     if(!gavf_io_read_int64v(io, &p->pts))
       goto fail;
-    p->pts += s->last_sync_pts;
+    p->pts += last_sync_pts;
     }
   else
-    p->pts = s->next_pts;
+    p->pts = *next_pts;
   
   /* Duration */
-  if(s->flags & STREAM_FLAG_HAS_DURATION)
+  if(packet_flags & GAVF_PACKET_WRITE_DURATION)
     {
     if(!gavf_io_read_int64v(io, &p->duration))
       goto fail;
     }
   
   /* Field2 */
-  if(s->h->ci.flags & GAVL_COMPRESSION_HAS_FIELD_PICTURES)
+  if(packet_flags & GAVF_PACKET_WRITE_FIELD2)
     {
     if(!gavf_io_read_uint32v(io, &p->field2_offset))
       goto fail;
     }
 
   /* Interlace mode */
-  if(s->flags & STREAM_FLAG_HAS_INTERLACE)
+  if(packet_flags & GAVF_PACKET_WRITE_INTERLACE)
     {
     if(!gavf_io_read_uint32v(io, (uint32_t*)&p->interlace_mode))
       goto fail;
     }
-
-  
+ 
   if(p->flags & GAVL_PACKET_EXT)
     {
     uint32_t num_extensions;
@@ -694,22 +696,17 @@ int gavf_read_gavl_packet(gavf_io_t * io,
   /* Duration */
   if(!p->duration)
     {
-    if(s->packet_duration)
-      p->duration = s->packet_duration;
+    if(default_duration)
+      p->duration = default_duration;
     }
   /* p->duration can be 0 for the first packet in a vorbis stream */
   
   /* Set pts */
-  s->next_pts += p->duration;
+  *next_pts += p->duration;
 
   /* Add offset */
-  p->pts += s->pts_offset;
+  p->pts += pts_offset;
   
-  if(s->g->opt.flags & GAVF_OPT_FLAG_DUMP_PACKETS)
-    {
-    fprintf(stderr, "ID: %d ", s->g->pkthdr.stream_id);
-    gavl_packet_dump(p);
-    }
   
   if(io->cb && !io->cb(io->cb_priv, GAVF_IO_CB_PACKET_END, p))
     return 0;
@@ -718,13 +715,15 @@ int gavf_read_gavl_packet(gavf_io_t * io,
   
   fail:
 
-  if(s->g->opt.flags & GAVF_OPT_FLAG_DUMP_PACKETS)
-    fprintf(stderr, "Got EOF while reading packet\n");
+  //  if(s->g->opt.flags & GAVF_OPT_FLAG_DUMP_PACKETS)
+  //    fprintf(stderr, "Got EOF while reading packet\n");
   return 0;
   }
 
 int gavf_write_gavl_packet_header(gavf_io_t * io,
-                                  gavf_stream_t * s,
+                                  int default_duration,
+                                  int packet_flags,
+                                  int64_t last_sync_pts,
                                   const gavl_packet_t * p)
   {
   uint32_t num_extensions;
@@ -738,7 +737,7 @@ int gavf_write_gavl_packet_header(gavf_io_t * io,
   /* Count extensions */
   num_extensions = 0;
   
-  if(s->packet_duration && (p->duration < s->packet_duration))
+  if(default_duration && (p->duration < default_duration))
     num_extensions++;
 
   if(p->header_size)
@@ -765,28 +764,28 @@ int gavf_write_gavl_packet_header(gavf_io_t * io,
     return 0;
     
   /* PTS */
-  if(s->flags & STREAM_FLAG_HAS_PTS)
+  if(packet_flags & GAVF_PACKET_WRITE_PTS)
     {
-    if(!gavf_io_write_int64v(io, p->pts - s->last_sync_pts))
+    if(!gavf_io_write_int64v(io, p->pts - last_sync_pts))
       return 0;
     }
   
   /* Duration */
-  if(s->flags & STREAM_FLAG_HAS_DURATION)
+  if(packet_flags & GAVF_PACKET_WRITE_DURATION)
     {
     if(!gavf_io_write_int64v(io, p->duration))
       return 0;
     }
 
   /* Field2 */
-  if(s->h->ci.flags & GAVL_COMPRESSION_HAS_FIELD_PICTURES)
+  if(packet_flags & GAVF_PACKET_WRITE_FIELD2)
     {
     if(!gavf_io_write_uint32v(io, p->field2_offset))
       return 0;
     }
 
   /* Interlace mode */
-  if(s->flags & STREAM_FLAG_HAS_INTERLACE)
+  if(packet_flags & GAVF_PACKET_WRITE_INTERLACE)
     {
     if(!gavf_io_write_uint32v(io, p->interlace_mode))
       return 0;
@@ -802,7 +801,7 @@ int gavf_write_gavl_packet_header(gavf_io_t * io,
     gavf_buffer_init_static(&buf, data, MAX_EXT_SIZE_AF);
     gavf_io_init_buf_write(&bufio, &buf);
     
-    if(s->packet_duration && (p->duration < s->packet_duration))
+    if(default_duration && (p->duration < default_duration))
       {
       buf.len = 0;
       if(!gavf_io_write_int64v(&bufio, p->duration) ||

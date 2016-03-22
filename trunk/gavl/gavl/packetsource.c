@@ -47,6 +47,7 @@ struct gavl_packet_source_s
   gavl_connector_lock_func_t lock_func;
   gavl_connector_lock_func_t unlock_func;
   void * lock_priv;
+  gavl_connector_free_func_t free_func;
   };
 
 static gavl_packet_source_t *
@@ -220,9 +221,20 @@ gavl_packet_source_read_packet(void*sp, gavl_packet_t ** p)
   }
 
 void
+gavl_packet_source_set_free_func(gavl_packet_source_t * src,
+                                 gavl_connector_free_func_t free_func)
+  {
+  src->free_func = free_func;
+  }
+
+void
 gavl_packet_source_destroy(gavl_packet_source_t * s)
   {
   gavl_compression_info_free(&s->ci);
   gavl_packet_free(&s->p);
+
+  if(s->priv && s->free_func)
+    s->free_func(s->priv);
+
   free(s);
   }

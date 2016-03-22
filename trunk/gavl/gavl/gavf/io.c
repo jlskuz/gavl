@@ -533,3 +533,109 @@ int gavf_io_cb(gavf_io_t * io, int type, const void * data)
     io->got_error = 1;
   return ret;
   }
+
+/* A/V frames */
+
+typedef struct
+  {
+  
+  } video_conn_t;
+
+typedef struct
+  {
+  
+  } audio_conn_t;
+
+
+gavl_audio_source_t * gavl_audio_source_create_io(gavf_io_t * io,
+                                                  gavl_audio_format_t * fmt)
+  {
+  gavl_audio_source_t * ret;
+  }
+
+gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
+                                              gavl_audio_format_t * fmt)
+  {
+  gavl_audio_sink_t * ret;
+  
+  }
+
+gavl_video_source_t * gavl_video_source_create_io(gavf_io_t * io,
+                                                  gavl_video_format_t * fmt)
+  {
+  gavl_video_source_t * ret;
+  
+  }
+
+gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,
+                                              gavl_video_format_t * fmt)
+  {
+  gavl_video_sink_t * ret;
+  
+  }
+
+/* Packet source */
+
+typedef struct
+  {
+  gavf_io_t * io;
+  int default_duration;
+  int packet_flags;
+  } packet_source_priv_t;
+
+gavl_packet_source_t * gavl_packet_source_create_io(gavf_io_t * io,
+                                                    int default_duration,
+                                                    int packet_flags)
+  {
+  packet_source_priv_t * priv = calloc(1, sizeof(*priv));
+  priv->io               = io;
+  priv->default_duration = default_duration;
+  priv->packet_flags     = packet_flags;
+
+  }
+
+/* Packet sink */
+
+typedef struct
+  {
+  gavf_io_t * io;
+  int default_duration;
+  int packet_flags;
+  gavl_packet_t p;
+
+  gavf_io_t * hdr_io;
+  
+  } packet_sink_priv_t;
+
+static gavl_packet_t *
+packet_sink_get_func(void * priv)
+  {
+  packet_sink_priv_t * p = priv;
+  return &p->p;
+  }
+
+static gavl_sink_status_t
+packet_sink_put_func(void * priv, gavl_packet_t * p)
+  {
+  packet_sink_priv_t * p = priv;
+
+  
+  if(!gavf_write_gavl_packet(p->io, p->hdr_io, p->default_duration, p->packet_flags, 0,
+                             &p->p))
+    return GAVL_SINK_ERROR;
+  return
+    return GAVL_SINK_OK;
+  
+
+  }
+
+gavl_packet_sink_t * gavl_packet_sink_create_io(gavf_io_t * io,
+                                                int default_duration,
+                                                int packet_flags)
+  {
+  packet_sink_priv_t * priv = calloc(1, sizeof(*priv));
+  priv->io               = io;
+  priv->default_duration = default_duration;
+  priv->packet_flags     = packet_flags;
+  
+  }

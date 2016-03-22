@@ -39,10 +39,7 @@ void gavf_io_skip(gavf_io_t * io, int bytes);
 
 int gavf_io_cb(gavf_io_t * io, int type, const void * data);
 
-/* Buffer as io */
 
-gavf_io_t * gavf_io_create_buf_read(gavf_buffer_t * buf);
-gavf_io_t * gavf_io_create_buf_write(gavf_buffer_t * buf);
 
 void gavf_io_init_buf_read(gavf_io_t * io, gavf_buffer_t * buf);
 void gavf_io_init_buf_write(gavf_io_t * io, gavf_buffer_t * buf);
@@ -109,9 +106,6 @@ void gavf_packet_buffer_destroy(gavf_packet_buffer_t *);
 
 /* Stream */
 
-#define STREAM_FLAG_HAS_PTS       (1<<0)
-#define STREAM_FLAG_HAS_INTERLACE (1<<1)
-#define STREAM_FLAG_HAS_DURATION  (1<<2)
 #define STREAM_FLAG_DISCONTINUOUS (1<<3)
 #define STREAM_FLAG_SKIP          (1<<4)
 
@@ -122,6 +116,8 @@ typedef struct
   /* Secondary variables */
   int flags;
 
+  int packet_flags;
+    
   int timescale;
   int packet_duration;
 
@@ -135,8 +131,7 @@ typedef struct
 
   // PTS Offset (to make all PTSes start near zero)
   int64_t pts_offset;
-  
-  
+    
   int packets_since_sync;
   
   gavf_packet_buffer_t * pb;
@@ -176,12 +171,16 @@ gavf_stream_t * gavf_find_stream_by_id(gavf_t * g, uint32_t id);
 int gavf_stream_get_timescale(const gavf_stream_header_t * sh);
 
 /* Packet */
-int gavf_read_gavl_packet(gavf_io_t * io,
-                          gavf_stream_t * s,
-                          gavl_packet_t * p);
+
+#define GAVF_PACKET_WRITE_PTS       (1<<0)
+#define GAVF_PACKET_WRITE_INTERLACE (1<<1)
+#define GAVF_PACKET_WRITE_DURATION  (1<<2)
+#define GAVF_PACKET_WRITE_FIELD2    (1<<3)
 
 int gavf_write_gavl_packet_header(gavf_io_t * io,
-                                  gavf_stream_t * s,
+                                  int default_duration,
+                                  int packet_flags,
+                                  int64_t last_sync_pts,
                                   const gavl_packet_t * p);
 
 /* Options */
@@ -344,8 +343,7 @@ struct gavf_s
   
   gavf_options_t opt;
   
-  gavf_io_t pkt_io;
-  gavf_buffer_t pkt_buf;
+  gavf_io_t * pkt_io;
 
   /* Inline metadata support */
   gavf_io_t meta_io;

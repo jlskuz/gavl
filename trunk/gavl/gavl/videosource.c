@@ -77,7 +77,15 @@ struct gavl_video_source_s
   void * lock_priv;
 
   gavl_video_source_t * prev;
+  gavl_connector_free_func_t free_func;
   };
+
+void
+gavl_video_source_set_free_func(gavl_video_source_t * src,
+                                gavl_connector_free_func_t free_func)
+  {
+  src->free_func = free_func;
+  }
 
 gavl_video_source_t *
 gavl_video_source_create(gavl_video_source_func_t func,
@@ -190,6 +198,10 @@ void gavl_video_source_destroy(gavl_video_source_t * s)
     gavl_video_frame_destroy(s->transfer_frame);
   
   gavl_video_converter_destroy(s->cnv);
+
+  if(s->priv && s->free_func)
+    s->free_func(s->priv);
+  
   free(s);
   }
 
