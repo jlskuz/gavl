@@ -613,25 +613,33 @@ int gavf_write_gavl_packet(gavf_io_t * io,
 
 GAVL_PUBLIC
 gavl_audio_source_t * gavl_audio_source_create_io(gavf_io_t * io,
-                                                  gavl_audio_format_t * fmt);
+                                                  gavl_audio_format_t * fmt,
+                                                  gavl_metadata_t * m);
 
 GAVL_PUBLIC
 gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
-                                              gavl_audio_format_t * fmt);
+                                              gavl_audio_format_t * fmt,
+                                              gavl_metadata_t * m);
 
 GAVL_PUBLIC
 gavl_video_source_t * gavl_video_source_create_io(gavf_io_t * io,
-                                                  gavl_video_format_t * fmt);
+                                                  gavl_video_format_t * fmt,
+                                                  gavl_metadata_t * m);
 
 GAVL_PUBLIC
 gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,
-                                              gavl_video_format_t * fmt);
+                                              gavl_video_format_t * fmt,
+                                              gavl_metadata_t * m);
 
 GAVL_PUBLIC
-gavl_packet_source_t * gavl_packet_source_create_io(gavf_io_t * io, int packet_flags);
+gavl_packet_source_t * gavl_packet_source_create_io(gavf_io_t * io,
+                                                    int default_duration,
+                                                    int packet_flags);
 
 GAVL_PUBLIC
-gavl_packet_sink_t * gavl_packet_sink_create_io(gavf_io_t * io, int packet_flags);
+gavl_packet_sink_t * gavl_packet_sink_create_io(gavf_io_t * io,
+                                                int default_duration,
+                                                int packet_flags);
 
 
 #endif // GAVF_H_INCLUDED
