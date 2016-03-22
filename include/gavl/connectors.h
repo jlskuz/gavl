@@ -53,6 +53,12 @@ extern "C" {
 
 typedef void (*gavl_connector_lock_func_t)(void * priv);
 
+/** \brief Prototype for freeing private data
+ *  \param priv Client data
+ */
+
+typedef void (*gavl_connector_free_func_t)(void * priv);
+
   
 /*! \defgroup sources A/V sources
  *  \ingroup pipelines
@@ -187,7 +193,19 @@ gavl_video_source_set_lock_funcs(gavl_video_source_t * src,
                                  gavl_connector_lock_func_t lock_func,
                                  gavl_connector_lock_func_t unlock_func,
                                  void * priv);
+
+/** \brief Set free function
+ *  \param src A video source
+ *  \param free_func Function called with the private data when the source is destroyed
+ *
+ *  Use this if you don't want to keep a reference to the private data along wit the source
+ */
   
+GAVL_PUBLIC void
+gavl_video_source_set_free_func(gavl_video_source_t * src,
+                                gavl_connector_free_func_t free_func);
+
+
   
 /** \brief Get coversion options of a video source
  *  \param s A video source
@@ -330,6 +348,18 @@ gavl_audio_source_set_lock_funcs(gavl_audio_source_t * src,
                                  gavl_connector_lock_func_t unlock_func,
                                  void * priv);
 
+/** \brief Set free function
+ *  \param src A audio source
+ *  \param free_func Function called with the private data when the source is destroyed
+ *
+ *  Use this if you don't want to keep a reference to the private data along wit the source
+ */
+  
+GAVL_PUBLIC void
+gavl_audio_source_set_free_func(gavl_audio_source_t * src,
+                                gavl_connector_free_func_t free_func);
+
+  
   
 /** \brief Get the native format
  *  \param s An audio source
@@ -521,6 +551,18 @@ gavl_packet_source_set_lock_funcs(gavl_packet_source_t * src,
                                   gavl_connector_lock_func_t unlock_func,
                                   void * priv);
 
+/** \brief Set free function
+ *  \param src A packet source
+ *  \param free_func Function called with the private data when the source is destroyed
+ *
+ *  Use this if you don't want to keep a reference to the private data along wit the source
+ */
+  
+GAVL_PUBLIC void
+gavl_packet_source_set_free_func(gavl_packet_source_t * src,
+                                 gavl_connector_free_func_t free_func);
+
+  
   
 /** \brief Get the compression info
  *  \param s A packet source
@@ -644,6 +686,18 @@ gavl_audio_sink_set_lock_funcs(gavl_audio_sink_t * sink,
                                gavl_connector_lock_func_t unlock_func,
                                void * priv);
 
+/** \brief Set free function
+ *  \param src A audio sink
+ *  \param free_func Function called with the private data when the sink is destroyed
+ *
+ *  Use this if you don't want to keep a reference to the private data along wit the sink
+ */
+  
+GAVL_PUBLIC void
+gavl_audio_sink_set_free_func(gavl_audio_sink_t * sink,
+                              gavl_connector_free_func_t free_func);
+
+  
   
 /** \brief Get the format
  *  \param s An audio sink
@@ -732,6 +786,18 @@ gavl_video_sink_set_lock_funcs(gavl_video_sink_t * sink,
                                gavl_connector_lock_func_t lock_func,
                                gavl_connector_lock_func_t unlock_func,
                                void * priv);
+
+/** \brief Set free function
+ *  \param src A video sink
+ *  \param free_func Function called with the private data when the sink is destroyed
+ *
+ *  Use this if you don't want to keep a reference to the private data along wit the sink
+ */
+  
+GAVL_PUBLIC void
+gavl_video_sink_set_free_func(gavl_video_sink_t * sink,
+                              gavl_connector_free_func_t free_func);
+
   
 /** \brief Get the format
  *  \param s A video sink
@@ -818,6 +884,17 @@ gavl_packet_sink_set_lock_funcs(gavl_packet_sink_t * sink,
                                 gavl_connector_lock_func_t lock_func,
                                 gavl_connector_lock_func_t unlock_func,
                                 void * priv);
+
+/** \brief Set free function
+ *  \param src A packet sink
+ *  \param free_func Function called with the private data when the sink is destroyed
+ *
+ *  Use this if you don't want to keep a reference to the private data along wit the sink
+ */
+  
+GAVL_PUBLIC void
+gavl_packet_sink_set_free_func(gavl_packet_sink_t * sink,
+                               gavl_connector_free_func_t free_func);
 
   
 /** \brief Get a buffer for a packet

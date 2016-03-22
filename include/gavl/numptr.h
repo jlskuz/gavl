@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * *****************************************************************/
 
-#include <gavldefs.h>
+#include <gavl/gavldefs.h>
 
 /* ptr -> integer */
 

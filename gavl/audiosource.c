@@ -71,7 +71,9 @@ struct gavl_audio_source_s
   void * lock_priv;
 
   gavl_audio_source_t * prev;
-  
+
+  gavl_connector_free_func_t free_func;
+ 
   };
 
 gavl_audio_source_t *
@@ -159,6 +161,14 @@ void gavl_audio_source_reset(gavl_audio_source_t * s)
 #endif
   }
 
+void
+gavl_audio_source_set_free_func(gavl_audio_source_t * src,
+                                gavl_connector_free_func_t free_func)
+  {
+  src->free_func = free_func;
+  }
+
+
 void gavl_audio_source_destroy(gavl_audio_source_t * s)
   {
   if(s->out_frame)
@@ -172,6 +182,10 @@ void gavl_audio_source_destroy(gavl_audio_source_t * s)
   
   
   gavl_audio_converter_destroy(s->cnv);
+
+  if(s->priv && s->free_func)
+    s->free_func(s->priv);
+
   free(s);
   }
 

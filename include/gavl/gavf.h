@@ -177,6 +177,20 @@ int gavf_io_read_float(gavf_io_t * io, float * num);
 GAVL_PUBLIC
 int gavf_io_write_float(gavf_io_t * io, float num);
 
+/* Buffer as io */
+
+GAVL_PUBLIC
+gavf_io_t * gavf_io_create_buf_read(void);
+
+GAVL_PUBLIC
+gavf_io_t * gavf_io_create_buf_write(void);
+
+GAVL_PUBLIC
+gavf_buffer_t * gavf_io_buf_get(gavf_io_t * io);
+
+GAVL_PUBLIC
+void gavf_io_buf_reset(gavf_io_t * io);
+
 /* Stream information */
 
 typedef enum
@@ -575,5 +589,49 @@ int gavf_read_metadata(gavf_io_t * io, gavl_metadata_t * ci);
 
 GAVL_PUBLIC
 int gavf_write_metadata(gavf_io_t * io, const gavl_metadata_t * ci);
+
+/* Packet */
+
+GAVL_PUBLIC
+int gavf_read_gavl_packet(gavf_io_t * io,
+                          int default_duration,
+                          int packet_flags,
+                          int64_t last_sync_pts,
+                          int64_t * next_pts,
+                          int64_t pts_offset,
+                          gavl_packet_t * p);
+
+GAVL_PUBLIC
+int gavf_write_gavl_packet(gavf_io_t * io,
+                           gavf_io_t * hdr_io,
+                           int packet_duration,
+                           int packet_flags,
+                           int64_t last_sync_pts,
+                           const gavl_packet_t * p);
+
+/* (de)serialize A/V frames */
+
+GAVL_PUBLIC
+gavl_audio_source_t * gavl_audio_source_create_io(gavf_io_t * io,
+                                                  gavl_audio_format_t * fmt);
+
+GAVL_PUBLIC
+gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
+                                              gavl_audio_format_t * fmt);
+
+GAVL_PUBLIC
+gavl_video_source_t * gavl_video_source_create_io(gavf_io_t * io,
+                                                  gavl_video_format_t * fmt);
+
+GAVL_PUBLIC
+gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,
+                                              gavl_video_format_t * fmt);
+
+GAVL_PUBLIC
+gavl_packet_source_t * gavl_packet_source_create_io(gavf_io_t * io, int packet_flags);
+
+GAVL_PUBLIC
+gavl_packet_sink_t * gavl_packet_sink_create_io(gavf_io_t * io, int packet_flags);
+
 
 #endif // GAVF_H_INCLUDED

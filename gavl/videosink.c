@@ -35,6 +35,7 @@ struct gavl_video_sink_s
   gavl_connector_lock_func_t lock_func;
   gavl_connector_lock_func_t unlock_func;
   void * lock_priv;
+  gavl_connector_free_func_t free_func;
   
   };
 
@@ -118,7 +119,16 @@ gavl_video_sink_put_frame(gavl_video_sink_t * s,
   }
 
 void
+gavl_video_sink_set_free_func(gavl_video_sink_t * sink,
+                              gavl_connector_free_func_t free_func)
+  {
+  sink->free_func = free_func;
+  }
+
+void
 gavl_video_sink_destroy(gavl_video_sink_t * s)
   {
+  if(s->priv && s->free_func)
+    s->free_func(s->priv);
   free(s);
   }
