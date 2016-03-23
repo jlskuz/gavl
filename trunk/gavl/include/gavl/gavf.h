@@ -177,6 +177,13 @@ int gavf_io_read_float(gavf_io_t * io, float * num);
 GAVL_PUBLIC
 int gavf_io_write_float(gavf_io_t * io, float num);
 
+GAVL_PUBLIC
+int gavf_io_read_double(gavf_io_t * io, double * num);
+
+GAVL_PUBLIC
+int gavf_io_write_double(gavf_io_t * io, double num);
+
+
 /* Buffer as io */
 
 GAVL_PUBLIC
@@ -613,8 +620,8 @@ int gavf_write_gavl_packet(gavf_io_t * io,
 
 GAVL_PUBLIC
 gavl_audio_source_t * gavl_audio_source_create_io(gavf_io_t * io,
-                                                  gavl_audio_format_t * fmt,
-                                                  gavl_metadata_t * m);
+                                                  const gavl_audio_format_t * fmt,
+                                                  const gavl_metadata_t * m);
 
 GAVL_PUBLIC
 gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
@@ -623,8 +630,8 @@ gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
 
 GAVL_PUBLIC
 gavl_video_source_t * gavl_video_source_create_io(gavf_io_t * io,
-                                                  gavl_video_format_t * fmt,
-                                                  gavl_metadata_t * m);
+                                                  const gavl_video_format_t * fmt,
+                                                  const gavl_metadata_t * m);
 
 GAVL_PUBLIC
 gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,

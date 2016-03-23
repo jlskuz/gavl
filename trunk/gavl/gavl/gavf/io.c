@@ -424,20 +424,43 @@ int gavf_io_read_int32v(gavf_io_t * io, int32_t * num)
 /* int <-> float conversion routines taken from
    ffmpeg */
 
-static float int2flt(int32_t v)
+typedef union {
+    uint32_t i;
+    float    f;
+} intfloat32_t;
+
+typedef union  {
+    uint64_t i;
+    double   f;
+} intfloat64_t;
+
+
+static float int2flt(uint32_t i)
   {
-  if((uint32_t)v+v > 0xFF000000U)
-    return NAN;
-  return ldexp(((v&0x7FFFFF) + (1<<23)) * (v>>31|1), (v>>23&0xFF)-150);
+  intfloat32_t v;
+  v.i = i;
+  return v.f;
   }
 
-static int32_t flt2int(float d)
+static int32_t flt2int(float f)
   {
-  int e;
-  if     ( !d) return 0;
-  else if(d-d) return 0x7F800000 + ((d<0)<<31) + (d!=d);
-  d= frexp(d, &e);
-  return (d<0)<<31 | (e+126)<<23 | (int64_t)((fabs(d)-0.5)*(1<<24));
+  intfloat32_t v;
+  v.f = f;
+  return v.i;
+  }
+
+static float int2dbl(uint64_t i)
+  {
+  intfloat64_t v;
+  v.i = i;
+  return v.f;
+  }
+
+static int32_t dbl2int(double f)
+  {
+  intfloat64_t v;
+  v.f = f;
+  return v.i;
   }
 
 int gavf_io_read_float(gavf_io_t * io, float * num)
@@ -453,6 +476,21 @@ int gavf_io_write_float(gavf_io_t * io, float num)
   {
   uint32_t val = flt2int(num);
   return write_uint32f(io, val);
+  }
+
+int gavf_io_read_double(gavf_io_t * io, double * num)
+  {
+  uint64_t val;
+  if(!gavf_io_read_uint64f(io, &val))
+    return 0;
+  *num = int2dbl(val);
+  return 1;
+  }
+
+int gavf_io_write_double(gavf_io_t * io, double num)
+  {
+  uint64_t val = dbl2int(num);
+  return gavf_io_write_uint64f(io, val);
   }
 
 
@@ -540,32 +578,55 @@ typedef struct
   {
   gavl_packet_source_t * psrc;
   gavl_metadata_t m;
+  gavl_audio_frame_t * frame;
+  gavl_dsp_context_t * dsp;
+  gavl_audio_format_t fmt;
   } audio_source_priv_t;
 
 typedef struct
   {
   gavl_packet_sink_t * psink;
+  gavl_packet_t * p;
+  gavl_audio_frame_t * frame;
+  int max_packet_size;
+  gavl_audio_format_t fmt;
   } audio_sink_priv_t;
-
 
 typedef struct
   {
   gavl_packet_source_t * psrc;
   gavl_metadata_t m;
+  gavl_video_frame_t * frame;
+  gavl_dsp_context_t * dsp;
+  gavl_video_format_t fmt;
   } video_source_priv_t;
 
 typedef struct
   {
   gavl_packet_sink_t * psink;
+  int max_packet_size;
+  gavl_packet_t * p;
+  gavl_video_frame_t * frame;
+  gavl_video_format_t fmt;
   } video_sink_priv_t;
 
 static gavl_source_status_t
 audio_source_func(void * data, gavl_audio_frame_t ** frame)
   {
-  audio_source_priv_t * p = data;
+  audio_source_priv_t * priv = data;
 
+  gavl_packet_t * p = NULL;
+  gavl_source_status_t st;
+
+  if((st = gavl_packet_source_read_packet(priv->psrc, &p)) != GAVL_SOURCE_OK)
+    return st;
+
+  if(!priv->frame)
+    priv->frame = gavl_audio_frame_create(NULL);
   
-  
+  gavf_packet_to_audio_frame(p, priv->frame, &priv->fmt, &priv->m, &priv->dsp);
+  *frame = priv->frame;
+  return GAVL_SOURCE_OK;
   }
 
 static gavl_source_status_t
@@ -578,14 +639,12 @@ video_source_func(void * data, gavl_video_frame_t ** frame)
   if((st = gavl_packet_source_read_packet(priv->psrc, &p)) != GAVL_SOURCE_OK)
     return st;
 
-  //  if(!priv->frame)
-  //    priv->frame = gavl_video_frame_create(NULL);
+  if(!priv->frame)
+    priv->frame = gavl_video_frame_create(NULL);
   
-  //  gavf_packet_to_video_frame(p, priv->frame, , &s->h->m, &s->dsp);
-  //  *frame = s->vframe;
+  gavf_packet_to_video_frame(p, priv->frame, &priv->fmt, &priv->m, &priv->dsp);
+  *frame = priv->frame;
   return GAVL_SOURCE_OK;
-
-  
   }
 
 static void audio_source_free(void * data)
@@ -593,6 +652,15 @@ static void audio_source_free(void * data)
   audio_source_priv_t * p = data;
   if(p->psrc)
     gavl_packet_source_destroy(p->psrc);
+
+  if(p->frame)
+    {
+    gavl_audio_frame_null(p->frame);
+    gavl_audio_frame_destroy(p->frame);
+    }
+  if(p->dsp)
+    gavl_dsp_context_destroy(p->dsp);
+
   free(p);
   }
 
@@ -601,6 +669,11 @@ static void audio_sink_free(void * data)
   audio_sink_priv_t * p = data;
   if(p->psink)
     gavl_packet_sink_destroy(p->psink);
+  if(p->frame)
+    {
+    gavl_audio_frame_null(p->frame);
+    gavl_audio_frame_destroy(p->frame);
+    }
   free(p);
   }
 
@@ -609,6 +682,15 @@ static void video_source_free(void * data)
   video_source_priv_t * p = data;
   if(p->psrc)
     gavl_packet_source_destroy(p->psrc);
+
+  if(p->frame)
+    {
+    gavl_video_frame_null(p->frame);
+    gavl_video_frame_destroy(p->frame);
+    }
+  if(p->dsp)
+    gavl_dsp_context_destroy(p->dsp);
+  
   free(p);
   }
 
@@ -620,10 +702,9 @@ static void video_sink_free(void * data)
   free(p);
   }
 
-
 gavl_audio_source_t * gavl_audio_source_create_io(gavf_io_t * io,
-                                                  gavl_audio_format_t * fmt,
-                                                  gavl_metadata_t * m)
+                                                  const gavl_audio_format_t * fmt,
+                                                  const gavl_metadata_t * m)
   {
   gavl_audio_source_t * ret;
   int src_flags = 0;
@@ -638,15 +719,40 @@ gavl_audio_source_t * gavl_audio_source_create_io(gavf_io_t * io,
   return ret;
   }
 
-gavl_audio_frame_t * audio_sink_get(void * priv)
+static
+gavl_audio_frame_t * audio_sink_get(void * data)
   {
+  audio_sink_priv_t * priv = data;
 
+  priv->p = gavl_packet_sink_get_packet(priv->psink);
+
+  gavl_packet_reset(priv->p);
+  gavl_packet_alloc(priv->p, priv->max_packet_size);
+
+  if(!priv->frame)
+    priv->frame = gavl_audio_frame_create(NULL);
+
+  priv->frame->valid_samples = priv->fmt.samples_per_frame;
+  
+  gavl_audio_frame_set_channels(priv->frame, &priv->fmt, priv->p->data);
+
+  priv->frame->valid_samples = 0;
+  return priv->frame;
   }
 
-gavl_sink_status_t
-audio_sink_put(void * priv, gavl_audio_frame_t * f)
+static gavl_sink_status_t
+audio_sink_put(void * data, gavl_audio_frame_t * f)
   {
+  gavl_sink_status_t st;
+  audio_sink_priv_t * priv = data;
   
+  gavf_audio_frame_to_packet_metadata(priv->frame, priv->p);
+  priv->p->data_len = priv->max_packet_size;
+  gavf_shrink_audio_frame(priv->frame, priv->p, &priv->fmt);
+
+  st = gavl_packet_sink_put_packet(priv->psink, priv->p);
+  priv->p = NULL;
+  return st;
   }
 
 gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
@@ -655,17 +761,22 @@ gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
   {
   gavl_audio_sink_t * ret;
   audio_sink_priv_t * priv = calloc(1, sizeof(*priv));
+  gavl_audio_format_copy(&priv->fmt, fmt);
 
+  gavl_metadata_set_endian(m);
+  
   priv->psink = gavl_packet_sink_create_io(io,
                                            fmt->samples_per_frame,
                                            GAVF_PACKET_WRITE_PTS);
-
+  
   ret = gavl_audio_sink_create(audio_sink_get, audio_sink_put, priv, fmt);
+  gavl_audio_sink_set_free_func(ret, audio_sink_free);
+  return ret;
   }
   
 gavl_video_source_t * gavl_video_source_create_io(gavf_io_t * io,
-                                                  gavl_video_format_t * fmt,
-                                                  gavl_metadata_t * m)
+                                                  const gavl_video_format_t * fmt,
+                                                  const gavl_metadata_t * m)
   {
   gavl_video_source_t * ret;
   int src_flags = 0;
@@ -680,12 +791,50 @@ gavl_video_source_t * gavl_video_source_create_io(gavf_io_t * io,
     default_duration = 0;
     packet_flags |= GAVF_PACKET_WRITE_DURATION;
     }
+
+  gavl_video_format_copy(&priv->fmt, fmt);
+  gavl_metadata_copy(&priv->m, m);
   
   priv->psrc = gavl_packet_source_create_io(io, default_duration,
                                             packet_flags);
   
   ret = gavl_video_source_create(video_source_func, priv, src_flags, fmt);
+
+  gavl_video_source_set_free_func(ret, video_source_free);
+
   return ret;
+  }
+
+static
+gavl_video_frame_t * video_sink_get(void * data)
+  {
+  video_sink_priv_t * priv = data;
+
+  priv->p = gavl_packet_sink_get_packet(priv->psink);
+
+  gavl_packet_reset(priv->p);
+  gavl_packet_alloc(priv->p, priv->max_packet_size);
+
+  if(!priv->frame)
+    priv->frame = gavl_video_frame_create(NULL);
+
+  priv->frame->strides[0] = 0;
+  gavl_video_frame_set_planes(priv->frame,
+                              &priv->fmt, priv->p->data);
+  return priv->frame;
+  }
+
+static gavl_sink_status_t
+video_sink_put(void * data, gavl_video_frame_t * f)
+  {
+  gavl_sink_status_t st;
+  video_sink_priv_t * priv = data;
+  
+  gavf_video_frame_to_packet_metadata(priv->frame, priv->p);
+  priv->p->data_len = priv->max_packet_size;
+  st = gavl_packet_sink_put_packet(priv->psink, priv->p);
+  priv->p = NULL;
+  return st;
   }
 
 gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,
@@ -693,12 +842,13 @@ gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,
                                               gavl_metadata_t * m)
   {
   gavl_video_sink_t * ret;
-  int src_flags = 0;
   int default_duration;
   int packet_flags = GAVF_PACKET_WRITE_PTS;
 
   video_sink_priv_t * priv = calloc(1, sizeof(*priv));
 
+  gavl_metadata_set_endian(m);
+  
   if(fmt->framerate_mode == GAVL_FRAMERATE_CONSTANT)
     default_duration = fmt->frame_duration;
   else
@@ -707,9 +857,18 @@ gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,
     packet_flags |= GAVF_PACKET_WRITE_DURATION;
     }
 
+  gavl_video_format_copy(&priv->fmt, fmt);
+  
+  priv->max_packet_size =
+    gavf_get_max_video_packet_size(&priv->fmt,
+                                   NULL);
+  
   priv->psink = gavl_packet_sink_create_io(io, default_duration,
                                            packet_flags);
   
+  ret = gavl_video_sink_create(video_sink_get, video_sink_put, priv, fmt);
+  gavl_video_sink_set_free_func(ret, video_sink_free);
+  return ret;
   }
 
 /* Packet source */
@@ -748,6 +907,7 @@ gavl_packet_source_t * gavl_packet_source_create_io(gavf_io_t * io,
 
   ret = gavl_packet_source_create(packet_source_func, priv, 0);
   gavl_packet_source_set_free_func(ret, free);
+  return ret;
   }
 
 /* Packet sink */
