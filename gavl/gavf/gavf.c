@@ -390,7 +390,7 @@ gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s)
 static int get_audio_sample_size(const gavl_audio_format_t * fmt,
                                  const gavl_compression_info_t * ci)
   {
-  if(ci->id == GAVL_CODEC_ID_NONE)
+  if(!ci || (ci->id == GAVL_CODEC_ID_NONE))
     return gavl_bytes_per_sample(fmt->sample_format);
   else
     return gavl_compression_get_sample_size(ci->id);
@@ -401,7 +401,7 @@ int gavf_get_max_audio_packet_size(const gavl_audio_format_t * fmt,
   {
   int sample_size = 0;
 
-  if(ci->max_packet_size)
+  if(ci && ci->max_packet_size)
     return ci->max_packet_size;
 
   sample_size =
