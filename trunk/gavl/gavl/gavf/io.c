@@ -4,6 +4,7 @@
 
 #include <gavfprivate.h>
 #include <gavl/utils.h>
+#include <gavl/numptr.h>
 
 void gavf_io_init(gavf_io_t * ret,
                   gavf_read_func  r,
@@ -163,14 +164,7 @@ int64_t gavf_io_seek(gavf_io_t * io, int64_t pos, int whence)
 int gavf_io_write_uint64f(gavf_io_t * io, uint64_t num)
  {
   uint8_t buf[8];
-  buf[7] = num & 0xff;
-  buf[6] = (num>>8) & 0xff;
-  buf[5] = (num>>16) & 0xff;
-  buf[4] = (num>>24) & 0xff;
-  buf[3] = (num>>32) & 0xff;
-  buf[2] = (num>>40) & 0xff;
-  buf[1] = (num>>48) & 0xff;
-  buf[0] = (num>>56) & 0xff;
+  GAVL_64BE_2_PTR(num, buf);
   return (gavf_io_write_data(io, buf, 8) < 8) ? 0 : 1;
   }
 
@@ -179,26 +173,19 @@ int gavf_io_read_uint64f(gavf_io_t * io, uint64_t * num)
   uint8_t buf[8];
   if(gavf_io_read_data(io, buf, 8) < 8)
     return 0;
-
-  *num =
-    ((uint64_t)buf[0] << 56 ) |
-    ((uint64_t)buf[1] << 48 ) |
-    ((uint64_t)buf[2] << 40 ) |
-    ((uint64_t)buf[3] << 32 ) |
-    ((uint64_t)buf[4] << 24 ) |
-    ((uint64_t)buf[5] << 16 ) |
-    ((uint64_t)buf[6] << 8 ) |
-    ((uint64_t)buf[7]);
+  *num = GAVL_PTR_2_64BE(buf);
   return 1;
   }
 
 static int write_uint32f(gavf_io_t * io, uint32_t num)
   {
   uint8_t buf[4];
-  buf[3] = num & 0xff;
-  buf[2] = (num>>8) & 0xff;
-  buf[1] = (num>>16) & 0xff;
-  buf[0] = (num>>24) & 0xff;
+
+  GAVL_32BE_2_PTR(num, buf);
+
+  //  fprintf(stderr, "write_uint32f\n");
+  //  gavl_hexdump(buf, 4, 4);
+
   return (gavf_io_write_data(io, buf, 4) < 4) ? 0 : 1;
   }
 
@@ -207,11 +194,11 @@ static int read_uint32f(gavf_io_t * io, uint32_t * num)
   uint8_t buf[4];
   if(gavf_io_read_data(io, buf, 4) < 4)
     return 0;
-  *num =
-    ((uint32_t)buf[0] << 24 ) ||
-    ((uint32_t)buf[1] << 16 ) ||
-    ((uint32_t)buf[2] << 8 ) ||
-    ((uint32_t)buf[3]);
+
+  //  fprintf(stderr, "read_uint32f\n");
+  //  gavl_hexdump(buf, 4, 4);
+
+  *num = GAVL_PTR_2_32BE(buf);
   return 1;
   }
 
@@ -442,21 +429,21 @@ static float int2flt(uint32_t i)
   return v.f;
   }
 
-static int32_t flt2int(float f)
+static uint32_t flt2int(float f)
   {
   intfloat32_t v;
   v.f = f;
   return v.i;
   }
 
-static float int2dbl(uint64_t i)
+static double int2dbl(uint64_t i)
   {
   intfloat64_t v;
   v.i = i;
   return v.f;
   }
 
-static int32_t dbl2int(double f)
+static uint64_t dbl2int(double f)
   {
   intfloat64_t v;
   v.f = f;

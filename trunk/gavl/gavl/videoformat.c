@@ -56,10 +56,6 @@ void gavl_video_format_dumpi(const gavl_video_format_t * format, int indent)
   fprintf(stderr, "  Pixel format:     %s\n",
           gavl_pixelformat_to_string(format->pixelformat));
   
-  fprintf(stderr, "  Pixel format:     %s\n",
-          gavl_pixelformat_to_string(format->pixelformat));
-  
-  
   if(format->framerate_mode != GAVL_FRAMERATE_STILL)
     {
     if((!format->frame_duration) &&
