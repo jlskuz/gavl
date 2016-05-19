@@ -61,12 +61,12 @@
 
 #define GAVL_META_GENRE       "Genre"
 
-/** \brief Tracknumber within the album
+/** \brief Tracknumber within the album or (more generically) index within parent container
  *
  *  Integer starting with 1
  */
 
-#define GAVL_META_TRACKNUMBER "Tracknumber"
+#define GAVL_META_TRACKNUMBER "Track"
 
 /** \brief Generic date
  *

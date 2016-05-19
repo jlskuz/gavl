@@ -11,11 +11,13 @@ gavldsp.h \
 hw.h \
 hw_vaapi.h \
 hw_vaapi_x11.h \
+keycodes.h \
 numptr.h \
 timecode.h \
 gavldefs.h \
 metadata.h \
 metatags.h \
+msg.h \
 peakdetector.h \
 utils.h
 
