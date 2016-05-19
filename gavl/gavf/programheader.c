@@ -5,12 +5,12 @@
 
 int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph)
   {
-  gavf_buffer_t buf;
+  gavl_buffer_t buf;
   gavf_io_t bufio;
   int i;
   int ret = 0;
   
-  gavf_buffer_init(&buf);
+  gavl_buffer_init(&buf);
 
   if(!gavf_io_read_buffer(io, &buf))
     goto fail;
@@ -40,7 +40,7 @@ int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph)
   ret = 1;
   fail:
   
-  gavf_buffer_free(&buf);
+  gavl_buffer_free(&buf);
   
   return ret;
   }
@@ -49,7 +49,7 @@ int gavf_program_header_write(gavf_io_t * io,
                               const gavf_program_header_t * ph)
   {
   int i;
-  gavf_buffer_t buf;
+  gavl_buffer_t buf;
   gavf_io_t bufio;
   int ret = 0;
 
@@ -59,7 +59,7 @@ int gavf_program_header_write(gavf_io_t * io,
   if(gavf_io_write_data(io, (uint8_t*)GAVF_TAG_PROGRAM_HEADER, 8) < 8)
     return 0;
   
-  gavf_buffer_init(&buf);
+  gavl_buffer_init(&buf);
   gavf_io_init_buf_write(&bufio, &buf);
 
   if(!gavf_io_write_uint32v(&bufio, ph->num_streams))
@@ -85,7 +85,7 @@ int gavf_program_header_write(gavf_io_t * io,
   ret = 1;
   fail:
   
-  gavf_buffer_free(&buf);
+  gavl_buffer_free(&buf);
   
   return ret;
   }

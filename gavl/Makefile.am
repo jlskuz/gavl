@@ -100,6 +100,7 @@ audiooptions.c \
 audiosink.c \
 audiosource.c \
 blend.c \
+buffer.c \
 chapterlist.c \
 colorchannel.c \
 colorspace.c \
@@ -119,6 +120,7 @@ memalign.c \
 memcpy.c \
 metadata.c \
 mix.c \
+msg.c \
 numptr.c \
 packetconnector.c \
 packetsink.c \

@@ -11,6 +11,8 @@
 #include <gavl/gavldefs.h>
 #include <gavl/connectors.h>
 #include <gavl/gavldsp.h>
+#include <gavl/utils.h>
+#include <gavl/msg.h>
 
 #include <stdio.h>
 
@@ -28,32 +30,6 @@ typedef struct gavf_options_s gavf_options_t;
 
 #define GAVF_IO_CB_TYPE_END(t) (!!(t & 0x100))
 
-/* Buffer */
-
-typedef struct
-  {
-  uint8_t * buf;
-  int len;
-  int alloc;
-  int alloc_static;
-  int pos;
-  } gavf_buffer_t;
-
-GAVL_PUBLIC
-void gavf_buffer_init(gavf_buffer_t * buf);
-
-GAVL_PUBLIC
-void gavf_buffer_init_static(gavf_buffer_t * buf, uint8_t * data, int size);
-
-GAVL_PUBLIC
-int gavf_buffer_alloc(gavf_buffer_t * buf,
-                      int size);
-
-GAVL_PUBLIC
-void gavf_buffer_free(gavf_buffer_t * buf);
-
-GAVL_PUBLIC
-void gavf_buffer_reset(gavf_buffer_t * buf);
 
 
 /* I/O Structure */
@@ -166,10 +142,10 @@ GAVL_PUBLIC
 int gavf_io_write_string(gavf_io_t * io, const char * );
 
 GAVL_PUBLIC
-int gavf_io_read_buffer(gavf_io_t * io, gavf_buffer_t * ret);
+int gavf_io_read_buffer(gavf_io_t * io, gavl_buffer_t * ret);
 
 GAVL_PUBLIC
-int gavf_io_write_buffer(gavf_io_t * io,  const gavf_buffer_t * buf);
+int gavf_io_write_buffer(gavf_io_t * io,  const gavl_buffer_t * buf);
 
 GAVL_PUBLIC
 int gavf_io_read_float(gavf_io_t * io, float * num);
@@ -183,6 +159,24 @@ int gavf_io_read_double(gavf_io_t * io, double * num);
 GAVL_PUBLIC
 int gavf_io_write_double(gavf_io_t * io, double num);
 
+/** \brief Read a message using a callback
+ *  \param ret Where the message will be copied
+ *  \param io I/O context
+ *  \returns 1 on success, 0 on error
+ */
+
+GAVL_PUBLIC
+int gavl_msg_read(gavl_msg_t * ret, gavf_io_t * io);
+
+/** \brief Write a message using a callback
+ *  \param msg A message
+ *  \param io I/O context
+ *  \returns 1 on success, 0 on error
+ */
+
+GAVL_PUBLIC
+int gavl_msg_write(const gavl_msg_t * msg, gavf_io_t * io);
+
 
 /* Buffer as io */
 
@@ -193,7 +187,7 @@ GAVL_PUBLIC
 gavf_io_t * gavf_io_create_buf_write(void);
 
 GAVL_PUBLIC
-gavf_buffer_t * gavf_io_buf_get(gavf_io_t * io);
+gavl_buffer_t * gavf_io_buf_get(gavf_io_t * io);
 
 GAVL_PUBLIC
 void gavf_io_buf_reset(gavf_io_t * io);

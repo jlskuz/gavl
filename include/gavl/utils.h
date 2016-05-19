@@ -19,6 +19,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * *****************************************************************/
 
+#ifndef GAVL_UTILS_H_INCLUDED
+#define GAVL_UTILS_H_INCLUDED
+
+
 /** \defgroup utils Utilities
  *  \brief Utility functions
  *
@@ -211,5 +215,39 @@ int gavl_string_ends_with(const char * str, const char * end);
 GAVL_PUBLIC
 int gavl_string_ends_with_i(const char * str, const char * end);
 
+/* Buffer */
+
+typedef struct
+  {
+  uint8_t * buf;
+  int len;
+  int alloc;
+  int alloc_static;
+  int pos;
+  } gavl_buffer_t;
+
+GAVL_PUBLIC
+void gavl_buffer_init(gavl_buffer_t * buf);
+
+GAVL_PUBLIC
+void gavl_buffer_init_static(gavl_buffer_t * buf, uint8_t * data, int size);
+
+GAVL_PUBLIC
+int gavl_buffer_alloc(gavl_buffer_t * buf,
+                      int size);
+
+GAVL_PUBLIC
+void gavl_buffer_free(gavl_buffer_t * buf);
+
+GAVL_PUBLIC
+void gavl_buffer_reset(gavl_buffer_t * buf);
+
+GAVL_PUBLIC
+void gavl_buffer_copy(gavl_buffer_t * dst, const gavl_buffer_t * src);
+
+
+#endif // GAVL_UTILS_H_INCLUDED
+
 
 /* @} */
+

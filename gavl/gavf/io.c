@@ -519,19 +519,26 @@ int gavf_io_write_string(gavf_io_t * io, const char * str)
   return 1;
   }
 
-int gavf_io_read_buffer(gavf_io_t * io, gavf_buffer_t * ret)
+int gavf_io_read_buffer(gavf_io_t * io, gavl_buffer_t * ret)
   {
   uint32_t len;
   
-  if(!gavf_io_read_uint32v(io, &len) ||
-     !gavf_buffer_alloc(ret, len) ||
-     (gavf_io_read_data(io, ret->buf, len) < len))
+  if(!gavf_io_read_uint32v(io, &len))
+    return 0;
+
+  if(!len)
+    {
+    gavl_buffer_free(ret);
+    gavl_buffer_init(ret);
+    }
+  else if(!gavl_buffer_alloc(ret, len) ||
+          (gavf_io_read_data(io, ret->buf, len) < len))
     return 0;
   ret->len = len;
   return 1;
   }
 
-int gavf_io_write_buffer(gavf_io_t * io, const gavf_buffer_t * buf)
+int gavf_io_write_buffer(gavf_io_t * io, const gavl_buffer_t * buf)
   {
   if(!gavf_io_write_uint32v(io, buf->len) ||
      (gavf_io_write_data(io, buf->buf, buf->len) < buf->len))
@@ -956,4 +963,163 @@ gavl_packet_sink_t * gavl_packet_sink_create_io(gavf_io_t * io,
   gavl_packet_sink_set_free_func(ret, packet_sink_free_func);
   
   return ret;
+  }
+
+/* */
+
+
+int gavl_msg_read(gavl_msg_t * ret, gavf_io_t * io)
+  {
+  int i;
+  
+  int32_t val_i;
+
+  gavl_time_t val_time;
+
+  memset(ret, 0, sizeof(*ret));
+
+  /* Message Namespace */
+  
+  if(!gavf_io_read_int32v(io, &val_i))
+    return 0;
+  
+  ret->ns = val_i;
+  
+  /* Message ID */
+  
+  if(!gavf_io_read_int32v(io, &val_i))
+    return 0;
+  
+  ret->id = val_i;
+
+  //  fprintf(stderr, "Got ID: %d\n", ret->id);
+  
+  /* Number of arguments */
+
+  if(!gavf_io_read_int32v(io, &val_i))
+    return 0;
+  
+  ret->num_args = val_i;
+
+  for(i = 0; i < ret->num_args; i++)
+    {
+    if(!gavf_io_read_int32v(io, &val_i))
+      return 0;
+    
+    ret->args[i].type = val_i;
+    
+    switch(ret->args[i].type)
+      {
+      case GAVL_MSG_TYPE_INT:
+        if(!gavf_io_read_int32v(io, &val_i))
+          return 0;
+        ret->args[i].value.val_i = val_i;
+        break;
+      case GAVL_MSG_TYPE_FLOAT:
+        if(!gavf_io_read_double(io, &ret->args[i].value.val_f))
+          return 0;
+        break;
+      case GAVL_MSG_TYPE_STRING:
+      case GAVL_MSG_TYPE_AUDIO_FORMAT:
+      case GAVL_MSG_TYPE_VIDEO_FORMAT:
+      case GAVL_MSG_TYPE_METADATA:
+        if(!gavf_io_read_buffer(io, &ret->args[i].value.val_buf))
+          return 0;
+        break;
+      case GAVL_MSG_TYPE_TIME:
+        if(!gavf_io_read_int64v(io, &val_time))
+          return 0;
+        ret->args[i].value.val_time = val_time;
+        break;
+      case GAVL_MSG_TYPE_COLOR_RGB:
+        if(!gavf_io_read_float(io, &ret->args[i].value.val_color[0]) ||
+           !gavf_io_read_float(io, &ret->args[i].value.val_color[1]) ||
+           !gavf_io_read_float(io, &ret->args[i].value.val_color[2]))
+          return 0;
+        break;
+      case GAVL_MSG_TYPE_COLOR_RGBA:
+        if(!gavf_io_read_float(io, &ret->args[i].value.val_color[0]) ||
+           !gavf_io_read_float(io, &ret->args[i].value.val_color[1]) ||
+           !gavf_io_read_float(io, &ret->args[i].value.val_color[2]) ||
+           !gavf_io_read_float(io, &ret->args[i].value.val_color[3]))
+          return 0;
+        break;
+      case GAVL_MSG_TYPE_POSITION:
+        if(!gavf_io_read_double(io, &ret->args[i].value.val_pos[0]) ||
+           !gavf_io_read_double(io, &ret->args[i].value.val_pos[1]))
+          return 0;
+        break;
+      }
+    }
+  return 1;
+  }
+
+int gavl_msg_write(const gavl_msg_t * msg, gavf_io_t * io)
+  {
+  int i;
+
+  /* Namespace */
+
+  if(!gavf_io_write_int32v(io, msg->ns))
+    return 0;
+  
+  /* Message id */
+
+  if(!gavf_io_write_int32v(io, msg->id))
+    return 0;
+
+  /* Number of arguments */
+
+  if(!gavf_io_write_int32v(io, msg->num_args))
+    return 0;
+  
+  /* Arguments */
+
+  for(i = 0; i < msg->num_args; i++)
+    {
+    if(!gavf_io_write_int32v(io, msg->args[i].type))
+      return 0;
+    
+    switch(msg->args[i].type)
+      {
+      case GAVL_MSG_TYPE_INT:
+        if(!gavf_io_write_int32v(io, msg->args[i].value.val_i))
+          return 0;
+        break;
+      case GAVL_MSG_TYPE_TIME:
+        if(!gavf_io_write_int64v(io, msg->args[i].value.val_time))
+          return 0;
+        break;
+      case GAVL_MSG_TYPE_FLOAT:
+        if(!gavf_io_write_double(io, msg->args[i].value.val_f))
+          return 0;
+        break;
+      case GAVL_MSG_TYPE_STRING:
+      case GAVL_MSG_TYPE_AUDIO_FORMAT:
+      case GAVL_MSG_TYPE_VIDEO_FORMAT:
+      case GAVL_MSG_TYPE_METADATA:
+        if(!gavf_io_write_buffer(io, &msg->args[i].value.val_buf))
+          return 0;
+        break;
+      case GAVL_MSG_TYPE_COLOR_RGB:
+        if(!gavf_io_write_float(io, msg->args[i].value.val_color[0]) ||
+           !gavf_io_write_float(io, msg->args[i].value.val_color[1]) ||
+           !gavf_io_write_float(io, msg->args[i].value.val_color[2]))
+          return 0;
+        break;
+      case GAVL_MSG_TYPE_COLOR_RGBA:
+        if(!gavf_io_write_float(io, msg->args[i].value.val_color[0]) ||
+           !gavf_io_write_float(io, msg->args[i].value.val_color[1]) ||
+           !gavf_io_write_float(io, msg->args[i].value.val_color[2]) ||
+           !gavf_io_write_float(io, msg->args[i].value.val_color[3]))
+          return 0;
+        break;
+      case GAVL_MSG_TYPE_POSITION:
+        if(!gavf_io_write_double(io, msg->args[i].value.val_pos[0]) ||
+           !gavf_io_write_double(io, msg->args[i].value.val_pos[1]))
+          return 0;
+        break;
+      }
+    }
+  return 1;
   }

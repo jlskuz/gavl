@@ -1,5 +1,5 @@
 
-#include "gavf.h"
+#include <gavl/gavf.h>
 
 
 /* I/O */
@@ -41,8 +41,8 @@ int gavf_io_cb(gavf_io_t * io, int type, const void * data);
 
 
 
-void gavf_io_init_buf_read(gavf_io_t * io, gavf_buffer_t * buf);
-void gavf_io_init_buf_write(gavf_io_t * io, gavf_buffer_t * buf);
+void gavf_io_init_buf_read(gavf_io_t * io, gavl_buffer_t * buf);
+void gavf_io_init_buf_write(gavf_io_t * io, gavl_buffer_t * buf);
 
 
 /* Streamheader */
@@ -347,7 +347,7 @@ struct gavf_s
 
   /* Inline metadata support */
   gavf_io_t meta_io;
-  gavf_buffer_t meta_buf;
+  gavl_buffer_t meta_buf;
   gavl_metadata_t metadata;
   
   uint64_t first_sync_pos;

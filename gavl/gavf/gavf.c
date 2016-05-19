@@ -195,7 +195,7 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
                            (const uint8_t*)GAVF_TAG_METADATA_HEADER, 1) < 1) ||
        !gavf_io_write_buffer(g->io, &g->meta_buf))
       return GAVL_SINK_ERROR;
-    gavf_buffer_reset(&g->meta_buf);
+    gavl_buffer_reset(&g->meta_buf);
 
     if(!gavf_io_flush(g->io))
       return GAVL_SINK_ERROR;
@@ -253,7 +253,7 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
 int gavf_write_gavl_packet(gavf_io_t * io, gavf_io_t * hdr_io, int packet_duration, int packet_flags, int64_t last_sync_pts,
                            const gavl_packet_t * p)
   {
-  gavf_buffer_t * buf;
+  gavl_buffer_t * buf;
   buf = gavf_io_buf_get(hdr_io);
   gavf_io_buf_reset(hdr_io);
 
@@ -903,7 +903,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
         gavl_metadata_t m;
         gavl_metadata_init(&m);
         
-        gavf_buffer_reset(&g->meta_buf);
+        gavl_buffer_reset(&g->meta_buf);
         
         if(!gavf_io_read_buffer(g->io, &g->meta_buf) ||
            !gavf_read_metadata(&g->meta_io, &m))
@@ -1005,7 +1005,7 @@ int gavf_update_metadata(gavf_t * g, const gavl_metadata_t * m)
    *  Will be flushed after the next sync header.
    */
 
-  gavf_buffer_reset(&g->meta_buf);
+  gavl_buffer_reset(&g->meta_buf);
   if(!gavf_write_metadata(&g->meta_io, &g->metadata))
     return 0;
   
@@ -1458,7 +1458,7 @@ void gavf_close(gavf_t * g)
   if(g->pkt_io)
     gavf_io_destroy(g->pkt_io);
   
-  gavf_buffer_free(&g->meta_buf);
+  gavl_buffer_free(&g->meta_buf);
   gavl_metadata_free(&g->metadata);
   
   free(g);

@@ -72,7 +72,7 @@ int gavf_write_audio_format(gavf_io_t * io, const gavl_audio_format_t * format)
   {
   int num_extensions;
   uint8_t data[MAX_EXT_SIZE_AF];
-  gavf_buffer_t buf;
+  gavl_buffer_t buf;
   gavf_io_t bufio;
   int i;
   
@@ -112,7 +112,7 @@ int gavf_write_audio_format(gavf_io_t * io, const gavl_audio_format_t * format)
   if(!num_extensions)
     return 1;
 
-  gavf_buffer_init_static(&buf, data, MAX_EXT_SIZE_AF);
+  gavl_buffer_init_static(&buf, data, MAX_EXT_SIZE_AF);
   gavf_io_init_buf_write(&bufio, &buf);
   
   if(format->samples_per_frame != 0)
@@ -240,7 +240,7 @@ int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format)
   {
   int num_extensions;
   uint8_t data[MAX_EXT_SIZE_VF];
-  gavf_buffer_t buf;
+  gavl_buffer_t buf;
   gavf_io_t bufio;
 
   /* Write mandatory stuff */
@@ -287,7 +287,7 @@ int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format)
   if(!num_extensions)
     return 1;
 
-  gavf_buffer_init_static(&buf, data, MAX_EXT_SIZE_VF);
+  gavl_buffer_init_static(&buf, data, MAX_EXT_SIZE_VF);
   gavf_io_init_buf_write(&bufio, &buf);
 
   if(format->pixelformat != GAVL_PIXELFORMAT_NONE)
@@ -415,7 +415,7 @@ int gavf_write_compression_info(gavf_io_t * io,
   {
   uint32_t num_extensions;
   uint8_t data[MAX_EXT_SIZE_CI];
-  gavf_buffer_t buf;
+  gavl_buffer_t buf;
   gavf_io_t bufio;
   
   /* Write mandatory stuff */
@@ -450,7 +450,7 @@ int gavf_write_compression_info(gavf_io_t * io,
   if(!num_extensions)
     return 1;
 
-  gavf_buffer_init_static(&buf, data, MAX_EXT_SIZE_CI);
+  gavl_buffer_init_static(&buf, data, MAX_EXT_SIZE_CI);
   gavf_io_init_buf_write(&bufio, &buf);
   
   if(ci->global_header_len)
@@ -729,7 +729,7 @@ int gavf_write_gavl_packet_header(gavf_io_t * io,
   uint32_t num_extensions;
 
   uint8_t data[MAX_EXT_SIZE_PK];
-  gavf_buffer_t buf;
+  gavl_buffer_t buf;
   gavf_io_t bufio;
 
   uint32_t flags;
@@ -798,7 +798,7 @@ int gavf_write_gavl_packet_header(gavf_io_t * io,
     if(!gavf_io_write_uint32v(io, num_extensions))
       return 0;
     
-    gavf_buffer_init_static(&buf, data, MAX_EXT_SIZE_AF);
+    gavl_buffer_init_static(&buf, data, MAX_EXT_SIZE_AF);
     gavf_io_init_buf_write(&bufio, &buf);
     
     if(default_duration && (p->duration < default_duration))
