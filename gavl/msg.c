@@ -60,6 +60,11 @@ void gavl_msg_set_id(gavl_msg_t * msg, int id)
   gavl_msg_set_id_ns(msg, id, 0);
   }
 
+int gavl_msg_get_id_ns(gavl_msg_t * msg, int * ns)
+  {
+  *ns = msg->ns;
+  return msg->id;
+  }
 
 void gavl_msg_copy(gavl_msg_t * dst, const gavl_msg_t * src)
   {
@@ -387,12 +392,20 @@ void gavl_msg_get_arg_metadata(gavl_msg_t * msg, int arg,
     }
   }
 
+void gavl_msg_init(gavl_msg_t * m)
+  {
+  memset(m, 0, sizeof(*m));
+  m->id = -1;
+  }
+
 gavl_msg_t * gavl_msg_create()
   {
   gavl_msg_t * ret;
-  ret = calloc(1, sizeof(*ret));
+  ret = malloc(sizeof(*ret));
+  gavl_msg_init(ret);
   return ret;
   }
+
 
 void gavl_msg_free(gavl_msg_t * m)
   {
@@ -405,6 +418,7 @@ void gavl_msg_free(gavl_msg_t * m)
   memset(m->args, 0, GAVL_MSG_MAX_ARGS * sizeof(m->args[0]));
   m->num_args = 0;
   m->id = -1;
+  m->ns = 0;
   }
 
 void gavl_msg_destroy(gavl_msg_t * m)
@@ -505,7 +519,7 @@ void gavl_msg_dump(gavl_msg_t * msg, int indent)
 void
 gavl_msg_set_progress(gavl_msg_t * msg, const char * activity, float perc)
   {
-  gavl_msg_set_id_ns(msg, GAVL_MSG_PROGRESS, GAVL_MSG_NS);
+  gavl_msg_set_id_ns(msg, GAVL_MSG_PROGRESS, GAVL_MSG_NS_GENERIC);
   gavl_msg_set_arg_string(msg, 0, activity);
   gavl_msg_set_arg_float(msg, 1, perc);
   }
@@ -524,7 +538,7 @@ gavl_msg_get_progress(gavl_msg_t * msg, char ** activity, float * perc)
 void
 gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, int scale, gavl_metadata_t * m)
   {
-  gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_METADATA, GAVL_MSG_NS);
+  gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_METADATA, GAVL_MSG_NS_SRC);
   gavl_msg_set_arg_time(msg, 0, time);
   gavl_msg_set_arg_int(msg, 1, scale);
   gavl_msg_set_arg_metadata(msg, 2, m);
@@ -546,7 +560,7 @@ void
 gavl_msg_set_src_aspect(gavl_msg_t * msg, int64_t time, int scale, int stream,
                         int pixel_width, int pixel_height)
   {
-  gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_ASPECT, GAVL_MSG_NS);
+  gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_ASPECT, GAVL_MSG_NS_SRC);
   gavl_msg_set_arg_time(msg, 0, time);
   gavl_msg_set_arg_int(msg, 1, scale);
   gavl_msg_set_arg_int(msg, 2, stream);
@@ -575,7 +589,7 @@ gavl_msg_get_src_aspect(gavl_msg_t * msg,
 void
 gavl_msg_set_src_buffering(gavl_msg_t * msg, float perc)
   {
-  gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_BUFFERING, GAVL_MSG_NS);
+  gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_BUFFERING, GAVL_MSG_NS_SRC);
   gavl_msg_set_arg_float(msg, 0, perc);
   }
 
@@ -602,7 +616,7 @@ void
 gavl_msg_set_gui_button_press(gavl_msg_t * msg, int64_t time, int scale, int button,
                               int mask, int x, int y, const double * pos)
   {
-  gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_BUTTON_PRESS, GAVL_MSG_NS);
+  gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_BUTTON_PRESS, GAVL_MSG_NS_GUI);
   set_button_args(msg, time, scale, button, mask, x, y, pos);
   }
 
@@ -610,7 +624,7 @@ void
 gavl_msg_set_gui_button_release(gavl_msg_t * msg, int64_t time, int scale, int button,
                                 int mask, int x, int y, const double * pos)
   {
-  gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_BUTTON_RELEASE, GAVL_MSG_NS);
+  gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_BUTTON_RELEASE, GAVL_MSG_NS_GUI);
   set_button_args(msg, time, scale, button, mask, x, y, pos);
   }
 
@@ -652,7 +666,7 @@ gavl_msg_set_gui_key_press(gavl_msg_t * msg, int64_t time, int scale, int key,
                            int mask, int x, int y, const double * pos)
   
   {
-  gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_KEY_PRESS, GAVL_MSG_NS);
+  gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_KEY_PRESS, GAVL_MSG_NS_GUI);
   set_key_args(msg, time, scale, key, mask, x, y, pos);
   }
 
@@ -661,7 +675,7 @@ gavl_msg_set_gui_key_release(gavl_msg_t * msg, int64_t time, int scale, int key,
                              int mask, int x, int y, const double * pos)
   
   {
-  gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_KEY_RELEASE, GAVL_MSG_NS);
+  gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_KEY_RELEASE, GAVL_MSG_NS_GUI);
   set_key_args(msg, time, scale, key, mask, x, y, pos);
   }
 
@@ -720,3 +734,7 @@ gavl_msg_get_gui_motion(gavl_msg_t * msg, int64_t * time, int * scale,
 
   }
 
+int gavl_msg_match(const gavl_msg_t * m, uint32_t id, uint32_t ns)
+  {
+  return ((m->id == id) && (m->ns == ns)) ? 1 : 0;
+  }

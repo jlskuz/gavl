@@ -22,6 +22,8 @@
 #ifndef GAVL_MSG_H_INCLUDED
 #define GAVL_MSG_H_INCLUDED
 
+#include <gavl/gavldefs.h>
+
 /* Must match utils.js */
 
 typedef enum
@@ -42,17 +44,30 @@ typedef enum
 #define GAVL_MSG_MAX_ARGS  8 //!< Maximum number of args
 
 
-#define GAVL_MSG_NS        1
+#define GAVL_MSG_NS_TRANSPORT 1
+#define GAVL_MSG_NS_GENERIC   2
+#define GAVL_MSG_NS_SRC       3
+#define GAVL_MSG_NS_GUI       4
 
 /* Message IDs */
 
-/** \brief End of transmission, it's peer's turn
+/*
+ *  GAVL_MSG_NS_TRANSPORT
+ */
+
+/** \brief 
  *  
  *  For implementing block-free duplex connections.
  */
 
-#define GAVL_MSG_EOT            0
-#define GAVL_MSG_TRANSPORT_MAX  9
+#define GAVL_MSG_READY          1 // Initial handshake, sent by client, echoed by server
+#define GAVL_MSG_EOT            2 // End of transmission, it's peer's turn
+#define GAVL_MSG_ACK            3 // Acknowledge, can have application specific args
+#define GAVL_MSG_BYE            4 // Quit, connection is closed IMMEDIATELY after
+
+/*
+ *  GAVL_MSG_NS_GENERIC
+ */
 
 /** \brief Generic progress callback
  *
@@ -60,7 +75,12 @@ typedef enum
  *  arg0: Percentage (0.0..1.0)
  */
 
-#define GAVL_MSG_PROGRESS      10
+#define GAVL_MSG_PROGRESS      1
+
+/*
+ *  GAVL_MSG_NS_SRC
+ */
+
 
 /** \brief Global metadata changed
  *
@@ -69,7 +89,7 @@ typedef enum
  *  arg2: Metadata
  */
 
-#define GAVL_MSG_SRC_METADATA  100
+#define GAVL_MSG_SRC_METADATA  1
 
 /** \brief Pixel aspect ratio changed
  *
@@ -80,16 +100,20 @@ typedef enum
  *  arg4: new pixel width
  */
 
-#define GAVL_MSG_SRC_ASPECT    101 
+#define GAVL_MSG_SRC_ASPECT    2
 
 /** \brief Buffering notification
  *
  *  arg0: Percentage (float), negative means buffering finished
  */
 
-#define GAVL_MSG_SRC_BUFFERING 102 
+#define GAVL_MSG_SRC_BUFFERING 3
 
 /* GUI Events */
+
+/*
+ *  GAVL_MSG_NS_GUI
+ */
 
 /** \brief Key was pressed
  *
@@ -99,7 +123,7 @@ typedef enum
  *  arg3: Mask (see keycodes.h)
  */
 
-#define GAVL_MSG_GUI_KEY_PRESS       201  // Key was pressed
+#define GAVL_MSG_GUI_KEY_PRESS       1  // Key was pressed
 
 /** \brief Key was released
  *
@@ -109,7 +133,7 @@ typedef enum
  *  arg3: Mask (see keycodes.h)
  */
 
-#define GAVL_MSG_GUI_KEY_RELEASE     202  // Key was released
+#define GAVL_MSG_GUI_KEY_RELEASE     2  // Key was released
 
 /** \brief Button was pressed
  *
@@ -122,7 +146,7 @@ typedef enum
  *  arg6: pos (position, 0..1, relative to Video viewport)
  */
 
-#define GAVL_MSG_GUI_BUTTON_PRESS    203  // Mouse button was pressed
+#define GAVL_MSG_GUI_BUTTON_PRESS    3  // Mouse button was pressed
 
 /** \brief Button was released
  *
@@ -135,7 +159,7 @@ typedef enum
  *  arg6: pos (position, 0..1, relative to Video viewport)
  */
 
-#define GAVL_MSG_GUI_BUTTON_RELEASE  204  // Mouse button was released
+#define GAVL_MSG_GUI_BUTTON_RELEASE  4  // Mouse button was released
 
 /** \brief Motion callback
  *
@@ -147,7 +171,7 @@ typedef enum
  *  arg5: pos (position, 0..1, relative to Video viewport)
  */
 
-#define GAVL_MSG_GUI_MOUSE_MOTION    205  // Mouse was moved
+#define GAVL_MSG_GUI_MOUSE_MOTION    5  // Mouse was moved
 
 /** \brief Message type
  */
@@ -179,12 +203,21 @@ typedef struct gavl_msg_s gavl_msg_t;
  *  \returns A newly allocated message
  */
 
+GAVL_PUBLIC
 gavl_msg_t * gavl_msg_create();
+
+/** \brief Initialize a message struct
+ *  \param m A message
+ */
+
+GAVL_PUBLIC
+void gavl_msg_init(gavl_msg_t * m);
 
 /** \brief Destroy a message
  *  \param msg A message
  */
 
+GAVL_PUBLIC
 void gavl_msg_destroy(gavl_msg_t * msg);
 
 /** \brief Free internal memory of the message
@@ -194,6 +227,7 @@ void gavl_msg_destroy(gavl_msg_t * msg);
  *  a different ID or args
  */
 
+GAVL_PUBLIC
 void gavl_msg_free(gavl_msg_t * msg);
 
 /** \brief Copy message
@@ -201,7 +235,12 @@ void gavl_msg_free(gavl_msg_t * msg);
  *  \param src Source
  */
 
+GAVL_PUBLIC
 void gavl_msg_copy(gavl_msg_t * dst, const gavl_msg_t * src);
+
+
+GAVL_PUBLIC
+int gavl_msg_match(const gavl_msg_t * m, uint32_t id, uint32_t ns);
 
 /* Functions for messages */
 
@@ -210,6 +249,7 @@ void gavl_msg_copy(gavl_msg_t * dst, const gavl_msg_t * src);
  *  \param id The ID
  */
 
+GAVL_PUBLIC
 void gavl_msg_set_id(gavl_msg_t * msg, int id);
 
 /** \brief Set the ID of a message with namespace
@@ -217,6 +257,8 @@ void gavl_msg_set_id(gavl_msg_t * msg, int id);
  *  \param id The ID
  *  \param ns The Namespace
  */
+
+GAVL_PUBLIC
 void gavl_msg_set_id_ns(gavl_msg_t * msg, int id, int ns);
 
 /** \brief Get the ID of a message
@@ -224,6 +266,7 @@ void gavl_msg_set_id_ns(gavl_msg_t * msg, int id, int ns);
  *  \returns The ID
  */
 
+GAVL_PUBLIC
 int gavl_msg_get_id(gavl_msg_t * msg);
 
 /** \brief Get the ID and namespace of a message
@@ -232,6 +275,7 @@ int gavl_msg_get_id(gavl_msg_t * msg);
  *  \returns The ID
  */
 
+GAVL_PUBLIC
 int gavl_msg_get_id_ns(gavl_msg_t * msg, int * ns);
 
 /** \brief Set an integer argument
@@ -240,6 +284,7 @@ int gavl_msg_get_id_ns(gavl_msg_t * msg, int * ns);
  *  \param value Value
  */
 
+GAVL_PUBLIC
 void gavl_msg_set_arg_int(gavl_msg_t * msg, int arg, int value);
 
 /** \brief Get an integer argument
@@ -248,6 +293,7 @@ void gavl_msg_set_arg_int(gavl_msg_t * msg, int arg, int value);
  *  \returns Value
  */
 
+GAVL_PUBLIC
 int gavl_msg_get_arg_int(gavl_msg_t * msg, int arg);
 
 /** \brief Set a time argument
@@ -256,6 +302,7 @@ int gavl_msg_get_arg_int(gavl_msg_t * msg, int arg);
  *  \param value Value
  */
 
+GAVL_PUBLIC
 void gavl_msg_set_arg_time(gavl_msg_t * msg, int arg, gavl_time_t value);
 
 /** \brief Get a time argument
@@ -264,6 +311,7 @@ void gavl_msg_set_arg_time(gavl_msg_t * msg, int arg, gavl_time_t value);
  *  \returns Value
  */
 
+GAVL_PUBLIC
 gavl_time_t gavl_msg_get_arg_time(gavl_msg_t * msg, int arg);
 
 /** \brief Set a string argument
@@ -272,6 +320,7 @@ gavl_time_t gavl_msg_get_arg_time(gavl_msg_t * msg, int arg);
  *  \param value Value
  */
 
+GAVL_PUBLIC
 void gavl_msg_set_arg_string(gavl_msg_t * msg, int arg, const char * value);
 
 /** \brief Get a string argument
@@ -283,6 +332,7 @@ void gavl_msg_set_arg_string(gavl_msg_t * msg, int arg, const char * value);
  *  and must free() it, when you are done with it
  */
 
+GAVL_PUBLIC
 char * gavl_msg_get_arg_string(gavl_msg_t * msg, int arg);
 
 /** \brief Get a string argument
@@ -294,7 +344,7 @@ char * gavl_msg_get_arg_string(gavl_msg_t * msg, int arg);
  *  owned by the message and must not be freed.
  */
 
-
+GAVL_PUBLIC
 const char * gavl_msg_get_arg_string_c(const gavl_msg_t * msg, int arg);
 
 /** \brief Set a float argument
@@ -302,6 +352,8 @@ const char * gavl_msg_get_arg_string_c(const gavl_msg_t * msg, int arg);
  *  \param arg Argument index (starting with 0)
  *  \param value Value
  */
+
+GAVL_PUBLIC
 void gavl_msg_set_arg_float(gavl_msg_t * msg, int arg, double value);
 
 /** \brief Get a float argument
@@ -310,13 +362,16 @@ void gavl_msg_set_arg_float(gavl_msg_t * msg, int arg, double value);
  *  \returns Value
  */
 
-double  gavl_msg_get_arg_float(gavl_msg_t * msg, int arg);
+GAVL_PUBLIC
+double gavl_msg_get_arg_float(gavl_msg_t * msg, int arg);
 
 /** \brief Set an RGB color argument
  *  \param msg A message
  *  \param arg Argument index (starting with 0)
  *  \param value Value
  */
+
+GAVL_PUBLIC
 void gavl_msg_set_arg_color_rgb(gavl_msg_t * msg, int arg, const float * value);
 
 /** \brief Get an RGB color argument
@@ -324,6 +379,8 @@ void gavl_msg_set_arg_color_rgb(gavl_msg_t * msg, int arg, const float * value);
  *  \param arg Argument index (starting with 0)
  *  \param value Value
  */
+
+GAVL_PUBLIC
 void gavl_msg_get_arg_color_rgb(gavl_msg_t * msg, int arg, float * value);
 
 
@@ -332,6 +389,8 @@ void gavl_msg_get_arg_color_rgb(gavl_msg_t * msg, int arg, float * value);
  *  \param arg Argument index (starting with 0)
  *  \param value Value
  */
+
+GAVL_PUBLIC
 void gavl_msg_set_arg_color_rgba(gavl_msg_t * msg, int arg, const float * value);
 
 /** \brief Get an RGBA color argument
@@ -339,6 +398,8 @@ void gavl_msg_set_arg_color_rgba(gavl_msg_t * msg, int arg, const float * value)
  *  \param arg Argument index (starting with 0)
  *  \param value Value
  */
+
+GAVL_PUBLIC
 void gavl_msg_get_arg_color_rgba(gavl_msg_t * msg, int arg, float * value);
 
 /** \brief Set a position argument
@@ -346,6 +407,8 @@ void gavl_msg_get_arg_color_rgba(gavl_msg_t * msg, int arg, float * value);
  *  \param arg Argument index (starting with 0)
  *  \param value Value
  */
+
+GAVL_PUBLIC
 void gavl_msg_set_arg_position(gavl_msg_t * msg, int arg, const double * value);
 
 /** \brief Get a position argument
@@ -353,6 +416,8 @@ void gavl_msg_set_arg_position(gavl_msg_t * msg, int arg, const double * value);
  *  \param arg Argument index (starting with 0)
  *  \param value Value
  */
+
+GAVL_PUBLIC
 void gavl_msg_get_arg_position(gavl_msg_t * msg, int arg, double * value);
 
 /** \brief Set an audio format argument
@@ -361,6 +426,7 @@ void gavl_msg_get_arg_position(gavl_msg_t * msg, int arg, double * value);
  *  \param format An audio format
  */
 
+GAVL_PUBLIC
 void gavl_msg_set_arg_audio_format(gavl_msg_t * msg, int arg,
                                  const gavl_audio_format_t * format);
 
@@ -370,6 +436,7 @@ void gavl_msg_set_arg_audio_format(gavl_msg_t * msg, int arg,
  *  \param format Returns the audio format
  */
 
+GAVL_PUBLIC
 void gavl_msg_get_arg_audio_format(gavl_msg_t * msg, int arg,
                                  gavl_audio_format_t * format);
 
@@ -380,6 +447,7 @@ void gavl_msg_get_arg_audio_format(gavl_msg_t * msg, int arg,
  *  \param format A video format
  */
 
+GAVL_PUBLIC
 void gavl_msg_set_arg_video_format(gavl_msg_t * msg, int arg,
                                  const gavl_video_format_t * format);
 
@@ -389,6 +457,7 @@ void gavl_msg_set_arg_video_format(gavl_msg_t * msg, int arg,
  *  \param format Returns the video format
  */
 
+GAVL_PUBLIC
 void gavl_msg_get_arg_video_format(gavl_msg_t * msg, int arg,
                                  gavl_video_format_t * format);
 
@@ -399,6 +468,7 @@ void gavl_msg_get_arg_video_format(gavl_msg_t * msg, int arg,
  *  \param m Metadata
  */
 
+GAVL_PUBLIC
 void gavl_msg_set_arg_metadata(gavl_msg_t * msg, int arg,
                              const gavl_metadata_t * m);
 
@@ -410,72 +480,74 @@ void gavl_msg_set_arg_metadata(gavl_msg_t * msg, int arg,
  *  Don't pass uninitalized memory as metadata.
  */
 
+GAVL_PUBLIC
 void gavl_msg_get_arg_metadata(gavl_msg_t * msg, int arg,
                                gavl_metadata_t * m);
 
+GAVL_PUBLIC
 void gavl_msg_dump(gavl_msg_t * msg, int indent);
 
 /*
  *  Utilities
  */
 
-void
+GAVL_PUBLIC void
 gavl_msg_set_progress(gavl_msg_t * msg, const char * activity, float perc);
 
-void
+GAVL_PUBLIC void
 gavl_msg_get_progress(gavl_msg_t * msg, char ** activity, float * perc);
 
 
-void
+GAVL_PUBLIC void
 gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, int scale, gavl_metadata_t * m);
 
-void
+GAVL_PUBLIC void
 gavl_msg_get_src_metadata(gavl_msg_t * msg, int64_t * time, int * scale, gavl_metadata_t * m);
 
-void
+GAVL_PUBLIC void
 gavl_msg_set_src_aspect(gavl_msg_t * msg, int64_t time, int scale, int stream,
                         int pixel_width, int pixel_height);
 
-void
+GAVL_PUBLIC void
 gavl_msg_get_src_aspect(gavl_msg_t * msg,
                         int64_t * time,
                         int * scale, int * stream,
                         int * pixel_width, int * pixel_height);
-void
+GAVL_PUBLIC void
 gavl_msg_set_src_buffering(gavl_msg_t * msg, float perc);
 
-void
+GAVL_PUBLIC void
 gavl_msg_get_src_buffering(gavl_msg_t * msg, float * perc);
 
-void
+GAVL_PUBLIC void
 gavl_msg_set_gui_button_press(gavl_msg_t * msg, int64_t time, int scale, int button,
                               int mask, int x, int y, const double * pos);
 
-void
+GAVL_PUBLIC void
 gavl_msg_set_gui_button_release(gavl_msg_t * msg, int64_t time, int scale, int button,
                                 int mask, int x, int y, const double * pos);
 
-void
+GAVL_PUBLIC void
 gavl_msg_get_gui_button(gavl_msg_t * msg, int64_t * time, int * scale, int * button,
                         int * mask, int * x, int * y, double * pos);
 
-void
+GAVL_PUBLIC void
 gavl_msg_set_gui_key_press(gavl_msg_t * msg, int64_t time, int scale, int key,
                            int mask, int x, int y, const double * pos);
 
-void
+GAVL_PUBLIC void
 gavl_msg_set_gui_key_release(gavl_msg_t * msg, int64_t time, int scale, int key,
                              int mask, int x, int y, const double * pos);
 
-void
+GAVL_PUBLIC void
 gavl_msg_get_gui_key(gavl_msg_t * msg, int64_t * time, int * scale, int * key,
                      int * mask, int * x, int * y, double * pos);
 
-void
+GAVL_PUBLIC void
 gavl_msg_set_gui_motion(gavl_msg_t * msg, int64_t time, int scale, 
                         int mask, int x, int y, const double * pos);
 
-void
+GAVL_PUBLIC void
 gavl_msg_get_gui_motion(gavl_msg_t * msg, int64_t * time, int * scale,
                         int * mask, int * x, int * y, double * pos);
                         
