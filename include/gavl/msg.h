@@ -180,6 +180,7 @@ struct gavl_msg_s
   {
   uint32_t ns;  // Namespace
   uint32_t id;
+  int num_args;
   
   struct
     {
@@ -194,7 +195,6 @@ struct gavl_msg_s
       gavl_buffer_t val_buf;
       } value;
     } args[GAVL_MSG_MAX_ARGS];
-  int num_args;
   };
 
 typedef struct gavl_msg_s gavl_msg_t;
@@ -470,7 +470,7 @@ void gavl_msg_get_arg_video_format(gavl_msg_t * msg, int arg,
 
 GAVL_PUBLIC
 void gavl_msg_set_arg_metadata(gavl_msg_t * msg, int arg,
-                             const gavl_metadata_t * m);
+                               const gavl_metadata_t * m);
 
 /** \brief Get a matadata argument
  *  \param msg A message
@@ -499,7 +499,7 @@ gavl_msg_get_progress(gavl_msg_t * msg, char ** activity, float * perc);
 
 
 GAVL_PUBLIC void
-gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, int scale, gavl_metadata_t * m);
+gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, int scale, const gavl_metadata_t * m);
 
 GAVL_PUBLIC void
 gavl_msg_get_src_metadata(gavl_msg_t * msg, int64_t * time, int * scale, gavl_metadata_t * m);
