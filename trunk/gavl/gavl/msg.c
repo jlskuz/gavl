@@ -49,6 +49,7 @@ static int type_has_buffer(int type)
 void gavl_msg_set_id_ns(gavl_msg_t * msg, int id, int ns)
   {
   msg->id = id;
+  msg->ns = ns;
   msg->num_args = 0;
 
   /* Zero everything */
@@ -297,6 +298,10 @@ static void set_arg_ptr_nocopy(gavl_msg_t * msg, int arg, void * value,
   msg->args[arg].value.val_buf.len = len;
   msg->args[arg].value.val_buf.alloc = len;
   msg->args[arg].type = type;
+  
+  if(arg+1 > msg->num_args)
+    msg->num_args = arg + 1;
+
   }
 
 static void * get_arg_ptr(gavl_msg_t * msg, int arg, int * length)
@@ -536,7 +541,7 @@ gavl_msg_get_progress(gavl_msg_t * msg, char ** activity, float * perc)
 
 
 void
-gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, int scale, gavl_metadata_t * m)
+gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, int scale, const gavl_metadata_t * m)
   {
   gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_METADATA, GAVL_MSG_NS_SRC);
   gavl_msg_set_arg_time(msg, 0, time);
