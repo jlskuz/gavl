@@ -436,7 +436,7 @@ void gavl_msg_dump(gavl_msg_t * msg, int indent)
   {
   int i;
 
-  gavl_dprintf("Message ID: %d (%08x) args: %d\n", msg->id, msg->id, msg->num_args);
+  gavl_dprintf("Message NS: %d ID: %d (%08x) args: %d\n", msg->ns, msg->id, msg->id, msg->num_args);
     
   for(i = 0; i < msg->num_args; i++)
     {
