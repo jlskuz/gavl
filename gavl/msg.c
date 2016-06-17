@@ -432,7 +432,7 @@ void gavl_msg_destroy(gavl_msg_t * m)
   free(m);
   }
 
-void gavl_msg_dump(gavl_msg_t * msg, int indent)
+void gavl_msg_dump(const gavl_msg_t * msg, int indent)
   {
   int i;
 

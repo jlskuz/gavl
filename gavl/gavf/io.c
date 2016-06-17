@@ -1051,6 +1051,8 @@ int gavl_msg_read(gavl_msg_t * ret, gavf_io_t * io)
         break;
       }
     }
+  fprintf(stderr, "read message:\n");
+  gavl_msg_dump(ret, 1);
   return 1;
   }
 
@@ -1058,6 +1060,9 @@ int gavl_msg_write(const gavl_msg_t * msg, gavf_io_t * io)
   {
   int i;
 
+  fprintf(stderr, "writing message:\n");
+  gavl_msg_dump(msg, 2);
+  
   /* Namespace */
 
   if(!gavf_io_write_int32v(io, msg->ns))
