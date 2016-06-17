@@ -43,7 +43,6 @@ typedef enum
 #define GAVL_MSG_NONE     -1 //!< Reserved ID for non valid message
 #define GAVL_MSG_MAX_ARGS  8 //!< Maximum number of args
 
-
 #define GAVL_MSG_NS_TRANSPORT 1
 #define GAVL_MSG_NS_GENERIC   2
 #define GAVL_MSG_NS_SRC       3
@@ -485,7 +484,7 @@ void gavl_msg_get_arg_metadata(gavl_msg_t * msg, int arg,
                                gavl_metadata_t * m);
 
 GAVL_PUBLIC
-void gavl_msg_dump(gavl_msg_t * msg, int indent);
+void gavl_msg_dump(const gavl_msg_t * msg, int indent);
 
 /*
  *  Utilities
