@@ -180,6 +180,9 @@ struct gavl_msg_s
   uint32_t ns;  // Namespace
   uint32_t id;
   int num_args;
+
+  // Where to send the answer. Meaning defined at a higher level.
+  void * sender; 
   
   struct
     {
@@ -194,6 +197,7 @@ struct gavl_msg_s
       gavl_buffer_t val_buf;
       } value;
     } args[GAVL_MSG_MAX_ARGS];
+  
   };
 
 typedef struct gavl_msg_s gavl_msg_t;

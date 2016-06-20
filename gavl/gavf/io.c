@@ -6,6 +6,9 @@
 #include <gavl/utils.h>
 #include <gavl/numptr.h>
 
+// #define DUMP_MSG_WRITE
+// #define DUMP_MSG_READ
+
 void gavf_io_init(gavf_io_t * ret,
                   gavf_read_func  r,
                   gavf_write_func w,
@@ -1051,8 +1054,11 @@ int gavl_msg_read(gavl_msg_t * ret, gavf_io_t * io)
         break;
       }
     }
+
+#ifdef DUMP_MSG_READ
   fprintf(stderr, "read message:\n");
   gavl_msg_dump(ret, 1);
+#endif
   return 1;
   }
 
@@ -1060,8 +1066,10 @@ int gavl_msg_write(const gavl_msg_t * msg, gavf_io_t * io)
   {
   int i;
 
+#ifdef DUMP_MSG_WRITE
   fprintf(stderr, "writing message:\n");
-  gavl_msg_dump(msg, 2);
+  gavl_msg_dump(msg, 1);
+#endif
   
   /* Namespace */
 
