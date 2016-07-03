@@ -908,3 +908,32 @@ gavl_metadata_get_image_max(const gavl_metadata_t * m,
   
   return pos;
   }
+
+void gavl_metadata_add_src(gavl_metadata_t * m, const char * key, const char * mimetype, const char * location)
+  {
+  int len;
+  char * str;
+  len = strlen(mimetype) + 1 + strlen(location) + 1;
+  str = malloc(len);
+  snprintf(str, len, "%s|%s", mimetype, location);
+  gavl_metadata_set_nocpy(m, key, str);
+  }
+
+
+int gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
+                          char ** mimetype, char ** location)
+  {
+  char * val;
+  char * pos;
+  if(!(val = gavl_metadata_get_arr(m, key, idx)))
+    return 0;
+  
+  pos = strchr(val, '|');
+  if(!pos)
+    return 0;
+  
+  *mimetype = gavl_strndup(val, pos);
+  pos++;
+  *location = gavl_strdup(pos);
+  return 1;
+  }

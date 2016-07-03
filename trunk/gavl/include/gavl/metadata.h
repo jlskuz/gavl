@@ -554,6 +554,15 @@ gavl_metadata_get_image_max(const gavl_metadata_t * m,
                             int w, int h,
                             const char * mimetype);
  
+
+GAVL_PUBLIC void
+gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
+                      const char * mimetype, const char * location);
+
+GAVL_PUBLIC int
+gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
+                      char ** mimetype, char ** location);
+
   
 /**
  * @}
