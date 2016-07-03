@@ -193,6 +193,12 @@
  */
 #define GAVL_META_LOCATION         "Location"
 
+/** \brief source attribute, format: <mimetype>"|"<url>
+ *  This is an array and allows multiple locations along with their
+ *  mimetypes to be stored
+ */
+#define GAVL_META_SRC        "src"
+
 /** \brief "1"  is big endian, 0 else
  */
 #define GAVL_META_BIG_ENDIAN       "BigEndian"
