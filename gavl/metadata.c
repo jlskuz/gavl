@@ -909,16 +909,25 @@ gavl_metadata_get_image_max(const gavl_metadata_t * m,
   return pos;
   }
 
-void gavl_metadata_add_src(gavl_metadata_t * m, const char * key, const char * mimetype, const char * location)
+void gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
+                           const char * mimetype, const char * location)
   {
   int len;
   char * str;
-  len = strlen(mimetype) + 1 + strlen(location) + 1;
-  str = malloc(len);
-  snprintf(str, len, "%s|%s", mimetype, location);
+  if(!mimetype)
+    {
+    len = 1 + strlen(location) + 1;
+    str = malloc(len);
+    snprintf(str, len, "|%s", location);
+    }
+  else
+    {
+    len = strlen(mimetype) + 1 + strlen(location) + 1;
+    str = malloc(len);
+    snprintf(str, len, "%s|%s", mimetype, location);
+    }
   gavl_metadata_set_nocpy(m, key, str);
   }
-
 
 int gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
                           char ** mimetype, char ** location)
@@ -931,9 +940,16 @@ int gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
   pos = strchr(val, '|');
   if(!pos)
     return 0;
-  
-  *mimetype = gavl_strndup(val, pos);
+
+  if(mimetype)
+    {
+    if(*val != '|')
+      *mimetype = gavl_strndup(val, pos);
+    else
+      *mimetype = NULL;
+    }
   pos++;
-  *location = gavl_strdup(pos);
+  if(location)
+    *location = gavl_strdup(pos);
   return 1;
   }
