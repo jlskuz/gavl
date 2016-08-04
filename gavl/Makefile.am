@@ -92,6 +92,7 @@ $(hw_libva_sources) \
 $(hw_libva_x11_sources) \
 absdiff.c \
 arith128.c \
+array.c \
 audioconnector.c \
 audioconverter.c \
 audioformat.c \
@@ -110,6 +111,7 @@ deinterlace.c \
 deinterlace_blend.c \
 deinterlace_copy.c \
 deinterlace_scale.c \
+dictionary.c \
 dsp.c \
 dsputils.c \
 edl.c \
@@ -150,6 +152,7 @@ videoframepool.c \
 videosink.c \
 videosource.c \
 videooptions.c \
+value.c \
 volume.c
 
 noinst_HEADERS = \

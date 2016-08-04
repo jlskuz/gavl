@@ -20,6 +20,7 @@
  * *****************************************************************/
 
 #include <config.h>
+#include <gavl/gavl.h>
 #include <gavl/metadata.h>
 #include <gavl/metatags.h>
 #include <gavl/utils.h>
@@ -28,6 +29,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#if 0
 static char * my_strdup(const char * str)
   {
   char * ret;
@@ -75,7 +77,6 @@ gavl_metadata_free(gavl_metadata_t * m)
     free(m->tags);
   gavl_metadata_init(m);
   }
-
 static void gavl_metadata_copy_tag(gavl_metadata_t * dst,
                                    gavl_metadata_tag_t * src)
   {
@@ -99,13 +100,6 @@ gavl_metadata_copy(gavl_metadata_t * dst,
     gavl_metadata_copy_tag(dst, &src->tags[i]);
   }
 
-void
-gavl_metadata_init(gavl_metadata_t * m)
-  {
-  memset(m, 0, sizeof(*m));
-  }
-
-
 static int find_tag(const gavl_metadata_t * m, const char * key)
   {
   int i;
@@ -126,6 +120,12 @@ static int find_tag_i(const gavl_metadata_t * m, const char * key)
       return i;
     }
   return -1;
+  }
+
+void
+gavl_metadata_init(gavl_metadata_t * m)
+  {
+  memset(m, 0, sizeof(*m));
   }
 
 void
@@ -169,7 +169,6 @@ static gavl_metadata_tag_t * ensure_tag(gavl_metadata_t * m,
   else
     return create_tag(m, key);
   }
-
 void
 gavl_metadata_set_nocpy(gavl_metadata_t * m,
                         const char * key,
@@ -201,6 +200,95 @@ gavl_metadata_set_nocpy(gavl_metadata_t * m,
     tag->val = val;
     }
   }
+const char * gavl_metadata_get(const gavl_metadata_t * m,
+                               const char * key)
+  {
+  int idx = find_tag(m, key);
+  if(idx < 0)
+    return NULL;
+  return m->tags[idx].val;
+  }
+
+const char * gavl_metadata_get_i(const gavl_metadata_t * m,
+                                 const char * key)
+  {
+  int idx = find_tag_i(m, key);
+  if(idx < 0)
+    return NULL;
+  return m->tags[idx].val;
+  }
+
+void gavl_metadata_merge(gavl_metadata_t * dst,
+                         const gavl_metadata_t * src1,
+                         const gavl_metadata_t * src2)
+  {
+  int i;
+  /* src1 has priority */
+  for(i = 0; i < src1->num_tags; i++)
+    gavl_metadata_copy_tag(dst, &src1->tags[i]);
+
+  /* From src2 we take only the tags, which aren't available */
+  for(i = 0; i < src2->num_tags; i++)
+    {
+    if(!gavl_metadata_get(dst, src2->tags[i].key))
+      gavl_metadata_copy_tag(dst, &src2->tags[i]);
+    }
+  }
+
+void gavl_metadata_merge2(gavl_metadata_t * dst,
+                          const gavl_metadata_t * src)
+  {
+  int i;
+  for(i = 0; i < src->num_tags; i++)
+    {
+    if(!gavl_metadata_get(dst, src->tags[i].key))
+      gavl_metadata_copy_tag(dst, &src->tags[i]);
+    }
+  }
+
+GAVL_PUBLIC void
+gavl_metadata_dump(const gavl_metadata_t * m, int indent)
+  {
+  int len, i, j, k;
+  int max_key_len = 0;
+  
+  for(i = 0; i < m->num_tags; i++)
+    {
+    len = strlen(m->tags[i].key);
+    if(len > max_key_len)
+      max_key_len = len;
+    }
+  
+  for(i = 0; i < m->num_tags; i++)
+    {
+    len = strlen(m->tags[i].key);
+
+    for(j = 0; j < indent; j++)
+      fprintf(stderr, " ");
+
+    fprintf(stderr, "%s: ", m->tags[i].key);
+
+    for(j = 0; j < max_key_len - len; j++)
+      fprintf(stderr, " ");
+
+    fprintf(stderr, "%s\n", m->tags[i].val);
+
+    for(k = 0; k < m->tags[i].arr_len; k++)
+      {
+      for(j = 0; j < indent; j++)
+        fprintf(stderr, " ");
+
+      fprintf(stderr, "%s: ", m->tags[i].key);
+
+      for(j = 0; j < max_key_len - len; j++)
+        fprintf(stderr, " ");
+      fprintf(stderr, "%s\n", m->tags[i].val_arr[k]);
+      }
+    }
+  }
+
+#endif
+
 
 #define STR_SIZE 128
 
@@ -235,26 +323,6 @@ gavl_metadata_set_float(gavl_metadata_t * m,
   }
 
 #undef STR_SIZE
-
-
-const char * gavl_metadata_get(const gavl_metadata_t * m,
-                               const char * key)
-  {
-  int idx = find_tag(m, key);
-  if(idx < 0)
-    return NULL;
-  return m->tags[idx].val;
-  }
-
-const char * gavl_metadata_get_i(const gavl_metadata_t * m,
-                                 const char * key)
-  {
-  int idx = find_tag_i(m, key);
-  if(idx < 0)
-    return NULL;
-  return m->tags[idx].val;
-  }
-
 
 int gavl_metadata_get_int(const gavl_metadata_t * m,
                           const char * key, int * ret)
@@ -427,98 +495,11 @@ gavl_metadata_get_date_time(gavl_metadata_t * m,
   }
 
 
-
-void gavl_metadata_merge(gavl_metadata_t * dst,
-                         const gavl_metadata_t * src1,
-                         const gavl_metadata_t * src2)
-  {
-  int i;
-  /* src1 has priority */
-  for(i = 0; i < src1->num_tags; i++)
-    gavl_metadata_copy_tag(dst, &src1->tags[i]);
-
-  /* From src2 we take only the tags, which aren't available */
-  for(i = 0; i < src2->num_tags; i++)
-    {
-    if(!gavl_metadata_get(dst, src2->tags[i].key))
-      gavl_metadata_copy_tag(dst, &src2->tags[i]);
-    }
-  }
-
-void gavl_metadata_merge2(gavl_metadata_t * dst,
-                          const gavl_metadata_t * src)
-  {
-  int i;
-  for(i = 0; i < src->num_tags; i++)
-    {
-    if(!gavl_metadata_get(dst, src->tags[i].key))
-      gavl_metadata_copy_tag(dst, &src->tags[i]);
-    }
-  }
-
-GAVL_PUBLIC void
-gavl_metadata_dump(const gavl_metadata_t * m, int indent)
-  {
-  int len, i, j, k;
-  int max_key_len = 0;
-  
-  for(i = 0; i < m->num_tags; i++)
-    {
-    len = strlen(m->tags[i].key);
-    if(len > max_key_len)
-      max_key_len = len;
-    }
-  
-  for(i = 0; i < m->num_tags; i++)
-    {
-    len = strlen(m->tags[i].key);
-
-    for(j = 0; j < indent; j++)
-      fprintf(stderr, " ");
-
-    fprintf(stderr, "%s: ", m->tags[i].key);
-
-    for(j = 0; j < max_key_len - len; j++)
-      fprintf(stderr, " ");
-
-    fprintf(stderr, "%s\n", m->tags[i].val);
-
-    for(k = 0; k < m->tags[i].arr_len; k++)
-      {
-      for(j = 0; j < indent; j++)
-        fprintf(stderr, " ");
-
-      fprintf(stderr, "%s: ", m->tags[i].key);
-
-      for(j = 0; j < max_key_len - len; j++)
-        fprintf(stderr, " ");
-      fprintf(stderr, "%s\n", m->tags[i].val_arr[k]);
-      }
-    }
-  }
-
 int
 gavl_metadata_equal(const gavl_metadata_t * m1,
                     const gavl_metadata_t * m2)
   {
-  int i;
-  const char * val;
-
-  /* Check if tags from m1 are present in m2 */
-  for(i = 0; i < m1->num_tags; i++)
-    {
-    val = gavl_metadata_get(m2, m1->tags[i].key);
-    if(!val || strcmp(val, m1->tags[i].val))
-      return 0;
-    }
-  
-  /* Check if tags from m2 are present in m1 */
-  for(i = 0; i < m2->num_tags; i++)
-    {
-    if(!gavl_metadata_get(m1, m2->tags[i].key))
-      return 0;
-    }
-  return 1;
+  return !gavl_dictionary_compare(m1, m2);
   }
 
 static const char * compression_fields[] =
@@ -541,44 +522,17 @@ const char * implicit_fields[] =
     NULL,
   };
 
-static void
-delete_fields(gavl_metadata_t * m, const char * fields[])
-  {
-  int found;
-  int i, j;
-
-  i = 0;
-  while(i < m->num_tags)
-    {
-    j = 0;
-
-    found = 0;
-    
-    while(fields[j])
-      {
-      if(!strcmp(fields[j], m->tags[i].key))
-        {
-        gavl_metadata_set(m, fields[j], NULL);
-        found = 1;
-        break;
-        }
-      j++;
-      }
-    if(!found)
-      i++;
-    }
-  }
 
 void
 gavl_metadata_delete_compression_fields(gavl_metadata_t * m)
   {
-  delete_fields(m, compression_fields);
+  gavl_dictionary_delete_fields(m, compression_fields);
   }
 
 void
 gavl_metadata_delete_implicit_fields(gavl_metadata_t * m)
   {
-  delete_fields(m, implicit_fields);
+  gavl_dictionary_delete_fields(m, implicit_fields);
   }
 
 void
@@ -621,30 +575,11 @@ gavl_metadata_append_nocpy(gavl_metadata_t * m,
                            const char * key,
                            char * val)
   {
-  gavl_metadata_tag_t * tag = ensure_tag(m, key);
-  if(!val)
-    return;
-  
-  if(!tag->val)
-    {
-    tag->val = val;
-    return;
-    }
-
-  if(tag->arr_len + 1 > tag->arr_alloc)
-    {
-    tag->arr_alloc += 64;
-    tag->val_arr = realloc(tag->val_arr,
-                           tag->arr_alloc * sizeof(*tag->val_arr));
-    
-    memset(tag->val_arr + tag->arr_len, 0,
-           (tag->arr_alloc - tag->arr_len) * sizeof(*tag->val_arr));
-    }
-  
-  tag->val_arr[tag->arr_len] = val;
-  tag->arr_len++;
+  gavl_value_t v;
+  gavl_value_init(&v);
+  gavl_value_set_string_nocopy(&v, val);
+  gavl_dictionary_append_nocopy(m, key, &v);
   }
-
 
 void
 gavl_metadata_append(gavl_metadata_t * m,
@@ -654,20 +589,32 @@ gavl_metadata_append(gavl_metadata_t * m,
   gavl_metadata_append_nocpy(m, key, gavl_strdup(val));
   }
 
-static const char * get_arr(gavl_metadata_tag_t * tag, int idx)
+static char * metadata_get_arr_internal(const gavl_metadata_t * m,
+                                        const char * key,
+                                        int i, int ign)
   {
-  if(idx < 0)
-    return NULL;
+  const gavl_value_t * val;
 
-  if(!idx)
-    return tag->val;
-
-  idx--;
+  if(ign)
+    val = gavl_dictionary_get(m, key);
+  else
+    val = gavl_dictionary_get_i(m, key);
   
-  if(idx >= tag->arr_len)
+  if(val->type == GAVL_TYPE_ARRAY)
+    {
+    if(i < 0)
+      return NULL;
+    if(i >= val->v.array.num_entries)
+      return NULL;
+    if(val->v.array.entries[i].type != GAVL_TYPE_STRING)
+      return NULL;
+    return val->v.array.entries[i].v.str;
+    }
+  else if((val->type == GAVL_TYPE_STRING) && !i)
+    return val->v.str;
+  else
     return NULL;
-
-  return tag->val_arr[idx];
+  
   }
 
 const char * 
@@ -675,26 +622,39 @@ gavl_metadata_get_arr(const gavl_metadata_t * m,
                       const char * key,
                       int i)
   {
-  int idx = find_tag(m, key);
-  if(idx < 0)
-    return NULL;
-  return get_arr(&m->tags[idx], i);
+  return metadata_get_arr_internal(m, key, i, 0);
   }
+
+const char * 
+gavl_metadata_get_arr_i(const gavl_metadata_t * m,
+                        const char * key,
+                        int i)
+  {
+  return metadata_get_arr_internal(m, key, i, 1);
+  }
+
+
 
 int gavl_metadata_get_arr_len(const gavl_metadata_t * m,
                               const char * key)
   {
-  int idx = find_tag(m, key);
-  if(idx < 0)
-    return 0;
+  const gavl_value_t * val = gavl_dictionary_get(m, key);
   
-  return m->tags[idx].arr_len + 1;
+  if(!val)
+    return 0;
+  else if(val->type == GAVL_TYPE_STRING)
+    return 1;
+  else if(val->type == GAVL_TYPE_ARRAY)
+    return val->v.array.num_entries;
+  else
+    return 0;
   }
   
 char * 
 gavl_metadata_join_arr(const gavl_metadata_t * m,
                        const char * key, const char * glue)
   {
+#if 0
   char * ret;
   int ret_len;
   int glue_len;
@@ -718,18 +678,64 @@ gavl_metadata_join_arr(const gavl_metadata_t * m,
     strncat(ret, m->tags[idx].val_arr[i], ret_len - strlen(ret));
     }
   return ret;
-  }
+#else
+  char * ret;
+  int ret_len;
+  int glue_len;
+  int i;
+  int idx;
+  const gavl_array_t * arr;
 
-
-const char * 
-gavl_metadata_get_arr_i(gavl_metadata_t * m,
-                        const char * key,
-                        int i)
-  {
-  int idx = find_tag_i(m, key);
-  if(idx < 0)
+  const gavl_value_t * val = gavl_dictionary_get(m, key);
+  if(!val)
     return NULL;
-  return get_arr(&m->tags[idx], i);
+  if(val->type == GAVL_TYPE_STRING)
+    return gavl_strdup(val->v.str);
+  else if(val->type == GAVL_TYPE_ARRAY)
+    {
+    glue_len = strlen(glue);
+    
+    ret_len = 1; // "\0"
+
+    idx = 0;
+    
+    arr = &val->v.array;
+    for(i = 0; i < arr->num_entries; i++)
+      {
+      if(arr->entries[i].type != GAVL_TYPE_STRING)
+        continue;
+      
+      if(idx)
+        ret_len += glue_len;
+      
+      ret_len += strlen(arr->entries[i].v.str);
+      idx++;
+      }
+
+    ret = malloc(ret_len);
+    *ret = '\0';
+
+    if(!idx)
+      return ret;
+    
+    idx = 0;
+    for(i = 0; i < arr->num_entries; i++)
+      {
+      if(arr->entries[i].type != GAVL_TYPE_STRING)
+        continue;
+      
+      if(idx)
+        strncat(ret, glue, ret_len - strlen(ret));
+
+      strncat(ret, arr->entries[i].v.str, ret_len - strlen(ret));
+      idx++;
+      }
+    return ret;
+    }
+  else
+    return NULL;
+  
+#endif
   }
 
 // Format is w|h|mimetype|url
@@ -932,7 +938,7 @@ void gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
 int gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
                           char ** mimetype, char ** location)
   {
-  char * val;
+  const char * val;
   char * pos;
   if(!(val = gavl_metadata_get_arr(m, key, idx)))
     return 0;

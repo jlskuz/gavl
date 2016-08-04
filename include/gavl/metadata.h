@@ -29,6 +29,7 @@ extern "C" {
 #include <inttypes.h>
   
 #include <gavl/gavldefs.h>
+#include <gavl/value.h>
 
 /** \defgroup metadata Metadata
  *  \brief Metadata support
@@ -63,6 +64,7 @@ extern "C" {
 /** \brief Single metadata tag
  */
 
+#if 0  
 typedef struct
   {
   char * key; //!< Key
@@ -84,12 +86,35 @@ typedef struct
   int num_tags;                //!< Number of valid tags
   } gavl_metadata_t;
 
+#else
+#define gavl_metadata_t gavl_dictionary_t
+
+#define gavl_metadata_free(a) gavl_dictionary_free(a)
+#define gavl_metadata_init(a) gavl_dictionary_init(a)
+#define gavl_metadata_set(a, b, c) gavl_dictionary_set_string(a, b, c)
+#define gavl_metadata_set_nocpy(a, b, c) gavl_dictionary_set_string_nocopy(a, b, c)
+
+#define gavl_metadata_get(a, b) gavl_dictionary_get_string(a, b)
+#define gavl_metadata_get_i(a, b) gavl_dictionary_get_string_i(a, b)
+
+#define gavl_metadata_merge(a, b, c) gavl_dictionary_merge(a, b, c)
+#define gavl_metadata_merge2(a, b)   gavl_dictionary_merge2(a, b)
+#define gavl_metadata_dump(a, b) gavl_dictionary_dump(a, b)
+
+#define gavl_metadata_copy(a, b) gavl_dictionary_copy(a, b)
+
+#define gavf_read_metadata(a, b) gavl_dictionary_read(a, b)
+#define gavf_write_metadata(a, b) gavl_dictionary_write(a, b)
+
+#endif
+
+  
 /** \brief Free all metadata tags 
  *  \arg m A metadata structure
  */
   
-GAVL_PUBLIC void
-gavl_metadata_free(gavl_metadata_t * m);
+// GAVL_PUBLIC void
+// gavl_metadata_free(gavl_metadata_t * m);
 
 /** \brief Initialize structre
  *  \arg m A metadata structure
@@ -99,8 +124,8 @@ gavl_metadata_free(gavl_metadata_t * m);
  *  before using it.
  */
   
-GAVL_PUBLIC void
-gavl_metadata_init(gavl_metadata_t * m);
+// GAVL_PUBLIC void
+// gavl_metadata_init(gavl_metadata_t * m);
 
 /** \brief Set a tag
  *  \arg m A metadata structure
@@ -110,10 +135,10 @@ gavl_metadata_init(gavl_metadata_t * m);
  *  Set a metadata tag. The value is copied.
  */
 
-GAVL_PUBLIC void
-gavl_metadata_set(gavl_metadata_t * m,
-                  const char * key,
-                  const char * val);
+// GAVL_PUBLIC void
+//gavl_metadata_set(gavl_metadata_t * m,
+//                  const char * key,
+//                  const char * val);
 
 /** \brief Set a tag
  *  \arg m A metadata structure
@@ -124,10 +149,10 @@ gavl_metadata_set(gavl_metadata_t * m,
  *  value is not copied.
  */
 
-GAVL_PUBLIC void
-gavl_metadata_set_nocpy(gavl_metadata_t * m,
-                        const char * key,
-                        char * val);
+//GAVL_PUBLIC void
+//gavl_metadata_set_nocpy(gavl_metadata_t * m,
+//                        const char * key,
+//                        char * val);
 
 /** \brief Append values of a tag
  *  \arg m A metadata structure
@@ -164,9 +189,9 @@ gavl_metadata_append_nocpy(gavl_metadata_t * m,
  *  \returns Value of the tag or NULL if the tag doesn't exist
  */
 
-GAVL_PUBLIC 
-const char * gavl_metadata_get(const gavl_metadata_t * m,
-                               const char * key);
+// GAVL_PUBLIC 
+// const char * gavl_metadata_get(const gavl_metadata_t * m,
+//                               const char * key);
 
 /** \brief Get the array value of a tag
  *  \arg m A metadata structure
@@ -190,7 +215,7 @@ gavl_metadata_get_arr(const gavl_metadata_t * m,
  */
 
 GAVL_PUBLIC const char * 
-gavl_metadata_get_arr_i(gavl_metadata_t * m,
+gavl_metadata_get_arr_i(const gavl_metadata_t * m,
                         const char * key,
                         int i);
 
@@ -198,7 +223,7 @@ gavl_metadata_get_arr_i(gavl_metadata_t * m,
  *  \arg m A metadata structure
  *  \arg key Key
  *  \arg glue Glue string (e.g. ", ")
- *  \returns Array elements concacenated with the glue string between them
+ *  \returns Array elements concatenated with the glue string between them
  */
 
 GAVL_PUBLIC char * 
@@ -223,9 +248,9 @@ gavl_metadata_get_arr_len(const gavl_metadata_t * m,
  *  \returns Value of the tag or NULL if the tag doesn't exist
  */
 
-GAVL_PUBLIC 
-const char * gavl_metadata_get_i(const gavl_metadata_t * m,
-                                 const char * key);
+// GAVL_PUBLIC 
+// const char * gavl_metadata_get_i(const gavl_metadata_t * m,
+//                                 const char * key);
 
 /** \brief Set an integer tag
  *  \arg m A metadata structure
@@ -291,7 +316,7 @@ int gavl_metadata_get_long(const gavl_metadata_t * m,
   
 GAVL_PUBLIC 
 int gavl_metadata_get_float(const gavl_metadata_t * m,
-                           const char * key, float * ret);
+                            const char * key, float * ret);
   
 /** \brief Get an integer tag ignoring case
  *  \arg m A metadata structure
@@ -449,10 +474,10 @@ gavl_metadata_date_time_to_string(int year,
  *  taken.
  */
   
-GAVL_PUBLIC 
-void gavl_metadata_merge(gavl_metadata_t * dst,
-                         const gavl_metadata_t * src1,
-                         const gavl_metadata_t * src2);
+// GAVL_PUBLIC 
+// void gavl_metadata_merge(gavl_metadata_t * dst,
+//                         const gavl_metadata_t * src1,
+//                         const gavl_metadata_t * src2);
 
 /** \brief Merge two metadata structures
  *  \arg dst Destination
@@ -462,9 +487,9 @@ void gavl_metadata_merge(gavl_metadata_t * dst,
  *  already contained in dst.
  */
   
-GAVL_PUBLIC
-void gavl_metadata_merge2(gavl_metadata_t * dst,
-                          const gavl_metadata_t * src);
+// GAVL_PUBLIC
+// void gavl_metadata_merge2(gavl_metadata_t * dst,
+//                          const gavl_metadata_t * src);
 
 /** \brief Copy metadata structure
  *  \arg dst Destination
@@ -473,9 +498,9 @@ void gavl_metadata_merge2(gavl_metadata_t * dst,
  *  Copy all tags from src to dst
  */
   
-GAVL_PUBLIC void
-gavl_metadata_copy(gavl_metadata_t * dst,
-                   const gavl_metadata_t * src);
+// GAVL_PUBLIC void
+// gavl_metadata_copy(gavl_metadata_t * dst,
+//                    const gavl_metadata_t * src);
 
 /** \brief Dump metadata structure to stderr
  *  \arg m Metadata
@@ -562,6 +587,8 @@ gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
 GAVL_PUBLIC int
 gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
                       char ** mimetype, char ** location);
+
+
 
   
 /**

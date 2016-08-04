@@ -19,7 +19,8 @@ metadata.h \
 metatags.h \
 msg.h \
 peakdetector.h \
-utils.h
+utils.h \
+value.h
 
 
 EXTRA_DIST = gavl_version.h.in

@@ -13,6 +13,7 @@
 #include <gavl/gavldsp.h>
 #include <gavl/utils.h>
 #include <gavl/msg.h>
+#include <gavl/value.h>
 
 #include <stdio.h>
 
@@ -159,11 +160,25 @@ int gavf_io_read_double(gavf_io_t * io, double * num);
 GAVL_PUBLIC
 int gavf_io_write_double(gavf_io_t * io, double num);
 
+GAVL_PUBLIC
+int gavl_value_read(gavf_io_t * io, gavl_value_t * v);
+
+GAVL_PUBLIC
+int gavl_value_write(gavf_io_t * io, const gavl_value_t * v);
+
+GAVL_PUBLIC
+int gavl_dictionary_write(gavf_io_t * io, const gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
+int gavl_dictionary_read(gavf_io_t * io, gavl_dictionary_t * dict);
+
+
 /** \brief Read a message using a callback
  *  \param ret Where the message will be copied
  *  \param io I/O context
  *  \returns 1 on success, 0 on error
  */
+
 
 GAVL_PUBLIC
 int gavl_msg_read(gavl_msg_t * ret, gavf_io_t * io);
@@ -176,6 +191,7 @@ int gavl_msg_read(gavl_msg_t * ret, gavf_io_t * io);
 
 GAVL_PUBLIC
 int gavl_msg_write(const gavl_msg_t * msg, gavf_io_t * io);
+
 
 
 /* Buffer as io */
@@ -560,6 +576,12 @@ int gavl_compression_info_from_buffer(const uint8_t * buf, int len, gavl_compres
  
 GAVL_PUBLIC
 uint8_t * gavl_compression_info_to_buffer(int * len, const gavl_compression_info_t * fmt);
+
+GAVL_PUBLIC
+uint8_t * gavl_msg_to_buffer(int * len, const gavl_msg_t * msg);
+
+GAVL_PUBLIC
+int gavl_msg_from_buffer(const uint8_t * buf, int len, gavl_msg_t * msg);
 
 /* Formats */
 GAVL_PUBLIC

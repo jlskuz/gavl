@@ -37,6 +37,13 @@
 
 #define GAVL_META_TITLE       "Title"
 
+/** \brief Title of the song/movie... */
+#define GAVL_META_SEARCH_TITLE "SearchTitle"
+
+/** \brief Unique ID within this database */
+
+#define GAVL_META_ID          "ID"
+
 /** \brief Performing artist */
 
 #define GAVL_META_ARTIST      "Artist"
@@ -197,7 +204,7 @@
  *  This is an array and allows multiple locations along with their
  *  mimetypes to be stored
  */
-#define GAVL_META_SRC        "src"
+#define GAVL_META_SRC              "src"
 
 /** \brief "1"  is big endian, 0 else
  */
@@ -250,6 +257,54 @@
 #define GAVL_META_AVG_BITRATE    "AVGBitrate"   // Float, kbps
 #define GAVL_META_AVG_FRAMERATE  "AVGFramerate" // Float
 
+/* Purely informational entries for the global metadata or per Location */
+#define GAVL_META_AUDIO_CHANNELS     "Channels"
+#define GAVL_META_AUDIO_SAMPERATE    "Samplerate"
+#define GAVL_META_AUDIO_BITRATE      "AudioBitrate"
+#define GAVL_META_VIDEO_BITRATE      "VideoBitrate"
+#define GAVL_META_VIDEO_RESOLUTION   "VideoResolution"
+#define GAVL_META_VIDEO_ASPECT_RATIO "VideoAspectRatio" // Human readable e.g. (16:9)
+
+#define GAVL_META_NUM_CHILDREN       "NumChildren" // Number of children for container items
+
+/**
+ *
+ *
+ */
+
+#define GAVL_META_MEDIA_CLASS                    "MediaClass"
+
+/* Value for class */
+#define GAVL_META_MEDIA_CLASS_AUDIO_FILE         "item.audio"
+#define GAVL_META_MEDIA_CLASS_VIDEO_FILE         "item.video"
+#define GAVL_META_MEDIA_CLASS_SONG               "item.audio.song"
+#define GAVL_META_MEDIA_CLASS_MOVIE              "item.video.movie"
+#define GAVL_META_MEDIA_CLASS_TV_EPISODE         "item.video.episode"
+#define GAVL_META_MEDIA_CLASS_AUDIO_BROADCAST    "item.audio.broadcast"
+#define GAVL_META_MEDIA_CLASS_VIDEO_BROADCAST    "item.video.broadcast"
+
+/* Container values */
+#define GAVL_META_MEDIA_CLASS_CONTAINER          "container"       // Generic
+#define GAVL_META_MEDIA_CLASS_MUSICALBUM         "container.musicalbum" 
+#define GAVL_META_MEDIA_CLASS_PLAYLIST           "container.playlist"
+#define GAVL_META_MEDIA_CLASS_CONTAINER_ACTOR    "container.category.actor" 
+#define GAVL_META_MEDIA_CLASS_CONTAINER_DIRECTOR "container.category.director" 
+#define GAVL_META_MEDIA_CLASS_CONTAINER_ARTIST   "container.category.artist" 
+#define GAVL_META_MEDIA_CLASS_CONTAINER_COUNTRY  "container.category.country" 
+#define GAVL_META_MEDIA_CLASS_CONTAINER_GENRE    "container.category.genre" 
+#define GAVL_META_MEDIA_CLASS_TV_SEASON          "container.season"
+#define GAVL_META_MEDIA_CLASS_TV_SHOW            "container.tvshow"
+#define GAVL_META_MEDIA_CLASS_DIRECTORY          "container.directory"
+
+/* Root Containers */
+#define GAVL_META_MEDIA_CLASS_ROOT_MUSICALBUMS   "container.root.musicalbums" 
+#define GAVL_META_MEDIA_CLASS_ROOT_SONGS         "container.root.songs" 
+#define GAVL_META_MEDIA_CLASS_ROOT_PLAYLISTS     "container.root.playlists" 
+#define GAVL_META_MEDIA_CLASS_ROOT_MOVIES        "container.root.movies"
+#define GAVL_META_MEDIA_CLASS_ROOT_TV_SHOWS      "container.root.tvshows"
+#define GAVL_META_MEDIA_CLASS_ROOT_WEBRADIO      "container.root.webradio"
+#define GAVL_META_MEDIA_CLASS_ROOT_DIRECTORIES   "container.root.directories"
+#define GAVL_META_MEDIA_CLASS_ROOT_PHOTOS        "container.root.photos"
 
 /**
  * @}

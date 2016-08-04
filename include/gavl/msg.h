@@ -23,9 +23,11 @@
 #define GAVL_MSG_H_INCLUDED
 
 #include <gavl/gavldefs.h>
+#include <gavl/value.h>
 
 /* Must match utils.js */
 
+#if 0
 typedef enum
   {
     GAVL_MSG_TYPE_INT            = 0,
@@ -39,6 +41,7 @@ typedef enum
     GAVL_MSG_TYPE_VIDEO_FORMAT   = 8,
     GAVL_MSG_TYPE_METADATA       = 9,
   } gavl_msg_type_t;
+#endif
 
 #define GAVL_MSG_NONE     -1 //!< Reserved ID for non valid message
 #define GAVL_MSG_MAX_ARGS  8 //!< Maximum number of args
@@ -184,19 +187,7 @@ struct gavl_msg_s
   // Where to send the answer. Meaning defined at a higher level.
   void * sender; 
   
-  struct
-    {
-    gavl_msg_type_t type;
-    union
-      {
-      int val_i;
-      double val_f;
-      gavl_time_t val_time;
-      float val_color[4];
-      double val_pos[2];
-      gavl_buffer_t val_buf;
-      } value;
-    } args[GAVL_MSG_MAX_ARGS];
+  gavl_value_t args[GAVL_MSG_MAX_ARGS];
   
   };
 
