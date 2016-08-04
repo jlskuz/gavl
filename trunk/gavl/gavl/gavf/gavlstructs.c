@@ -509,6 +509,7 @@ int gavf_write_compression_info(gavf_io_t * io,
 
 /* Metadata */
 
+#if 0
 int gavf_read_metadata(gavf_io_t * io, gavl_metadata_t * m)
   {
   int i, j;
@@ -576,6 +577,7 @@ int gavf_write_metadata(gavf_io_t * io, const gavl_metadata_t * m)
     }
   return 1;
   }
+#endif
 
 /* Packet */
 

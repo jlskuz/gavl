@@ -31,21 +31,6 @@
 
 
 
-static int type_has_buffer(int type)
-  {
-  switch(type)
-    {
-    case GAVL_MSG_TYPE_STRING:
-    case GAVL_MSG_TYPE_AUDIO_FORMAT:
-    case GAVL_MSG_TYPE_VIDEO_FORMAT:
-    case GAVL_MSG_TYPE_METADATA:
-      return 1;
-    default:
-      return 0;
-    }
-  }
-
-
 void gavl_msg_set_id_ns(gavl_msg_t * msg, int id, int ns)
   {
   msg->id = id;
@@ -79,38 +64,7 @@ void gavl_msg_copy(gavl_msg_t * dst, const gavl_msg_t * src)
   dst->num_args = src->num_args;
 
   for(i = 0; i < src->num_args; i++)
-    {
-    dst->args[i].type = src->args[i].type;
-
-    switch(src->args[i].type)
-      {
-      case GAVL_MSG_TYPE_INT:
-        dst->args[i].value.val_i = src->args[i].value.val_i;
-        break;
-      case GAVL_MSG_TYPE_FLOAT: 
-        dst->args[i].value.val_f = src->args[i].value.val_f;
-        break;
-      case GAVL_MSG_TYPE_STRING:
-      case GAVL_MSG_TYPE_AUDIO_FORMAT:
-      case GAVL_MSG_TYPE_VIDEO_FORMAT:
-      case GAVL_MSG_TYPE_METADATA:
-        gavl_buffer_copy(&dst->args[i].value.val_buf, &src->args[i].value.val_buf);
-        break;
-      case GAVL_MSG_TYPE_TIME:
-        dst->args[i].value.val_time = src->args[i].value.val_time;
-        break;
-      case GAVL_MSG_TYPE_COLOR_RGB:
-        memcpy(dst->args[i].value.val_color, src->args[i].value.val_color, sizeof(src->args[i].value.val_color[0]) * 3);
-        break;
-      case GAVL_MSG_TYPE_COLOR_RGBA:
-        memcpy(dst->args[i].value.val_color, src->args[i].value.val_color, sizeof(src->args[i].value.val_color[0]) * 4);
-        break;
-      case GAVL_MSG_TYPE_POSITION:
-        memcpy(dst->args[i].value.val_pos, src->args[i].value.val_pos, sizeof(src->args[i].value.val_pos[0]) * 2);
-        break;
-      }
-    
-    }
+    gavl_value_copy(&dst->args[i], &src->args[i]); 
   }
 
 static int check_arg(int arg)
@@ -127,8 +81,7 @@ void gavl_msg_set_arg_int(gavl_msg_t * msg, int arg, int value)
   {
   if(!check_arg(arg))
     return;
-  msg->args[arg].value.val_i = value;
-  msg->args[arg].type = GAVL_MSG_TYPE_INT;
+  gavl_value_set_int(&msg->args[arg], value);
   if(arg+1 > msg->num_args)
     msg->num_args = arg + 1;
   }
@@ -137,8 +90,7 @@ void gavl_msg_set_arg_time(gavl_msg_t * msg, int arg, gavl_time_t value)
   {
   if(!check_arg(arg))
     return;
-  msg->args[arg].value.val_time = value;
-  msg->args[arg].type = GAVL_MSG_TYPE_TIME;
+  gavl_value_set_long(&msg->args[arg], value);
   if(arg+1 > msg->num_args)
     msg->num_args = arg + 1;
   }
@@ -147,20 +99,9 @@ void gavl_msg_set_arg_time(gavl_msg_t * msg, int arg, gavl_time_t value)
 
 void gavl_msg_set_arg_string(gavl_msg_t * msg, int arg, const char * value)
   {
-  if(value)
-    {
-    int length = strlen(value)+1;
-    gavl_buffer_alloc(&msg->args[arg].value.val_buf, length);
-    memcpy(msg->args[arg].value.val_buf.buf, value, length);
-    msg->args[arg].value.val_buf.len = length;
-    }
-  else
-    {
-    gavl_buffer_free(&msg->args[arg].value.val_buf);
-    gavl_buffer_init(&msg->args[arg].value.val_buf);
-    }
-  msg->args[arg].type = GAVL_MSG_TYPE_STRING;
-  
+  if(!check_arg(arg))
+    return;
+  gavl_value_set_string(&msg->args[arg], value);
   if(arg+1 > msg->num_args)
     msg->num_args = arg + 1;
   }
@@ -169,48 +110,51 @@ void gavl_msg_set_arg_float(gavl_msg_t * msg, int arg, double value)
   {
   if(!check_arg(arg))
     return;
-  msg->args[arg].value.val_f = value;
-  msg->args[arg].type = GAVL_MSG_TYPE_FLOAT;
+  gavl_value_set_float(&msg->args[arg], value);
   if(arg+1 > msg->num_args)
     msg->num_args = arg + 1;
   }
 
 void gavl_msg_set_arg_color_rgb(gavl_msg_t * msg, int arg, const float * value)
   {
+  double * col;
   if(!check_arg(arg))
     return;
-  msg->args[arg].value.val_color[0] = value[0];
-  msg->args[arg].value.val_color[1] = value[1];
-  msg->args[arg].value.val_color[2] = value[2];
-  msg->args[arg].type = GAVL_MSG_TYPE_COLOR_RGB;
+  col = gavl_value_set_color_rgb(&msg->args[arg]);
+  col[0] = value[0];
+  col[1] = value[1];
+  col[2] = value[2];
   if(arg+1 > msg->num_args)
     msg->num_args = arg + 1;
   }
 
 void gavl_msg_set_arg_color_rgba(gavl_msg_t * msg, int arg, const float * value)
   {
+  double * col;
   if(!check_arg(arg))
     return;
-  msg->args[arg].value.val_color[0] = value[0];
-  msg->args[arg].value.val_color[1] = value[1];
-  msg->args[arg].value.val_color[2] = value[2];
-  msg->args[arg].value.val_color[3] = value[3];
-  msg->args[arg].type = GAVL_MSG_TYPE_COLOR_RGBA;
+  col = gavl_value_set_color_rgba(&msg->args[arg]);
+  col[0] = value[0];
+  col[1] = value[1];
+  col[2] = value[2];
+  col[3] = value[3];
+
   if(arg+1 > msg->num_args)
     msg->num_args = arg + 1;
   }
 
 void gavl_msg_set_arg_position(gavl_msg_t * msg, int arg, const double * value)
   {
+  double * pos;
   if(!check_arg(arg))
     return;
-  msg->args[arg].value.val_pos[0] = value[0];
-  msg->args[arg].value.val_pos[1] = value[1];
-  msg->args[arg].type = GAVL_MSG_TYPE_POSITION;
+  pos = gavl_value_set_position(&msg->args[arg]);
+  pos[0] = value[0];
+  pos[1] = value[1];
+
   if(arg+1 > msg->num_args)
     msg->num_args = arg + 1;
   }
-
 
 /* Get basic types */
 
@@ -223,48 +167,48 @@ int gavl_msg_get_arg_int(gavl_msg_t * msg, int arg)
   {
   if(!check_arg(arg))
     return 0;
-  return msg->args[arg].value.val_i;
+  return msg->args[arg].v.i;
   }
 
 gavl_time_t gavl_msg_get_arg_time(gavl_msg_t * msg, int arg)
   {
   if(!check_arg(arg))
     return 0;
-  return msg->args[arg].value.val_time;
+  return msg->args[arg].v.l;
   }
 
 double gavl_msg_get_arg_float(gavl_msg_t * msg, int arg)
   {
   if(!check_arg(arg))
     return 0.0;
-  return msg->args[arg].value.val_f;
+  return msg->args[arg].v.d;
   }
 
 void gavl_msg_get_arg_color_rgb(gavl_msg_t * msg, int arg, float * val)
   {
   if(!check_arg(arg))
     return;
-  val[0] = msg->args[arg].value.val_color[0];
-  val[1] = msg->args[arg].value.val_color[1];
-  val[2] = msg->args[arg].value.val_color[2];
+  val[0] = msg->args[arg].v.color[0];
+  val[1] = msg->args[arg].v.color[1];
+  val[2] = msg->args[arg].v.color[2];
   }
 
 void gavl_msg_get_arg_color_rgba(gavl_msg_t * msg, int arg, float * val)
   {
   if(!check_arg(arg))
     return;
-  val[0] = msg->args[arg].value.val_color[0];
-  val[1] = msg->args[arg].value.val_color[1];
-  val[2] = msg->args[arg].value.val_color[2];
-  val[3] = msg->args[arg].value.val_color[3];
+  val[0] = msg->args[arg].v.color[0];
+  val[1] = msg->args[arg].v.color[1];
+  val[2] = msg->args[arg].v.color[2];
+  val[3] = msg->args[arg].v.color[3];
   }
 
 void gavl_msg_get_arg_position(gavl_msg_t * msg, int arg, double * val)
   {
   if(!check_arg(arg))
     return;
-  val[0] = msg->args[arg].value.val_pos[0];
-  val[1] = msg->args[arg].value.val_pos[1];
+  val[0] = msg->args[arg].v.position[0];
+  val[1] = msg->args[arg].v.position[1];
   }
 
 
@@ -273,10 +217,8 @@ char * gavl_msg_get_arg_string(gavl_msg_t * msg, int arg)
   char * ret;
   if(!check_arg(arg))
     return NULL;
-  ret = (char *)msg->args[arg].value.val_buf.buf;
-  msg->args[arg].value.val_buf.buf = NULL;
-  msg->args[arg].value.val_buf.len = 0;
-  msg->args[arg].value.val_buf.alloc = 0;
+  ret = msg->args[arg].v.str;
+  msg->args[arg].v.str = NULL;
   return ret;
   }
 
@@ -284,12 +226,12 @@ const char * gavl_msg_get_arg_string_c(const gavl_msg_t * msg, int arg)
   {
   if(!check_arg(arg))
     return NULL;
-  return (char *)msg->args[arg].value.val_buf.buf;
+  return (char *)msg->args[arg].v.str;
   }
 
 /* Get/Set routines for structures */
 
-
+#if 0
 static void set_arg_ptr_nocopy(gavl_msg_t * msg, int arg, void * value,
                                int len,
                                int type)
@@ -321,26 +263,20 @@ static void * get_arg_ptr(gavl_msg_t * msg, int arg, int * length)
   return ret;
   }
 
+#endif
+
 void gavl_msg_set_arg_audio_format(gavl_msg_t * msg, int arg,
                                  const gavl_audio_format_t * format)
   {
-  uint8_t * ptr1;
-  int len;
-  ptr1 = gavl_audio_format_to_buffer(&len, format);
-
-  set_arg_ptr_nocopy(msg, arg, ptr1,
-                     len,
-                     GAVL_MSG_TYPE_AUDIO_FORMAT);
+  gavl_audio_format_copy(gavl_value_set_audio_format(&msg->args[arg]), format);
+  if(arg+1 > msg->num_args)
+    msg->num_args = arg + 1;
   }
 
 void gavl_msg_get_arg_audio_format(gavl_msg_t * msg, int arg,
                                  gavl_audio_format_t * format)
   {
-  uint8_t * ptr;
-  int len = 0;
-  ptr = get_arg_ptr(msg, arg, &len);
-  gavl_audio_format_from_buffer(ptr, len, format);
-  free(ptr);
+  gavl_audio_format_copy(format, &msg->args[arg].v.audioformat);
   }
 
 /* Video format */
@@ -348,53 +284,33 @@ void gavl_msg_get_arg_audio_format(gavl_msg_t * msg, int arg,
 void gavl_msg_set_arg_video_format(gavl_msg_t * msg, int arg,
                                  const gavl_video_format_t * format)
   {
-  uint8_t * ptr1;
-  int len = 0;
-  ptr1 = gavl_video_format_to_buffer(&len, format);
-
-  set_arg_ptr_nocopy(msg, arg, ptr1,
-                     len,
-                     GAVL_MSG_TYPE_VIDEO_FORMAT);
+  gavl_video_format_copy(gavl_value_set_video_format(&msg->args[arg]), format);
+  if(arg+1 > msg->num_args)
+    msg->num_args = arg + 1;
   }
 
 void gavl_msg_get_arg_video_format(gavl_msg_t * msg, int arg,
                                  gavl_video_format_t * format)
   {
-  uint8_t * ptr;
-  int len = 0;
-  
-  ptr = get_arg_ptr(msg, arg, &len);
-  gavl_video_format_from_buffer(ptr, len, format);
-  free(ptr);
+  gavl_video_format_copy(format, &msg->args[arg].v.videoformat);
   }
 
 void gavl_msg_set_arg_metadata(gavl_msg_t * msg, int arg,
                              const gavl_metadata_t * m)
   {
-  int len;
-  uint8_t * ptr1;
-  
-  ptr1 = gavl_metadata_to_buffer(&len, m);
-
-  set_arg_ptr_nocopy(msg, arg, ptr1,
-                     len,
-                     GAVL_MSG_TYPE_METADATA);
+  gavl_dictionary_copy(gavl_value_set_dictionary(&msg->args[arg]), m);
   }
                             
 void gavl_msg_get_arg_metadata(gavl_msg_t * msg, int arg,
-                             gavl_metadata_t * m)
+                               gavl_metadata_t * m)
   {
-  uint8_t * ptr;
-  int len = 0;
+  gavl_dictionary_free(m);
+  gavl_dictionary_init(m);
 
-  gavl_metadata_free(m);
-  gavl_metadata_init(m);
-  ptr = get_arg_ptr(msg, arg, &len);
-  if(len > 0)
-    {
-    gavl_metadata_from_buffer(ptr, len, m);
-    free(ptr);
-    }
+  if(msg->args[arg].type != GAVL_TYPE_DICTIONARY)
+    return;
+  
+  gavl_dictionary_copy(m, &msg->args[arg].v.dictionary);
   }
 
 void gavl_msg_init(gavl_msg_t * m)
@@ -416,10 +332,8 @@ void gavl_msg_free(gavl_msg_t * m)
   {
   int i;
   for(i = 0; i < m->num_args; i++)
-    {
-    if(type_has_buffer(m->args[i].type))
-      gavl_buffer_free(&m->args[i].value.val_buf);
-    }
+    gavl_value_free(&m->args[i]);
+  
   memset(m->args, 0, GAVL_MSG_MAX_ARGS * sizeof(m->args[0]));
   m->num_args = 0;
   m->id = -1;
@@ -436,79 +350,13 @@ void gavl_msg_dump(const gavl_msg_t * msg, int indent)
   {
   int i;
 
-  gavl_dprintf("Message NS: %d ID: %d (%08x) args: %d\n", msg->ns, msg->id, msg->id, msg->num_args);
+  gavl_diprintf(indent, "Message NS: %d ID: %d (%08x) args: %d\n", msg->ns, msg->id, msg->id, msg->num_args);
     
   for(i = 0; i < msg->num_args; i++)
     {
-    switch(msg->args[i].type)
-      {
-      case GAVL_MSG_TYPE_INT:
-        gavl_diprintf(indent + 2, "arg[%d]: Int: %d\n", i, msg->args[i].value.val_i);
-        break;
-      case GAVL_MSG_TYPE_FLOAT:
-        gavl_diprintf(indent + 2, "arg[%d]: Float: %f\n", i, msg->args[i].value.val_f);
-        break;
-      case GAVL_MSG_TYPE_TIME:
-        gavl_diprintf(indent + 2, "arg[%d]: Time: %"PRId64"\n",
-                    i, msg->args[i].value.val_time);
-        break;
-      case GAVL_MSG_TYPE_COLOR_RGB:
-        gavl_diprintf(indent + 2, "arg[%d]: RGB Color: %f,%f,%f\n",
-                    i,
-                    msg->args[i].value.val_color[0],
-                    msg->args[i].value.val_color[1],
-                    msg->args[i].value.val_color[2]);
-        break;
-      case GAVL_MSG_TYPE_COLOR_RGBA:
-        gavl_diprintf(indent + 2, "arg[%d]: RGBA Color: %f,%f,%f,%f\n",
-                    i,
-                    msg->args[i].value.val_color[0],
-                    msg->args[i].value.val_color[1],
-                    msg->args[i].value.val_color[2],
-                    msg->args[i].value.val_color[3]);
-        break;
-      case GAVL_MSG_TYPE_POSITION:
-        gavl_diprintf(indent + 2, "arg[%d]: Pos: %f,%f\n",
-                    i,
-                    msg->args[i].value.val_pos[0],
-                    msg->args[i].value.val_pos[1]);
-        break;
-      case GAVL_MSG_TYPE_STRING:
-        gavl_diprintf(indent + 2, "arg[%d]: String: %s\n",
-                    i,
-                    (char*)msg->args[i].value.val_buf.buf);
-        break;
-      case GAVL_MSG_TYPE_AUDIO_FORMAT:
-        {
-        gavl_audio_format_t afmt;
-        gavl_diprintf(indent + 2, "arg[%d]: Audio format\n", i);
-
-        gavl_audio_format_from_buffer(msg->args[i].value.val_buf.buf, msg->args[i].value.val_buf.len, &afmt);
-        gavl_audio_format_dumpi(&afmt, indent + 2);
-        }
-        break;
-      case GAVL_MSG_TYPE_VIDEO_FORMAT:
-        {
-        gavl_video_format_t vfmt;
-        gavl_diprintf(indent + 2, "arg[%d]: Video format\n", i);
-
-        gavl_video_format_from_buffer(msg->args[i].value.val_buf.buf, msg->args[i].value.val_buf.len, &vfmt);
-        gavl_video_format_dumpi(&vfmt, indent + 2);
-        }
-        break;
-      case GAVL_MSG_TYPE_METADATA:
-        {
-        gavl_metadata_t m;
-        gavl_metadata_init(&m);
-        gavl_diprintf(indent + 2, "arg[%d]: Metadata\n", i);
-
-        gavl_metadata_from_buffer(msg->args[i].value.val_buf.buf, msg->args[i].value.val_buf.len, &m);
-        gavl_metadata_dump(&m, indent + 4);
-        gavl_metadata_free(&m);
-        }
-        break;
-      }
-      
+    gavl_diprintf(indent + 2, "arg[%d]: %s: ", i, gavl_type_to_string(msg->args[i].type));
+    gavl_value_dump(&msg->args[i], indent+2);
+    gavl_dprintf("\n");
     }
   
   }
