@@ -299,6 +299,8 @@ void gavl_msg_set_arg_metadata(gavl_msg_t * msg, int arg,
                              const gavl_metadata_t * m)
   {
   gavl_dictionary_copy(gavl_value_set_dictionary(&msg->args[arg]), m);
+  if(arg+1 > msg->num_args)
+    msg->num_args = arg + 1;
   }
                             
 void gavl_msg_get_arg_metadata(gavl_msg_t * msg, int arg,

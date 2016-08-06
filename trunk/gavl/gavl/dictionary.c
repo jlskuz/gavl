@@ -65,6 +65,7 @@ static gavl_dict_entry_t * dict_append(gavl_dictionary_t * m, const char * name)
     {
     m->entries_alloc += 128;
     m->entries = realloc(m->entries, m->entries_alloc * sizeof(*m->entries));
+    memset(m->entries + m->num_entries, 0, (m->entries_alloc - m->num_entries) * sizeof(*m->entries));
     }
   ret = m->entries + m->num_entries;
   ret->name = gavl_strdup(name);
@@ -174,6 +175,46 @@ const gavl_value_t * gavl_dictionary_get(const gavl_dictionary_t * d, const char
     return &d->entries[idx].v;
   else
     return NULL;
+  }
+
+int gavl_dictionary_get_int(const gavl_dictionary_t * d, const char * name, int * ret)
+  {
+  const gavl_value_t * val;
+  if(!(val = gavl_dictionary_get(d, name)))
+    return 0;
+  return gavl_value_get_int(val, ret);
+  }
+
+int gavl_dictionary_get_long(const gavl_dictionary_t * d, const char * name, int64_t * ret)
+  {
+  const gavl_value_t * val;
+  if(!(val = gavl_dictionary_get(d, name)))
+    return 0;
+  return gavl_value_get_long(val, ret);
+  }
+
+int gavl_dictionary_get_float(const gavl_dictionary_t * d, const char * name, double * ret)
+  {
+  const gavl_value_t * val;
+  if(!(val = gavl_dictionary_get(d, name)))
+    return 0;
+  return gavl_value_get_float(val, ret);
+  }
+
+const gavl_array_t * gavl_dictionary_get_array(const gavl_dictionary_t * d, const char * name)
+  {
+  const gavl_value_t * val;
+  if(!(val = gavl_dictionary_get(d, name)))
+    return 0;
+  return gavl_value_get_array(val);
+  }
+
+const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_t * d, const char * name)
+  {
+  const gavl_value_t * val;
+  if(!(val = gavl_dictionary_get(d, name)))
+    return 0;
+  return gavl_value_get_dictionary(val);
   }
 
 const gavl_value_t * gavl_dictionary_get_i(const gavl_dictionary_t * d, const char * name)

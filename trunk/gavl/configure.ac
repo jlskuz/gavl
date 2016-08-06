@@ -139,7 +139,7 @@ dnl
 dnl Check for library functions
 dnl 
 
-AC_CHECK_FUNCS([memalign posix_memalign strdup])
+AC_CHECK_FUNCS([memalign posix_memalign strdup vasprintf])
 
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
