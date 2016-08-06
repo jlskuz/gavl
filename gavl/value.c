@@ -214,18 +214,20 @@ void gavl_value_init(gavl_value_t * v)
 void gavl_value_set_int(gavl_value_t * v, int val)
   {
   v->type = GAVL_TYPE_INT;
+  v->v.i = val;
   }
 
 void gavl_value_set_float(gavl_value_t * v, double val)
   {
   v->type = GAVL_TYPE_FLOAT;
+  v->v.d = val;
 
   }
 
 void gavl_value_set_long(gavl_value_t * v, int64_t val)
   {
   v->type = GAVL_TYPE_LONG;
-
+  v->v.l = val;
   }
 
 void gavl_value_set_string(gavl_value_t * v, const char * str)
@@ -343,7 +345,29 @@ void gavl_value_append_nocopy(gavl_value_t * v, gavl_value_t * child)
     }
   
   }
+
+int gavl_value_get_num_items(gavl_value_t * v)
+  {
+  if(v->type == GAVL_TYPE_UNDEFINED)
+    return 0;
   
+  if(v->type == GAVL_TYPE_ARRAY)
+    return v->v.array.num_entries; 
+  
+  return 1;
+  }
+
+const gavl_value_t * gavl_value_get_item(gavl_value_t * v, int item)
+  {
+  if(v->type == GAVL_TYPE_UNDEFINED)
+    return NULL;
+  
+  if(v->type == GAVL_TYPE_ARRAY)
+    return &v->v.array.entries[item]; 
+  
+  return v;
+  }
+
 
 /* Get value */
 
@@ -360,6 +384,14 @@ int gavl_value_get_int(const gavl_value_t * v, int * val)
     case GAVL_TYPE_FLOAT:
       *val = (int)(v->v.d);
       break;
+    case GAVL_TYPE_STRING:
+      {
+      char * rest;
+      const char * end = v->v.str + strlen(v->v.str);
+      *val = strtol(v->v.str, &rest, 10);
+      if(rest != end)
+        return 0;
+      }
     default:
       return 0;
       break;
@@ -380,6 +412,14 @@ int gavl_value_get_float(const gavl_value_t * v, double * val)
     case GAVL_TYPE_FLOAT:
       *val = v->v.d;
       break;
+    case GAVL_TYPE_STRING:
+      {
+      char * rest;
+      const char * end = v->v.str + strlen(v->v.str);
+      *val = strtod(v->v.str, &rest);
+      if(rest != end)
+        return 0;
+      }
     default:
       return 0;
       break;
@@ -400,6 +440,14 @@ int gavl_value_get_long(const gavl_value_t * v, int64_t * val)
     case GAVL_TYPE_FLOAT:
       *val = v->v.d;
       break;
+    case GAVL_TYPE_STRING:
+      {
+      char * rest;
+      const char * end = v->v.str + strlen(v->v.str);
+      *val = strtoll(v->v.str, &rest, 10);
+      if(rest != end)
+        return 0;
+      }
     default:
       return 0;
       break;
@@ -414,54 +462,117 @@ const char * gavl_value_get_string_c(const gavl_value_t * v)
   return NULL;
   }
 
-char * gavl_value_get_string(gavl_value_t * v)
+char * gavl_value_to_string(const gavl_value_t * v)
   {
+  switch(v->type)
+    {
+    case GAVL_TYPE_INT:
+      return gavl_sprintf("%d", v->v.i);
+      break;
+    case GAVL_TYPE_LONG:
+      return gavl_sprintf("%"PRId64, v->v.l);
+      break;
+    case GAVL_TYPE_FLOAT:
+      return gavl_sprintf("%.16e", v->v.d);
+      break;
+    case GAVL_TYPE_STRING:
+      return gavl_strdup(v->v.str);
+      break;
+    default:
+      return NULL;
+      break;
+    }
+  }
+
+void gavl_value_from_string(gavl_value_t * v, const char * str)
+  {
+  switch(v->type)
+    {
+    case GAVL_TYPE_UNDEFINED:
+      {
+      char * rest;
+      const char * end;
+      end = str + strlen(str);
+
+      v->v.l = strtoll(str, &rest, 10);
+      if(rest == end)
+        {
+        v->type = GAVL_TYPE_LONG;
+        return;
+        }
+
+      v->v.d = strtod(str, &rest);
+      if(rest == end)
+        {
+        v->type = GAVL_TYPE_FLOAT;
+        return;
+        }
+      // Default
+      v->v.str = gavl_strdup(str);
+      v->type = GAVL_TYPE_STRING;
+      }
+      break;
+    case GAVL_TYPE_INT:
+      v->v.i = strtol(str, NULL, 10);
+      break;
+    case GAVL_TYPE_LONG:
+      v->v.l = strtoll(str, NULL, 10);
+      break;
+    case GAVL_TYPE_FLOAT:
+      v->v.d = strtod(str, NULL);
+      break;
+    case GAVL_TYPE_STRING:
+      v->v.str = gavl_strdup(str);
+      break;
+    default:
+      break;
+    }
   
   }
 
-const gavl_audio_format_t * gavl_value_get_audio_format(gavl_value_t * v)
+const gavl_audio_format_t * gavl_value_get_audio_format(const gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_AUDIOFORMAT)
     return NULL;
   return &v->v.audioformat;
   }
 
-const gavl_video_format_t * gavl_value_get_video_format(gavl_value_t * v)
+const gavl_video_format_t * gavl_value_get_video_format(const gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_VIDEOFORMAT)
     return NULL;
   return &v->v.videoformat;
   }
 
-const gavl_dictionary_t * gavl_value_get_dictionary(gavl_value_t * v)
+const gavl_dictionary_t * gavl_value_get_dictionary(const gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_DICTIONARY)
     return NULL;
   return &v->v.dictionary;
   }
 
-const gavl_array_t * gavl_value_get_array(gavl_value_t * v)
+const gavl_array_t * gavl_value_get_array(const gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_ARRAY)
     return NULL;
   return &v->v.array;
   }
 
-const double * gavl_value_get_position(gavl_value_t * v)
+const double * gavl_value_get_position(const gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_POSITION)
     return NULL;
   return v->v.position;
   }
 
-const double * gavl_value_get_color_rgb(gavl_value_t * v)
+const double * gavl_value_get_color_rgb(const gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_COLOR_RGB)
     return NULL;
   return v->v.color;
   }
 
-const double * gavl_value_get_color_rgba(gavl_value_t * v)
+const double * gavl_value_get_color_rgba(const gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_COLOR_RGBA)
     return NULL;
@@ -509,10 +620,12 @@ void gavl_value_dump(const gavl_value_t * v, int indent)
       gavl_diprintf(indent, "\"%s\"", v->v.str);
       break;
     case GAVL_TYPE_DICTIONARY:
+      gavl_dprintf("\n");
       gavl_dictionary_dump(&v->v.dictionary, indent + 2);
+      
       break;
     case GAVL_TYPE_ARRAY:
-      gavl_array_dump(&v->v.array, indent+2);
+      gavl_array_dump(&v->v.array, indent);
       break;
     }
 

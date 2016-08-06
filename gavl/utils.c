@@ -297,7 +297,22 @@ void gavl_strtrim(char * str)
 char *
 gavl_sprintf(const char * format,...)
   {
-  return NULL;
+  va_list argp; /* arg ptr */
+#ifndef HAVE_VASPRINTF
+  int len;
+#endif
+  char * ret;
+  va_start( argp, format);
+
+#ifndef HAVE_VASPRINTF
+  len = vsnprintf(NULL, 0, format, argp);
+  ret = malloc(len+1);
+  vsnprintf(ret, len+1, format, argp);
+#else
+  vasprintf(&ret, format, argp);
+#endif
+  va_end(argp);
+  return ret;
   }
 
 

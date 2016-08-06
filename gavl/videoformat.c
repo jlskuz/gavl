@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <gavl/gavl.h>
+#include <gavl/value.h>
 
 void gavl_video_format_copy(gavl_video_format_t * dst,
                             const gavl_video_format_t * src)
@@ -432,4 +433,109 @@ void gavl_get_field_format(const gavl_video_format_t * frame_format,
         field_format->frame_height = field_format->image_height;
       }
     }
+  }
+
+#define PUT_INT(member) \
+  gavl_value_set_int(&val, fmt->member); \
+  gavl_dictionary_set_nocopy(dict, #member, &val)
+
+
+#define PUT_STRING(member, str) \
+  gavl_value_set_string(&val, str); \
+  gavl_dictionary_set_nocopy(dict, #member, &val)
+
+
+void gavl_video_format_to_dictionary(const gavl_video_format_t * fmt, gavl_dictionary_t * dict)
+  {
+  gavl_value_t val;
+  gavl_value_init(&val);
+
+  PUT_INT(image_width);
+  PUT_INT(image_height);
+  PUT_INT(frame_width);
+  PUT_INT(frame_height);
+  PUT_INT(pixel_width);
+  PUT_INT(pixel_height);
+  PUT_INT(frame_duration);
+  PUT_INT(timescale);
+
+  PUT_STRING(pixelformat, gavl_pixelformat_to_short_string(fmt->pixelformat));
+  PUT_STRING(interlace_mode, gavl_interlace_mode_to_short_string(fmt->interlace_mode));
+  PUT_STRING(framerate_mode, gavl_framerate_mode_to_short_string(fmt->framerate_mode));
+  PUT_STRING(chroma_placement, gavl_chroma_placement_to_short_string(fmt->chroma_placement));
+
+  if(fmt->timecode_format.int_framerate)
+    {
+    gavl_value_t child;
+    gavl_dictionary_t * timecode_format = gavl_value_set_dictionary(&val);
+    gavl_value_init(&child);
+    
+    gavl_value_set_int(&child, fmt->timecode_format.int_framerate);
+    gavl_dictionary_set_nocopy(timecode_format, "int_framerate", &child);
+
+    if(fmt->timecode_format.flags)
+      {
+      gavl_value_set_int(&child, fmt->timecode_format.flags);
+      gavl_dictionary_set_nocopy(timecode_format, "flags", &val);
+      }
+    }
+  }
+
+#define GET_INT(member) \
+  if(!(val = gavl_dictionary_get(dict, #member)) || \
+     !gavl_value_get_int(val, &val_i)) \
+    goto fail; \
+  fmt->member = val_i;
+
+#define GET_ENUM(member) \
+  if(!(str = gavl_dictionary_get_string(dict, #member))) \
+    goto fail; \
+  fmt->member = gavl_short_string_to_##member (str);
+
+
+int gavl_video_format_from_dictionary(gavl_video_format_t * fmt, const gavl_dictionary_t * dict)
+  {
+  int ret = 0; 
+  int val_i;
+  const gavl_value_t * val;
+  const char * str;
+  
+  GET_INT(image_width);
+  GET_INT(image_height);
+  GET_INT(frame_width);
+  GET_INT(frame_height);
+  GET_INT(pixel_width);
+  GET_INT(pixel_height);
+  GET_INT(frame_duration);
+  GET_INT(timescale);
+
+  GET_ENUM(pixelformat);
+  GET_ENUM(interlace_mode);
+  GET_ENUM(framerate_mode);
+  GET_ENUM(chroma_placement);
+
+  if((val = gavl_dictionary_get(dict, "timecode_format")))
+    {
+    const gavl_value_t * child;
+    const gavl_dictionary_t * timecode_format = gavl_value_get_dictionary(val);
+    
+    if(!timecode_format)
+      goto fail;
+
+    if(!(child = gavl_dictionary_get(timecode_format, "int_framerate")) ||
+       !gavl_value_get_int(child, &val_i))
+      goto fail;
+    fmt->timecode_format.int_framerate = val_i;
+
+    if((child = gavl_dictionary_get(timecode_format, "flags")))
+      {
+      if(!gavl_value_get_int(child, &val_i))
+        goto fail;
+      fmt->timecode_format.flags = val_i;
+      }
+    }
+
+  ret = 1;
+  fail:
+  return ret;
   }

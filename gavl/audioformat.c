@@ -25,6 +25,8 @@
 #include <gavl/gavl.h>
 #include <stdlib.h>
 
+#include <gavl/value.h>
+
 static const struct
   {
   gavl_sample_format_t format;
@@ -546,3 +548,106 @@ int gavl_nearest_samplerate(int in_rate, const int * supported)
     }
   return supported[min_index];
   }
+
+/*   Conversion from <-> to Dictionary. This is for file formats
+ *   (json or xml).
+ */
+
+#define PUT_INT(member) \
+  gavl_value_set_int(&val, fmt->member); \
+  gavl_dictionary_set_nocopy(dict, #member, &val)
+
+#define PUT_FLOAT(member) \
+  gavl_value_set_float(&val, fmt->member); \
+  gavl_dictionary_set_nocopy(dict, #member, &val)
+
+#define PUT_STRING(member, str) \
+  gavl_value_set_string(&val, str); \
+  gavl_dictionary_set_nocopy(dict, #member, &val)
+
+void gavl_audio_format_to_dictionary(const gavl_audio_format_t * fmt, gavl_dictionary_t * dict)
+  {
+  int i;
+  gavl_array_t * arr;
+  gavl_value_t val;
+  gavl_value_t child;
+  gavl_value_init(&val);                 \
+  
+  PUT_INT(samples_per_frame);
+  PUT_INT(samplerate);
+  PUT_INT(num_channels);
+
+  PUT_STRING(sample_format, gavl_sample_format_to_short_string(fmt->sample_format));
+  PUT_STRING(interleave_mode, gavl_interleave_mode_to_short_string(fmt->interleave_mode));
+
+  PUT_FLOAT(center_level);
+  PUT_FLOAT(rear_level);
+  
+  arr = gavl_value_set_array(&val);
+  
+  for(i = 0; i < fmt->num_channels; i++)
+    {
+    gavl_value_init(&child);
+    gavl_value_set_string(&child, gavl_channel_id_to_short_string(fmt->channel_locations[i]));
+    gavl_array_push_nocopy(arr, &child);
+    }
+  gavl_dictionary_set_nocopy(dict, "channel_locations", &val);
+  }
+
+#define GET_INT(member) \
+  if(!(val = gavl_dictionary_get(dict, #member)) || \
+     !gavl_value_get_int(val, &val_i)) \
+    goto fail; \
+  fmt->member = val_i;
+
+#define GET_FLOAT(member)                             \
+  if(!(val = gavl_dictionary_get(dict, #member)) || \
+     !gavl_value_get_float(val, &val_f)) \
+    goto fail; \
+  fmt->member = val_i;
+     
+  
+int gavl_audio_format_from_dictionary(gavl_audio_format_t * fmt, const gavl_dictionary_t * dict)
+  {
+  int i;
+  const char * str;
+  const gavl_value_t * val;
+  int val_i;
+  double val_f;
+  const gavl_array_t * arr;  
+  int ret = 0;
+  
+  GET_INT(samples_per_frame);
+  GET_INT(samplerate);
+  GET_INT(num_channels);
+  GET_FLOAT(center_level);
+  GET_FLOAT(rear_level);
+
+  if(!(str = gavl_dictionary_get_string(dict, "sample_format")))
+    goto fail;
+  fmt->sample_format = gavl_short_string_to_sample_format(str);
+
+  if(!(str = gavl_dictionary_get_string(dict, "interleave_mode")))
+    goto fail;
+  fmt->interleave_mode = gavl_short_string_to_interleave_mode(str);
+
+  if(!(val = gavl_dictionary_get(dict, "channel_locations")) ||
+     !(arr = gavl_value_get_array(val)))
+    goto fail;
+
+  if(arr->num_entries != fmt->num_channels)
+    goto fail;
+    
+  for(i = 0; i < fmt->num_channels; i++)
+    {
+    if(!(str = gavl_value_get_string_c(&arr->entries[i])))
+      goto fail;
+    fmt->channel_locations[i] = gavl_short_string_to_channel_id(str);
+    }
+  
+  ret = 1;
+  fail:
+ 
+  return ret;
+  }
+

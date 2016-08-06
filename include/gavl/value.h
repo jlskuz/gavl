@@ -46,6 +46,7 @@ gavl_type_t gavl_type_from_string(const char * str);
 
 typedef struct gavl_value_s gavl_value_t;
 typedef struct gavl_dict_entry_s gavl_dict_entry_t;
+typedef struct gavl_array_s gavl_array_t;
 
 /* Dictionary */
 
@@ -147,15 +148,33 @@ gavl_dictionary_compare(const gavl_dictionary_t * m1,
 GAVL_PUBLIC void
 gavl_dictionary_delete_fields(gavl_dictionary_t * m, const char * fields[]);
 
+int gavl_dictionary_get_int(const gavl_dictionary_t * d, const char * name, int * ret);
+int gavl_dictionary_get_long(const gavl_dictionary_t * d, const char * name, int64_t * ret);
+int gavl_dictionary_get_float(const gavl_dictionary_t * d, const char * name, double * ret);
+const gavl_array_t * gavl_dictionary_get_array(const gavl_dictionary_t * d, const char * name);
+const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_t * d, const char * name);
+
+
+/* Convert formats to and from dictionaries */
+
+GAVL_PUBLIC
+void gavl_audio_format_to_dictionary(const gavl_audio_format_t * fmt, gavl_dictionary_t * dict);
+GAVL_PUBLIC
+int gavl_audio_format_from_dictionary(gavl_audio_format_t * fmt, const gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
+void gavl_video_format_to_dictionary(const gavl_video_format_t * fmt, gavl_dictionary_t * dict);
+GAVL_PUBLIC
+int gavl_video_format_from_dictionary(gavl_video_format_t * fmt, const gavl_dictionary_t * dict);
 
 /* Array */
 
-typedef struct
+struct gavl_array_s
   {
   int entries_alloc;
   int num_entries;
   struct gavl_value_s * entries;
-  } gavl_array_t;
+  };
 
 GAVL_PUBLIC
 void gavl_array_init(gavl_array_t * d);
@@ -167,7 +186,7 @@ GAVL_PUBLIC
 void gavl_array_push_nocopy(gavl_array_t * d, gavl_value_t * val);
 
 GAVL_PUBLIC
-const gavl_value_t * gavl_array_get(gavl_array_t * d, int idx);
+const gavl_value_t * gavl_array_get(const gavl_array_t * d, int idx);
 
 GAVL_PUBLIC
 void gavl_array_free(gavl_array_t * d);
@@ -235,6 +254,12 @@ GAVL_PUBLIC
 void gavl_value_append(gavl_value_t * v, const gavl_value_t * child);
 
 GAVL_PUBLIC
+int gavl_value_get_num_items(gavl_value_t * v);
+
+GAVL_PUBLIC
+const gavl_value_t * gavl_value_get_item(gavl_value_t * v, int item);
+
+GAVL_PUBLIC
 void gavl_value_set_int(gavl_value_t * v, int val);
 
 GAVL_PUBLIC
@@ -272,23 +297,28 @@ GAVL_PUBLIC
 int gavl_value_get_long(const gavl_value_t * v, int64_t * val);
 GAVL_PUBLIC
 const char * gavl_value_get_string_c(const gavl_value_t * v);
-GAVL_PUBLIC
-char * gavl_value_get_string(gavl_value_t * v);
 
 GAVL_PUBLIC
-const gavl_audio_format_t * gavl_value_get_audio_format(gavl_value_t * v);
-GAVL_PUBLIC
-const gavl_video_format_t * gavl_value_get_video_format(gavl_value_t * v);
-GAVL_PUBLIC
-const gavl_dictionary_t * gavl_value_get_dictionary(gavl_value_t * v);
-GAVL_PUBLIC
-const gavl_array_t * gavl_value_get_array(gavl_value_t * v);
+char * gavl_value_to_string(const gavl_value_t * v);
 
 GAVL_PUBLIC
-const double * gavl_value_get_position(gavl_value_t * v);
+void gavl_value_from_string(gavl_value_t * v, const char * str);
+
+
 GAVL_PUBLIC
-const double * gavl_value_get_color_rgb(gavl_value_t * v);
+const gavl_audio_format_t * gavl_value_get_audio_format(const gavl_value_t * v);
 GAVL_PUBLIC
-const double * gavl_value_get_color_rgba(gavl_value_t * v);
+const gavl_video_format_t * gavl_value_get_video_format(const gavl_value_t * v);
+GAVL_PUBLIC
+const gavl_dictionary_t * gavl_value_get_dictionary(const gavl_value_t * v);
+GAVL_PUBLIC
+const gavl_array_t * gavl_value_get_array(const gavl_value_t * v);
+
+GAVL_PUBLIC
+const double * gavl_value_get_position(const gavl_value_t * v);
+GAVL_PUBLIC
+const double * gavl_value_get_color_rgb(const gavl_value_t * v);
+GAVL_PUBLIC
+const double * gavl_value_get_color_rgba(const gavl_value_t * v);
 
 #endif // GAVL_VALUE_H_INCLUDED

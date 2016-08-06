@@ -79,7 +79,7 @@ void gavl_array_push_nocopy(gavl_array_t * d, gavl_value_t * val)
   gavl_value_move(dst, val);
   }
 
-const gavl_value_t * gavl_array_get(gavl_array_t * d, int idx)
+const gavl_value_t * gavl_array_get(const gavl_array_t * d, int idx)
   {
   if((idx < 0) || (idx >= d->num_entries))
     return NULL;
