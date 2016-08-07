@@ -571,7 +571,7 @@ gavl_metadata_get_image_uri(const gavl_metadata_t * m,
                             const char * key,
                             int i,
                             int * wp, int * hp,
-                            char ** mimetype);
+                            const char ** mimetype);
 
 GAVL_PUBLIC const char *
 gavl_metadata_get_image_max(const gavl_metadata_t * m,
@@ -580,11 +580,11 @@ gavl_metadata_get_image_max(const gavl_metadata_t * m,
                             const char * mimetype);
  
 
-GAVL_PUBLIC void
+GAVL_PUBLIC gavl_dictionary_t *
 gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
                       const char * mimetype, const char * location);
 
-GAVL_PUBLIC int
+GAVL_PUBLIC const gavl_dictionary_t *
 gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
                       char ** mimetype, char ** location);
 

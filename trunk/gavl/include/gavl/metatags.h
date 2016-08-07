@@ -40,6 +40,8 @@
 /** \brief Title of the song/movie... */
 #define GAVL_META_SEARCH_TITLE "SearchTitle"
 
+#define GAVL_META_ORIGINAL_TITLE "OriginalTitle"
+
 /** \brief Unique ID within this database */
 
 #define GAVL_META_ID          "ID"
