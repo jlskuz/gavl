@@ -80,7 +80,7 @@ static void dict_free_entry(gavl_dict_entry_t * e)
   gavl_value_free(&e->v);
   }
 
-static void
+static int
 dict_set(gavl_dictionary_t * d, const char * name, const gavl_value_t * val,
          int ign,
          int cpy)
@@ -102,13 +102,18 @@ dict_set(gavl_dictionary_t * d, const char * name, const gavl_value_t * val,
         }
       d->num_entries--;
       }
-    return;
+    return 1;
     }
   
   if((idx = gavl_dictionary_find(d, name, ign)) >= 0)
     {
-    /* Replace */
     e = d->entries + idx;
+    
+    /* Check for equality */
+    if(!gavl_value_compare(&e->v, val))
+      return 0; // Noop
+    
+    /* Replace */
     gavl_value_free(&e->v);
     gavl_value_init(&e->v);
     }
@@ -121,51 +126,58 @@ dict_set(gavl_dictionary_t * d, const char * name, const gavl_value_t * val,
     {
     memcpy(&e->v, val, sizeof(*val));
     }
+  return 1;
   }
 
-void gavl_dictionary_set_string(gavl_dictionary_t * d,
+int gavl_dictionary_set_string(gavl_dictionary_t * d,
                                 const char * name, const char * val)
   {
   gavl_value_t v;
   gavl_value_init(&v);
   gavl_value_set_string(&v, val);
-  gavl_dictionary_set_nocopy(d, name, &v);
+  return gavl_dictionary_set_nocopy(d, name, &v);
   }
 
-void gavl_dictionary_set_string_nocopy(gavl_dictionary_t * d,
+int gavl_dictionary_set_string_nocopy(gavl_dictionary_t * d,
                                        const char * name, char * val)
   {
   gavl_value_t v;
   gavl_value_init(&v);
   gavl_value_set_string_nocopy(&v, val);
-  gavl_dictionary_set_nocopy(d, name, &v);
+  return gavl_dictionary_set_nocopy(d, name, &v);
   }
 
 
-void gavl_dictionary_set(gavl_dictionary_t * d, const char * name,
+int gavl_dictionary_set(gavl_dictionary_t * d, const char * name,
                          const gavl_value_t * val)
   {
-  dict_set(d, name, val, 0, 1);
+  return dict_set(d, name, val, 0, 1);
   }
 
-void gavl_dictionary_set_i(gavl_dictionary_t * d, const char * name,
+int gavl_dictionary_set_i(gavl_dictionary_t * d, const char * name,
                            const gavl_value_t * val)
   {
-  dict_set(d, name, val, 1, 1);
+  return dict_set(d, name, val, 1, 1);
   }
 
-void gavl_dictionary_set_nocopy(gavl_dictionary_t * d, const char * name,
+int gavl_dictionary_set_nocopy(gavl_dictionary_t * d, const char * name,
                                 gavl_value_t * val)
   {
-  dict_set(d, name, val, 0, 0);
+  int ret = dict_set(d, name, val, 0, 0);
+  if(!ret)
+    gavl_value_free(val);
   gavl_value_init(val);
+  return ret;
   }
 
-void gavl_dictionary_set_nocopy_i(gavl_dictionary_t * d, const char * name,
+int gavl_dictionary_set_nocopy_i(gavl_dictionary_t * d, const char * name,
                                   gavl_value_t * val)
   {
-  dict_set(d, name, val, 1, 0);
+  int ret = dict_set(d, name, val, 1, 0);
+  if(!ret)
+    gavl_value_free(val);
   gavl_value_init(val);
+  return ret;
   }
 
 const gavl_value_t * gavl_dictionary_get(const gavl_dictionary_t * d, const char * name)
