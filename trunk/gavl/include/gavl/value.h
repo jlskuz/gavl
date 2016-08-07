@@ -66,10 +66,10 @@ void gavl_dictionary_init(gavl_dictionary_t * d);
 
 
 GAVL_PUBLIC
-void gavl_dictionary_set_string(gavl_dictionary_t * d,
+int gavl_dictionary_set_string(gavl_dictionary_t * d,
                                 const char * name, const char * val);
 GAVL_PUBLIC
-void gavl_dictionary_set_string_nocopy(gavl_dictionary_t * d,
+int gavl_dictionary_set_string_nocopy(gavl_dictionary_t * d,
                                        const char * name, char * val);
 
 GAVL_PUBLIC
@@ -80,21 +80,23 @@ GAVL_PUBLIC
 const char * gavl_dictionary_get_string_i(const gavl_dictionary_t * d,
                                           const char * name);
 
+/* *_set* functions return 1 is the dictionary was really changed */
+
 GAVL_PUBLIC
-void gavl_dictionary_set(gavl_dictionary_t * d,
+int gavl_dictionary_set(gavl_dictionary_t * d,
                          const char * name, const gavl_value_t * val);
 
 GAVL_PUBLIC
-void gavl_dictionary_set_i(gavl_dictionary_t * d,
-                           const char * name, const gavl_value_t * val);
+int gavl_dictionary_set_i(gavl_dictionary_t * d,
+                          const char * name, const gavl_value_t * val);
 
 GAVL_PUBLIC
-void gavl_dictionary_set_nocopy(gavl_dictionary_t * d,
-                                const char * name, gavl_value_t * val);
+int gavl_dictionary_set_nocopy(gavl_dictionary_t * d,
+                               const char * name, gavl_value_t * val);
 
 GAVL_PUBLIC
-void gavl_dictionary_set_nocopy_i(gavl_dictionary_t * d, const char * name,
-                                  gavl_value_t * val);
+int gavl_dictionary_set_nocopy_i(gavl_dictionary_t * d, const char * name,
+                                 gavl_value_t * val);
 
 GAVL_PUBLIC
 void gavl_dictionary_append(gavl_dictionary_t * d, const char * name,
