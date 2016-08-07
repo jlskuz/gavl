@@ -64,12 +64,6 @@ typedef void (*gavl_dictionary_foreach_func)(void * priv, const char * name, con
 GAVL_PUBLIC
 void gavl_dictionary_init(gavl_dictionary_t * d);
 
-GAVL_PUBLIC
-void gavl_dictionary_set(gavl_dictionary_t * d,
-                         const char * name, const gavl_value_t * val);
-
-GAVL_PUBLIC
-void gavl_dictionary_set_i(gavl_dictionary_t * d, const char * name, const gavl_value_t * val);
 
 GAVL_PUBLIC
 void gavl_dictionary_set_string(gavl_dictionary_t * d,
@@ -86,10 +80,17 @@ GAVL_PUBLIC
 const char * gavl_dictionary_get_string_i(const gavl_dictionary_t * d,
                                           const char * name);
 
+GAVL_PUBLIC
+void gavl_dictionary_set(gavl_dictionary_t * d,
+                         const char * name, const gavl_value_t * val);
 
 GAVL_PUBLIC
-void gavl_dictionary_set_nocopy(gavl_dictionary_t * d, const char * name,
-                                gavl_value_t * val);
+void gavl_dictionary_set_i(gavl_dictionary_t * d,
+                           const char * name, const gavl_value_t * val);
+
+GAVL_PUBLIC
+void gavl_dictionary_set_nocopy(gavl_dictionary_t * d,
+                                const char * name, gavl_value_t * val);
 
 GAVL_PUBLIC
 void gavl_dictionary_set_nocopy_i(gavl_dictionary_t * d, const char * name,
@@ -111,9 +112,19 @@ GAVL_PUBLIC
 void gavl_dictionary_append_nocopy_i(gavl_dictionary_t * d, const char * name,
                                      gavl_value_t * val);
 
+GAVL_PUBLIC
+const gavl_value_t *
+gavl_dictionary_get_item(const gavl_dictionary_t * d, const char * name, int item);
+
+GAVL_PUBLIC
+const gavl_value_t *
+gavl_dictionary_get_item_i(const gavl_dictionary_t * d, const char * name, int item);
 
 GAVL_PUBLIC
 void gavl_dictionary_foreach(const gavl_dictionary_t * d, gavl_dictionary_foreach_func, void * priv);
+
+GAVL_PUBLIC
+int gavl_dictionary_find(const gavl_dictionary_t * m, const char * name, int ign);
 
 
 GAVL_PUBLIC
@@ -140,7 +151,6 @@ GAVL_PUBLIC
 void gavl_dictionary_merge2(gavl_dictionary_t * dst,
                             const gavl_dictionary_t * src);
 
-
 GAVL_PUBLIC int
 gavl_dictionary_compare(const gavl_dictionary_t * m1,
                         const gavl_dictionary_t * m2);
@@ -148,22 +158,32 @@ gavl_dictionary_compare(const gavl_dictionary_t * m1,
 GAVL_PUBLIC void
 gavl_dictionary_delete_fields(gavl_dictionary_t * m, const char * fields[]);
 
+GAVL_PUBLIC
 int gavl_dictionary_get_int(const gavl_dictionary_t * d, const char * name, int * ret);
-int gavl_dictionary_get_long(const gavl_dictionary_t * d, const char * name, int64_t * ret);
-int gavl_dictionary_get_float(const gavl_dictionary_t * d, const char * name, double * ret);
-const gavl_array_t * gavl_dictionary_get_array(const gavl_dictionary_t * d, const char * name);
-const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_t * d, const char * name);
 
+GAVL_PUBLIC
+int gavl_dictionary_get_long(const gavl_dictionary_t * d, const char * name, int64_t * ret);
+
+GAVL_PUBLIC
+int gavl_dictionary_get_float(const gavl_dictionary_t * d, const char * name, double * ret);
+
+GAVL_PUBLIC
+const gavl_array_t * gavl_dictionary_get_array(const gavl_dictionary_t * d, const char * name);
+
+GAVL_PUBLIC
+const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_t * d, const char * name);
 
 /* Convert formats to and from dictionaries */
 
 GAVL_PUBLIC
 void gavl_audio_format_to_dictionary(const gavl_audio_format_t * fmt, gavl_dictionary_t * dict);
+
 GAVL_PUBLIC
 int gavl_audio_format_from_dictionary(gavl_audio_format_t * fmt, const gavl_dictionary_t * dict);
 
 GAVL_PUBLIC
 void gavl_video_format_to_dictionary(const gavl_video_format_t * fmt, gavl_dictionary_t * dict);
+
 GAVL_PUBLIC
 int gavl_video_format_from_dictionary(gavl_video_format_t * fmt, const gavl_dictionary_t * dict);
 
@@ -201,6 +221,8 @@ GAVL_PUBLIC
 int gavl_array_compare(const gavl_array_t * m1,
                        const gavl_array_t * m2);
 
+
+/* Value */
 
 struct gavl_value_s
   {
@@ -254,10 +276,10 @@ GAVL_PUBLIC
 void gavl_value_append(gavl_value_t * v, const gavl_value_t * child);
 
 GAVL_PUBLIC
-int gavl_value_get_num_items(gavl_value_t * v);
+int gavl_value_get_num_items(const gavl_value_t * v);
 
 GAVL_PUBLIC
-const gavl_value_t * gavl_value_get_item(gavl_value_t * v, int item);
+const gavl_value_t * gavl_value_get_item(const gavl_value_t * v, int item);
 
 GAVL_PUBLIC
 void gavl_value_set_int(gavl_value_t * v, int val);

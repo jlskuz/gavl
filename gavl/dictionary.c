@@ -35,7 +35,7 @@ void gavl_dictionary_init(gavl_dictionary_t * d)
   memset(d, 0, sizeof(*d));
   }
 
-static int dict_find(const gavl_dictionary_t * m, const char * name, int ign)
+int gavl_dictionary_find(const gavl_dictionary_t * m, const char * name, int ign)
   {
   int i;
 
@@ -91,7 +91,7 @@ dict_set(gavl_dictionary_t * d, const char * name, const gavl_value_t * val,
   /* Value is NULL: Delete entry */
   if(!val)
     {
-    if((idx = dict_find(d, name, ign)) >= 0)
+    if((idx = gavl_dictionary_find(d, name, ign)) >= 0)
       {
       dict_free_entry(d->entries + idx);
       if(idx < d->num_entries - 1)
@@ -105,7 +105,7 @@ dict_set(gavl_dictionary_t * d, const char * name, const gavl_value_t * val,
     return;
     }
   
-  if((idx = dict_find(d, name, ign)) >= 0)
+  if((idx = gavl_dictionary_find(d, name, ign)) >= 0)
     {
     /* Replace */
     e = d->entries + idx;
@@ -171,7 +171,7 @@ void gavl_dictionary_set_nocopy_i(gavl_dictionary_t * d, const char * name,
 const gavl_value_t * gavl_dictionary_get(const gavl_dictionary_t * d, const char * name)
   {
   int idx;
-  if((idx = dict_find(d, name, 0)) >= 0)
+  if((idx = gavl_dictionary_find(d, name, 0)) >= 0)
     return &d->entries[idx].v;
   else
     return NULL;
@@ -220,10 +220,26 @@ const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_
 const gavl_value_t * gavl_dictionary_get_i(const gavl_dictionary_t * d, const char * name)
   {
   int idx;
-  if((idx = dict_find(d, name, 1)) >= 0)
+  if((idx = gavl_dictionary_find(d, name, 1)) >= 0)
     return &d->entries[idx].v;
   else
     return NULL;
+  }
+
+const gavl_value_t * gavl_dictionary_get_item(const gavl_dictionary_t * d, const char * name, int item)
+  {
+  int idx;
+  if((idx = gavl_dictionary_find(d, name, 0)) < 0)
+    return NULL;
+  return gavl_value_get_item(&d->entries[idx].v, item);
+  }
+
+const gavl_value_t * gavl_dictionary_get_item_i(const gavl_dictionary_t * d, const char * name, int item)
+  {
+  int idx;
+  if((idx = gavl_dictionary_find(d, name, 1)) < 0)
+    return NULL;
+  return gavl_value_get_item(&d->entries[idx].v, item);
   }
 
 
@@ -406,7 +422,7 @@ static void dict_append_internal(gavl_dictionary_t * d, const char * name,
   int idx;
   gavl_dict_entry_t * e;
   
-  if((idx = dict_find(d, name, ign)) >= 0)
+  if((idx = gavl_dictionary_find(d, name, ign)) >= 0)
     e = &d->entries[idx];
   else
     e = dict_append(d, name);

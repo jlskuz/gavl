@@ -757,12 +757,12 @@ void gavl_metadata_add_image_uri(gavl_metadata_t * m,
   
   gavl_value_init(&val);
   gavl_value_set_string(&val, uri);
-  gavl_dictionary_set_nocopy(dict, "src", &val);
+  gavl_dictionary_set_nocopy(dict, GAVL_META_LOCATION, &val);
 
   if(mimetype)
     {
     gavl_value_set_string(&val, mimetype);
-    gavl_dictionary_set_nocopy(dict, "mimetype", &val);
+    gavl_dictionary_set_nocopy(dict, GAVL_META_MIMETYPE, &val);
     }
   if(w > 0)
     {
@@ -781,7 +781,7 @@ const char * gavl_metadata_get_image_uri(const gavl_metadata_t * m,
                                          const char * key,
                                          int i,
                                          int * wp, int * hp,
-                                         char ** mimetype)
+                                         const char ** mimetype)
   {
   const gavl_dictionary_t * dict = NULL;
   const gavl_value_t * val;
@@ -804,13 +804,13 @@ const char * gavl_metadata_get_image_uri(const gavl_metadata_t * m,
   if(!dict)
     return NULL;
 
-  if(!(val = gavl_dictionary_get(dict, "src")))
+  if(!(val = gavl_dictionary_get(dict, GAVL_META_LOCATION)))
     return NULL;
 
   ret = gavl_value_get_string_c(val);
 
   /* mimetype, width, height */
-  if(mimetype && (val = gavl_dictionary_get(dict, "mimetype")))
+  if(mimetype && (val = gavl_dictionary_get(dict, GAVL_META_MIMETYPE)))
     *mimetype = gavl_strdup(gavl_value_get_string_c(val));
   if(wp  && (val = gavl_dictionary_get(dict, "w")))
     gavl_value_get_int(val, wp);
@@ -826,14 +826,12 @@ gavl_metadata_get_image_max(const gavl_metadata_t * m,
                             int w, int h,
                             const char * mimetype)
   {
-#if 1
+  int i;
   const gavl_value_t * val;
-  const gavl_value_t * uri;
-  const gavl_value_t * val_w;
-  const gavl_value_t * val_h;
-  const gavl_value_t * val_mimetype;
+  
+  int val_w = -1, val_h = -1;
+  const char * val_mimetype;
 
-  const gavl_dictionary_t * dict;
   
   int num;
   int w_max = 0, i_max = -1;
@@ -841,126 +839,93 @@ gavl_metadata_get_image_max(const gavl_metadata_t * m,
   if(!(val = gavl_dictionary_get(m, key)))
     return NULL;
   
-  num= gavl_value_get_num_items(val);
+  num = gavl_value_get_num_items(val);
   
   for(i = 0; i < num; i++)
     {
-    if(!(uri = gavl_value_get_item(val, i)) ||
-       (uri->type != GAVL_TYPE_DICTIONARY))
-      continue;
-    
-    dict = &uri->v.dictionary;
-    
-    if(!gavl_dictionary_get_string(dict, "src"))
-      continue;
-    
-    }
-  
-  
-#else
-  const char * var;
-  int w_test, h_test;
-  int i;
-  const char * pos;
-  
-  int w_max = 0, i_max = -1;
-  
-  int num = gavl_metadata_get_arr_len(m, key);
-
-  if(!num)
-    return NULL;
-
-  for(i = 0; i < num; i++)
-    {
-    var = gavl_metadata_get_arr(m, key, i);
-
-    pos = var;
-    
-    if(*pos == '|')
+    /* Invalid */
+    if(!gavl_metadata_get_image_uri(m,
+                                    key,
+                                    i,
+                                    &val_w, &val_h,
+                                    &val_mimetype))
       continue;
 
-    if(sscanf(pos, "%d|%d|", &w_test, &h_test) < 2)
+    /* Too large */
+    if(((w > 0) && (val_w > w)) || ((h > 0) && (val_h > h)))
+      continue;
+      
+    /* Wrong type */
+    if(mimetype && val_mimetype && strcmp(mimetype, val_mimetype))
       continue;
 
-    pos = strchr(pos, '|');
-    pos++;
-    pos = strchr(pos, '|');
-    pos++;
-
-    if(mimetype)
+    if(!w_max || !val_w || (w_max < val_w))
       {
-      if((*pos != '|') && strncmp(mimetype, pos, strlen(mimetype)))
-        continue;
-      }
-    
-    if(((w > 0) && (w_test > w)) ||
-       ((h > 0) && (h_test > h)))
-      continue;
-    
-    if(w_max < w_test)
-      {
+      w_max = val_w;
       i_max = i;
-      w_max = w_test;
       }
     }
   
   if(i_max < 0)
     i_max = 0;
   
-  var = gavl_metadata_get_arr(m, key, i_max);
-  pos = var;
-  pos = strchr(pos, '|');
-  pos++;
-  pos = strchr(pos, '|');
-  pos++;
-  pos = strchr(pos, '|');
-  pos++;
-  
-  return pos;
-#endif
+  return gavl_metadata_get_image_uri(m, key, i_max, NULL, NULL, NULL);
   }
 
-void gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
-                           const char * mimetype, const char * location)
+gavl_dictionary_t *
+gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
+                      const char * mimetype, const char * location)
   {
-  int len;
-  char * str;
-  if(!mimetype)
-    {
-    len = 1 + strlen(location) + 1;
-    str = malloc(len);
-    snprintf(str, len, "|%s", location);
-    }
-  else
-    {
-    len = strlen(mimetype) + 1 + strlen(location) + 1;
-    str = malloc(len);
-    snprintf(str, len, "%s|%s", mimetype, location);
-    }
-  gavl_metadata_set_nocpy(m, key, str);
-  }
+  int idx;
+  gavl_value_t val;
+  gavl_value_t child_val;
+  gavl_dictionary_t * ret;
+  gavl_value_t * valp;
 
-int gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
-                          char ** mimetype, char ** location)
-  {
-  const char * val;
-  char * pos;
-  if(!(val = gavl_metadata_get_arr(m, key, idx)))
-    return 0;
+  gavl_value_init(&val);
+  gavl_value_init(&child_val);
+
+  ret = gavl_value_set_dictionary(&val);
   
-  pos = strchr(val, '|');
-  if(!pos)
-    return 0;
-
+  gavl_value_set_string(&child_val, location);
+  gavl_dictionary_set_nocopy(ret, GAVL_META_LOCATION, &child_val);
+  
   if(mimetype)
     {
-    if(*val != '|')
-      *mimetype = gavl_strndup(val, pos);
-    else
-      *mimetype = NULL;
+    gavl_value_set_string(&child_val, mimetype);
+    gavl_dictionary_set_nocopy(ret, GAVL_META_MIMETYPE, &child_val);
     }
-  pos++;
+  
+  gavl_dictionary_append_nocopy(m, key, &val);
+
+  idx = gavl_dictionary_find(m, key, 0);
+
+  valp = &m->entries[idx].v;
+  
+  if(valp->type == GAVL_TYPE_ARRAY)
+    return &valp->v.array.entries[valp->v.array.num_entries-1].v.dictionary;
+  else if(valp->type == GAVL_TYPE_DICTIONARY)
+    return &valp->v.dictionary;
+  else
+    return NULL;
+  }
+
+const gavl_dictionary_t *
+gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
+                      char ** mimetype, char ** location)
+  {
+  const gavl_value_t * val;
+  const gavl_dictionary_t * dict;
+  
+  if(!(val = gavl_dictionary_get_item(m, key, idx)) ||
+     (val->type != GAVL_TYPE_DICTIONARY))
+    return 0;
+
+  dict = &val->v.dictionary;
+  
   if(location)
-    *location = gavl_strdup(pos);
-  return 1;
+    *location = gavl_strdup(gavl_dictionary_get_string(dict, GAVL_META_LOCATION));
+  if(mimetype)
+    *mimetype = gavl_strdup(gavl_dictionary_get_string(dict, GAVL_META_MIMETYPE));
+  return dict;
   }

@@ -343,10 +343,9 @@ void gavl_value_append_nocopy(gavl_value_t * v, gavl_value_t * child)
     /* Append to array */
     gavl_array_push_nocopy(&v->v.array, child);
     }
-  
   }
 
-int gavl_value_get_num_items(gavl_value_t * v)
+int gavl_value_get_num_items(const gavl_value_t * v)
   {
   if(v->type == GAVL_TYPE_UNDEFINED)
     return 0;
@@ -357,13 +356,13 @@ int gavl_value_get_num_items(gavl_value_t * v)
   return 1;
   }
 
-const gavl_value_t * gavl_value_get_item(gavl_value_t * v, int item)
+const gavl_value_t * gavl_value_get_item(const gavl_value_t * v, int item)
   {
   if(v->type == GAVL_TYPE_UNDEFINED)
     return NULL;
   
   if(v->type == GAVL_TYPE_ARRAY)
-    return &v->v.array.entries[item]; 
+    return gavl_array_get(&v->v.array, item);
   
   return v;
   }
