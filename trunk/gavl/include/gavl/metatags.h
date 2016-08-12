@@ -187,7 +187,11 @@
 /** \brief Name of the station for Radio or TV streams
  */
 
-#define GAVL_META_STATION     "Station"
+#define GAVL_META_STATION      "Station"
+
+#define GAVL_META_STATION_URL  "StationURL"
+
+
 
 /** \brief Approximate duration
  */
@@ -252,6 +256,7 @@
 #define GAVL_META_COVER_URL      "CoverURL"
 #define GAVL_META_WALLPAPER_URL  "WallpaperURL"
 #define GAVL_META_POSTER_URL     "PosterURL"
+#define GAVL_META_ICON           "Icon"
 
 #define GAVL_META_CAN_SEEK   "CanSeek"
 #define GAVL_META_CAN_PAUSE  "CanPause"
@@ -275,6 +280,7 @@
  */
 
 #define GAVL_META_MEDIA_CLASS                    "MediaClass"
+#define GAVL_META_CHILD_CLASS                    "ChildClass"
 
 /* Value for class */
 #define GAVL_META_MEDIA_CLASS_AUDIO_FILE         "item.audio"
@@ -299,6 +305,7 @@
 #define GAVL_META_MEDIA_CLASS_DIRECTORY          "container.directory"
 
 /* Root Containers */
+#define GAVL_META_MEDIA_CLASS_ROOT               "container.root" 
 #define GAVL_META_MEDIA_CLASS_ROOT_MUSICALBUMS   "container.root.musicalbums" 
 #define GAVL_META_MEDIA_CLASS_ROOT_SONGS         "container.root.songs" 
 #define GAVL_META_MEDIA_CLASS_ROOT_PLAYLISTS     "container.root.playlists" 
