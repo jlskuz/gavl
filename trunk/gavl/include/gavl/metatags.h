@@ -266,7 +266,7 @@
 
 /* Purely informational entries for the global metadata or per Location */
 #define GAVL_META_AUDIO_CHANNELS     "Channels"
-#define GAVL_META_AUDIO_SAMPERATE    "Samplerate"
+#define GAVL_META_AUDIO_SAMPLERATE   "Samplerate"
 #define GAVL_META_AUDIO_BITRATE      "AudioBitrate"
 #define GAVL_META_VIDEO_BITRATE      "VideoBitrate"
 #define GAVL_META_VIDEO_RESOLUTION   "VideoResolution"
