@@ -25,24 +25,6 @@
 #include <gavl/gavldefs.h>
 #include <gavl/value.h>
 
-/* Must match utils.js */
-
-#if 0
-typedef enum
-  {
-    GAVL_MSG_TYPE_INT            = 0,
-    GAVL_MSG_TYPE_FLOAT          = 1,
-    GAVL_MSG_TYPE_TIME           = 2,
-    GAVL_MSG_TYPE_COLOR_RGB      = 3,
-    GAVL_MSG_TYPE_COLOR_RGBA     = 4,
-    GAVL_MSG_TYPE_POSITION       = 5,
-    GAVL_MSG_TYPE_STRING         = 6,
-    GAVL_MSG_TYPE_AUDIO_FORMAT   = 7,
-    GAVL_MSG_TYPE_VIDEO_FORMAT   = 8,
-    GAVL_MSG_TYPE_METADATA       = 9,
-  } gavl_msg_type_t;
-#endif
-
 #define GAVL_MSG_NONE     -1 //!< Reserved ID for non valid message
 #define GAVL_MSG_MAX_ARGS  8 //!< Maximum number of args
 

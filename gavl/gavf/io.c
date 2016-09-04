@@ -1129,7 +1129,7 @@ int gavl_value_read(gavf_io_t * io, gavl_value_t * v)
         return 0;
 
       v->v.array.entries_alloc = v->v.array.num_entries;
-      v->v.array.entries = calloc(v->v.array.entries_alloc, sizeof(v->v.array.entries));
+      v->v.array.entries = calloc(v->v.array.entries_alloc, sizeof(*v->v.array.entries));
 
       for(i = 0; i < v->v.array.num_entries; i++)
         {
@@ -1165,7 +1165,7 @@ int gavl_dictionary_read(gavf_io_t * io, gavl_dictionary_t * dict)
     return 0;
   
   dict->entries_alloc = dict->num_entries;
-  dict->entries = calloc(dict->entries_alloc, sizeof(dict->entries));
+  dict->entries = calloc(dict->entries_alloc, sizeof(*dict->entries));
   
   for(i = 0; i < dict->num_entries; i++)
     {
