@@ -109,7 +109,12 @@ int gavl_value_compare(const gavl_value_t * v1, const gavl_value_t * v2)
       return CMP_NUM(v1->v.d, v2->v.d);
       break;
     case GAVL_TYPE_STRING:
-      return strcmp(v1->v.str, v2->v.str);
+      if(!v1->v.str && !v2->v.str)
+        return 0;
+      else if(v1->v.str && v2->v.str)
+        return strcmp(v1->v.str, v2->v.str);
+      else
+        return 1;
       break;
     case GAVL_TYPE_AUDIOFORMAT:
       return memcmp(&v1->v.audioformat, &v2->v.audioformat, sizeof(v1->v.audioformat));
