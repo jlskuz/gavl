@@ -161,7 +161,7 @@ int gavl_dictionary_set_i(gavl_dictionary_t * d, const char * name,
   }
 
 int gavl_dictionary_set_nocopy(gavl_dictionary_t * d, const char * name,
-                                gavl_value_t * val)
+                               gavl_value_t * val)
   {
   int ret = dict_set(d, name, val, 0, 0);
   if(!ret)

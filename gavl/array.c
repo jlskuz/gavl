@@ -30,20 +30,6 @@
 
 /* Array */
 
-static gavl_value_t * array_append(gavl_array_t * m)
-  {
-  gavl_value_t * ret;
-  if(m->num_entries == m->entries_alloc)
-    {
-    m->entries_alloc += 128;
-    m->entries = realloc(m->entries, m->entries_alloc * sizeof(*m->entries));
-    memset(m->entries + m->num_entries, 0, (m->entries_alloc - m->num_entries) * sizeof(*m->entries));
-    }
-  ret = m->entries + m->num_entries;
-  m->num_entries++;
-  return ret;
-  }
-
 void gavl_array_init(gavl_array_t * d)
   {
   memset(d, 0, sizeof(*d));
@@ -67,17 +53,6 @@ void gavl_array_dump(const gavl_array_t * a, int indent)
   gavl_diprintf(indent + 2, "]");
   }
 
-void gavl_array_push(gavl_array_t * d, const gavl_value_t * val)
-  {
-  gavl_value_t * dst = array_append(d);
-  gavl_value_copy(dst, val);
-  }
-
-void gavl_array_push_nocopy(gavl_array_t * d, gavl_value_t * val)
-  {
-  gavl_value_t * dst = array_append(d);
-  gavl_value_move(dst, val);
-  }
 
 const gavl_value_t * gavl_array_get(const gavl_array_t * d, int idx)
   {
@@ -129,4 +104,123 @@ gavl_array_compare(const gavl_array_t * m1,
       return result;
     }
   return 0;
+  }
+
+static gavl_value_t * do_splice(gavl_array_t * arr,
+                         int idx, int del, int num)
+  {
+  int i;
+  
+  if((idx < 0) || (idx > arr->num_entries)) // Append
+    idx = arr->num_entries;
+  
+  if(del)
+    {
+    if(idx + del > arr->num_entries)
+      del = idx - arr->num_entries;
+    
+    for(i = 0; i < del; i++)
+      gavl_value_free(&arr->entries[idx + i]);
+
+    arr->num_entries -= del;
+
+    if(idx < arr->num_entries - 1)
+      {
+      memmove(arr->entries + idx,
+              arr->entries + idx + del,
+              (sizeof(*arr->entries) * (arr->num_entries - 1 - idx)));
+      }
+    }
+
+  if(num)
+    {
+    if(arr->num_entries + num > arr->entries_alloc)
+      {
+      arr->entries_alloc = arr->num_entries + num + 128;
+      arr->entries = realloc(arr->entries,
+                             arr->entries_alloc * sizeof(*arr->entries));
+
+      }
+
+    if(idx < arr->num_entries)
+      {
+      memmove(arr->entries + idx + num,
+              arr->entries + idx,
+              (sizeof(*arr->entries) * (arr->num_entries - idx)));
+      }
+    arr->num_entries += num;
+    }
+  
+  return arr->entries + idx;
+  }
+
+void gavl_array_splice_val(gavl_array_t * arr,
+                           int idx, int del, const gavl_value_t * add)
+  {
+  gavl_value_t * val;
+  int num = 0;
+
+  if(add)
+    num = 1;
+
+  val = do_splice(arr, idx, del, num);
+  gavl_value_copy(val, add);
+  }
+
+void gavl_array_splice_array(gavl_array_t * arr,
+                             int idx, int del, const gavl_array_t * add)
+  {
+  int i;
+  gavl_value_t * val;
+  int num = 0;
+  
+  if(add)
+    num = add->num_entries;
+
+  val = do_splice(arr, idx, del, num);
+
+  for(i = 0; i < num; i++)
+    gavl_value_copy(val + i , add->entries + i);
+  }
+
+
+void gavl_array_splice_val_nocopy(gavl_array_t * arr,
+                                 int idx, int del, gavl_value_t * add)
+  {
+  gavl_value_t * val;
+  int num = 0;
+
+  if(add)
+    num = 1;
+
+  val = do_splice(arr, idx, del, num);
+
+  if(add)
+    memcpy(val, add, sizeof(*add));
+  }
+
+void gavl_array_splice_array_nocopy(gavl_array_t * arr,
+                                   int idx, int del, gavl_array_t * add)
+  {
+  gavl_value_t * val;
+  int num = 0;
+  
+  if(add)
+    num = add->num_entries;
+
+  val = do_splice(arr, idx, del, num);
+
+  if(num)
+    memcpy(val, add->entries, sizeof(*add->entries) * num);
+  
+  }
+
+void gavl_array_push(gavl_array_t * d, const gavl_value_t * val)
+  {
+  gavl_array_splice_val(d, -1, 0, val);
+  }
+
+void gavl_array_push_nocopy(gavl_array_t * d, gavl_value_t * val)
+  {
+  gavl_array_splice_val_nocopy(d, -1, 0, val);
   }
