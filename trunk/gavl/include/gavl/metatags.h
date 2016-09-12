@@ -294,6 +294,7 @@
 #define GAVL_META_MEDIA_CLASS_TV_EPISODE         "item.video.episode"
 #define GAVL_META_MEDIA_CLASS_AUDIO_BROADCAST    "item.audio.broadcast"
 #define GAVL_META_MEDIA_CLASS_VIDEO_BROADCAST    "item.video.broadcast"
+#define GAVL_META_MEDIA_CLASS_IMAGE              "item.image"
 
 /* Container values */
 #define GAVL_META_MEDIA_CLASS_CONTAINER          "container"       // Generic

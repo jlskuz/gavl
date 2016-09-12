@@ -224,6 +224,26 @@ GAVL_PUBLIC
 int gavl_array_compare(const gavl_array_t * m1,
                        const gavl_array_t * m2);
 
+GAVL_PUBLIC
+void gavl_array_splice_val(gavl_array_t * arr,
+                           int idx, int del,
+                           const gavl_value_t * add);
+
+GAVL_PUBLIC
+void gavl_array_splice_array(gavl_array_t * arr,
+                             int idx, int del,
+                             const gavl_array_t * add);
+
+GAVL_PUBLIC
+void gavl_array_splice_val_nocopy(gavl_array_t * arr,
+                                 int idx, int del,
+                                 gavl_value_t * add);
+
+GAVL_PUBLIC
+void gavl_array_splice_array_nocopy(gavl_array_t * arr,
+                                   int idx, int del,
+                                   gavl_array_t * add);
+
 
 /* Value */
 
