@@ -204,16 +204,27 @@
 
 /** \brief Location used for opening this resource
  */
-#define GAVL_META_LOCATION         "Location"
+#define GAVL_META_URI              "URI"
 
-/** \brief source attribute, format: <mimetype>"|"<url>
- *  This is an array and allows multiple locations along with their
- *  mimetypes to be stored
+/** \brief src attribute, can be either an array (for multiple sources) or a dictionary
+    with at least GAVL_META_URI set
  */
+
 #define GAVL_META_SRC              "src"
+
+/* Which index is currently opened */
+#define GAVL_META_SRCIDX           "srcidx"
+
+/* Index in the locical parent */
+
+#define GAVL_META_IDX              "idx"
+
+/* Total tracks of the logical parent */
+#define GAVL_META_TOTAL_TRACKS     "TotalTracks"
 
 /** \brief "1"  is big endian, 0 else
  */
+
 #define GAVL_META_BIG_ENDIAN       "BigEndian"
 
 /** \brief Movie Actor. Can be array for multiple entries
@@ -275,8 +286,10 @@
 #define GAVL_META_WIDTH  "w"
 #define GAVL_META_HEIGHT "h"
 
-
 #define GAVL_META_NUM_CHILDREN       "NumChildren" // Number of children for container items
+#define GAVL_META_IDX                "idx"         // Index in parent container
+#define GAVL_META_SHOW               "Show"        // TV Show, this item belongs to
+#define GAVL_META_SEASON             "Season"      // Season, this episode belongs to
 
 /**
  *
