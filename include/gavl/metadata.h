@@ -586,8 +586,11 @@ gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
 
 GAVL_PUBLIC const gavl_dictionary_t *
 gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
-                      char ** mimetype, char ** location);
+                      const char ** mimetype, const char ** location);
 
+GAVL_PUBLIC 
+int gavl_metadata_has_src(const gavl_metadata_t * m, const char * key,
+                          const char * location);
 
 
   

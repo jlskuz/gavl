@@ -138,6 +138,24 @@ int gavl_dictionary_set_string(gavl_dictionary_t * d,
   return gavl_dictionary_set_nocopy(d, name, &v);
   }
 
+int gavl_dictionary_set_int(gavl_dictionary_t * d,
+                            const char * name, int val)
+  {
+  gavl_value_t v;
+  gavl_value_init(&v);
+  gavl_value_set_int(&v, val);
+  return gavl_dictionary_set_nocopy(d, name, &v);
+  }
+
+int gavl_dictionary_set_long(gavl_dictionary_t * d,
+                             const char * name, int64_t val)
+  {
+  gavl_value_t v;
+  gavl_value_init(&v);
+  gavl_value_set_int(&v, val);
+  return gavl_dictionary_set_nocopy(d, name, &v);
+  }
+
 int gavl_dictionary_set_string_nocopy(gavl_dictionary_t * d,
                                        const char * name, char * val)
   {

@@ -116,6 +116,15 @@ void gavl_dictionary_append_nocopy_i(gavl_dictionary_t * d, const char * name,
                                      gavl_value_t * val);
 
 GAVL_PUBLIC
+int gavl_dictionary_set_int(gavl_dictionary_t * d,
+                            const char * name, int val);
+
+GAVL_PUBLIC
+int gavl_dictionary_set_long(gavl_dictionary_t * d,
+                             const char * name, int64_t val);
+
+
+GAVL_PUBLIC
 const gavl_value_t *
 gavl_dictionary_get_item(const gavl_dictionary_t * d, const char * name, int item);
 
