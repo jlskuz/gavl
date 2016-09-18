@@ -384,7 +384,7 @@ void gavl_dictionary_merge(gavl_dictionary_t * dst,
   }
 
 void gavl_dictionary_merge2(gavl_dictionary_t * dst,
-                          const gavl_dictionary_t * src)
+                            const gavl_dictionary_t * src)
   {
   gavl_dictionary_foreach(src, merge_func_nr, dst);
   }
