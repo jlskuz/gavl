@@ -368,8 +368,10 @@ const gavl_value_t * gavl_value_get_item(const gavl_value_t * v, int item)
   
   if(v->type == GAVL_TYPE_ARRAY)
     return gavl_array_get(&v->v.array, item);
-  
-  return v;
+  else if(!item)
+    return v;
+  else
+    return NULL;
   }
 
 
@@ -450,8 +452,12 @@ int gavl_value_get_long(const gavl_value_t * v, int64_t * val)
       const char * end = v->v.str + strlen(v->v.str);
       *val = strtoll(v->v.str, &rest, 10);
       if(rest != end)
+        {
+        //        fprintf(stderr, "Couldn't transform value: %s", v->v.str);
         return 0;
+        }
       }
+      break;
     default:
       return 0;
       break;

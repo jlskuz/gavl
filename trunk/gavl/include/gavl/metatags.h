@@ -98,6 +98,8 @@
 
 #define GAVL_META_DATE_MODIFY "ModificationDate" // YYYY-MM-DD [HH:MM:SS]
 
+#define GAVL_META_MTIME       "mtime" // time_t (from stat()) as long
+
 /** \brief Generic year
  */
 
