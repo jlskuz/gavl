@@ -107,7 +107,7 @@ gavl_array_compare(const gavl_array_t * m1,
   }
 
 static gavl_value_t * do_splice(gavl_array_t * arr,
-                         int idx, int del, int num)
+                                int idx, int del, int num)
   {
   int i;
   
@@ -116,6 +116,9 @@ static gavl_value_t * do_splice(gavl_array_t * arr,
   
   if(del)
     {
+    if(del < 0)
+      del = idx - arr->num_entries;
+    
     if(idx + del > arr->num_entries)
       del = idx - arr->num_entries;
     
@@ -183,9 +186,8 @@ void gavl_array_splice_array(gavl_array_t * arr,
     gavl_value_copy(val + i , add->entries + i);
   }
 
-
 void gavl_array_splice_val_nocopy(gavl_array_t * arr,
-                                 int idx, int del, gavl_value_t * add)
+                                  int idx, int del, gavl_value_t * add)
   {
   gavl_value_t * val;
   int num = 0;
@@ -200,7 +202,7 @@ void gavl_array_splice_val_nocopy(gavl_array_t * arr,
   }
 
 void gavl_array_splice_array_nocopy(gavl_array_t * arr,
-                                   int idx, int del, gavl_array_t * add)
+                                    int idx, int del, gavl_array_t * add)
   {
   gavl_value_t * val;
   int num = 0;
@@ -211,8 +213,11 @@ void gavl_array_splice_array_nocopy(gavl_array_t * arr,
   val = do_splice(arr, idx, del, num);
 
   if(num)
+    {
     memcpy(val, add->entries, sizeof(*add->entries) * num);
-  
+    memset(add->entries, 0, sizeof(*add->entries) * num);
+    add->num_entries = 0;
+    }
   }
 
 void gavl_array_push(gavl_array_t * d, const gavl_value_t * val)

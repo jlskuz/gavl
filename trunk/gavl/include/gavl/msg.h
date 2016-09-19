@@ -254,6 +254,19 @@ int gavl_msg_get_id(gavl_msg_t * msg);
 GAVL_PUBLIC
 int gavl_msg_get_id_ns(gavl_msg_t * msg, int * ns);
 
+GAVL_PUBLIC
+int gavl_msg_set_arg(gavl_msg_t * msg, int idx, const gavl_value_t * val);
+
+GAVL_PUBLIC
+int gavl_msg_set_arg_nocopy(gavl_msg_t * msg, int idx, gavl_value_t * val);
+
+GAVL_PUBLIC
+const gavl_value_t * gavl_msg_get_arg_c(const gavl_msg_t * msg, int idx);
+
+GAVL_PUBLIC
+void gavl_msg_get_arg(gavl_msg_t * msg, int idx, gavl_value_t * val);
+
+
 /** \brief Set an integer argument
  *  \param msg A message
  *  \param arg Argument index (starting with 0)
@@ -457,8 +470,13 @@ void gavl_msg_set_arg_metadata(gavl_msg_t * msg, int arg,
  */
 
 GAVL_PUBLIC
-void gavl_msg_get_arg_metadata(gavl_msg_t * msg, int arg,
+int gavl_msg_get_arg_metadata(gavl_msg_t * msg, int arg,
                                gavl_metadata_t * m);
+
+GAVL_PUBLIC
+int gavl_msg_get_arg_metadata_c(const gavl_msg_t * msg, int arg,
+                                gavl_metadata_t * m);
+
 
 GAVL_PUBLIC
 void gavl_msg_dump(const gavl_msg_t * msg, int indent);

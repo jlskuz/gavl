@@ -95,8 +95,6 @@ void gavl_msg_set_arg_time(gavl_msg_t * msg, int arg, gavl_time_t value)
     msg->num_args = arg + 1;
   }
 
-
-
 void gavl_msg_set_arg_string(gavl_msg_t * msg, int arg, const char * value)
   {
   if(!check_arg(arg))
@@ -156,6 +154,51 @@ void gavl_msg_set_arg_position(gavl_msg_t * msg, int arg, const double * value)
     msg->num_args = arg + 1;
   }
 
+/* Get/Set value */
+
+int gavl_msg_set_arg(gavl_msg_t * msg, int arg, const gavl_value_t * val)
+  {
+  if(!check_arg(arg))
+    return 0;
+
+  gavl_value_copy(&msg->args[arg], val);
+  
+  if(arg+1 > msg->num_args)
+    msg->num_args = arg + 1;
+  
+  return 1;
+  }
+
+int gavl_msg_set_arg_nocopy(gavl_msg_t * msg, int arg, gavl_value_t * val)
+  {
+  if(!check_arg(arg))
+    return 0;
+  
+  memcpy(&msg->args[arg], val, sizeof(*val));
+  gavl_value_init(val);
+  
+  if(arg+1 > msg->num_args)
+    msg->num_args = arg + 1;
+
+  return 1;
+  }
+
+const gavl_value_t * gavl_msg_get_arg_c(const gavl_msg_t * msg, int arg)
+  {
+  if(!check_arg(arg))
+    return NULL;
+  return &msg->args[arg];
+  }
+
+void gavl_msg_get_arg(gavl_msg_t * msg, int arg, gavl_value_t * val)
+  {
+  if(!check_arg(arg))
+    return;
+  
+  memcpy(val, &msg->args[arg], sizeof(*val));
+  gavl_value_init(&msg->args[arg]);
+  }
+  
 /* Get basic types */
 
 int gavl_msg_get_id(gavl_msg_t * msg)
@@ -169,6 +212,8 @@ int gavl_msg_get_arg_int(gavl_msg_t * msg, int arg)
     return 0;
   return msg->args[arg].v.i;
   }
+
+
 
 gavl_time_t gavl_msg_get_arg_time(gavl_msg_t * msg, int arg)
   {
@@ -231,40 +276,6 @@ const char * gavl_msg_get_arg_string_c(const gavl_msg_t * msg, int arg)
 
 /* Get/Set routines for structures */
 
-#if 0
-static void set_arg_ptr_nocopy(gavl_msg_t * msg, int arg, void * value,
-                               int len,
-                               int type)
-  {
-  msg->args[arg].value.val_buf.buf = value;
-  msg->args[arg].value.val_buf.len = len;
-  msg->args[arg].value.val_buf.alloc = len;
-  msg->args[arg].type = type;
-  
-  if(arg+1 > msg->num_args)
-    msg->num_args = arg + 1;
-
-  }
-
-static void * get_arg_ptr(gavl_msg_t * msg, int arg, int * length)
-  {
-  void * ret;
-  
-  if(!check_arg(arg))
-    return NULL;
-
-  ret = msg->args[arg].value.val_buf.buf;
-  msg->args[arg].value.val_buf.buf = NULL;
-  
-  if(length)
-    *length = msg->args[arg].value.val_buf.len;
-  msg->args[arg].value.val_buf.len = 0;
-  msg->args[arg].value.val_buf.alloc = 0;
-  return ret;
-  }
-
-#endif
-
 void gavl_msg_set_arg_audio_format(gavl_msg_t * msg, int arg,
                                  const gavl_audio_format_t * format)
   {
@@ -296,23 +307,38 @@ void gavl_msg_get_arg_video_format(gavl_msg_t * msg, int arg,
   }
 
 void gavl_msg_set_arg_metadata(gavl_msg_t * msg, int arg,
-                             const gavl_metadata_t * m)
+                               const gavl_metadata_t * m)
   {
   gavl_dictionary_copy(gavl_value_set_dictionary(&msg->args[arg]), m);
   if(arg+1 > msg->num_args)
     msg->num_args = arg + 1;
   }
-                            
-void gavl_msg_get_arg_metadata(gavl_msg_t * msg, int arg,
-                               gavl_metadata_t * m)
+
+int gavl_msg_get_arg_metadata_c(const gavl_msg_t * msg, int arg,
+                                gavl_metadata_t * m)
   {
   gavl_dictionary_free(m);
   gavl_dictionary_init(m);
 
   if(msg->args[arg].type != GAVL_TYPE_DICTIONARY)
-    return;
+    return 0;
   
   gavl_dictionary_copy(m, &msg->args[arg].v.dictionary);
+  return 1;
+  }
+
+int gavl_msg_get_arg_metadata(gavl_msg_t * msg, int arg,
+                              gavl_metadata_t * m)
+  {
+  gavl_dictionary_free(m);
+  gavl_dictionary_init(m);
+
+  if(msg->args[arg].type != GAVL_TYPE_DICTIONARY)
+    return 0;
+  
+  memcpy(m, &msg->args[arg].v.dictionary, sizeof(*m));
+  memset(&msg->args[arg].v.dictionary, 0, sizeof(*m));
+  return 1;
   }
 
 void gavl_msg_init(gavl_msg_t * m)
