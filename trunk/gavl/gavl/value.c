@@ -143,6 +143,11 @@ int gavl_value_compare(const gavl_value_t * v1, const gavl_value_t * v2)
 
 void gavl_value_copy(gavl_value_t * dst, const gavl_value_t * src)
   {
+  if(!src)
+    {
+    gavl_value_init(dst);
+    return;
+    }
   dst->type = src->type;
   switch(src->type)
     {
