@@ -198,7 +198,10 @@ void gavl_array_splice_val_nocopy(gavl_array_t * arr,
   val = do_splice(arr, idx, del, num);
 
   if(add)
+    {
     memcpy(val, add, sizeof(*add));
+    gavl_value_init(add);
+    }
   }
 
 void gavl_array_splice_array_nocopy(gavl_array_t * arr,

@@ -266,7 +266,6 @@ const gavl_value_t * gavl_msg_get_arg_c(const gavl_msg_t * msg, int idx);
 GAVL_PUBLIC
 void gavl_msg_get_arg(gavl_msg_t * msg, int idx, gavl_value_t * val);
 
-
 /** \brief Set an integer argument
  *  \param msg A message
  *  \param arg Argument index (starting with 0)
