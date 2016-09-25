@@ -294,6 +294,7 @@
 #define GAVL_META_SEASON             "Season"      // Season, this episode belongs to
 
 #define GAVL_META_ERROR              "Error"       // Indicate, that an error occurrent during loading of a track
+#define GAVL_META_SELECTED           "Selected"    // Track is selected in a GUI
 
 
 /**
