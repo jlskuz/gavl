@@ -264,6 +264,15 @@ const gavl_value_t * gavl_dictionary_get_item(const gavl_dictionary_t * d, const
   return gavl_value_get_item(&d->entries[idx].v, item);
   }
 
+gavl_value_t * gavl_dictionary_get_item_nc(gavl_dictionary_t * d, const char * name, int item)
+  {
+  int idx;
+  if((idx = gavl_dictionary_find(d, name, 0)) < 0)
+    return NULL;
+  return gavl_value_get_item_nc(&d->entries[idx].v, item);
+  }
+
+
 const gavl_value_t * gavl_dictionary_get_item_i(const gavl_dictionary_t * d, const char * name, int item)
   {
   int idx;

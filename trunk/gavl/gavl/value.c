@@ -379,6 +379,19 @@ const gavl_value_t * gavl_value_get_item(const gavl_value_t * v, int item)
     return NULL;
   }
 
+gavl_value_t * gavl_value_get_item_nc(gavl_value_t * v, int item)
+  {
+  if(v->type == GAVL_TYPE_UNDEFINED)
+    return NULL;
+  
+  if(v->type == GAVL_TYPE_ARRAY)
+    return gavl_array_get(&v->v.array, item);
+  else if(!item)
+    return v;
+  else
+    return NULL;
+  }
+
 
 /* Get value */
 
