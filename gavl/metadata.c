@@ -881,15 +881,21 @@ gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
   gavl_value_t child_val;
   gavl_dictionary_t * ret;
   gavl_value_t * valp;
-  gavl_array_t * arr;
   /* Check if the location is already there */
 
   const char * loc;
 
   idx = 0;
 
-  while((ret = gavl_metadata_get_src(m, GAVL_META_SRC, idx, NULL, &loc)))
+  while((valp = gavl_dictionary_get_item_nc(m, GAVL_META_SRC, idx)))
     {
+    if(valp->type != GAVL_TYPE_DICTIONARY)
+      return NULL;
+    
+    ret = &valp->v.dictionary;
+    
+    loc = gavl_dictionary_get_string(ret, GAVL_META_URI);
+    
     if(!strcmp(loc, location))
       {
       gavl_metadata_set_int(m, GAVL_META_SRCIDX, idx);

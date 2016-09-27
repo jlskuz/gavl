@@ -129,6 +129,10 @@ const gavl_value_t *
 gavl_dictionary_get_item(const gavl_dictionary_t * d, const char * name, int item);
 
 GAVL_PUBLIC
+gavl_value_t * gavl_dictionary_get_item_nc(gavl_dictionary_t * d, const char * name, int item);
+
+
+GAVL_PUBLIC
 const gavl_value_t *
 gavl_dictionary_get_item_i(const gavl_dictionary_t * d, const char * name, int item);
 
@@ -357,6 +361,7 @@ char * gavl_value_to_string(const gavl_value_t * v);
 
 GAVL_PUBLIC
 void gavl_value_from_string(gavl_value_t * v, const char * str);
+
 
 
 GAVL_PUBLIC
