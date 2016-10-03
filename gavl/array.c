@@ -117,10 +117,10 @@ static gavl_value_t * do_splice(gavl_array_t * arr,
   if(del)
     {
     if(del < 0)
-      del = idx - arr->num_entries;
+      del = arr->num_entries - idx;
     
     if(idx + del > arr->num_entries)
-      del = idx - arr->num_entries;
+      del = arr->num_entries - idx;
     
     for(i = 0; i < del; i++)
       gavl_value_free(&arr->entries[idx + i]);
@@ -131,7 +131,7 @@ static gavl_value_t * do_splice(gavl_array_t * arr,
       {
       memmove(arr->entries + idx,
               arr->entries + idx + del,
-              (sizeof(*arr->entries) * (arr->num_entries - 1 - idx)));
+              sizeof(*arr->entries) * (arr->num_entries - 1 - idx));
       }
     }
 
@@ -153,7 +153,8 @@ static gavl_value_t * do_splice(gavl_array_t * arr,
       }
     arr->num_entries += num;
     }
-  
+
+  memset(arr->entries + idx, 0, sizeof(*arr->entries) * num);
   return arr->entries + idx;
   }
 
@@ -167,7 +168,9 @@ void gavl_array_splice_val(gavl_array_t * arr,
     num = 1;
 
   val = do_splice(arr, idx, del, num);
-  gavl_value_copy(val, add);
+
+  if(add)
+    gavl_value_copy(val, add);
   }
 
 void gavl_array_splice_array(gavl_array_t * arr,
@@ -182,8 +185,11 @@ void gavl_array_splice_array(gavl_array_t * arr,
 
   val = do_splice(arr, idx, del, num);
 
-  for(i = 0; i < num; i++)
-    gavl_value_copy(val + i , add->entries + i);
+  if(add)
+    {
+    for(i = 0; i < num; i++)
+      gavl_value_copy(val + i , add->entries + i);
+    }
   }
 
 void gavl_array_splice_val_nocopy(gavl_array_t * arr,
