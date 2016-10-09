@@ -120,7 +120,7 @@
 /** \brief Related URL
  */
 
-#define GAVL_META_URL         "URL"
+#define GAVL_META_RELURL         "RelURL"
 
 /** \brief Referenced URL (means: Redirector)
  */
