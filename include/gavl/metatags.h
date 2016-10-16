@@ -45,6 +45,7 @@
 /** \brief Unique ID within this database */
 
 #define GAVL_META_ID          "ID"
+#define GAVL_META_PARENT_ID   "ParentID"
 
 /** \brief Performing artist */
 
@@ -217,10 +218,6 @@
 /* Which index is currently opened */
 #define GAVL_META_SRCIDX           "srcidx"
 
-/* Index in the locical parent */
-
-#define GAVL_META_IDX              "idx"
-
 /* Total tracks of the logical parent */
 #define GAVL_META_TOTAL_TRACKS     "TotalTracks"
 
@@ -338,6 +335,8 @@
 #define GAVL_META_MEDIA_CLASS_ROOT_WEBRADIO      "container.root.webradio"
 #define GAVL_META_MEDIA_CLASS_ROOT_DIRECTORIES   "container.root.directories"
 #define GAVL_META_MEDIA_CLASS_ROOT_PHOTOS        "container.root.photos"
+
+
 
 /**
  * @}
