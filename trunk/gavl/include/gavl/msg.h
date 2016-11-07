@@ -73,7 +73,7 @@
  *  arg2: Metadata
  */
 
-#define GAVL_MSG_SRC_METADATA  1
+#define GAVL_MSG_SRC_METADATA_CHANGED  1
 
 /** \brief Pixel aspect ratio changed
  *
@@ -84,7 +84,7 @@
  *  arg4: new pixel width
  */
 
-#define GAVL_MSG_SRC_ASPECT    2
+#define GAVL_MSG_SRC_ASPECT_CHANGED    2
 
 /** \brief Buffering notification
  *
