@@ -286,6 +286,9 @@
 #define GAVL_META_HEIGHT "h"
 
 #define GAVL_META_NUM_CHILDREN       "NumChildren" // Number of children for container items
+
+#define GAVL_META_CHILDREN           "children" // Generic name for children of an element, which must be an array
+
 #define GAVL_META_IDX                "idx"         // Index in parent container
 #define GAVL_META_SHOW               "Show"        // TV Show, this item belongs to
 #define GAVL_META_SEASON             "Season"      // Season, this episode belongs to

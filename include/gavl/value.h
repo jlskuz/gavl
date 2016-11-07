@@ -171,6 +171,10 @@ GAVL_PUBLIC int
 gavl_dictionary_compare(const gavl_dictionary_t * m1,
                         const gavl_dictionary_t * m2);
 
+GAVL_PUBLIC
+gavl_dictionary_t *
+gavl_dictionary_get_child(gavl_dictionary_t *, const char * name);
+
 GAVL_PUBLIC void
 gavl_dictionary_delete_fields(gavl_dictionary_t * m, const char * fields[]);
 
@@ -316,6 +320,9 @@ int gavl_value_get_num_items(const gavl_value_t * v);
 
 GAVL_PUBLIC
 const gavl_value_t * gavl_value_get_item(const gavl_value_t * v, int item);
+
+GAVL_PUBLIC
+gavl_value_t * gavl_value_get_item_nc(gavl_value_t * v, int item);
 
 GAVL_PUBLIC
 void gavl_value_set_int(gavl_value_t * v, int val);

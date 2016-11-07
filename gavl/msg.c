@@ -419,7 +419,7 @@ gavl_msg_get_progress(gavl_msg_t * msg, char ** activity, float * perc)
 void
 gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, int scale, const gavl_metadata_t * m)
   {
-  gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_METADATA, GAVL_MSG_NS_SRC);
+  gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_METADATA_CHANGED, GAVL_MSG_NS_SRC);
   gavl_msg_set_arg_time(msg, 0, time);
   gavl_msg_set_arg_int(msg, 1, scale);
   gavl_msg_set_arg_metadata(msg, 2, m);
@@ -441,7 +441,7 @@ void
 gavl_msg_set_src_aspect(gavl_msg_t * msg, int64_t time, int scale, int stream,
                         int pixel_width, int pixel_height)
   {
-  gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_ASPECT, GAVL_MSG_NS_SRC);
+  gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_ASPECT_CHANGED, GAVL_MSG_NS_SRC);
   gavl_msg_set_arg_time(msg, 0, time);
   gavl_msg_set_arg_int(msg, 1, scale);
   gavl_msg_set_arg_int(msg, 2, stream);
