@@ -645,7 +645,10 @@ void gavl_value_dump(const gavl_value_t * v, int indent)
                     v->v.position[0], v->v.position[1]);
       break;
     case GAVL_TYPE_STRING:
-      gavl_diprintf(indent, "\"%s\"", v->v.str);
+      if(!v->v.str)
+        gavl_diprintf(indent, "NULL");
+      else
+        gavl_diprintf(indent, "\"%s\"", v->v.str);
       break;
     case GAVL_TYPE_DICTIONARY:
       gavl_dprintf("\n");
