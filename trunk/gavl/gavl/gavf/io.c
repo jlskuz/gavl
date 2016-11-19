@@ -497,10 +497,10 @@ int gavf_io_read_string(gavf_io_t * io, char ** ret)
     *ret = NULL;
     return 1;
     }
-  *ret = malloc(len + 1);
   if(!ret)
     return 0;
 
+  *ret = malloc(len + 1);
   if(gavf_io_read_data(io, (uint8_t*)(*ret), len) < len)
     return 0;
 
