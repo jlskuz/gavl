@@ -35,17 +35,17 @@ static const struct
   }
 types[] =
   {
-    { GAVL_TYPE_INT,         "int"        },
-    { GAVL_TYPE_LONG,        "long"       },
-    { GAVL_TYPE_FLOAT,       "float"      },
-    { GAVL_TYPE_STRING,      "string"     },
-    { GAVL_TYPE_AUDIOFORMAT, "afmt"       },
-    { GAVL_TYPE_VIDEOFORMAT, "vfmt"       },
-    { GAVL_TYPE_COLOR_RGB,   "rgb"        },
-    { GAVL_TYPE_COLOR_RGBA,  "rgba"       },
-    { GAVL_TYPE_POSITION,    "position"   },
-    { GAVL_TYPE_DICTIONARY,  "dictionary" },
-    { GAVL_TYPE_ARRAY,       "array"      },
+    { GAVL_TYPE_INT,         "i"  },
+    { GAVL_TYPE_LONG,        "l"  },
+    { GAVL_TYPE_FLOAT,       "f"  },
+    { GAVL_TYPE_STRING,      "s"  },
+    { GAVL_TYPE_AUDIOFORMAT, "af" },
+    { GAVL_TYPE_VIDEOFORMAT, "vf" },
+    { GAVL_TYPE_COLOR_RGB,   "rgb" },
+    { GAVL_TYPE_COLOR_RGBA,  "rgba" },
+    { GAVL_TYPE_POSITION,    "pos" },
+    { GAVL_TYPE_DICTIONARY,  "d" },
+    { GAVL_TYPE_ARRAY,       "a" },
     { /* End */ },
   };
   
