@@ -387,4 +387,10 @@ const double * gavl_value_get_color_rgb(const gavl_value_t * v);
 GAVL_PUBLIC
 const double * gavl_value_get_color_rgba(const gavl_value_t * v);
 
+/* For initializing values statically */
+#define GAVL_VALUE_INIT_INT(val)  { .type = GAVL_TYPE_INT, .v.i = val }
+#define GAVL_VALUE_INIT_LONG(val) { .type = GAVL_TYPE_LONG, .v.l = val }
+#define GAVL_VALUE_INIT_FLOAT(val) { .type = GAVL_TYPE_FLOAT, .v.d = val }
+#define GAVL_VALUE_INIT_STRING(val) { .type = GAVL_TYPE_STRING, .v.s = val }
+
 #endif // GAVL_VALUE_H_INCLUDED
