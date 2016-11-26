@@ -123,9 +123,8 @@ dict_set(gavl_dictionary_t * d, const char * name, const gavl_value_t * val,
   if(cpy)
     gavl_value_copy(&e->v, val);
   else
-    {
     memcpy(&e->v, val, sizeof(*val));
-    }
+
   return 1;
   }
 
@@ -517,4 +516,12 @@ gavl_dictionary_get_child(gavl_dictionary_t * d, const char * name)
 
   idx = gavl_dictionary_find(d, name, 0);
   return &d->entries[idx].v.v.dictionary;
+  }
+
+int gavl_dictionary_is_last(const gavl_dictionary_t * d, const char * name)
+  {
+  if(!strcmp(d->entries[d->num_entries-1].name, name))
+    return 1;
+  else
+    return 0;
   }

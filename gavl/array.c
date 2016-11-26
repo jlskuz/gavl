@@ -61,6 +61,13 @@ const gavl_value_t * gavl_array_get(const gavl_array_t * d, int idx)
   return d->entries + idx;
   }
 
+gavl_value_t * gavl_array_get_nc(gavl_array_t * d, int idx)
+  {
+  if((idx < 0) || (idx >= d->num_entries))
+    return NULL;
+  return d->entries + idx;
+  }
+
 void gavl_array_free(gavl_array_t * d)
   {
   int i;

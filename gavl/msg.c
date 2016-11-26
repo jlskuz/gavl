@@ -79,9 +79,11 @@ static int check_arg(int arg)
 
 void gavl_msg_set_arg_int(gavl_msg_t * msg, int arg, int value)
   {
+  gavl_value_t * val;
   if(!check_arg(arg))
     return;
-  gavl_value_set_int(&msg->args[arg], value);
+  val = &msg->args[arg];
+  gavl_value_set_int(val, value);
   if(arg+1 > msg->num_args)
     msg->num_args = arg + 1;
   }
@@ -206,7 +208,7 @@ int gavl_msg_get_id(gavl_msg_t * msg)
   return msg->id;
   }
 
-int gavl_msg_get_arg_int(gavl_msg_t * msg, int arg)
+int gavl_msg_get_arg_int(const gavl_msg_t * msg, int arg)
   {
   if(!check_arg(arg))
     return 0;

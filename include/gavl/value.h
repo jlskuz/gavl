@@ -193,6 +193,14 @@ const gavl_array_t * gavl_dictionary_get_array(const gavl_dictionary_t * d, cons
 GAVL_PUBLIC
 const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_t * d, const char * name);
 
+/*
+ *  Can be used within a foreach_func to know, if this is the last entry
+ */
+
+GAVL_PUBLIC
+int gavl_dictionary_is_last(const gavl_dictionary_t * d, const char * name);
+
+
 /* Convert formats to and from dictionaries */
 
 GAVL_PUBLIC
@@ -227,6 +235,9 @@ void gavl_array_push_nocopy(gavl_array_t * d, gavl_value_t * val);
 
 GAVL_PUBLIC
 const gavl_value_t * gavl_array_get(const gavl_array_t * d, int idx);
+
+GAVL_PUBLIC
+gavl_value_t * gavl_array_get_nc(gavl_array_t * d, int idx);
 
 GAVL_PUBLIC
 void gavl_array_free(gavl_array_t * d);

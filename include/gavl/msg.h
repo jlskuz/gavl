@@ -282,7 +282,7 @@ void gavl_msg_set_arg_int(gavl_msg_t * msg, int arg, int value);
  */
 
 GAVL_PUBLIC
-int gavl_msg_get_arg_int(gavl_msg_t * msg, int arg);
+int gavl_msg_get_arg_int(const gavl_msg_t * msg, int arg);
 
 /** \brief Set a time argument
  *  \param msg A message
