@@ -487,7 +487,7 @@ int gavf_io_write_double(gavf_io_t * io, double num)
 
 int gavf_io_read_string(gavf_io_t * io, char ** ret)
   {
-  uint32_t len;
+  uint32_t len = 0;
   
   if(!gavf_io_read_uint32v(io, &len))
     return 0;
