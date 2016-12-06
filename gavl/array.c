@@ -117,6 +117,7 @@ static gavl_value_t * do_splice(gavl_array_t * arr,
                                 int idx, int del, int num)
   {
   int i;
+  int after;
   
   if((idx < 0) || (idx > arr->num_entries)) // Append
     idx = arr->num_entries;
@@ -128,17 +129,19 @@ static gavl_value_t * do_splice(gavl_array_t * arr,
     
     if(idx + del > arr->num_entries)
       del = arr->num_entries - idx;
+
+    after = arr->num_entries - (idx + del);
     
     for(i = 0; i < del; i++)
       gavl_value_free(&arr->entries[idx + i]);
 
     arr->num_entries -= del;
 
-    if(idx < arr->num_entries - 1)
+    if(after)
       {
       memmove(arr->entries + idx,
               arr->entries + idx + del,
-              sizeof(*arr->entries) * (arr->num_entries - 1 - idx));
+              sizeof(*arr->entries) * after);
       }
     }
 
@@ -149,7 +152,6 @@ static gavl_value_t * do_splice(gavl_array_t * arr,
       arr->entries_alloc = arr->num_entries + num + 128;
       arr->entries = realloc(arr->entries,
                              arr->entries_alloc * sizeof(*arr->entries));
-
       }
 
     if(idx < arr->num_entries)
@@ -159,10 +161,12 @@ static gavl_value_t * do_splice(gavl_array_t * arr,
               (sizeof(*arr->entries) * (arr->num_entries - idx)));
       }
     arr->num_entries += num;
-    }
 
-  memset(arr->entries + idx, 0, sizeof(*arr->entries) * num);
-  return arr->entries + idx;
+    memset(arr->entries + idx, 0, sizeof(*arr->entries) * num);
+    return arr->entries + idx;
+    }
+  else
+    return NULL;
   }
 
 void gavl_array_splice_val(gavl_array_t * arr,
