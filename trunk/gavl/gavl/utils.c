@@ -20,9 +20,11 @@
  * *****************************************************************/
 
 #include <config.h>
+#define _GNU_SOURCE
 
 #include <gavl/gavl.h>
 #include <gavl/utils.h>
+
 
 #include <stdarg.h>
 #include <stdio.h>

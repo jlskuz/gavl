@@ -350,6 +350,7 @@ int gavl_metadata_get_int_i(const gavl_metadata_t * m,
   return 1;
   }
 
+#if 0
 int gavl_metadata_get_long(const gavl_metadata_t * m,
                            const char * key, int64_t * ret)
   {
@@ -362,6 +363,7 @@ int gavl_metadata_get_long(const gavl_metadata_t * m,
     return 0;
   return 1;
   }
+#endif
 
 int gavl_metadata_get_long_i(const gavl_metadata_t * m,
                              const char * key, int64_t * ret)

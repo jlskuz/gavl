@@ -106,6 +106,8 @@ typedef struct
 #define gavf_read_metadata(a, b) gavl_dictionary_read(a, b)
 #define gavf_write_metadata(a, b) gavl_dictionary_write(a, b)
 
+#define gavl_metadata_get_long(a, b, c) gavl_dictionary_get_long(a, b, c)
+  
 #endif
 
   
@@ -303,9 +305,9 @@ int gavl_metadata_get_int(const gavl_metadata_t * m,
  *  \returns 1 if ret contains a valid tag, 0 if the tag doesn't exist or is not numeric
  */
   
-GAVL_PUBLIC 
-int gavl_metadata_get_long(const gavl_metadata_t * m,
-                           const char * key, int64_t * ret);
+  // GAVL_PUBLIC 
+  // int gavl_metadata_get_long(const gavl_metadata_t * m,
+  //                          const char * key, int64_t * ret);
 
 /** \brief Get a float tag
  *  \arg m A metadata structure
