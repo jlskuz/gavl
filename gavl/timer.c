@@ -104,7 +104,15 @@ gavl_time_t gavl_timer_get(gavl_timer_t * t)
 
 void gavl_timer_set(gavl_timer_t * t, gavl_time_t v)
   {
+  int was_running = t->is_running;
+
+  if(was_running)
+    gavl_timer_stop(t);
+
   t->start_time = v;
+
+  if(was_running)
+    gavl_timer_start(t);
   }
 
 /* */

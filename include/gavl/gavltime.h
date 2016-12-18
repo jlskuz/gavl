@@ -182,6 +182,9 @@ gavl_time_prettyprint(gavl_time_t time, char str[GAVL_TIME_STRING_LEN]);
 
 GAVL_PUBLIC void
 gavl_time_prettyprint_ms(gavl_time_t time, char str[GAVL_TIME_STRING_LEN_MS]);
+
+GAVL_PUBLIC void
+gavl_time_prettyprint_ms_full(gavl_time_t time, char str[GAVL_TIME_STRING_LEN_MS]);
   
 
 /* Scan time: format is hhh:mm:ss with hh: hours, mm: minutes, ss: seconds. Seconds can be a fractional

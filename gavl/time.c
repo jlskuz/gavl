@@ -113,7 +113,36 @@ gavl_time_prettyprint_ms(gavl_time_t t, char str[GAVL_TIME_STRING_LEN_MS])
     sprintf(pos, "%d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds);
   else
     sprintf(pos, "%02d:%02d.%03d", minutes, seconds, milliseconds);
+  }
 
+void
+gavl_time_prettyprint_ms_full(gavl_time_t t, char str[GAVL_TIME_STRING_LEN_MS])
+  {
+  int hours, minutes, seconds, milliseconds;
+  char * pos = str;
+  
+  if(t == GAVL_TIME_UNDEFINED)
+    {
+    strcpy(str, "-:--.---");
+    return;
+    }
+
+  if(t < 0)
+    {
+    t = -t;
+    *(pos++) = '-';
+    }
+  
+  milliseconds = (t/1000) % 1000;
+  t /= GAVL_TIME_SCALE;
+  seconds = t % 60;
+  t /= 60;
+
+  minutes = t % 60;
+  t /= 60;
+
+  hours = t % 1000;
+  sprintf(pos, "%d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds);
   }
 
 void
