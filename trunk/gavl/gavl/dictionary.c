@@ -155,6 +155,15 @@ int gavl_dictionary_set_long(gavl_dictionary_t * d,
   return gavl_dictionary_set_nocopy(d, name, &v);
   }
 
+int gavl_dictionary_set_float(gavl_dictionary_t * d,
+                              const char * name, double val)
+  {
+  gavl_value_t v;
+  gavl_value_init(&v);
+  gavl_value_set_float(&v, val);
+  return gavl_dictionary_set_nocopy(d, name, &v);
+  }
+
 int gavl_dictionary_set_string_nocopy(gavl_dictionary_t * d,
                                        const char * name, char * val)
   {
@@ -206,6 +215,15 @@ const gavl_value_t * gavl_dictionary_get(const gavl_dictionary_t * d, const char
     return NULL;
   }
 
+gavl_value_t * gavl_dictionary_get_nc(gavl_dictionary_t * d, const char * name)
+  {
+  int idx;
+  if((idx = gavl_dictionary_find(d, name, 0)) >= 0)
+    return &d->entries[idx].v;
+  else
+    return NULL;
+  }
+
 int gavl_dictionary_get_int(const gavl_dictionary_t * d, const char * name, int * ret)
   {
   const gavl_value_t * val;
@@ -234,7 +252,7 @@ const gavl_array_t * gavl_dictionary_get_array(const gavl_dictionary_t * d, cons
   {
   const gavl_value_t * val;
   if(!(val = gavl_dictionary_get(d, name)))
-    return 0;
+    return NULL;
   return gavl_value_get_array(val);
   }
 
@@ -242,7 +260,7 @@ const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_
   {
   const gavl_value_t * val;
   if(!(val = gavl_dictionary_get(d, name)))
-    return 0;
+    return NULL;
   return gavl_value_get_dictionary(val);
   }
 

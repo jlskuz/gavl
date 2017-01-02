@@ -239,10 +239,12 @@ gavl_video_options_get_deinterlace_drop_mode(const gavl_video_options_t * opt)
 #define CLIP_FLOAT(a) if(a < 0.0) a = 0.0; if(a>1.0) a = 1.0;
 
 void gavl_video_options_set_background_color(gavl_video_options_t * opt,
-                                             const float * color)
+                                             const double * color)
   {
-  memcpy(opt->background_float, color, 3*sizeof(*color));
-
+  opt->background_float[0] = color[0];
+  opt->background_float[1] = color[1];
+  opt->background_float[2] = color[2];
+  
   CLIP_FLOAT(opt->background_float[0]);
   CLIP_FLOAT(opt->background_float[1]);
   CLIP_FLOAT(opt->background_float[2]);
@@ -254,9 +256,11 @@ void gavl_video_options_set_background_color(gavl_video_options_t * opt,
 
 void
 gavl_video_options_get_background_color(const gavl_video_options_t * opt,
-                                        float * color)
+                                        double * color)
   {
-  memcpy(color, opt->background_float, 3*sizeof(*color));
+  color[0] = opt->background_float[0];
+  color[1] = opt->background_float[1];
+  color[2] = opt->background_float[2];
   }
 
 void gavl_video_options_set_downscale_filter(gavl_video_options_t * opt,
