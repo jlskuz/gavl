@@ -3337,7 +3337,7 @@ int gavl_video_options_get_scale_order(const gavl_video_options_t * opt);
 
 GAVL_PUBLIC
 void gavl_video_options_set_background_color(gavl_video_options_t * opt,
-                                             const float * color);
+                                             const double * color);
 
 /*! \ingroup video_options
  *  \brief Get the background color for alpha blending
@@ -3347,7 +3347,7 @@ void gavl_video_options_set_background_color(gavl_video_options_t * opt,
 
 GAVL_PUBLIC
 void gavl_video_options_get_background_color(const gavl_video_options_t * opt,
-                                             float * color);
+                                             double * color);
   
 /*! \ingroup video_ptions
  *  \brief Set the deinterlace mode

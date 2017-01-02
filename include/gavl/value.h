@@ -123,6 +123,10 @@ GAVL_PUBLIC
 int gavl_dictionary_set_long(gavl_dictionary_t * d,
                              const char * name, int64_t val);
 
+GAVL_PUBLIC
+int gavl_dictionary_set_float(gavl_dictionary_t * d,
+                              const char * name, double val);
+
 
 GAVL_PUBLIC
 const gavl_value_t *
@@ -130,7 +134,6 @@ gavl_dictionary_get_item(const gavl_dictionary_t * d, const char * name, int ite
 
 GAVL_PUBLIC
 gavl_value_t * gavl_dictionary_get_item_nc(gavl_dictionary_t * d, const char * name, int item);
-
 
 GAVL_PUBLIC
 const gavl_value_t *
@@ -142,9 +145,11 @@ void gavl_dictionary_foreach(const gavl_dictionary_t * d, gavl_dictionary_foreac
 GAVL_PUBLIC
 int gavl_dictionary_find(const gavl_dictionary_t * m, const char * name, int ign);
 
-
 GAVL_PUBLIC
 const gavl_value_t * gavl_dictionary_get(const gavl_dictionary_t * d, const char * name);
+
+GAVL_PUBLIC
+gavl_value_t * gavl_dictionary_get_nc(gavl_dictionary_t * d, const char * name);
 
 GAVL_PUBLIC
 const gavl_value_t * gavl_dictionary_get_i(const gavl_dictionary_t * d, const char * name);
@@ -253,6 +258,10 @@ int gavl_array_compare(const gavl_array_t * m1,
                        const gavl_array_t * m2);
 
 GAVL_PUBLIC
+int gavl_array_move_entry(gavl_array_t * m1,
+                          int src_pos, int dst_pos);
+
+GAVL_PUBLIC
 void gavl_array_splice_val(gavl_array_t * arr,
                            int idx, int del,
                            const gavl_value_t * add);
@@ -289,8 +298,8 @@ struct gavl_value_s
     gavl_array_t array;
     double color[4];
     double position[2];
-    gavl_audio_format_t audioformat;
-    gavl_video_format_t videoformat;
+    gavl_audio_format_t * audioformat;
+    gavl_video_format_t * videoformat;
     } v;
   };
 
@@ -402,6 +411,9 @@ const double * gavl_value_get_color_rgba(const gavl_value_t * v);
 #define GAVL_VALUE_INIT_INT(val)  { .type = GAVL_TYPE_INT, .v.i = val }
 #define GAVL_VALUE_INIT_LONG(val) { .type = GAVL_TYPE_LONG, .v.l = val }
 #define GAVL_VALUE_INIT_FLOAT(val) { .type = GAVL_TYPE_FLOAT, .v.d = val }
-#define GAVL_VALUE_INIT_STRING(val) { .type = GAVL_TYPE_STRING, .v.s = val }
+#define GAVL_VALUE_INIT_STRING(val) { .type = GAVL_TYPE_STRING, .v.str = val }
+#define GAVL_VALUE_INIT_COLOR_RGB(r, g, b)     { .type = GAVL_TYPE_COLOR_RGB,  .v.color = {r, g, b, 1.0 } }
+#define GAVL_VALUE_INIT_COLOR_RGBA(r, g, b, a) { .type = GAVL_TYPE_COLOR_RGBA, .v.color = {r, g, b, a } }
+#define GAVL_VALUE_INIT_POSITION(x, y) { .type = GAVL_TYPE_POSITION, .v.position = {x, y} }
 
 #endif // GAVL_VALUE_H_INCLUDED

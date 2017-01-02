@@ -249,3 +249,20 @@ void gavl_array_push_nocopy(gavl_array_t * d, gavl_value_t * val)
   {
   gavl_array_splice_val_nocopy(d, -1, 0, val);
   }
+
+int gavl_array_move_entry(gavl_array_t * m1,
+                          int src_pos, int dst_pos)
+  {
+  gavl_value_t save;
+  if((src_pos < 0) || (src_pos >= m1->num_entries) ||
+     (dst_pos < 0) || (dst_pos >= m1->num_entries))
+    return 0;
+
+  gavl_value_move(&save, m1->entries + src_pos);
+
+  gavl_array_splice_val(m1, src_pos, 1, NULL);
+  gavl_array_splice_val_nocopy(m1, dst_pos, 0, &save);
+  
+  return 1;
+  }
+

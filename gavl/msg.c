@@ -289,7 +289,7 @@ void gavl_msg_set_arg_audio_format(gavl_msg_t * msg, int arg,
 void gavl_msg_get_arg_audio_format(gavl_msg_t * msg, int arg,
                                  gavl_audio_format_t * format)
   {
-  gavl_audio_format_copy(format, &msg->args[arg].v.audioformat);
+  gavl_audio_format_copy(format, msg->args[arg].v.audioformat);
   }
 
 /* Video format */
@@ -305,7 +305,7 @@ void gavl_msg_set_arg_video_format(gavl_msg_t * msg, int arg,
 void gavl_msg_get_arg_video_format(gavl_msg_t * msg, int arg,
                                  gavl_video_format_t * format)
   {
-  gavl_video_format_copy(format, &msg->args[arg].v.videoformat);
+  gavl_video_format_copy(format, msg->args[arg].v.videoformat);
   }
 
 void gavl_msg_set_arg_metadata(gavl_msg_t * msg, int arg,
