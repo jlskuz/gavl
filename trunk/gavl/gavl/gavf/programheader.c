@@ -29,7 +29,7 @@ int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph)
     }
 
   /* Read metadata */
-  if(!gavf_read_metadata(&bufio, &ph->m))
+  if(!gavl_dictionary_read(&bufio, &ph->m))
     goto fail;
 
   gavf_footer_init(ph);
@@ -72,7 +72,7 @@ int gavf_program_header_write(gavf_io_t * io,
     }
   
   /* Write metadata */
-  if(!gavf_write_metadata(&bufio, &ph->m))
+  if(!gavl_dictionary_write(&bufio, &ph->m))
     goto fail;
   
   if(!gavf_io_write_buffer(io, &buf) ||
@@ -91,7 +91,7 @@ int gavf_program_header_write(gavf_io_t * io,
   }
 
 static gavf_stream_header_t *
-add_stream(gavf_program_header_t * ph, const gavl_metadata_t * m)
+add_stream(gavf_program_header_t * ph, const gavl_dictionary_t * m)
   {
   gavf_stream_header_t * ret;
   ph->num_streams++;
@@ -101,7 +101,7 @@ add_stream(gavf_program_header_t * ph, const gavl_metadata_t * m)
   
   ret = &ph->streams[ph->num_streams-1];
   memset(ret, 0, sizeof(*ret));
-  gavl_metadata_copy(&ret->m, m);
+  gavl_dictionary_copy(&ret->m, m);
   gavl_metadata_delete_implicit_fields(&ret->m);
   
   ret->id = ph->num_streams;
@@ -117,7 +117,7 @@ add_stream(gavf_program_header_t * ph, const gavl_metadata_t * m)
 int gavf_program_header_add_audio_stream(gavf_program_header_t * ph,
                                          const gavl_compression_info_t * ci,
                                          const gavl_audio_format_t * format,
-                                         const gavl_metadata_t * m)
+                                         const gavl_dictionary_t * m)
   {
   gavf_stream_header_t * h = add_stream(ph, m);
 
@@ -131,7 +131,7 @@ int gavf_program_header_add_audio_stream(gavf_program_header_t * ph,
 int gavf_program_header_add_video_stream(gavf_program_header_t * ph,
                                          const gavl_compression_info_t * ci,
                                          const gavl_video_format_t * format,
-                                         const gavl_metadata_t * m)
+                                         const gavl_dictionary_t * m)
   {
   gavf_stream_header_t * h = add_stream(ph, m);
   h->type = GAVF_STREAM_VIDEO;
@@ -147,7 +147,7 @@ int gavf_program_header_add_video_stream(gavf_program_header_t * ph,
 int gavf_program_header_add_overlay_stream(gavf_program_header_t * ph,
                                            const gavl_compression_info_t * ci,
                                            const gavl_video_format_t * format,
-                                           const gavl_metadata_t * m)
+                                           const gavl_dictionary_t * m)
   {
   gavf_stream_header_t * h = add_stream(ph, m);
   h->type = GAVF_STREAM_OVERLAY;
@@ -167,7 +167,7 @@ int gavf_program_header_add_overlay_stream(gavf_program_header_t * ph,
 
 int gavf_program_header_add_text_stream(gavf_program_header_t * ph,
                                         uint32_t timescale,
-                                        const gavl_metadata_t * m)
+                                        const gavl_dictionary_t * m)
   {
   gavf_stream_header_t * h = add_stream(ph, m);
   h->type = GAVF_STREAM_TEXT;
@@ -183,7 +183,7 @@ void gavf_program_header_free(gavf_program_header_t * ph)
 
   if(ph->streams)
     free(ph->streams);
-  gavl_metadata_free(&ph->m);
+  gavl_dictionary_free(&ph->m);
   }
 
 void gavf_program_header_dump(const gavf_program_header_t * ph)
@@ -193,7 +193,7 @@ void gavf_program_header_dump(const gavf_program_header_t * ph)
   
   fprintf(stderr, "Program header\n");
   fprintf(stderr, "  Metadata\n");
-  gavl_metadata_dump(&ph->m, 4);
+  gavl_dictionary_dump(&ph->m, 4);
 
   num = gavf_program_header_get_num_streams(ph, GAVF_STREAM_AUDIO);
   for(i = 0; i < num; i++)
@@ -269,7 +269,7 @@ void gavf_program_header_copy(gavf_program_header_t * dst,
   int i;
 
   /* Copy metadata */
-  gavl_metadata_copy(&dst->m, &src->m);
+  gavl_dictionary_copy(&dst->m, &src->m);
 
   /* Copy streams */
   dst->num_streams = src->num_streams;
@@ -281,8 +281,8 @@ void gavf_program_header_copy(gavf_program_header_t * dst,
     memcpy(&dst->streams[i], &src->streams[i], sizeof(dst->streams[i]));
 
     /* Copy pointers */
-    gavl_metadata_init(&dst->streams[i].m);
-    gavl_metadata_copy(&dst->streams[i].m, &src->streams[i].m);
+    gavl_dictionary_init(&dst->streams[i].m);
+    gavl_dictionary_copy(&dst->streams[i].m, &src->streams[i].m);
     
     gavl_compression_info_init(&dst->streams[i].ci);
     gavl_compression_info_copy(&dst->streams[i].ci, &src->streams[i].ci);

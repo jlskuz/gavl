@@ -60,74 +60,24 @@ extern "C" {
  */
   
 #define GAVL_METADATA_DATE_TIME_STRING_LEN 20 
-
-/** \brief Single metadata tag
- */
-
-#if 0  
-typedef struct
-  {
-  char * key; //!< Key
-  char * val; //!< Value
-  char ** val_arr; //!< Additional values as array
-
-  int arr_len;   //!< length of array
-  int arr_alloc; //!< allocated values of array
-  } gavl_metadata_tag_t;
-
-/** \brief Single metadata structure
- */
-
-  
-typedef struct
-  {
-  gavl_metadata_tag_t * tags;  //!< Array of tags
-  int tags_alloc;              //!< Number of allocated tags (never touch this)
-  int num_tags;                //!< Number of valid tags
-  } gavl_metadata_t;
-
-#else
-#define gavl_metadata_t gavl_dictionary_t
-
-#define gavl_metadata_free(a) gavl_dictionary_free(a)
-#define gavl_metadata_init(a) gavl_dictionary_init(a)
-#define gavl_metadata_set(a, b, c) gavl_dictionary_set_string(a, b, c)
-#define gavl_metadata_set_nocpy(a, b, c) gavl_dictionary_set_string_nocopy(a, b, c)
-
-#define gavl_metadata_get(a, b) gavl_dictionary_get_string(a, b)
-#define gavl_metadata_get_i(a, b) gavl_dictionary_get_string_i(a, b)
-
-#define gavl_metadata_merge(a, b, c) gavl_dictionary_merge(a, b, c)
-#define gavl_metadata_merge2(a, b)   gavl_dictionary_merge2(a, b)
-#define gavl_metadata_dump(a, b) gavl_dictionary_dump(a, b)
-
-#define gavl_metadata_copy(a, b) gavl_dictionary_copy(a, b)
-
-#define gavf_read_metadata(a, b) gavl_dictionary_read(a, b)
-#define gavf_write_metadata(a, b) gavl_dictionary_write(a, b)
-
-#define gavl_metadata_get_long(a, b, c) gavl_dictionary_get_long(a, b, c)
-  
-#endif
-
   
 /** \brief Free all metadata tags 
  *  \arg m A metadata structure
  */
   
 // GAVL_PUBLIC void
-// gavl_metadata_free(gavl_metadata_t * m);
+// gavl_dictionary_free(gavl_dictionary_t * m);
 
 /** \brief Initialize structre
  *  \arg m A metadata structure
  *
- *  Use this if you define a \ref gavl_metadata_t
+ *  Use this if you define a \ref gavl_dictionary_t
  *  structure in unintialized memory (e.g. on the stack)
  *  before using it.
  */
   
 // GAVL_PUBLIC void
-// gavl_metadata_init(gavl_metadata_t * m);
+// gavl_dictionary_init(gavl_dictionary_t * m);
 
 /** \brief Set a tag
  *  \arg m A metadata structure
@@ -138,7 +88,7 @@ typedef struct
  */
 
 // GAVL_PUBLIC void
-//gavl_metadata_set(gavl_metadata_t * m,
+//gavl_dictionary_set_string(gavl_dictionary_t * m,
 //                  const char * key,
 //                  const char * val);
 
@@ -147,12 +97,12 @@ typedef struct
  *  \arg key Key
  *  \arg val Value
  *
- *  Like \ref gavl_metadata_set except that the
+ *  Like \ref gavl_dictionary_set_string except that the
  *  value is not copied.
  */
 
 //GAVL_PUBLIC void
-//gavl_metadata_set_nocpy(gavl_metadata_t * m,
+//gavl_dictionary_set_string_nocpy(gavl_dictionary_t * m,
 //                        const char * key,
 //                        char * val);
 
@@ -166,7 +116,7 @@ typedef struct
  */
 
 GAVL_PUBLIC void
-gavl_metadata_append(gavl_metadata_t * m,
+gavl_metadata_append(gavl_dictionary_t * m,
                      const char * key,
                      const char * val);
 
@@ -180,7 +130,7 @@ gavl_metadata_append(gavl_metadata_t * m,
  */
 
 GAVL_PUBLIC void
-gavl_metadata_append_nocpy(gavl_metadata_t * m,
+gavl_metadata_append_nocpy(gavl_dictionary_t * m,
                         const char * key,
                         char * val);
 
@@ -192,7 +142,7 @@ gavl_metadata_append_nocpy(gavl_metadata_t * m,
  */
 
 // GAVL_PUBLIC 
-// const char * gavl_metadata_get(const gavl_metadata_t * m,
+// const char * gavl_dictionary_get_string(const gavl_dictionary_t * m,
 //                               const char * key);
 
 /** \brief Get the array value of a tag
@@ -203,7 +153,7 @@ gavl_metadata_append_nocpy(gavl_metadata_t * m,
  */
  
 GAVL_PUBLIC const char * 
-gavl_metadata_get_arr(const gavl_metadata_t * m,
+gavl_dictionary_get_string_arr(const gavl_dictionary_t * m,
                       const char * key,
                       int i);
 
@@ -213,11 +163,11 @@ gavl_metadata_get_arr(const gavl_metadata_t * m,
  *  \arg i Index (starting with zero).
  *  \returns Array element if i > 0, else val
  *
- *  Like \ref gavl_metadata_get_arr but ignoring the case of key
+ *  Like \ref gavl_dictionary_get_string_arr but ignoring the case of key
  */
 
 GAVL_PUBLIC const char * 
-gavl_metadata_get_arr_i(const gavl_metadata_t * m,
+gavl_dictionary_get_string_arr_i(const gavl_dictionary_t * m,
                         const char * key,
                         int i);
 
@@ -229,7 +179,7 @@ gavl_metadata_get_arr_i(const gavl_metadata_t * m,
  */
 
 GAVL_PUBLIC char * 
-gavl_metadata_join_arr(const gavl_metadata_t * m,
+gavl_metadata_join_arr(const gavl_dictionary_t * m,
                        const char * key, const char * glue);
 
   
@@ -240,7 +190,7 @@ gavl_metadata_join_arr(const gavl_metadata_t * m,
  */
 
 GAVL_PUBLIC int
-gavl_metadata_get_arr_len(const gavl_metadata_t * m,
+gavl_dictionary_get_string_arr_len(const gavl_dictionary_t * m,
                           const char * key);
 
   
@@ -251,7 +201,7 @@ gavl_metadata_get_arr_len(const gavl_metadata_t * m,
  */
 
 // GAVL_PUBLIC 
-// const char * gavl_metadata_get_i(const gavl_metadata_t * m,
+// const char * gavl_dictionary_get_string_i(const gavl_dictionary_t * m,
 //                                 const char * key);
 
 /** \brief Set an integer tag
@@ -261,7 +211,7 @@ gavl_metadata_get_arr_len(const gavl_metadata_t * m,
  */
   
 GAVL_PUBLIC void
-gavl_metadata_set_int(gavl_metadata_t * m,
+gavl_dictionary_set_string_int(gavl_dictionary_t * m,
                       const char * key,
                       int val);
 
@@ -272,7 +222,7 @@ gavl_metadata_set_int(gavl_metadata_t * m,
  */
   
 GAVL_PUBLIC void
-gavl_metadata_set_long(gavl_metadata_t * m,
+gavl_dictionary_set_string_long(gavl_dictionary_t * m,
                        const char * key,
                        int64_t val);
 
@@ -283,7 +233,7 @@ gavl_metadata_set_long(gavl_metadata_t * m,
  */
 
 void
-gavl_metadata_set_float(gavl_metadata_t * m,
+gavl_dictionary_set_string_float(gavl_dictionary_t * m,
                         const char * key,
                         float val);
   
@@ -295,7 +245,7 @@ gavl_metadata_set_float(gavl_metadata_t * m,
  */
   
 GAVL_PUBLIC 
-int gavl_metadata_get_int(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_int(const gavl_dictionary_t * m,
                           const char * key, int * ret);
 
 /** \brief Get a long tag
@@ -306,7 +256,7 @@ int gavl_metadata_get_int(const gavl_metadata_t * m,
  */
   
   // GAVL_PUBLIC 
-  // int gavl_metadata_get_long(const gavl_metadata_t * m,
+  // int gavl_dictionary_get_string_long(const gavl_dictionary_t * m,
   //                          const char * key, int64_t * ret);
 
 /** \brief Get a float tag
@@ -317,7 +267,7 @@ int gavl_metadata_get_int(const gavl_metadata_t * m,
  */
   
 GAVL_PUBLIC 
-int gavl_metadata_get_float(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_float(const gavl_dictionary_t * m,
                             const char * key, float * ret);
   
 /** \brief Get an integer tag ignoring case
@@ -328,7 +278,7 @@ int gavl_metadata_get_float(const gavl_metadata_t * m,
  */
   
 GAVL_PUBLIC 
-int gavl_metadata_get_int_i(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_int_i(const gavl_dictionary_t * m,
                             const char * key, int * ret);
 
 /** \brief Get a long tag ignoring case
@@ -339,7 +289,7 @@ int gavl_metadata_get_int_i(const gavl_metadata_t * m,
  */
   
 GAVL_PUBLIC 
-int gavl_metadata_get_long_i(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_long_i(const gavl_dictionary_t * m,
                              const char * key, int64_t * ret);
 
 /** \brief Get a float tag ignoring case
@@ -350,7 +300,7 @@ int gavl_metadata_get_long_i(const gavl_metadata_t * m,
  */
   
 GAVL_PUBLIC 
-int gavl_metadata_get_float_i(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_float_i(const gavl_dictionary_t * m,
                               const char * key, float * ret);
 
   
@@ -364,7 +314,7 @@ int gavl_metadata_get_float_i(const gavl_metadata_t * m,
  */
   
 GAVL_PUBLIC void
-gavl_metadata_set_date(gavl_metadata_t * m,
+gavl_dictionary_set_string_date(gavl_dictionary_t * m,
                        const char * key,
                        int year,
                        int month,
@@ -380,7 +330,7 @@ gavl_metadata_set_date(gavl_metadata_t * m,
  */
   
 GAVL_PUBLIC int
-gavl_metadata_get_date(gavl_metadata_t * m,
+gavl_dictionary_get_string_date(gavl_dictionary_t * m,
                        const char * key,
                        int * year,
                        int * month,
@@ -398,7 +348,7 @@ gavl_metadata_get_date(gavl_metadata_t * m,
  */
   
 GAVL_PUBLIC void
-gavl_metadata_set_date_time(gavl_metadata_t * m,
+gavl_dictionary_set_string_date_time(gavl_dictionary_t * m,
                             const char * key,
                             int year,
                             int month,
@@ -420,7 +370,7 @@ gavl_metadata_set_date_time(gavl_metadata_t * m,
  */
   
 GAVL_PUBLIC int
-gavl_metadata_get_date_time(gavl_metadata_t * m,
+gavl_dictionary_get_string_date_time(gavl_dictionary_t * m,
                             const char * key,
                             int * year,
                             int * month,
@@ -477,9 +427,9 @@ gavl_metadata_date_time_to_string(int year,
  */
   
 // GAVL_PUBLIC 
-// void gavl_metadata_merge(gavl_metadata_t * dst,
-//                         const gavl_metadata_t * src1,
-//                         const gavl_metadata_t * src2);
+// void gavl_dictionary_merge(gavl_dictionary_t * dst,
+//                         const gavl_dictionary_t * src1,
+//                         const gavl_dictionary_t * src2);
 
 /** \brief Merge two metadata structures
  *  \arg dst Destination
@@ -490,8 +440,8 @@ gavl_metadata_date_time_to_string(int year,
  */
   
 // GAVL_PUBLIC
-// void gavl_metadata_merge2(gavl_metadata_t * dst,
-//                          const gavl_metadata_t * src);
+// void gavl_dictionary_merge2(gavl_dictionary_t * dst,
+//                          const gavl_dictionary_t * src);
 
 /** \brief Copy metadata structure
  *  \arg dst Destination
@@ -501,8 +451,8 @@ gavl_metadata_date_time_to_string(int year,
  */
   
 // GAVL_PUBLIC void
-// gavl_metadata_copy(gavl_metadata_t * dst,
-//                    const gavl_metadata_t * src);
+// gavl_dictionary_copy(gavl_dictionary_t * dst,
+//                    const gavl_dictionary_t * src);
 
 /** \brief Dump metadata structure to stderr
  *  \arg m Metadata
@@ -510,7 +460,7 @@ gavl_metadata_date_time_to_string(int year,
  */
 
 GAVL_PUBLIC void
-gavl_metadata_dump(const gavl_metadata_t * m, int indent);
+gavl_dictionary_dump(const gavl_dictionary_t * m, int indent);
 
 /** \brief Check if 2 metadata structures are equal
  *  \arg m1 Metadata 1
@@ -519,8 +469,8 @@ gavl_metadata_dump(const gavl_metadata_t * m, int indent);
  */
 
 GAVL_PUBLIC int
-gavl_metadata_equal(const gavl_metadata_t * m1,
-                    const gavl_metadata_t * m2);
+gavl_metadata_equal(const gavl_dictionary_t * m1,
+                    const gavl_dictionary_t * m2);
 
 /** \brief Clear fields, which are related to the compression
  *  \arg m Metadata
@@ -532,7 +482,7 @@ gavl_metadata_equal(const gavl_metadata_t * m1,
  */
 
 GAVL_PUBLIC void
-gavl_metadata_delete_compression_fields(gavl_metadata_t * m);
+gavl_metadata_delete_compression_fields(gavl_dictionary_t * m);
 
 /** \brief Clear fields, which are obtained implicitly
  *  \arg m Metadata
@@ -541,7 +491,7 @@ gavl_metadata_delete_compression_fields(gavl_metadata_t * m);
  */
 
 GAVL_PUBLIC void
-gavl_metadata_delete_implicit_fields(gavl_metadata_t * m);
+gavl_metadata_delete_implicit_fields(gavl_dictionary_t * m);
   
 /** \brief Set the enddian tag
  *  \arg m Metadata
@@ -551,7 +501,7 @@ gavl_metadata_delete_implicit_fields(gavl_metadata_t * m);
  */
 
 GAVL_PUBLIC void
-gavl_metadata_set_endian(gavl_metadata_t * m);
+gavl_dictionary_set_string_endian(gavl_dictionary_t * m);
 
 /** \brief Check if endianess needs to be swapped
  *  \arg m Metadata
@@ -559,39 +509,39 @@ gavl_metadata_set_endian(gavl_metadata_t * m);
  */
 
 GAVL_PUBLIC int
-gavl_metadata_do_swap_endian(const gavl_metadata_t * m);
+gavl_metadata_do_swap_endian(const gavl_dictionary_t * m);
 
 GAVL_PUBLIC void
-gavl_metadata_add_image_uri(gavl_metadata_t * m,
+gavl_metadata_add_image_uri(gavl_dictionary_t * m,
                             const char * key,
                             int w, int h,
                             const char * mimetype,
                             const char * uri);
 
 GAVL_PUBLIC const char *
-gavl_metadata_get_image_uri(const gavl_metadata_t * m,
+gavl_dictionary_get_string_image_uri(const gavl_dictionary_t * m,
                             const char * key,
                             int i,
                             int * wp, int * hp,
                             const char ** mimetype);
 
 GAVL_PUBLIC const char *
-gavl_metadata_get_image_max(const gavl_metadata_t * m,
+gavl_dictionary_get_string_image_max(const gavl_dictionary_t * m,
                             const char * key,
                             int w, int h,
                             const char * mimetype);
  
 
 GAVL_PUBLIC gavl_dictionary_t *
-gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
+gavl_metadata_add_src(gavl_dictionary_t * m, const char * key,
                       const char * mimetype, const char * location);
 
 GAVL_PUBLIC const gavl_dictionary_t *
-gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
+gavl_dictionary_get_string_src(const gavl_dictionary_t * m, const char * key, int idx,
                       const char ** mimetype, const char ** location);
 
 GAVL_PUBLIC 
-int gavl_metadata_has_src(const gavl_metadata_t * m, const char * key,
+int gavl_metadata_has_src(const gavl_dictionary_t * m, const char * key,
                           const char * location);
 
 

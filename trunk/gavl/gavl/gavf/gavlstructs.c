@@ -510,7 +510,7 @@ int gavf_write_compression_info(gavf_io_t * io,
 /* Metadata */
 
 #if 0
-int gavf_read_metadata(gavf_io_t * io, gavl_metadata_t * m)
+int gavl_dictionary_read(gavf_io_t * io, gavl_dictionary_t * m)
   {
   int i, j;
   uint32_t num;
@@ -545,7 +545,7 @@ int gavf_read_metadata(gavf_io_t * io, gavl_metadata_t * m)
   return 1;
   }
 
-int gavf_write_metadata(gavf_io_t * io, const gavl_metadata_t * m)
+int gavl_dictionary_write(gavf_io_t * io, const gavl_dictionary_t * m)
   {
   int i, j;
   uint32_t num = 0;
@@ -905,20 +905,20 @@ uint8_t * gavl_video_format_to_buffer(int * len, const gavl_video_format_t * fmt
   return ret;
   }
 
-int gavl_metadata_from_buffer(const uint8_t * buf, int len, gavl_metadata_t * fmt)
+int gavl_metadata_from_buffer(const uint8_t * buf, int len, gavl_dictionary_t * fmt)
   {
   int result;
   gavf_io_t * io = gavf_io_create_mem_read(buf, len);
-  result = gavf_read_metadata(io, fmt);
+  result = gavl_dictionary_read(io, fmt);
   gavf_io_destroy(io);
   return result;
   }
   
-uint8_t * gavl_metadata_to_buffer(int * len, const gavl_metadata_t * fmt)
+uint8_t * gavl_dictionary_to_buffer(int * len, const gavl_dictionary_t * fmt)
   {
   uint8_t * ret;
   gavf_io_t * io = gavf_io_create_mem_write();
-  gavf_write_metadata(io, fmt);
+  gavl_dictionary_write(io, fmt);
   ret = gavf_io_mem_get_buf(io, len);
   gavf_io_destroy(io);
   return ret;

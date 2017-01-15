@@ -153,6 +153,18 @@ gavl_dictionary_t * gavl_chapter_list_get(gavl_chapter_list_t * list, int idx)
   return &arr->entries[idx].v.dictionary;
   }
 
+int64_t gavl_chapter_list_get_time(gavl_chapter_list_t * list, int idx)
+  {
+  gavl_dictionary_t * chap;
+  int64_t t = GAVL_TIME_UNDEFINED;
+
+  if(!(chap = gavl_chapter_list_get(list, idx)) ||
+     !gavl_dictionary_get_long(chap, GAVL_CHAPTERLIST_TIME, &t))
+    return GAVL_TIME_UNDEFINED;
+  return t;
+  }
+
+
 const gavl_dictionary_t * gavl_chapter_list_get_c(const gavl_chapter_list_t * list, int idx)
   {
   const gavl_array_t * arr;

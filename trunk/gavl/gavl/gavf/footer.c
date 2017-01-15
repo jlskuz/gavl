@@ -212,7 +212,7 @@ void gavf_stream_footer_update(gavf_stream_footer_t * f, gavl_packet_t * p)
 
 static void footer_apply_common(gavf_stream_footer_t * f,
                                 gavl_compression_info_t * ci,
-                                gavl_metadata_t * m, int timescale)
+                                gavl_dictionary_t * m, int timescale)
   {
   if(ci->max_packet_size <= 0)
     ci->max_packet_size = f->size_max;
@@ -223,7 +223,7 @@ static void footer_apply_common(gavf_stream_footer_t * f,
       (double)(f->total_bytes) / 
       (gavl_time_to_seconds(gavl_time_unscale(timescale,
                                               f->pts_end-f->pts_start)) * 125.0);
-    gavl_metadata_set_float(m, GAVL_META_AVG_FRAMERATE, avg_rate);
+    gavl_dictionary_set_string_float(m, GAVL_META_AVG_FRAMERATE, avg_rate);
     }
   
   }
@@ -231,7 +231,7 @@ static void footer_apply_common(gavf_stream_footer_t * f,
 void gavf_stream_footer_apply_audio(gavf_stream_footer_t * f, 
                                     gavl_audio_format_t * fmt,
                                     gavl_compression_info_t * ci,
-                                    gavl_metadata_t * m)
+                                    gavl_dictionary_t * m)
   {
   if(f->pts_start == GAVL_TIME_UNDEFINED)
     return;
@@ -242,7 +242,7 @@ void gavf_stream_footer_apply_audio(gavf_stream_footer_t * f,
 void gavf_stream_footer_apply_video(gavf_stream_footer_t * f, 
                                     gavl_video_format_t * fmt,
                                     gavl_compression_info_t * ci,
-                                    gavl_metadata_t * m)
+                                    gavl_dictionary_t * m)
   {
   if(f->pts_start == GAVL_TIME_UNDEFINED)
     return;
@@ -264,7 +264,7 @@ void gavf_stream_footer_apply_video(gavf_stream_footer_t * f,
         gavl_time_to_seconds(gavl_time_unscale(fmt->timescale,
                                                f->pts_end-f->pts_start));
       
-      gavl_metadata_set_float(m, GAVL_META_AVG_FRAMERATE, avg_rate);
+      gavl_dictionary_set_string_float(m, GAVL_META_AVG_FRAMERATE, avg_rate);
       }
     }
   }

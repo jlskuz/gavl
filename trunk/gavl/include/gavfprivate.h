@@ -62,18 +62,18 @@ void gavf_stream_header_apply_footer(gavf_stream_header_t * h);
 int gavf_program_header_add_audio_stream(gavf_program_header_t * ph,
                                          const gavl_compression_info_t * ci,
                                          const gavl_audio_format_t * format,
-                                         const gavl_metadata_t * m);
+                                         const gavl_dictionary_t * m);
 int gavf_program_header_add_video_stream(gavf_program_header_t * ph,
                                          const gavl_compression_info_t * ci,
                                          const gavl_video_format_t * format,
-                                         const gavl_metadata_t * m);
+                                         const gavl_dictionary_t * m);
 int gavf_program_header_add_overlay_stream(gavf_program_header_t * ph,
                                            const gavl_compression_info_t * ci,
                                            const gavl_video_format_t * format,
-                                           const gavl_metadata_t * m);
+                                           const gavl_dictionary_t * m);
 int gavf_program_header_add_text_stream(gavf_program_header_t * ph,
                                         uint32_t timescale,
-                                        const gavl_metadata_t * m);
+                                        const gavl_dictionary_t * m);
 int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph);
 int gavf_program_header_write(gavf_io_t * io,
                               const gavf_program_header_t * ph);
@@ -189,7 +189,7 @@ struct gavf_options_s
   {
   uint32_t flags;
   gavl_time_t sync_distance;
-  void (*metadata_cb)(void * priv, const gavl_metadata_t * m);
+  void (*metadata_cb)(void * priv, const gavl_dictionary_t * m);
   void * metadata_cb_priv;
   };
 
@@ -349,7 +349,7 @@ struct gavf_s
   /* Inline metadata support */
   gavf_io_t meta_io;
   gavl_buffer_t meta_buf;
-  gavl_metadata_t metadata;
+  gavl_dictionary_t metadata;
   
   uint64_t first_sync_pos;
   

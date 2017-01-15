@@ -40,7 +40,7 @@ static char * my_strdup(const char * str)
   return ret;
   }
 
-static void free_val(gavl_metadata_tag_t * tag)
+static void free_val(gavl_dictionary_tag_t * tag)
   {
   int j;
   free(tag->val);
@@ -53,21 +53,21 @@ static void free_val(gavl_metadata_tag_t * tag)
     }
   }
 
-static void init_val(gavl_metadata_tag_t * tag)
+static void init_val(gavl_dictionary_tag_t * tag)
   {
   char * key = tag->key;
   memset(tag, 0, sizeof(*tag));
   tag->key = key;
   }
 
-static void free_tag(gavl_metadata_tag_t * tag)
+static void free_tag(gavl_dictionary_tag_t * tag)
   {
   free(tag->key);
   free_val(tag);
   }
 
 void
-gavl_metadata_free(gavl_metadata_t * m)
+gavl_dictionary_free(gavl_dictionary_t * m)
   {
   int i;
   for(i = 0; i < m->num_tags; i++)
@@ -75,13 +75,13 @@ gavl_metadata_free(gavl_metadata_t * m)
   
   if(m->tags)
     free(m->tags);
-  gavl_metadata_init(m);
+  gavl_dictionary_init(m);
   }
-static void gavl_metadata_copy_tag(gavl_metadata_t * dst,
-                                   gavl_metadata_tag_t * src)
+static void gavl_dictionary_copy_tag(gavl_dictionary_t * dst,
+                                   gavl_dictionary_tag_t * src)
   {
   int i;
-  gavl_metadata_set(dst, src->key, src->val);
+  gavl_dictionary_set_string(dst, src->key, src->val);
 
   for(i = 0; i < src->arr_len; i++)
     {
@@ -90,17 +90,17 @@ static void gavl_metadata_copy_tag(gavl_metadata_t * dst,
   }
 
 void
-gavl_metadata_copy(gavl_metadata_t * dst,
-                   const gavl_metadata_t * src)
+gavl_dictionary_copy(gavl_dictionary_t * dst,
+                   const gavl_dictionary_t * src)
   {
   int i;
   if(!src->tags_alloc)
     return;
   for(i = 0; i < src->num_tags; i++)
-    gavl_metadata_copy_tag(dst, &src->tags[i]);
+    gavl_dictionary_copy_tag(dst, &src->tags[i]);
   }
 
-static int find_tag(const gavl_metadata_t * m, const char * key)
+static int find_tag(const gavl_dictionary_t * m, const char * key)
   {
   int i;
   for(i = 0; i < m->num_tags; i++)
@@ -111,7 +111,7 @@ static int find_tag(const gavl_metadata_t * m, const char * key)
   return -1;
   }
 
-static int find_tag_i(const gavl_metadata_t * m, const char * key)
+static int find_tag_i(const gavl_dictionary_t * m, const char * key)
   {
   int i;
   for(i = 0; i < m->num_tags; i++)
@@ -123,13 +123,13 @@ static int find_tag_i(const gavl_metadata_t * m, const char * key)
   }
 
 void
-gavl_metadata_init(gavl_metadata_t * m)
+gavl_dictionary_init(gavl_dictionary_t * m)
   {
   memset(m, 0, sizeof(*m));
   }
 
 void
-gavl_metadata_set(gavl_metadata_t * m,
+gavl_dictionary_set_string(gavl_dictionary_t * m,
                   const char * key,
                   const char * val_c)
   {
@@ -138,13 +138,13 @@ gavl_metadata_set(gavl_metadata_t * m,
     val = my_strdup(val_c);
   else
     val = NULL;
-  gavl_metadata_set_nocpy(m, key, val);
+  gavl_dictionary_set_string_nocpy(m, key, val);
   }
 
-static gavl_metadata_tag_t * create_tag(gavl_metadata_t * m,
+static gavl_dictionary_tag_t * create_tag(gavl_dictionary_t * m,
                                         const char * key)
   {
-  gavl_metadata_tag_t * ret;
+  gavl_dictionary_tag_t * ret;
   if(m->num_tags + 1 > m->tags_alloc)
     {
     m->tags_alloc = m->num_tags + 16;
@@ -160,7 +160,7 @@ static gavl_metadata_tag_t * create_tag(gavl_metadata_t * m,
   return ret;
   }
 
-static gavl_metadata_tag_t * ensure_tag(gavl_metadata_t * m,
+static gavl_dictionary_tag_t * ensure_tag(gavl_dictionary_t * m,
                                         const char * key)
   {
   int idx;
@@ -170,7 +170,7 @@ static gavl_metadata_tag_t * ensure_tag(gavl_metadata_t * m,
     return create_tag(m, key);
   }
 void
-gavl_metadata_set_nocpy(gavl_metadata_t * m,
+gavl_dictionary_set_string_nocpy(gavl_dictionary_t * m,
                         const char * key,
                         char * val)
   {
@@ -196,11 +196,11 @@ gavl_metadata_set_nocpy(gavl_metadata_t * m,
     }
   else if(val)
     {
-    gavl_metadata_tag_t * tag = create_tag(m, key);
+    gavl_dictionary_tag_t * tag = create_tag(m, key);
     tag->val = val;
     }
   }
-const char * gavl_metadata_get(const gavl_metadata_t * m,
+const char * gavl_dictionary_get_string(const gavl_dictionary_t * m,
                                const char * key)
   {
   int idx = find_tag(m, key);
@@ -209,7 +209,7 @@ const char * gavl_metadata_get(const gavl_metadata_t * m,
   return m->tags[idx].val;
   }
 
-const char * gavl_metadata_get_i(const gavl_metadata_t * m,
+const char * gavl_dictionary_get_string_i(const gavl_dictionary_t * m,
                                  const char * key)
   {
   int idx = find_tag_i(m, key);
@@ -218,36 +218,36 @@ const char * gavl_metadata_get_i(const gavl_metadata_t * m,
   return m->tags[idx].val;
   }
 
-void gavl_metadata_merge(gavl_metadata_t * dst,
-                         const gavl_metadata_t * src1,
-                         const gavl_metadata_t * src2)
+void gavl_dictionary_merge(gavl_dictionary_t * dst,
+                         const gavl_dictionary_t * src1,
+                         const gavl_dictionary_t * src2)
   {
   int i;
   /* src1 has priority */
   for(i = 0; i < src1->num_tags; i++)
-    gavl_metadata_copy_tag(dst, &src1->tags[i]);
+    gavl_dictionary_copy_tag(dst, &src1->tags[i]);
 
   /* From src2 we take only the tags, which aren't available */
   for(i = 0; i < src2->num_tags; i++)
     {
-    if(!gavl_metadata_get(dst, src2->tags[i].key))
-      gavl_metadata_copy_tag(dst, &src2->tags[i]);
+    if(!gavl_dictionary_get_string(dst, src2->tags[i].key))
+      gavl_dictionary_copy_tag(dst, &src2->tags[i]);
     }
   }
 
-void gavl_metadata_merge2(gavl_metadata_t * dst,
-                          const gavl_metadata_t * src)
+void gavl_dictionary_merge2(gavl_dictionary_t * dst,
+                          const gavl_dictionary_t * src)
   {
   int i;
   for(i = 0; i < src->num_tags; i++)
     {
-    if(!gavl_metadata_get(dst, src->tags[i].key))
-      gavl_metadata_copy_tag(dst, &src->tags[i]);
+    if(!gavl_dictionary_get_string(dst, src->tags[i].key))
+      gavl_dictionary_copy_tag(dst, &src->tags[i]);
     }
   }
 
 GAVL_PUBLIC void
-gavl_metadata_dump(const gavl_metadata_t * m, int indent)
+gavl_dictionary_dump(const gavl_dictionary_t * m, int indent)
   {
   int len, i, j, k;
   int max_key_len = 0;
@@ -293,42 +293,42 @@ gavl_metadata_dump(const gavl_metadata_t * m, int indent)
 #define STR_SIZE 128
 
 void
-gavl_metadata_set_int(gavl_metadata_t * m,
+gavl_dictionary_set_string_int(gavl_dictionary_t * m,
                       const char * key,
                       int val)
   {
   char str[STR_SIZE];
   snprintf(str, STR_SIZE, "%d", val);
-  gavl_metadata_set(m, key, str);
+  gavl_dictionary_set_string(m, key, str);
   }
 
 void
-gavl_metadata_set_long(gavl_metadata_t * m,
+gavl_dictionary_set_string_long(gavl_dictionary_t * m,
                        const char * key,
                        int64_t val)
   {
   char str[STR_SIZE];
   snprintf(str, STR_SIZE, "%"PRId64, val);
-  gavl_metadata_set(m, key, str);
+  gavl_dictionary_set_string(m, key, str);
   }
 
 void
-gavl_metadata_set_float(gavl_metadata_t * m,
+gavl_dictionary_set_string_float(gavl_dictionary_t * m,
                         const char * key,
                         float val)
   {
   char str[STR_SIZE];
   snprintf(str, STR_SIZE, "%.6f", val);
-  gavl_metadata_set(m, key, str);
+  gavl_dictionary_set_string(m, key, str);
   }
 
 #undef STR_SIZE
 
-int gavl_metadata_get_int(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_int(const gavl_dictionary_t * m,
                           const char * key, int * ret)
   {
   char * rest;
-  const char * val_str = gavl_metadata_get(m, key);
+  const char * val_str = gavl_dictionary_get_string(m, key);
   if(!val_str)
     return 0;
   *ret = strtol(val_str, &rest, 10);
@@ -337,11 +337,11 @@ int gavl_metadata_get_int(const gavl_metadata_t * m,
   return 1;
   }
 
-int gavl_metadata_get_int_i(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_int_i(const gavl_dictionary_t * m,
                             const char * key, int * ret)
   {
   char * rest;
-  const char * val_str = gavl_metadata_get_i(m, key);
+  const char * val_str = gavl_dictionary_get_string_i(m, key);
   if(!val_str)
     return 0;
   *ret = strtol(val_str, &rest, 10);
@@ -351,11 +351,11 @@ int gavl_metadata_get_int_i(const gavl_metadata_t * m,
   }
 
 #if 0
-int gavl_metadata_get_long(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_long(const gavl_dictionary_t * m,
                            const char * key, int64_t * ret)
   {
   char * rest;
-  const char * val_str = gavl_metadata_get(m, key);
+  const char * val_str = gavl_dictionary_get_string(m, key);
   if(!val_str)
     return 0;
   *ret = strtoll(val_str, &rest, 10);
@@ -365,11 +365,11 @@ int gavl_metadata_get_long(const gavl_metadata_t * m,
   }
 #endif
 
-int gavl_metadata_get_long_i(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_long_i(const gavl_dictionary_t * m,
                              const char * key, int64_t * ret)
   {
   char * rest;
-  const char * val_str = gavl_metadata_get_i(m, key);
+  const char * val_str = gavl_dictionary_get_string_i(m, key);
   if(!val_str)
     return 0;
   *ret = strtoll(val_str, &rest, 10);
@@ -378,10 +378,10 @@ int gavl_metadata_get_long_i(const gavl_metadata_t * m,
   return 1;
   }
 
-int gavl_metadata_get_float(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_float(const gavl_dictionary_t * m,
                            const char * key, float * ret)
   {
-  const char * val_str = gavl_metadata_get(m, key);
+  const char * val_str = gavl_dictionary_get_string(m, key);
   if(!val_str)
     return 0;
   if(sscanf(val_str, "%f", ret) != 1)
@@ -389,10 +389,10 @@ int gavl_metadata_get_float(const gavl_metadata_t * m,
   return 1;
   }
 
-int gavl_metadata_get_float_i(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_float_i(const gavl_dictionary_t * m,
                              const char * key, float * ret)
   {
-  const char * val_str = gavl_metadata_get_i(m, key);
+  const char * val_str = gavl_dictionary_get_string_i(m, key);
   if(!val_str)
     return 0;
   if(sscanf(val_str, "%f", ret) != 1)
@@ -426,7 +426,7 @@ gavl_metadata_date_time_to_string(int year,
   }
 
 void
-gavl_metadata_set_date(gavl_metadata_t * m,
+gavl_dictionary_set_string_date(gavl_dictionary_t * m,
                        const char * key,
                        int year,
                        int month,
@@ -435,11 +435,11 @@ gavl_metadata_set_date(gavl_metadata_t * m,
   // YYYY-MM-DD
   char buf[GAVL_METADATA_DATE_STRING_LEN];
   gavl_metadata_date_to_string(year, month, day, buf);
-  gavl_metadata_set(m, key, buf);
+  gavl_dictionary_set_string(m, key, buf);
   }
 
 void
-gavl_metadata_set_date_time(gavl_metadata_t * m,
+gavl_dictionary_set_string_date_time(gavl_dictionary_t * m,
                             const char * key,
                             int year,
                             int month,
@@ -457,17 +457,17 @@ gavl_metadata_set_date_time(gavl_metadata_t * m,
                                     minute,
                                     second,
                                     buf);
-  gavl_metadata_set(m, key, buf);
+  gavl_dictionary_set_string(m, key, buf);
   }
 
 GAVL_PUBLIC int
-gavl_metadata_get_date(gavl_metadata_t * m,
+gavl_dictionary_get_string_date(gavl_dictionary_t * m,
                        const char * key,
                        int * year,
                        int * month,
                        int * day)
   {
-  const char * val = gavl_metadata_get(m, key);
+  const char * val = gavl_dictionary_get_string(m, key);
   if(!val)
     return 0;
 
@@ -477,7 +477,7 @@ gavl_metadata_get_date(gavl_metadata_t * m,
   }
 
 GAVL_PUBLIC int
-gavl_metadata_get_date_time(gavl_metadata_t * m,
+gavl_dictionary_get_string_date_time(gavl_dictionary_t * m,
                             const char * key,
                             int * year,
                             int * month,
@@ -486,7 +486,7 @@ gavl_metadata_get_date_time(gavl_metadata_t * m,
                             int * minute,
                             int * second)
   {
-  const char * val = gavl_metadata_get(m, key);
+  const char * val = gavl_dictionary_get_string(m, key);
   if(!val)
     return 0;
 
@@ -498,8 +498,8 @@ gavl_metadata_get_date_time(gavl_metadata_t * m,
 
 
 int
-gavl_metadata_equal(const gavl_metadata_t * m1,
-                    const gavl_metadata_t * m2)
+gavl_metadata_equal(const gavl_dictionary_t * m1,
+                    const gavl_dictionary_t * m2)
   {
   return !gavl_dictionary_compare(m1, m2);
   }
@@ -526,19 +526,19 @@ const char * implicit_fields[] =
 
 
 void
-gavl_metadata_delete_compression_fields(gavl_metadata_t * m)
+gavl_metadata_delete_compression_fields(gavl_dictionary_t * m)
   {
   gavl_dictionary_delete_fields(m, compression_fields);
   }
 
 void
-gavl_metadata_delete_implicit_fields(gavl_metadata_t * m)
+gavl_metadata_delete_implicit_fields(gavl_dictionary_t * m)
   {
   gavl_dictionary_delete_fields(m, implicit_fields);
   }
 
 void
-gavl_metadata_set_endian(gavl_metadata_t * m)
+gavl_dictionary_set_string_endian(gavl_dictionary_t * m)
   {
   int val;
 #ifdef WORDS_BIGENDIAN
@@ -546,18 +546,18 @@ gavl_metadata_set_endian(gavl_metadata_t * m)
 #else
   val = 0;
 #endif
-  gavl_metadata_set_int(m, "BigEndian", val);
+  gavl_dictionary_set_string_int(m, "BigEndian", val);
   }
 
 int
-gavl_metadata_do_swap_endian(const gavl_metadata_t * m)
+gavl_metadata_do_swap_endian(const gavl_dictionary_t * m)
   {
   int val;
 
   if(!m)
     return 0;
   
-  if(!gavl_metadata_get_int(m, "BigEndian", &val))
+  if(!gavl_dictionary_get_string_int(m, "BigEndian", &val))
     val = 0;
 #ifdef WORDS_BIGENDIAN
   if(!val)
@@ -573,7 +573,7 @@ gavl_metadata_do_swap_endian(const gavl_metadata_t * m)
 /* Array functions */
 
 void
-gavl_metadata_append_nocpy(gavl_metadata_t * m,
+gavl_metadata_append_nocpy(gavl_dictionary_t * m,
                            const char * key,
                            char * val)
   {
@@ -584,14 +584,14 @@ gavl_metadata_append_nocpy(gavl_metadata_t * m,
   }
 
 void
-gavl_metadata_append(gavl_metadata_t * m,
+gavl_metadata_append(gavl_dictionary_t * m,
                      const char * key,
                      const char * val)
   {
   gavl_metadata_append_nocpy(m, key, gavl_strdup(val));
   }
 
-static char * metadata_get_arr_internal(const gavl_metadata_t * m,
+static char * metadata_get_arr_internal(const gavl_dictionary_t * m,
                                         const char * key,
                                         int i, int ign)
   {
@@ -620,7 +620,7 @@ static char * metadata_get_arr_internal(const gavl_metadata_t * m,
   }
 
 const char * 
-gavl_metadata_get_arr(const gavl_metadata_t * m,
+gavl_dictionary_get_string_arr(const gavl_dictionary_t * m,
                       const char * key,
                       int i)
   {
@@ -628,7 +628,7 @@ gavl_metadata_get_arr(const gavl_metadata_t * m,
   }
 
 const char * 
-gavl_metadata_get_arr_i(const gavl_metadata_t * m,
+gavl_dictionary_get_string_arr_i(const gavl_dictionary_t * m,
                         const char * key,
                         int i)
   {
@@ -637,7 +637,7 @@ gavl_metadata_get_arr_i(const gavl_metadata_t * m,
 
 
 
-int gavl_metadata_get_arr_len(const gavl_metadata_t * m,
+int gavl_dictionary_get_string_arr_len(const gavl_dictionary_t * m,
                               const char * key)
   {
   const gavl_value_t * val = gavl_dictionary_get(m, key);
@@ -653,7 +653,7 @@ int gavl_metadata_get_arr_len(const gavl_metadata_t * m,
   }
   
 char * 
-gavl_metadata_join_arr(const gavl_metadata_t * m,
+gavl_metadata_join_arr(const gavl_dictionary_t * m,
                        const char * key, const char * glue)
   {
 #if 0
@@ -742,7 +742,7 @@ gavl_metadata_join_arr(const gavl_metadata_t * m,
 
 // Format is w|h|mimetype|url
 
-void gavl_metadata_add_image_uri(gavl_metadata_t * m,
+void gavl_metadata_add_image_uri(gavl_dictionary_t * m,
                                  const char * key,
                                  int w, int h,
                                  const char * mimetype,
@@ -779,7 +779,7 @@ void gavl_metadata_add_image_uri(gavl_metadata_t * m,
   gavl_dictionary_append_nocopy(m, key, &child);
   }
 
-const char * gavl_metadata_get_image_uri(const gavl_metadata_t * m,
+const char * gavl_dictionary_get_string_image_uri(const gavl_dictionary_t * m,
                                          const char * key,
                                          int i,
                                          int * wp, int * hp,
@@ -823,7 +823,7 @@ const char * gavl_metadata_get_image_uri(const gavl_metadata_t * m,
   }
 
 const char *
-gavl_metadata_get_image_max(const gavl_metadata_t * m,
+gavl_dictionary_get_string_image_max(const gavl_dictionary_t * m,
                             const char * key,
                             int w, int h,
                             const char * mimetype)
@@ -846,7 +846,7 @@ gavl_metadata_get_image_max(const gavl_metadata_t * m,
   for(i = 0; i < num; i++)
     {
     /* Invalid */
-    if(!gavl_metadata_get_image_uri(m,
+    if(!gavl_dictionary_get_string_image_uri(m,
                                     key,
                                     i,
                                     &val_w, &val_h,
@@ -871,11 +871,11 @@ gavl_metadata_get_image_max(const gavl_metadata_t * m,
   if(i_max < 0)
     i_max = 0;
   
-  return gavl_metadata_get_image_uri(m, key, i_max, NULL, NULL, NULL);
+  return gavl_dictionary_get_string_image_uri(m, key, i_max, NULL, NULL, NULL);
   }
 
 gavl_dictionary_t *
-gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
+gavl_metadata_add_src(gavl_dictionary_t * m, const char * key,
                       const char * mimetype, const char * location)
   {
   int idx;
@@ -900,7 +900,7 @@ gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
     
     if(!strcmp(loc, location))
       {
-      gavl_metadata_set_int(m, GAVL_META_SRCIDX, idx);
+      gavl_dictionary_set_string_int(m, GAVL_META_SRCIDX, idx);
       return ret;
       }
     else
@@ -933,7 +933,7 @@ gavl_metadata_add_src(gavl_metadata_t * m, const char * key,
   }
 
 const gavl_dictionary_t *
-gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
+gavl_dictionary_get_string_src(const gavl_dictionary_t * m, const char * key, int idx,
                       const char ** mimetype, const char ** location)
   {
   const gavl_value_t * val;
@@ -953,13 +953,13 @@ gavl_metadata_get_src(const gavl_metadata_t * m, const char * key, int idx,
   return dict;
   }
 
-int gavl_metadata_has_src(const gavl_metadata_t * m, const char * key,
+int gavl_metadata_has_src(const gavl_dictionary_t * m, const char * key,
                           const char * location)
   {
   int i = 0;
   const char * loc;
 
-  while(gavl_metadata_get_src(m, key, i, NULL, &loc))
+  while(gavl_dictionary_get_string_src(m, key, i, NULL, &loc))
     {
     if(!strcmp(loc, location))
       return 1;
