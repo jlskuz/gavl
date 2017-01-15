@@ -143,6 +143,7 @@ int gavl_value_compare(const gavl_value_t * v1, const gavl_value_t * v2)
 
 void gavl_value_copy(gavl_value_t * dst, const gavl_value_t * src)
   {
+  gavl_value_reset(dst);
   if(!src || !src->type)
     {
     gavl_value_init(dst);
@@ -166,10 +167,22 @@ void gavl_value_copy(gavl_value_t * dst, const gavl_value_t * src)
       dst->v.str = gavl_strdup(src->v.str);
       break;
     case GAVL_TYPE_AUDIOFORMAT:
-      gavl_audio_format_copy(dst->v.audioformat, src->v.audioformat);
+      {
+      const gavl_audio_format_t * fmt_src;
+      gavl_audio_format_t * fmt_dst;
+      fmt_src = gavl_value_get_audio_format(src);
+      fmt_dst = gavl_value_set_audio_format(dst);
+      gavl_audio_format_copy(fmt_dst, fmt_src);
+      }
       break;
     case GAVL_TYPE_VIDEOFORMAT:
-      gavl_video_format_copy(dst->v.videoformat, src->v.videoformat);
+      {
+      const gavl_video_format_t * fmt_src;
+      gavl_video_format_t * fmt_dst;
+      fmt_src = gavl_value_get_video_format(src);
+      fmt_dst = gavl_value_set_video_format(dst);
+      gavl_video_format_copy(fmt_dst, fmt_src);
+      }
       break;
     case GAVL_TYPE_COLOR_RGB:
       memcpy(dst->v.color, src->v.color, 3 * sizeof(dst->v.color[0]));
@@ -225,7 +238,7 @@ void gavl_value_init(gavl_value_t * v)
   memset(v, 0, sizeof(*v));
   }
 
-static void value_reset(gavl_value_t * v)
+void gavl_value_reset(gavl_value_t * v)
   {
   gavl_value_free(v);
   gavl_value_init(v);
@@ -233,28 +246,28 @@ static void value_reset(gavl_value_t * v)
 
 void gavl_value_set_int(gavl_value_t * v, int val)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   v->type = GAVL_TYPE_INT;
   v->v.i = val;
   }
 
 void gavl_value_set_float(gavl_value_t * v, double val)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   v->type = GAVL_TYPE_FLOAT;
   v->v.d = val;
   }
 
 void gavl_value_set_long(gavl_value_t * v, int64_t val)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   v->type = GAVL_TYPE_LONG;
   v->v.l = val;
   }
 
 void gavl_value_set_string(gavl_value_t * v, const char * str)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   gavl_value_set_string_nocopy(v, gavl_strdup(str));
   }
 
@@ -262,14 +275,14 @@ void gavl_value_set_string(gavl_value_t * v, const char * str)
 
 void gavl_value_set_string_nocopy(gavl_value_t * v, char * str)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   v->type = GAVL_TYPE_STRING;
   v->v.str = str;
   }
 
 gavl_audio_format_t * gavl_value_set_audio_format(gavl_value_t * v)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   v->type = GAVL_TYPE_AUDIOFORMAT;
   v->v.audioformat = calloc(1, sizeof(*v->v.audioformat));
   return v->v.audioformat;
@@ -277,7 +290,7 @@ gavl_audio_format_t * gavl_value_set_audio_format(gavl_value_t * v)
 
 gavl_video_format_t * gavl_value_set_video_format(gavl_value_t * v)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   v->type = GAVL_TYPE_VIDEOFORMAT;
   v->v.videoformat = calloc(1, sizeof(*v->v.videoformat));
   return v->v.videoformat;
@@ -285,35 +298,35 @@ gavl_video_format_t * gavl_value_set_video_format(gavl_value_t * v)
 
 gavl_dictionary_t * gavl_value_set_dictionary(gavl_value_t * v)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   v->type = GAVL_TYPE_DICTIONARY;
   return &v->v.dictionary;
   }
 
 gavl_array_t * gavl_value_set_array(gavl_value_t * v)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   v->type = GAVL_TYPE_ARRAY;
   return &v->v.array;
   }
 
 double * gavl_value_set_position(gavl_value_t * v)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   v->type = GAVL_TYPE_POSITION;
   return v->v.position;
   }
 
 double * gavl_value_set_color_rgb(gavl_value_t * v)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   v->type = GAVL_TYPE_COLOR_RGB;
   return v->v.color;
   }
 
 double * gavl_value_set_color_rgba(gavl_value_t * v)
   {
-  value_reset(v);
+  gavl_value_reset(v);
   v->type = GAVL_TYPE_COLOR_RGBA;
   return v->v.color;
   }

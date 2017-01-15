@@ -780,10 +780,13 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
     {
     gavf_program_header_dump(&g->ph);
 
-    if(g->cl)
-      gavl_chapter_list_dump(g->cl);
+    if(gavl_chapter_list_is_valid(&g->cl))
+      {
+      gavl_dprintf("Chapter list\n");
+      gavl_dictionary_dump(&g->cl, 2);
+      }
     }
-
+  
   if(g->opt.flags & GAVF_OPT_FLAG_DUMP_INDICES)
     {
     if((g->opt.flags & GAVF_OPT_FLAG_DUMP_INDICES) ||
@@ -829,7 +832,7 @@ gavf_program_header_t * gavf_get_program_header(gavf_t * g)
 
 const gavl_chapter_list_t * gavf_get_chapter_list(gavf_t * g)
   {
-  return g->cl;
+  return &g->cl;
   }
 
 const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
@@ -1145,7 +1148,10 @@ int gavf_open_write(gavf_t * g, gavf_io_t * io,
     gavl_metadata_copy(&g->ph.m, m);
 
   if(cl)
-    g->cl = gavl_chapter_list_copy(cl);
+    {
+    if(cl && gavl_chapter_list_is_valid(cl))
+      gavl_dictionary_copy(&g->cl, cl);
+    }
   
   return 1;
   }
@@ -1435,8 +1441,7 @@ void gavf_close(gavf_t * g)
   gavf_packet_index_free(&g->pi);
   gavf_program_header_free(&g->ph);
 
-  if(g->cl)
-    gavl_chapter_list_destroy(g->cl);
+  gavl_dictionary_free(&g->cl);
   
   if(g->write_vframe)
     {

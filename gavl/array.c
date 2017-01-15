@@ -38,7 +38,6 @@ void gavl_array_init(gavl_array_t * d)
 void gavl_array_dump(const gavl_array_t * a, int indent)
   {
   int i;
-  gavl_diprintf(0, "\n");
   gavl_diprintf(indent + 2, "[\n");
   
   for(i = 0; i < a->num_entries; i++)

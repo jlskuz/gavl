@@ -865,55 +865,6 @@ int gavf_write_gavl_packet_header(gavf_io_t * io,
   return 1;
   }
 
-gavl_chapter_list_t * gavf_read_chapter_list(gavf_io_t * io)
-  {
-  gavl_chapter_list_t * ret;
-  uint32_t num_entries;
-  uint32_t timescale;
-  int i;
-  
-  if(!gavf_io_read_uint32v(io, &timescale) ||
-     !gavf_io_read_uint32v(io, &num_entries))
-    return NULL;
-  
-  ret = gavl_chapter_list_create(num_entries);
-  ret->timescale = timescale;
-
-  for(i = 0; i < num_entries; i++)
-    {
-    if(!gavf_io_read_int64v(io, &ret->chapters[i].time) ||
-       !gavf_io_read_string(io, &ret->chapters[i].name))
-      {
-      gavl_chapter_list_destroy(ret);
-      return NULL;
-      }
-      
-    }
-  return ret;
-  }
-
-int gavf_write_chapter_list(gavf_io_t * io,
-                            const gavl_chapter_list_t * cl)
-  {
-  int i;
-
-  if(gavf_io_write_data(io, (uint8_t*)GAVF_TAG_CHAPTER_LIST, 8) < 8)
-    return 0;
-
-  
-  if(!gavf_io_write_uint32v(io, cl->timescale) ||
-     !gavf_io_write_uint32v(io, cl->num_chapters))
-    return 0;
-
-  for(i = 0; i < cl->num_chapters; i++)
-    {
-    if(!gavf_io_write_int64v(io, cl->chapters[i].time) ||
-       !gavf_io_write_string(io, cl->chapters[i].name))
-      return 0;
-    }
-  return 1;
-  }
-
 /* From / To Buffer */
 
 int gavl_audio_format_from_buffer(const uint8_t * buf, int len, gavl_audio_format_t * fmt)

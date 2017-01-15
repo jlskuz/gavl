@@ -21,161 +21,146 @@
 
 #include <gavl/gavl.h>
 #include <gavl/chapterlist.h>
+#include <gavl/metatags.h>
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
-gavl_chapter_list_t * gavl_chapter_list_create(int num_chapters)
+
+static gavl_array_t * get_chapters(gavl_chapter_list_t * list)
   {
-  gavl_chapter_list_t * ret;
-  ret = calloc(1, sizeof(*ret));
-  if(num_chapters)
+  gavl_value_t * valp;
+  if(!(valp = gavl_dictionary_get_nc(list, GAVL_CHAPTERLIST_CHAPTERS)))
     {
-    ret->chapters = calloc(num_chapters, sizeof(*(ret->chapters)));
-    ret->num_chapters = num_chapters;
+    gavl_value_t val;
+    gavl_value_init(&val);
+    gavl_value_set_array(&val);
+    gavl_dictionary_set_nocopy(list, GAVL_CHAPTERLIST_CHAPTERS, &val);
+    valp = gavl_dictionary_get_nc(list, GAVL_CHAPTERLIST_CHAPTERS);
     }
-  return ret;
+  return &valp->v.array;
   }
 
-gavl_chapter_list_t * gavl_chapter_list_copy(const gavl_chapter_list_t * list)
+static const gavl_array_t * get_chapters_c(const gavl_chapter_list_t * list)
   {
-  int i;
-  gavl_chapter_list_t * ret;
-
-  if(!list || !list->num_chapters)
-    return NULL;
+  const gavl_array_t * arr;
+  const gavl_value_t * valp;
   
-  ret = gavl_chapter_list_create(list->num_chapters);
-  for(i = 0; i < ret->num_chapters; i++)
-    {
-    ret->chapters[i].time = list->chapters[i].time;
-
-    if(list->chapters[i].name)
-      {
-      ret->chapters[i].name = malloc(strlen(list->chapters[i].name)+1);
-      strcpy(ret->chapters[i].name, list->chapters[i].name);
-      }
-    }
-  ret->timescale = list->timescale;
-  return ret;
+  if(!(valp = gavl_dictionary_get(list, GAVL_CHAPTERLIST_CHAPTERS)) ||
+     !(arr = gavl_value_get_array(valp)))
+    return NULL; 
+  return arr;
   }
 
-
-void gavl_chapter_list_destroy(gavl_chapter_list_t * list)
+int gavl_chapter_list_is_valid(const gavl_chapter_list_t * list)
   {
-  int i;
-  for(i = 0; i < list->num_chapters; i++)
-    {
-    if(list->chapters[i].name)
-      free(list->chapters[i].name);
-    }
-  free(list->chapters);
-  free(list);
+  const gavl_array_t * arr = get_chapters_c(list);
+  if(!arr || !arr->num_entries)
+    return 0;
+  return 1;
   }
 
-void gavl_chapter_list_insert(gavl_chapter_list_t * list, int index,
-                            int64_t time, const char * name)
+gavl_dictionary_t * gavl_chapter_list_insert(gavl_chapter_list_t * list, int index,
+                                             int64_t time, const char * name)
   {
-  int chapters_to_add;
-  /* Add a chapter behind the last one */
-  if(index >= list->num_chapters)
-    {
-    chapters_to_add = index + 1 - list->num_chapters;
-    list->chapters =
-      realloc(list->chapters,
-              (chapters_to_add + list->num_chapters)*sizeof(*list->chapters));
-    memset(list->chapters + list->num_chapters,
-           0, sizeof(*list->chapters) * chapters_to_add);
-    list->num_chapters = index + 1;
-    }
-  else
-    {
-    list->chapters = realloc(list->chapters,
-                             (list->num_chapters + 1)*
-                             sizeof(*list->chapters));
-    memmove(list->chapters + index + 1, list->chapters + index,
-            (list->num_chapters - index) * sizeof(*list->chapters));
-    list->num_chapters++;
-    }
+  gavl_value_t val;
+  gavl_dictionary_t * dict;
+  
+  gavl_array_t * arr = get_chapters(list);
 
+  gavl_value_init(&val);
+  dict = gavl_value_set_dictionary(&val);
+  gavl_dictionary_set_long(dict, GAVL_CHAPTERLIST_TIME, time);
   if(name)
-    {
-    list->chapters[index].name = malloc(strlen(name)+1);
-    strcpy(list->chapters[index].name, name);
-    }
-  list->chapters[index].time = time;
-  
+    gavl_dictionary_set_string(dict, GAVL_META_LABEL, name);
+
+  gavl_array_splice_val_nocopy(arr, index, 0, &val);
+
+  return &arr->entries[index].v.dictionary;
   }
 
 void gavl_chapter_list_delete(gavl_chapter_list_t * list, int index)
   {
-  if((index < 0) || (index >= list->num_chapters))
-    return;
-
-  if(list->chapters[index].name)
-    free(list->chapters[index].name);
-
-  if(index < list->num_chapters-1)
-    {
-    memmove(list->chapters + index, list->chapters + index + 1,
-            sizeof(*list->chapters) * (list->num_chapters - index));
-    }
-  if(!index)
-    list->chapters[index].time = 0;
-  
-  list->num_chapters--;
-  
+  gavl_array_t * arr = get_chapters(list);
+  gavl_array_splice_val(arr, index, 1, NULL);
   }
 
-
-int gavl_chapter_list_get_current(gavl_chapter_list_t * list,
-                                gavl_time_t time)
+static int64_t get_time(const gavl_chapter_list_t * list, int idx)
   {
-  int i;
-  int64_t time_scaled = gavl_time_scale(list->timescale, time);
-  for(i = 0; i < list->num_chapters-1; i++)
+  int64_t ret = GAVL_TIME_UNDEFINED;
+  const gavl_array_t * arr;
+  
+  if((idx < 0) ||
+     !(arr = get_chapters_c(list)) ||
+     (idx >= arr->num_entries) ||
+     !gavl_value_get_long(&arr->entries[idx], &ret))
     {
-    if(time_scaled < list->chapters[i+1].time)
-      return i;
-    }
-  return list->num_chapters-1;
-  }
-
-int gavl_chapter_list_changed(gavl_chapter_list_t * list,
-                              gavl_time_t time, int * current_chapter)
-  {
-  int ret = 0;
-  int64_t time_scaled = gavl_time_scale(list->timescale, time);
-  while(*current_chapter < list->num_chapters-1)
-    {
-    if(time_scaled >= list->chapters[(*current_chapter)+1].time)
-      {
-      (*current_chapter)++;
-      ret = 1;
-      }
-    else
-      break;
+    return GAVL_TIME_UNDEFINED;
     }
   return ret;
   }
 
-void gavl_chapter_list_dump(const gavl_chapter_list_t * list)
+int gavl_chapter_list_get_current(gavl_chapter_list_t * list,
+                                  gavl_time_t time)
   {
   int i;
-  char time_string[GAVL_TIME_STRING_LEN];
-  gavl_time_t t;
+  int timescale;
+  int64_t time_scaled;
+  gavl_array_t * arr = get_chapters(list);
   
-  fprintf(stderr, "Chapter list\n");
-  fprintf(stderr, "  Timescale: %d\n", list->timescale);
-  for(i = 0; i < list->num_chapters; i++)
+  if(!(timescale = gavl_chapter_list_get_timescale(list)))
+    return 0;
+  
+  time_scaled = gavl_time_scale(timescale, time);
+  
+  for(i = 0; i < arr->num_entries-1; i++)
     {
-    t = gavl_time_unscale(list->timescale, 
-                          list->chapters[i].time);
-    gavl_time_prettyprint(t, time_string);
-    fprintf(stderr, "  Chapter %d\n", i+1);
-    fprintf(stderr, "    Name: %s\n", list->chapters[i].name);
-    fprintf(stderr, "    Time: %" PRId64 " [%s]\n", list->chapters[i].time, time_string);
+    if(time_scaled < get_time(list, i))
+      return i;
     }
+  return arr->num_entries-1;
+  }
 
+void gavl_chapter_list_set_timescale(gavl_chapter_list_t * list, int timescale)
+  {
+  gavl_dictionary_set_int(list, GAVL_CHAPTERLIST_TIMESCALE, timescale);
+  }
+
+int gavl_chapter_list_get_timescale(const gavl_chapter_list_t * list)
+  {
+  int timescale = 0;
+  if(!gavl_dictionary_get_int(list, GAVL_CHAPTERLIST_TIMESCALE, &timescale))
+    return 0;
+  return timescale;
+  }
+
+int gavl_chapter_list_get_num(const gavl_chapter_list_t * list)
+  {
+  const gavl_array_t * arr;
+
+  if(!(arr = get_chapters_c(list)))
+    return 0;
+  return arr->num_entries;
+  }
+
+gavl_dictionary_t * gavl_chapter_list_get(gavl_chapter_list_t * list, int idx)
+  {
+  gavl_array_t * arr = get_chapters(list);
+
+  if((idx < 0) || (idx >= arr->num_entries) || (arr->entries[idx].type != GAVL_TYPE_DICTIONARY))
+    return NULL;
+  return &arr->entries[idx].v.dictionary;
+  }
+
+const gavl_dictionary_t * gavl_chapter_list_get_c(const gavl_chapter_list_t * list, int idx)
+  {
+  const gavl_array_t * arr;
+
+  if(!(arr = get_chapters_c(list)))
+    return NULL;
+
+  if((idx < 0) || (idx >= arr->num_entries) || (arr->entries[idx].type != GAVL_TYPE_DICTIONARY))
+    return NULL;
+  return &arr->entries[idx].v.dictionary;
   }

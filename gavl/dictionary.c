@@ -378,7 +378,7 @@ void gavl_dictionary_dump(const gavl_dictionary_t * m, int indent)
     
     for(j = 0; j < max_key_len - len; j++)
       fprintf(stderr, " ");
-    gavl_value_dump(&m->entries[i].v, indent + 2);
+    gavl_value_dump(&m->entries[i].v, 0);
 
     if(i < m->num_entries-1)
       fprintf(stderr, "\n");
@@ -525,7 +525,8 @@ gavl_dictionary_get_child(gavl_dictionary_t * d, const char * name)
     {
     if(d->entries[idx].v.type == GAVL_TYPE_DICTIONARY)
       return &d->entries[idx].v.v.dictionary;
-    else return NULL; // Should never happen if the nameing schemes are sane
+    else
+      return NULL; // Should never happen if the naming schemes are sane
     }
 
   gavl_value_init(&val);

@@ -311,10 +311,11 @@ void gavf_sync_index_dump(const gavf_sync_index_t * idx);
 
 /* Chapter list */
 
+#if 0
 gavl_chapter_list_t * gavf_read_chapter_list(gavf_io_t * io);
 int gavf_write_chapter_list(gavf_io_t * io,
                             const gavl_chapter_list_t * cl);
-
+#endif
 
 /* Global gavf structure */
 
@@ -332,7 +333,7 @@ struct gavf_s
   gavf_sync_index_t     si;
   gavf_packet_index_t   pi;
 
-  gavl_chapter_list_t * cl;
+  gavl_chapter_list_t cl;
   
   gavf_packet_header_t  pkthdr;
   int have_pkt_header;

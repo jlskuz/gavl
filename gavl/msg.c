@@ -279,7 +279,7 @@ const char * gavl_msg_get_arg_string_c(const gavl_msg_t * msg, int arg)
 /* Get/Set routines for structures */
 
 void gavl_msg_set_arg_audio_format(gavl_msg_t * msg, int arg,
-                                 const gavl_audio_format_t * format)
+                                   const gavl_audio_format_t * format)
   {
   gavl_audio_format_copy(gavl_value_set_audio_format(&msg->args[arg]), format);
   if(arg+1 > msg->num_args)
@@ -385,7 +385,7 @@ void gavl_msg_dump(const gavl_msg_t * msg, int indent)
   for(i = 0; i < msg->num_args; i++)
     {
     gavl_diprintf(indent + 2, "arg[%d]: %s: ", i, gavl_type_to_string(msg->args[i].type));
-    gavl_value_dump(&msg->args[i], indent+2);
+    gavl_value_dump(&msg->args[i], 0);
     gavl_dprintf("\n");
     }
   
