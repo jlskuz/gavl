@@ -84,7 +84,7 @@ int gavf_footer_check(gavf_t * g)
       }
     else if(!strncmp(sig, GAVF_TAG_CHAPTER_LIST, 8))
       {
-      if(!(g->cl = gavf_read_chapter_list(g->io)))
+      if(!gavl_dictionary_read(g->io, &g->cl))
         return 0;
       }
     }
@@ -136,10 +136,10 @@ int gavf_footer_write(gavf_t * g)
     if(!gavf_packet_index_write(g->io, &g->pi))
       return 0;
     }
-
-  if(g->cl)
+  
+  if(gavl_chapter_list_is_valid(&g->cl))
     {
-    if(!gavf_write_chapter_list(g->io, g->cl))
+    if(!gavl_dictionary_write(g->io, &g->cl))
       return 0;
     }
   

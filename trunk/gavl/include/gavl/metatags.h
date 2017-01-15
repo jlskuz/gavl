@@ -284,6 +284,8 @@
 
 #define GAVL_META_WIDTH  "w"
 #define GAVL_META_HEIGHT "h"
+#define GAVL_META_X      "x"
+#define GAVL_META_Y      "y"
 
 #define GAVL_META_NUM_CHILDREN       "NumChildren" // Number of children for container items
 

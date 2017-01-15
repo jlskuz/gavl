@@ -27,6 +27,7 @@ extern "C" {
 #endif
 
 #include <gavl/gavldefs.h>
+#include <gavl/value.h>
 
 /** \defgroup chapterlist Chapter list
  *  \brief Chapter list
@@ -42,7 +43,8 @@ extern "C" {
 /** \brief Chapter list
  *
  */
-  
+
+#if 0  
 typedef struct
   {
   uint32_t num_chapters;       //!< Number of chapters
@@ -53,28 +55,18 @@ typedef struct
     char * name;          //!< Name for this chapter (or NULL if unavailable)
     } * chapters;         //!< Chapters
   } gavl_chapter_list_t;
+#else
 
-/** \brief Create chapter list
- *  \param num_chapters Initial number of chapters
- */
+#define GAVL_CHAPTERLIST_CHAPTERS  "chap"
+#define GAVL_CHAPTERLIST_TIME      "time"
+#define GAVL_CHAPTERLIST_TIMESCALE "timescale"
 
-GAVL_PUBLIC
-gavl_chapter_list_t * gavl_chapter_list_create(int num_chapters);
-
-/** \brief Copy chapter list
- *  \param list Chapter list
- */
-
-GAVL_PUBLIC
-gavl_chapter_list_t * gavl_chapter_list_copy(const gavl_chapter_list_t * list);
+typedef gavl_dictionary_t gavl_chapter_list_t;
 
 
-/** \brief Destroy chapter list
- *  \param list A chapter list
- */
-
-GAVL_PUBLIC
-void gavl_chapter_list_destroy(gavl_chapter_list_t * list);
+#endif
+ 
+  
 /** \brief Insert a chapter into a chapter list
  *  \param list A chapter list
  *  \param index Position (starting with 0) where the new chapter will be placed
@@ -83,8 +75,8 @@ void gavl_chapter_list_destroy(gavl_chapter_list_t * list);
  */
 
 GAVL_PUBLIC
-void gavl_chapter_list_insert(gavl_chapter_list_t * list, int index,
-                            int64_t time, const char * name);
+gavl_dictionary_t * gavl_chapter_list_insert(gavl_chapter_list_t * list, int index,
+                                             int64_t time, const char * name);
 
 /** \brief Delete a chapter from a chapter list
  *  \param list A chapter list
@@ -93,7 +85,6 @@ void gavl_chapter_list_insert(gavl_chapter_list_t * list, int index,
 
 GAVL_PUBLIC
 void gavl_chapter_list_delete(gavl_chapter_list_t * list, int index);
-
 
 /** \brief Get current chapter
  *  \param list A chapter list
@@ -108,28 +99,27 @@ GAVL_PUBLIC
 int gavl_chapter_list_get_current(gavl_chapter_list_t * list,
                                  gavl_time_t time);
 
-/** \brief Get current chapter
- *  \param list A chapter list
- *  \param time Playback time
- *  \param current_chapter Returns the current chapter
- *  \returns 1 if the chapter changed, 0 else
- *
- *  Use this function during linear playback to signal a
- *  chapter change
- */
+
+/* Check if the list is valid at all */  
 
 GAVL_PUBLIC
-int gavl_chapter_list_changed(gavl_chapter_list_t * list,
-                              gavl_time_t time, int * current_chapter);
-
-/** \brief Dump a chapter list to stderr
- *  \param list A chapter list
- *
- *  Use this for debugging
- */
+int gavl_chapter_list_is_valid(const gavl_chapter_list_t * list);
 
 GAVL_PUBLIC
-void gavl_chapter_list_dump(const gavl_chapter_list_t * list);
+void gavl_chapter_list_set_timescale(gavl_chapter_list_t * list, int timescale);
+
+GAVL_PUBLIC
+int gavl_chapter_list_get_timescale(const gavl_chapter_list_t * list);
+
+GAVL_PUBLIC
+int gavl_chapter_list_get_num(const gavl_chapter_list_t * list);
+
+GAVL_PUBLIC
+gavl_dictionary_t * gavl_chapter_list_get(gavl_chapter_list_t * list, int idx);
+
+GAVL_PUBLIC
+const gavl_dictionary_t * gavl_chapter_list_get_c(const gavl_chapter_list_t * list, int idx);
+
   
 /**
  * @}

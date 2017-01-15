@@ -330,6 +330,9 @@ GAVL_PUBLIC
 void gavl_value_init(gavl_value_t * v);
 
 GAVL_PUBLIC
+void gavl_value_reset(gavl_value_t * v);
+
+GAVL_PUBLIC
 void gavl_value_append_nocopy(gavl_value_t * v, gavl_value_t * child);
 
 GAVL_PUBLIC
