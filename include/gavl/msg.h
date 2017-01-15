@@ -457,8 +457,8 @@ void gavl_msg_get_arg_video_format(gavl_msg_t * msg, int arg,
  */
 
 GAVL_PUBLIC
-void gavl_msg_set_arg_metadata(gavl_msg_t * msg, int arg,
-                               const gavl_metadata_t * m);
+void gavl_msg_set_arg_dictionary(gavl_msg_t * msg, int arg,
+                               const gavl_dictionary_t * m);
 
 /** \brief Get a matadata argument
  *  \param msg A message
@@ -469,12 +469,12 @@ void gavl_msg_set_arg_metadata(gavl_msg_t * msg, int arg,
  */
 
 GAVL_PUBLIC
-int gavl_msg_get_arg_metadata(gavl_msg_t * msg, int arg,
-                               gavl_metadata_t * m);
+int gavl_msg_get_arg_dictionary(gavl_msg_t * msg, int arg,
+                               gavl_dictionary_t * m);
 
 GAVL_PUBLIC
-int gavl_msg_get_arg_metadata_c(const gavl_msg_t * msg, int arg,
-                                gavl_metadata_t * m);
+int gavl_msg_get_arg_dictionary_c(const gavl_msg_t * msg, int arg,
+                                gavl_dictionary_t * m);
 
 
 GAVL_PUBLIC
@@ -492,10 +492,10 @@ gavl_msg_get_progress(gavl_msg_t * msg, char ** activity, float * perc);
 
 
 GAVL_PUBLIC void
-gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, int scale, const gavl_metadata_t * m);
+gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, int scale, const gavl_dictionary_t * m);
 
 GAVL_PUBLIC void
-gavl_msg_get_src_metadata(gavl_msg_t * msg, int64_t * time, int * scale, gavl_metadata_t * m);
+gavl_msg_get_src_metadata(gavl_msg_t * msg, int64_t * time, int * scale, gavl_dictionary_t * m);
 
 GAVL_PUBLIC void
 gavl_msg_set_src_aspect(gavl_msg_t * msg, int64_t time, int scale, int stream,

@@ -575,7 +575,7 @@ int gavf_io_cb(gavf_io_t * io, int type, const void * data)
 typedef struct
   {
   gavl_packet_source_t * psrc;
-  gavl_metadata_t m;
+  gavl_dictionary_t m;
   gavl_audio_frame_t * frame;
   gavl_dsp_context_t * dsp;
   gavl_audio_format_t fmt;
@@ -593,7 +593,7 @@ typedef struct
 typedef struct
   {
   gavl_packet_source_t * psrc;
-  gavl_metadata_t m;
+  gavl_dictionary_t m;
   gavl_video_frame_t * frame;
   gavl_dsp_context_t * dsp;
   gavl_video_format_t fmt;
@@ -702,7 +702,7 @@ static void video_sink_free(void * data)
 
 gavl_audio_source_t * gavl_audio_source_create_io(gavf_io_t * io,
                                                   const gavl_audio_format_t * fmt,
-                                                  const gavl_metadata_t * m)
+                                                  const gavl_dictionary_t * m)
   {
   gavl_audio_source_t * ret;
   int src_flags = 0;
@@ -755,13 +755,13 @@ audio_sink_put(void * data, gavl_audio_frame_t * f)
 
 gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
                                               gavl_audio_format_t * fmt,
-                                              gavl_metadata_t * m)
+                                              gavl_dictionary_t * m)
   {
   gavl_audio_sink_t * ret;
   audio_sink_priv_t * priv = calloc(1, sizeof(*priv));
   gavl_audio_format_copy(&priv->fmt, fmt);
 
-  gavl_metadata_set_endian(m);
+  gavl_dictionary_set_string_endian(m);
   
   priv->psink = gavl_packet_sink_create_io(io,
                                            fmt->samples_per_frame,
@@ -774,7 +774,7 @@ gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
   
 gavl_video_source_t * gavl_video_source_create_io(gavf_io_t * io,
                                                   const gavl_video_format_t * fmt,
-                                                  const gavl_metadata_t * m)
+                                                  const gavl_dictionary_t * m)
   {
   gavl_video_source_t * ret;
   int src_flags = 0;
@@ -791,7 +791,7 @@ gavl_video_source_t * gavl_video_source_create_io(gavf_io_t * io,
     }
 
   gavl_video_format_copy(&priv->fmt, fmt);
-  gavl_metadata_copy(&priv->m, m);
+  gavl_dictionary_copy(&priv->m, m);
   
   priv->psrc = gavl_packet_source_create_io(io, default_duration,
                                             packet_flags);
@@ -837,7 +837,7 @@ video_sink_put(void * data, gavl_video_frame_t * f)
 
 gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,
                                               gavl_video_format_t * fmt,
-                                              gavl_metadata_t * m)
+                                              gavl_dictionary_t * m)
   {
   gavl_video_sink_t * ret;
   int default_duration;
@@ -845,7 +845,7 @@ gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,
 
   video_sink_priv_t * priv = calloc(1, sizeof(*priv));
 
-  gavl_metadata_set_endian(m);
+  gavl_dictionary_set_string_endian(m);
   
   if(fmt->framerate_mode == GAVL_FRAMERATE_CONSTANT)
     default_duration = fmt->frame_duration;

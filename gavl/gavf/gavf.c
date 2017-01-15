@@ -417,14 +417,14 @@ static void set_implicit_stream_fields(gavf_stream_t * s)
 
   var = gavl_compression_get_mimetype(&s->h->ci);
   if(var)
-    gavl_metadata_set(&s->h->m, GAVL_META_MIMETYPE, var);
+    gavl_dictionary_set_string(&s->h->m, GAVL_META_MIMETYPE, var);
   
   var = gavl_compression_get_long_name(s->h->ci.id);
   if(var)
-    gavl_metadata_set(&s->h->m, GAVL_META_FORMAT, var);
+    gavl_dictionary_set_string(&s->h->m, GAVL_META_FORMAT, var);
 
   if(s->h->ci.bitrate)
-    gavl_metadata_set_int(&s->h->m, GAVL_META_BITRATE, s->h->ci.bitrate);
+    gavl_dictionary_set_string_int(&s->h->m, GAVL_META_BITRATE, s->h->ci.bitrate);
   }
 
 /* Streams */
@@ -452,7 +452,7 @@ static void gavf_stream_init_audio(gavf_t * g, gavf_stream_t * s)
     /* Create packet sink */
     gavf_stream_create_packet_sink(g, s);
     if(s->h->ci.id == GAVL_CODEC_ID_NONE)
-      gavl_metadata_set_endian(&s->h->m);
+      gavl_dictionary_set_string_endian(&s->h->m);
     }
   else
     {
@@ -519,7 +519,7 @@ static void gavf_stream_init_video(gavf_t * g, gavf_stream_t * s,
     /* Create packet sink */
     gavf_stream_create_packet_sink(g, s);
     if(s->h->ci.id == GAVL_CODEC_ID_NONE)
-      gavl_metadata_set_endian(&s->h->m);
+      gavl_dictionary_set_string_endian(&s->h->m);
     }
   else
     {
@@ -803,7 +803,7 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
     calc_pts_offset(g);
 
   if(gavf_program_header_get_duration(&g->ph, NULL, &duration))
-    gavl_metadata_set_long(&g->ph.m, GAVL_META_APPROX_DURATION, duration);
+    gavl_dictionary_set_string_long(&g->ph.m, GAVL_META_APPROX_DURATION, duration);
   
   return 1;
   }
@@ -903,13 +903,13 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
       if(g->opt.metadata_cb ||
          (g->opt.flags & GAVF_OPT_FLAG_DUMP_METADATA))
         {
-        gavl_metadata_t m;
-        gavl_metadata_init(&m);
+        gavl_dictionary_t m;
+        gavl_dictionary_init(&m);
         
         gavl_buffer_reset(&g->meta_buf);
         
         if(!gavf_io_read_buffer(g->io, &g->meta_buf) ||
-           !gavf_read_metadata(&g->meta_io, &m))
+           !gavl_dictionary_read(&g->meta_io, &m))
           {
 #ifdef DUMP_EOF
           fprintf(stderr, "EOF 4\n");
@@ -918,7 +918,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
           }
         if(!gavl_metadata_equal(&g->metadata, &m))
           {
-          gavl_metadata_free(&g->metadata);
+          gavl_dictionary_free(&g->metadata);
           memcpy(&g->metadata, &m, sizeof(m));
 
           if(g->opt.metadata_cb)
@@ -931,11 +931,11 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
           if(g->opt.flags & GAVF_OPT_FLAG_DUMP_METADATA)
             {
             fprintf(stderr, "Got inline metadata\n");
-            gavl_metadata_dump(&g->metadata, 2);
+            gavl_dictionary_dump(&g->metadata, 2);
             }
           }
         else
-          gavl_metadata_free(&m);
+          gavl_dictionary_free(&m);
         }
       else
         {
@@ -986,7 +986,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
   return NULL;
   }
 
-int gavf_update_metadata(gavf_t * g, const gavl_metadata_t * m)
+int gavf_update_metadata(gavf_t * g, const gavl_dictionary_t * m)
   {
   if(gavl_metadata_equal(&g->metadata, m))
     return 1;
@@ -996,12 +996,12 @@ int gavf_update_metadata(gavf_t * g, const gavl_metadata_t * m)
 #if 0
     fprintf(stderr, "Got inline metadata\n");
 #endif
-    gavl_metadata_dump(m, 2);
+    gavl_dictionary_dump(m, 2);
     }
   
-  gavl_metadata_free(&g->metadata);
-  gavl_metadata_init(&g->metadata);
-  gavl_metadata_copy(&g->metadata, m);
+  gavl_dictionary_free(&g->metadata);
+  gavl_dictionary_init(&g->metadata);
+  gavl_dictionary_copy(&g->metadata, m);
 
   /*
    *  Write metadata to buffer.
@@ -1009,7 +1009,7 @@ int gavf_update_metadata(gavf_t * g, const gavl_metadata_t * m)
    */
 
   gavl_buffer_reset(&g->meta_buf);
-  if(!gavf_write_metadata(&g->meta_io, &g->metadata))
+  if(!gavl_dictionary_write(&g->meta_io, &g->metadata))
     return 0;
   
   return 1;
@@ -1133,7 +1133,7 @@ const int64_t * gavf_seek(gavf_t * g, int64_t time, int scale)
 /* Write support */
 
 int gavf_open_write(gavf_t * g, gavf_io_t * io,
-                    const gavl_metadata_t * m,
+                    const gavl_dictionary_t * m,
                     const gavl_chapter_list_t * cl)
   {
   g->io = io;
@@ -1145,7 +1145,7 @@ int gavf_open_write(gavf_t * g, gavf_io_t * io,
   gavf_io_init_buf_write(&g->meta_io, &g->meta_buf);
 
   if(m)
-    gavl_metadata_copy(&g->ph.m, m);
+    gavl_dictionary_copy(&g->ph.m, m);
 
   if(cl)
     {
@@ -1159,7 +1159,7 @@ int gavf_open_write(gavf_t * g, gavf_io_t * io,
 int gavf_add_audio_stream(gavf_t * g,
                           const gavl_compression_info_t * ci,
                           const gavl_audio_format_t * format,
-                          const gavl_metadata_t * m)
+                          const gavl_dictionary_t * m)
   {
   return gavf_program_header_add_audio_stream(&g->ph, ci, format, m);
   }
@@ -1167,14 +1167,14 @@ int gavf_add_audio_stream(gavf_t * g,
 int gavf_add_video_stream(gavf_t * g,
                           const gavl_compression_info_t * ci,
                           const gavl_video_format_t * format,
-                          const gavl_metadata_t * m)
+                          const gavl_dictionary_t * m)
   {
   return gavf_program_header_add_video_stream(&g->ph, ci, format, m);
   }
 
 int gavf_add_text_stream(gavf_t * g,
                          uint32_t timescale,
-                         const gavl_metadata_t * m)
+                         const gavl_dictionary_t * m)
   {
   return gavf_program_header_add_text_stream(&g->ph, timescale, m);
   }
@@ -1183,7 +1183,7 @@ int gavf_add_text_stream(gavf_t * g,
 int gavf_add_overlay_stream(gavf_t * g,
                             const gavl_compression_info_t * ci,
                             const gavl_video_format_t * format,
-                            const gavl_metadata_t * m)
+                            const gavl_dictionary_t * m)
   {
   return gavf_program_header_add_overlay_stream(&g->ph, ci, format, m);
   }
@@ -1220,7 +1220,7 @@ int gavf_start(gavf_t * g)
     }
   
   gavl_metadata_delete_implicit_fields(&g->ph.m);
-  gavl_metadata_set(&g->ph.m, GAVL_META_SOFTWARE, PACKAGE"-"VERSION);
+  gavl_dictionary_set_string(&g->ph.m, GAVL_META_SOFTWARE, PACKAGE"-"VERSION);
   
   if(g->opt.flags & GAVF_OPT_FLAG_DUMP_HEADERS)
     gavf_program_header_dump(&g->ph);
@@ -1257,7 +1257,7 @@ int gavf_write_video_frame(gavf_t * g,
 
 void gavf_packet_to_video_frame(gavl_packet_t * p, gavl_video_frame_t * frame,
                                 const gavl_video_format_t * format,
-                                const gavl_metadata_t * m,
+                                const gavl_dictionary_t * m,
                                 gavl_dsp_context_t ** ctx)
   {
   frame->timestamp = p->pts;
@@ -1392,7 +1392,7 @@ int gavf_write_audio_frame(gavf_t * g, int stream, gavl_audio_frame_t * frame)
 void gavf_packet_to_audio_frame(gavl_packet_t * p,
                                 gavl_audio_frame_t * frame,
                                 const gavl_audio_format_t * format,
-                                const gavl_metadata_t * m,
+                                const gavl_dictionary_t * m,
                                 gavl_dsp_context_t ** ctx)
   {
   frame->valid_samples = p->duration;
@@ -1464,7 +1464,7 @@ void gavf_close(gavf_t * g)
     gavf_io_destroy(g->pkt_io);
   
   gavl_buffer_free(&g->meta_buf);
-  gavl_metadata_free(&g->metadata);
+  gavl_dictionary_free(&g->metadata);
   
   free(g);
   }

@@ -16,7 +16,7 @@
 static const uint8_t sig[8] = "GAVLIMAG";
 
 int gavl_image_write_header(gavf_io_t * io,
-                            const gavl_metadata_t * m,
+                            const gavl_dictionary_t * m,
                             const gavl_video_format_t * v)
   {
   if((gavf_io_write_data(io, sig, 8) < 8))
@@ -24,14 +24,14 @@ int gavl_image_write_header(gavf_io_t * io,
 
   if(m)
     {
-    if(!gavf_write_metadata(io, m))
+    if(!gavl_dictionary_write(io, m))
       return 0;
     }
   else
     {
-    gavl_metadata_t m1;
-    gavl_metadata_init(&m1);
-    if(!gavf_write_metadata(io, &m1))
+    gavl_dictionary_t m1;
+    gavl_dictionary_init(&m1);
+    if(!gavl_dictionary_write(io, &m1))
       return 0;
     }
   
@@ -51,13 +51,13 @@ int gavl_image_write_image(gavf_io_t * io,
   }
 
 int gavl_image_read_header(gavf_io_t * io,
-                           gavl_metadata_t * m,
+                           gavl_dictionary_t * m,
                            gavl_video_format_t * v)
   {
   uint8_t sig_test[8];
   if((gavf_io_read_data(io, sig_test, 8) < 8) ||
      memcmp(sig_test, sig, 8) ||
-     !gavf_read_metadata(io, m) ||
+     !gavl_dictionary_read(io, m) ||
      !gavf_read_video_format(io, v))
     return 0;
   return 1;

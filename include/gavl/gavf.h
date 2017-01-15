@@ -246,13 +246,13 @@ GAVL_PUBLIC
 void gavf_stream_footer_apply_audio(gavf_stream_footer_t * f, 
                                     gavl_audio_format_t * fmt,
                                     gavl_compression_info_t * ci,
-                                    gavl_metadata_t * m);
+                                    gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 void gavf_stream_footer_apply_video(gavf_stream_footer_t * f, 
                                     gavl_video_format_t * fmt,
                                     gavl_compression_info_t * ci,
-                                    gavl_metadata_t * m);
+                                    gavl_dictionary_t * m);
 
 typedef struct
   {
@@ -273,7 +273,7 @@ typedef struct
     
     } format;
 
-  gavl_metadata_t m;
+  gavl_dictionary_t m;
   gavf_stream_footer_t foot;
   } gavf_stream_header_t;
 
@@ -285,7 +285,7 @@ typedef struct
   {
   uint32_t num_streams;
   gavf_stream_header_t * streams;
-  gavl_metadata_t m;
+  gavl_dictionary_t m;
   } gavf_program_header_t;
 
 GAVL_PUBLIC
@@ -340,7 +340,7 @@ void gavf_options_set_sync_distance(gavf_options_t *,
 
 GAVL_PUBLIC
 void gavf_options_set_metadata_callback(gavf_options_t *, 
-                                        void (*cb)(void*,const gavl_metadata_t*),
+                                        void (*cb)(void*,const gavl_dictionary_t*),
                                         void *cb_priv);
 
 /* General functions */
@@ -409,13 +409,13 @@ const int64_t * gavf_seek(gavf_t * gavf, int64_t time, int scale);
 GAVL_PUBLIC
 void gavf_packet_to_video_frame(gavl_packet_t * p, gavl_video_frame_t * frame,
                                 const gavl_video_format_t * format,
-                                const gavl_metadata_t * m,
+                                const gavl_dictionary_t * m,
                                 gavl_dsp_context_t ** ctx);
 
 GAVL_PUBLIC
 void gavf_packet_to_audio_frame(gavl_packet_t * p, gavl_audio_frame_t * frame,
                                 const gavl_audio_format_t * format,
-                                const gavl_metadata_t * m,
+                                const gavl_dictionary_t * m,
                                 gavl_dsp_context_t ** ctx);
 
 /* frame must be allocated with the maximum size already! */
@@ -449,7 +449,7 @@ void gavf_shrink_audio_frame(gavl_audio_frame_t * f,
 
 GAVL_PUBLIC
 int gavf_open_write(gavf_t * g, gavf_io_t * io,
-                    const gavl_metadata_t * m,
+                    const gavl_dictionary_t * m,
                     const gavl_chapter_list_t * cl);
 
 /*
@@ -461,24 +461,24 @@ GAVL_PUBLIC
 int gavf_add_audio_stream(gavf_t * g,
                           const gavl_compression_info_t * ci,
                           const gavl_audio_format_t * format,
-                          const gavl_metadata_t * m);
+                          const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 int gavf_add_video_stream(gavf_t * g,
                           const gavl_compression_info_t * ci,
                           const gavl_video_format_t * format,
-                          const gavl_metadata_t * m);
+                          const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 int gavf_add_text_stream(gavf_t * g,
                          uint32_t timescale,
-                         const gavl_metadata_t * m);
+                         const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 int gavf_add_overlay_stream(gavf_t * g,
                             const gavl_compression_info_t * ci,
                             const gavl_video_format_t * format,
-                            const gavl_metadata_t * m);
+                            const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 void gavf_add_streams(gavf_t * g, const gavf_program_header_t * ph);
@@ -497,7 +497,7 @@ GAVL_PUBLIC
 int gavf_write_audio_frame(gavf_t *, int stream, gavl_audio_frame_t * frame);
 
 GAVL_PUBLIC
-int gavf_update_metadata(gavf_t *, const gavl_metadata_t * m);
+int gavf_update_metadata(gavf_t *, const gavl_dictionary_t * m);
 
 GAVL_PUBLIC gavl_packet_sink_t *
 gavf_get_packet_sink(gavf_t *, uint32_t id);
@@ -533,7 +533,7 @@ int gavf_get_max_video_packet_size(const gavl_video_format_t * fmt,
 
 GAVL_PUBLIC
 int gavl_image_write_header(gavf_io_t * io,
-                            const gavl_metadata_t * m,
+                            const gavl_dictionary_t * m,
                             const gavl_video_format_t * v);
 
 GAVL_PUBLIC
@@ -543,7 +543,7 @@ int gavl_image_write_image(gavf_io_t * io,
 
 GAVL_PUBLIC
 int gavl_image_read_header(gavf_io_t * io,
-                           gavl_metadata_t * m,
+                           gavl_dictionary_t * m,
                            gavl_video_format_t * v);
 
 GAVL_PUBLIC
@@ -566,10 +566,10 @@ GAVL_PUBLIC
 uint8_t * gavl_video_format_to_buffer(int * len, const gavl_video_format_t * fmt);
 
 GAVL_PUBLIC
-int gavl_metadata_from_buffer(const uint8_t * buf, int len, gavl_metadata_t * fmt);
+int gavl_metadata_from_buffer(const uint8_t * buf, int len, gavl_dictionary_t * fmt);
   
 GAVL_PUBLIC
-uint8_t * gavl_metadata_to_buffer(int * len, const gavl_metadata_t * fmt);
+uint8_t * gavl_dictionary_to_buffer(int * len, const gavl_dictionary_t * fmt);
 
 GAVL_PUBLIC
 int gavl_compression_info_from_buffer(const uint8_t * buf, int len, gavl_compression_info_t * fmt);
@@ -608,10 +608,10 @@ int gavf_write_compression_info(gavf_io_t * io,
 /* Metadata */
 
 GAVL_PUBLIC
-int gavf_read_metadata(gavf_io_t * io, gavl_metadata_t * ci);
+int gavl_dictionary_read(gavf_io_t * io, gavl_dictionary_t * ci);
 
 GAVL_PUBLIC
-int gavf_write_metadata(gavf_io_t * io, const gavl_metadata_t * ci);
+int gavl_dictionary_write(gavf_io_t * io, const gavl_dictionary_t * ci);
 
 /* Packet */
 
@@ -637,22 +637,22 @@ int gavf_write_gavl_packet(gavf_io_t * io,
 GAVL_PUBLIC
 gavl_audio_source_t * gavl_audio_source_create_io(gavf_io_t * io,
                                                   const gavl_audio_format_t * fmt,
-                                                  const gavl_metadata_t * m);
+                                                  const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 gavl_audio_sink_t * gavl_audio_sink_create_io(gavf_io_t * io,
                                               gavl_audio_format_t * fmt,
-                                              gavl_metadata_t * m);
+                                              gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 gavl_video_source_t * gavl_video_source_create_io(gavf_io_t * io,
                                                   const gavl_video_format_t * fmt,
-                                                  const gavl_metadata_t * m);
+                                                  const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 gavl_video_sink_t * gavl_video_sink_create_io(gavf_io_t * io,
                                               gavl_video_format_t * fmt,
-                                              gavl_metadata_t * m);
+                                              gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 gavl_packet_source_t * gavl_packet_source_create_io(gavf_io_t * io,

@@ -97,8 +97,7 @@ void gavl_chapter_list_delete(gavl_chapter_list_t * list, int index);
 
 GAVL_PUBLIC
 int gavl_chapter_list_get_current(gavl_chapter_list_t * list,
-                                 gavl_time_t time);
-
+                                  gavl_time_t time);
 
 /* Check if the list is valid at all */  
 
@@ -118,7 +117,12 @@ GAVL_PUBLIC
 gavl_dictionary_t * gavl_chapter_list_get(gavl_chapter_list_t * list, int idx);
 
 GAVL_PUBLIC
+int64_t gavl_chapter_list_get_time(gavl_chapter_list_t * list, int idx);
+  
+GAVL_PUBLIC
 const gavl_dictionary_t * gavl_chapter_list_get_c(const gavl_chapter_list_t * list, int idx);
+
+int64_t gavl_chapter_list_get_time(gavl_chapter_list_t * list, int idx);
 
   
 /**

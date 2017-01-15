@@ -6,7 +6,7 @@ int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h)
      !gavf_io_read_uint32v(io, &h->id))
     return 0;
 
-  if(!gavf_read_metadata(io, &h->m))
+  if(!gavl_dictionary_read(io, &h->m))
     return 0;
   
   switch(h->type)
@@ -62,7 +62,7 @@ int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h)
      !gavf_io_write_uint32v(io, h->id))
     return 0;
 
-  if(!gavf_write_metadata(io, &h->m))
+  if(!gavl_dictionary_write(io, &h->m))
     return 0;
   
   switch(h->type)
@@ -89,7 +89,7 @@ int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h)
 void gavf_stream_header_free(gavf_stream_header_t * h)
   {
   gavl_compression_info_free(&h->ci);
-  gavl_metadata_free(&h->m);
+  gavl_dictionary_free(&h->m);
   }
 
 void gavf_stream_header_dump(const gavf_stream_header_t * h)
@@ -116,7 +116,7 @@ void gavf_stream_header_dump(const gavf_stream_header_t * h)
       break;
     }
   fprintf(stderr, "    Metadata:\n");
-  gavl_metadata_dump(&h->m, 6);
+  gavl_dictionary_dump(&h->m, 6);
   
   fprintf(stderr, "    Footer: ");
   if(h->foot.pts_start == GAVL_TIME_UNDEFINED)

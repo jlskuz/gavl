@@ -72,7 +72,7 @@ typedef struct
 
 typedef struct
   {
-  gavl_metadata_t   metadata;        //!< Metadata (optional)
+  gavl_dictionary_t   metadata;        //!< Metadata (optional)
   
   int num_audio_streams;             //!< Number of logical audio streams
   gavl_edl_stream_t * audio_streams; //!< Logical audio streams
