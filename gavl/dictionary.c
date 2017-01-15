@@ -151,7 +151,7 @@ int gavl_dictionary_set_long(gavl_dictionary_t * d,
   {
   gavl_value_t v;
   gavl_value_init(&v);
-  gavl_value_set_int(&v, val);
+  gavl_value_set_long(&v, val);
   return gavl_dictionary_set_nocopy(d, name, &v);
   }
 

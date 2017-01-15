@@ -360,9 +360,6 @@ GAVL_PUBLIC
 int gavf_open_read(gavf_t * g, gavf_io_t * io);
 
 GAVL_PUBLIC
-const gavl_chapter_list_t * gavf_get_chapter_list(gavf_t * g);
-
-GAVL_PUBLIC
 gavf_program_header_t * gavf_get_program_header(gavf_t *);
 
 GAVL_PUBLIC
@@ -449,8 +446,7 @@ void gavf_shrink_audio_frame(gavl_audio_frame_t * f,
 
 GAVL_PUBLIC
 int gavf_open_write(gavf_t * g, gavf_io_t * io,
-                    const gavl_dictionary_t * m,
-                    const gavl_chapter_list_t * cl);
+                    const gavl_dictionary_t * m);
 
 /*
  *  Return value: >= 0 is the stream index passed to gavf_write_packet()

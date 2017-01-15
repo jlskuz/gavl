@@ -248,7 +248,6 @@ int gavf_extension_write(gavf_io_t * io, uint32_t key, uint32_t len,
 #define GAVF_TAG_SYNC_HEADER    "GAVFSYNC"
 #define GAVF_TAG_SYNC_INDEX     "GAVFSIDX"
 #define GAVF_TAG_PACKET_INDEX   "GAVFPIDX"
-#define GAVF_TAG_CHAPTER_LIST   "GAVFCHAP"
 #define GAVF_TAG_FOOTER         "GAVFFOOT"
 
 #define GAVF_TAG_PACKET_HEADER    "P"
@@ -309,13 +308,6 @@ int gavf_sync_index_write(gavf_io_t * io, const gavf_sync_index_t * idx);
 void gavf_sync_index_free(gavf_sync_index_t * idx);
 void gavf_sync_index_dump(const gavf_sync_index_t * idx);
 
-/* Chapter list */
-
-#if 0
-gavl_chapter_list_t * gavf_read_chapter_list(gavf_io_t * io);
-int gavf_write_chapter_list(gavf_io_t * io,
-                            const gavl_chapter_list_t * cl);
-#endif
 
 /* Global gavf structure */
 
@@ -333,8 +325,6 @@ struct gavf_s
   gavf_sync_index_t     si;
   gavf_packet_index_t   pi;
 
-  gavl_chapter_list_t cl;
-  
   gavf_packet_header_t  pkthdr;
   int have_pkt_header;
   

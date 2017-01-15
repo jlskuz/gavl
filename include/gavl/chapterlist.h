@@ -57,9 +57,10 @@ typedef struct
   } gavl_chapter_list_t;
 #else
 
-#define GAVL_CHAPTERLIST_CHAPTERS  "chap"
-#define GAVL_CHAPTERLIST_TIME      "time"
-#define GAVL_CHAPTERLIST_TIMESCALE "timescale"
+#define GAVL_CHAPTERLIST_CHAPTERLIST  "chapterlist"
+#define GAVL_CHAPTERLIST_CHAPTERS     "chap"
+#define GAVL_CHAPTERLIST_TIME         "time"
+#define GAVL_CHAPTERLIST_TIMESCALE    "timescale"
 
 typedef gavl_dictionary_t gavl_chapter_list_t;
 
@@ -96,7 +97,7 @@ void gavl_chapter_list_delete(gavl_chapter_list_t * list, int index);
  */
 
 GAVL_PUBLIC
-int gavl_chapter_list_get_current(gavl_chapter_list_t * list,
+int gavl_chapter_list_get_current(const gavl_chapter_list_t * list,
                                   gavl_time_t time);
 
 /* Check if the list is valid at all */  
@@ -115,14 +116,27 @@ int gavl_chapter_list_get_num(const gavl_chapter_list_t * list);
 
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_chapter_list_get(gavl_chapter_list_t * list, int idx);
-
-GAVL_PUBLIC
-int64_t gavl_chapter_list_get_time(gavl_chapter_list_t * list, int idx);
   
 GAVL_PUBLIC
 const gavl_dictionary_t * gavl_chapter_list_get_c(const gavl_chapter_list_t * list, int idx);
 
-int64_t gavl_chapter_list_get_time(gavl_chapter_list_t * list, int idx);
+GAVL_PUBLIC
+int64_t gavl_chapter_list_get_time(const gavl_chapter_list_t * list, int idx);
+
+GAVL_PUBLIC
+const char * gavl_chapter_list_get_label(const gavl_chapter_list_t * list, int idx);
+
+GAVL_PUBLIC
+gavl_dictionary_t *
+gavl_dictionary_add_chapter_list(gavl_dictionary_t * m, int timescale);
+  
+GAVL_PUBLIC
+gavl_dictionary_t *
+gavl_dictionary_get_chapter_list(gavl_dictionary_t * m);
+
+GAVL_PUBLIC
+const gavl_dictionary_t *
+gavl_dictionary_get_chapter_list_c(const gavl_dictionary_t * m);
 
   
 /**

@@ -82,11 +82,6 @@ int gavf_footer_check(gavf_t * g)
       if(gavf_packet_index_read(g->io, &g->pi))
         g->opt.flags |= GAVF_OPT_FLAG_PACKET_INDEX;
       }
-    else if(!strncmp(sig, GAVF_TAG_CHAPTER_LIST, 8))
-      {
-      if(!gavl_dictionary_read(g->io, &g->cl))
-        return 0;
-      }
     }
   
   end:
@@ -134,12 +129,6 @@ int gavf_footer_write(gavf_t * g)
     if(g->opt.flags & GAVF_OPT_FLAG_DUMP_INDICES)
       gavf_packet_index_dump(&g->pi);
     if(!gavf_packet_index_write(g->io, &g->pi))
-      return 0;
-    }
-  
-  if(gavl_chapter_list_is_valid(&g->cl))
-    {
-    if(!gavl_dictionary_write(g->io, &g->cl))
       return 0;
     }
   
