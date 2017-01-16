@@ -424,7 +424,7 @@ static void set_implicit_stream_fields(gavf_stream_t * s)
     gavl_dictionary_set_string(&s->h->m, GAVL_META_FORMAT, var);
 
   if(s->h->ci.bitrate)
-    gavl_dictionary_set_string_int(&s->h->m, GAVL_META_BITRATE, s->h->ci.bitrate);
+    gavl_dictionary_set_int(&s->h->m, GAVL_META_BITRATE, s->h->ci.bitrate);
   }
 
 /* Streams */
@@ -797,7 +797,7 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
     calc_pts_offset(g);
 
   if(gavf_program_header_get_duration(&g->ph, NULL, &duration))
-    gavl_dictionary_set_string_long(&g->ph.m, GAVL_META_APPROX_DURATION, duration);
+    gavl_dictionary_set_long(&g->ph.m, GAVL_META_APPROX_DURATION, duration);
   
   return 1;
   }

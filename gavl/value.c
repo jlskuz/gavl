@@ -614,7 +614,21 @@ const gavl_dictionary_t * gavl_value_get_dictionary(const gavl_value_t * v)
   return &v->v.dictionary;
   }
 
+gavl_dictionary_t * gavl_value_get_dictionary_nc(gavl_value_t * v)
+  {
+  if(v->type != GAVL_TYPE_DICTIONARY)
+    return NULL;
+  return &v->v.dictionary;
+  }
+
 const gavl_array_t * gavl_value_get_array(const gavl_value_t * v)
+  {
+  if(v->type != GAVL_TYPE_ARRAY)
+    return NULL;
+  return &v->v.array;
+  }
+
+gavl_array_t * gavl_value_get_array_nc(gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_ARRAY)
     return NULL;

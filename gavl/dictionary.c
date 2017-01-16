@@ -232,6 +232,14 @@ int gavl_dictionary_get_int(const gavl_dictionary_t * d, const char * name, int 
   return gavl_value_get_int(val, ret);
   }
 
+int gavl_dictionary_get_int_i(const gavl_dictionary_t * d, const char * name, int * ret)
+  {
+  const gavl_value_t * val;
+  if(!(val = gavl_dictionary_get_i(d, name)))
+    return 0;
+  return gavl_value_get_int(val, ret);
+  }
+
 int gavl_dictionary_get_long(const gavl_dictionary_t * d, const char * name, int64_t * ret)
   {
   const gavl_value_t * val;
@@ -254,6 +262,14 @@ const gavl_array_t * gavl_dictionary_get_array(const gavl_dictionary_t * d, cons
   if(!(val = gavl_dictionary_get(d, name)))
     return NULL;
   return gavl_value_get_array(val);
+  }
+
+gavl_array_t * gavl_dictionary_get_array_nc(gavl_dictionary_t * d, const char * name)
+  {
+  gavl_value_t * val;
+  if(!(val = gavl_dictionary_get_nc(d, name)))
+    return NULL;
+  return gavl_value_get_array_nc(val);
   }
 
 const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_t * d, const char * name)
