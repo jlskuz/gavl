@@ -187,6 +187,10 @@ GAVL_PUBLIC
 int gavl_dictionary_get_int(const gavl_dictionary_t * d, const char * name, int * ret);
 
 GAVL_PUBLIC
+int gavl_dictionary_get_int_i(const gavl_dictionary_t * d, const char * name, int * ret);
+
+
+GAVL_PUBLIC
 int gavl_dictionary_get_long(const gavl_dictionary_t * d, const char * name, int64_t * ret);
 
 GAVL_PUBLIC
@@ -194,6 +198,9 @@ int gavl_dictionary_get_float(const gavl_dictionary_t * d, const char * name, do
 
 GAVL_PUBLIC
 const gavl_array_t * gavl_dictionary_get_array(const gavl_dictionary_t * d, const char * name);
+
+GAVL_PUBLIC
+gavl_array_t * gavl_dictionary_get_array_nc(gavl_dictionary_t * d, const char * name);
 
 GAVL_PUBLIC
 const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_t * d, const char * name);
@@ -398,10 +405,19 @@ GAVL_PUBLIC
 const gavl_audio_format_t * gavl_value_get_audio_format(const gavl_value_t * v);
 GAVL_PUBLIC
 const gavl_video_format_t * gavl_value_get_video_format(const gavl_value_t * v);
+
 GAVL_PUBLIC
 const gavl_dictionary_t * gavl_value_get_dictionary(const gavl_value_t * v);
+
+GAVL_PUBLIC
+gavl_dictionary_t * gavl_value_get_dictionary_nc(gavl_value_t * v);
+
 GAVL_PUBLIC
 const gavl_array_t * gavl_value_get_array(const gavl_value_t * v);
+
+GAVL_PUBLIC
+gavl_array_t * gavl_value_get_array_nc(gavl_value_t * v);
+
 
 GAVL_PUBLIC
 const double * gavl_value_get_position(const gavl_value_t * v);

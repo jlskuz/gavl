@@ -212,7 +212,7 @@ static void footer_apply_common(gavf_stream_footer_t * f,
       (double)(f->total_bytes) / 
       (gavl_time_to_seconds(gavl_time_unscale(timescale,
                                               f->pts_end-f->pts_start)) * 125.0);
-    gavl_dictionary_set_string_float(m, GAVL_META_AVG_FRAMERATE, avg_rate);
+    gavl_dictionary_set_float(m, GAVL_META_AVG_FRAMERATE, avg_rate);
     }
   
   }
@@ -253,7 +253,7 @@ void gavf_stream_footer_apply_video(gavf_stream_footer_t * f,
         gavl_time_to_seconds(gavl_time_unscale(fmt->timescale,
                                                f->pts_end-f->pts_start));
       
-      gavl_dictionary_set_string_float(m, GAVL_META_AVG_FRAMERATE, avg_rate);
+      gavl_dictionary_set_float(m, GAVL_META_AVG_FRAMERATE, avg_rate);
       }
     }
   }

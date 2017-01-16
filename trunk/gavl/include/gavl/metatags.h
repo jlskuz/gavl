@@ -299,6 +299,17 @@
 #define GAVL_META_SELECTED           "Selected"    // Track is selected in a GUI
 
 
+#define GAVL_META_STREAM_PTS_START "pts_start"
+#define GAVL_META_STREAM_DURATION  "duration"
+#define GAVL_META_STREAM_RAWSIZE   "rawsize"
+#define GAVL_META_STREAM_FORMAT    "fmt"
+#define GAVL_META_STREAM_TIMESCALE "timescale"
+
+#define GAVL_META_AUDIO_STREAMS    "astreams"
+#define GAVL_META_VIDEO_STREAMS    "vstreams"
+#define GAVL_META_TEXT_STREAMS     "tstreams"
+#define GAVL_META_OVERLAY_STREAMS  "ostreams"
+
 /**
  *
  *
