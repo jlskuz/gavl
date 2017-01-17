@@ -451,6 +451,7 @@ int gavl_value_get_int(const gavl_value_t * v, int * val)
       if(rest != end)
         return 0;
       }
+      break;
     default:
       return 0;
       break;
