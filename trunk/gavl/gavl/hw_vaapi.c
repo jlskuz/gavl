@@ -36,8 +36,10 @@ static struct
   }
 formats[] =
   {
+#if 0
     { GAVL_RGB_32,     VA_FOURCC('R','G','B','X'), VA_RT_FORMAT_RGB32 },
     { GAVL_BGR_32,     VA_FOURCC('B','G','R','X'), VA_RT_FORMAT_RGB32 },
+#endif
     { GAVL_RGBA_32,    VA_FOURCC('R','G','B','A'), VA_RT_FORMAT_RGB32 },
     { GAVL_RGBA_32,    VA_FOURCC('B','G','R','A'), VA_RT_FORMAT_RGB32 },
     { GAVL_YUV_420_P,  VA_FOURCC('I','4','2','0'), VA_RT_FORMAT_YUV420 },
@@ -119,7 +121,6 @@ static VAImageFormat * pixelformat_to_image_format(gavl_hw_vaapi_t * priv,
   return NULL;
   }
 
-
 static gavl_video_frame_t * create_common(gavl_hw_context_t * ctx)
   {
   gavl_video_frame_t * ret;
@@ -193,7 +194,8 @@ static int map_frame(gavl_hw_vaapi_t * priv, gavl_video_frame_t * f)
     f->planes[1] = buf_i + image->offsets[2];
     f->strides[1] = image->pitches[2];
     }
-  else if(image->offsets[1] + image->pitches[1])
+  else if((image->num_planes > 1) &&
+          (image->offsets[1] + image->pitches[1]))
     {
     f->planes[1] = buf_i + image->offsets[1];
     f->strides[1] = image->pitches[1];
