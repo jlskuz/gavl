@@ -121,41 +121,72 @@
 
 /** \brief Button was pressed
  *
- *  arg0: time (time)
- *  arg1: scale (int)
- *  arg2: Button  (1..5)
- *  arg3: Mask (see keycodes.h)
- *  arg4: x (int, in screen pixels)
- *  arg5: y (int, in screen pixels)
- *  arg6: pos (position, 0..1, relative to Video viewport)
+ *  arg0: Button  (1..5)
+ *  arg1: Mask (see keycodes.h)
+ *  arg2: x (int, in screen pixels)
+ *  arg3: y (int, in screen pixels)
+ *  arg4: pos (position, 0..1, relative to Video viewport)
  */
 
 #define GAVL_MSG_GUI_BUTTON_PRESS    3  // Mouse button was pressed
 
 /** \brief Button was released
  *
- *  arg0: time (time)
- *  arg1: scale (int)
- *  arg2: Button  (1..5)
- *  arg3: Mask (see keycodes.h)
- *  arg4: x (int, in screen pixels)
- *  arg5: y (int, in screen pixels)
- *  arg6: pos (position, 0..1, relative to Video viewport)
+ *  arg0: Button  (1..5)
+ *  arg1: Mask (see keycodes.h)
+ *  arg2: x (int, in screen pixels)
+ *  arg3: y (int, in screen pixels)
+ *  arg4: pos (position, 0..1, relative to Video viewport)
  */
 
 #define GAVL_MSG_GUI_BUTTON_RELEASE  4  // Mouse button was released
 
 /** \brief Motion callback
  *
- *  arg0: time (time)
- *  arg1: scale (int)
- *  arg2: Mask (see keycodes.h)
- *  arg3: x (int, in video pixels)
- *  arg4: y (int, in video pixels)
- *  arg5: pos (position, 0..1, relative to Video viewport)
+ *  arg0: Mask (see keycodes.h)
+ *  arg1: x (int, in video pixels)
+ *  arg2: y (int, in video pixels)
+ *  arg3: pos (position, 0..1, relative to Video viewport)
  */
 
 #define GAVL_MSG_GUI_MOUSE_MOTION    5  // Mouse was moved
+
+/** \brief Accelerator
+ *
+ *  arg0: id (int)
+ */
+
+#define GAVL_MSG_GUI_ACCEL         6  // Accelerator was triggered
+
+/** \brief Window coordinates changed
+ *
+ *  arg0: x (int)
+ *  arg1: y (int)
+ *  arg2: w (int)
+ *  arg3: h (int)
+ */
+
+#define GAVL_MSG_GUI_WINDOW_COORDS 7  // Window coordinates changed
+
+/* Commands */
+
+/** \brief Set window title
+ *
+ *  arg0: title (string)
+ */
+
+#define GAVL_CMD_GUI_SET_WINDOW_TITLE 100
+
+/** \brief Accelerator
+ *
+ *  arg0: time (time)
+ *  arg1: scale (int)
+ *  arg2: id (int)
+ */
+
+#define GAVL_MSG_GUI_ACCEL         6  // Accelerator was triggered
+
+
 
 /** \brief Message type
  */
@@ -513,35 +544,35 @@ GAVL_PUBLIC void
 gavl_msg_get_src_buffering(gavl_msg_t * msg, float * perc);
 
 GAVL_PUBLIC void
-gavl_msg_set_gui_button_press(gavl_msg_t * msg, int64_t time, int scale, int button,
+gavl_msg_set_gui_button_press(gavl_msg_t * msg, int button,
                               int mask, int x, int y, const double * pos);
 
 GAVL_PUBLIC void
-gavl_msg_set_gui_button_release(gavl_msg_t * msg, int64_t time, int scale, int button,
+gavl_msg_set_gui_button_release(gavl_msg_t * msg, int button,
                                 int mask, int x, int y, const double * pos);
 
 GAVL_PUBLIC void
-gavl_msg_get_gui_button(gavl_msg_t * msg, int64_t * time, int * scale, int * button,
+gavl_msg_get_gui_button(gavl_msg_t * msg, int * button,
                         int * mask, int * x, int * y, double * pos);
 
 GAVL_PUBLIC void
-gavl_msg_set_gui_key_press(gavl_msg_t * msg, int64_t time, int scale, int key,
+gavl_msg_set_gui_key_press(gavl_msg_t * msg, int key,
                            int mask, int x, int y, const double * pos);
 
 GAVL_PUBLIC void
-gavl_msg_set_gui_key_release(gavl_msg_t * msg, int64_t time, int scale, int key,
+gavl_msg_set_gui_key_release(gavl_msg_t * msg, int key,
                              int mask, int x, int y, const double * pos);
 
 GAVL_PUBLIC void
-gavl_msg_get_gui_key(gavl_msg_t * msg, int64_t * time, int * scale, int * key,
+gavl_msg_get_gui_key(gavl_msg_t * msg, int * key,
                      int * mask, int * x, int * y, double * pos);
 
 GAVL_PUBLIC void
-gavl_msg_set_gui_motion(gavl_msg_t * msg, int64_t time, int scale, 
+gavl_msg_set_gui_motion(gavl_msg_t * msg, 
                         int mask, int x, int y, const double * pos);
 
 GAVL_PUBLIC void
-gavl_msg_get_gui_motion(gavl_msg_t * msg, int64_t * time, int * scale,
+gavl_msg_get_gui_motion(gavl_msg_t * msg,
                         int * mask, int * x, int * y, double * pos);
                         
 
