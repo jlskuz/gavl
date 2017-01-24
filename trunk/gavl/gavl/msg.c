@@ -483,137 +483,119 @@ gavl_msg_get_src_buffering(gavl_msg_t * msg, float * perc)
     *perc = gavl_msg_get_arg_float(msg, 0);
   }
 
-static void set_button_args(gavl_msg_t * msg, int64_t time, int scale, int button,
+static void set_button_args(gavl_msg_t * msg, int button,
                             int mask, int x, int y, const double * pos)
   {
-  gavl_msg_set_arg_time(msg, 0, time);
-  gavl_msg_set_arg_int(msg, 1, scale);
-  gavl_msg_set_arg_int(msg, 2, button);
-  gavl_msg_set_arg_int(msg, 3, mask);
-  gavl_msg_set_arg_int(msg, 4, x);
-  gavl_msg_set_arg_int(msg, 5, y);
-  gavl_msg_set_arg_position(msg, 6, pos);
+  gavl_msg_set_arg_int(msg, 0, button);
+  gavl_msg_set_arg_int(msg, 1, mask);
+  gavl_msg_set_arg_int(msg, 2, x);
+  gavl_msg_set_arg_int(msg, 3, y);
+  gavl_msg_set_arg_position(msg, 4, pos);
   }
 
 void
-gavl_msg_set_gui_button_press(gavl_msg_t * msg, int64_t time, int scale, int button,
+gavl_msg_set_gui_button_press(gavl_msg_t * msg, int button,
                               int mask, int x, int y, const double * pos)
   {
   gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_BUTTON_PRESS, GAVL_MSG_NS_GUI);
-  set_button_args(msg, time, scale, button, mask, x, y, pos);
+  set_button_args(msg, button, mask, x, y, pos);
   }
 
 void
-gavl_msg_set_gui_button_release(gavl_msg_t * msg, int64_t time, int scale, int button,
+gavl_msg_set_gui_button_release(gavl_msg_t * msg, int button,
                                 int mask, int x, int y, const double * pos)
   {
   gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_BUTTON_RELEASE, GAVL_MSG_NS_GUI);
-  set_button_args(msg, time, scale, button, mask, x, y, pos);
+  set_button_args(msg, button, mask, x, y, pos);
   }
 
 void
-gavl_msg_get_gui_button(gavl_msg_t * msg, int64_t * time, int * scale, int * button,
+gavl_msg_get_gui_button(gavl_msg_t * msg, int * button,
                         int * mask, int * x, int * y, double * pos)
  
   {
-  if(time)
-    *time = gavl_msg_get_arg_time(msg, 0);
-  if(scale)
-    *scale = gavl_msg_get_arg_int(msg, 1);
   if(button)
-    *button = gavl_msg_get_arg_int(msg, 2);
+    *button = gavl_msg_get_arg_int(msg, 0);
   if(mask)
-    *mask = gavl_msg_get_arg_int(msg, 3);
+    *mask = gavl_msg_get_arg_int(msg, 1);
   if(x)
-    *x = gavl_msg_get_arg_int(msg, 4);
+    *x = gavl_msg_get_arg_int(msg, 2);
   if(y)
-    *y = gavl_msg_get_arg_int(msg, 5);
+    *y = gavl_msg_get_arg_int(msg, 3);
   if(pos)
-    gavl_msg_get_arg_position(msg, 6, pos);
+    gavl_msg_get_arg_position(msg, 4, pos);
   }
 
-static void set_key_args(gavl_msg_t * msg, int64_t time, int scale, int key,
+static void set_key_args(gavl_msg_t * msg, int key,
                          int mask, int x, int y, const double * pos)
   {
-  gavl_msg_set_arg_time(msg, 0, time);
-  gavl_msg_set_arg_int(msg, 1, scale);
-  gavl_msg_set_arg_int(msg, 2, key);
-  gavl_msg_set_arg_int(msg, 3, mask);
-  gavl_msg_set_arg_int(msg, 4, x);
-  gavl_msg_set_arg_int(msg, 5, y);
-  gavl_msg_set_arg_position(msg, 6, pos);
+  gavl_msg_set_arg_int(msg, 0, key);
+  gavl_msg_set_arg_int(msg, 1, mask);
+  gavl_msg_set_arg_int(msg, 2, x);
+  gavl_msg_set_arg_int(msg, 3, y);
+  gavl_msg_set_arg_position(msg, 4, pos);
   }
 
 void
-gavl_msg_set_gui_key_press(gavl_msg_t * msg, int64_t time, int scale, int key,
+gavl_msg_set_gui_key_press(gavl_msg_t * msg, int key,
                            int mask, int x, int y, const double * pos)
   
   {
   gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_KEY_PRESS, GAVL_MSG_NS_GUI);
-  set_key_args(msg, time, scale, key, mask, x, y, pos);
+  set_key_args(msg, key, mask, x, y, pos);
   }
 
 void
-gavl_msg_set_gui_key_release(gavl_msg_t * msg, int64_t time, int scale, int key,
+gavl_msg_set_gui_key_release(gavl_msg_t * msg, int key,
                              int mask, int x, int y, const double * pos)
   
   {
   gavl_msg_set_id_ns(msg, GAVL_MSG_GUI_KEY_RELEASE, GAVL_MSG_NS_GUI);
-  set_key_args(msg, time, scale, key, mask, x, y, pos);
+  set_key_args(msg, key, mask, x, y, pos);
   }
 
 void
-gavl_msg_get_gui_key(gavl_msg_t * msg, int64_t * time, int * scale, int * key,
+gavl_msg_get_gui_key(gavl_msg_t * msg, int * key,
                      int * mask, int * x, int * y, double * pos)
   
   {
-  if(time)
-    *time = gavl_msg_get_arg_time(msg, 0);
-  if(scale)
-    *scale = gavl_msg_get_arg_int(msg, 1);
   if(key)
-    *key = gavl_msg_get_arg_int(msg, 2);
+    *key = gavl_msg_get_arg_int(msg, 0);
   if(mask)
-    *mask = gavl_msg_get_arg_int(msg, 3);
+    *mask = gavl_msg_get_arg_int(msg, 1);
   if(x)
-    *x = gavl_msg_get_arg_int(msg, 4);
+    *x = gavl_msg_get_arg_int(msg, 2);
   if(y)
-    *y = gavl_msg_get_arg_int(msg, 5);
+    *y = gavl_msg_get_arg_int(msg, 3);
   if(pos)
-    gavl_msg_get_arg_position(msg, 6, pos);
+    gavl_msg_get_arg_position(msg, 4, pos);
   }
 
 
 void
-gavl_msg_set_gui_motion(gavl_msg_t * msg, int64_t time, int scale, 
+gavl_msg_set_gui_motion(gavl_msg_t * msg,  
                         int mask, int x, int y, const double * pos)
   
   {
-  gavl_msg_set_arg_time(msg, 0, time);
-  gavl_msg_set_arg_int(msg, 1, scale);
-  gavl_msg_set_arg_int(msg, 2, mask);
-  gavl_msg_set_arg_int(msg, 3, x);
-  gavl_msg_set_arg_int(msg, 4, y);
-  gavl_msg_set_arg_position(msg, 5, pos);
+  gavl_msg_set_arg_int(msg, 0, mask);
+  gavl_msg_set_arg_int(msg, 1, x);
+  gavl_msg_set_arg_int(msg, 2, y);
+  gavl_msg_set_arg_position(msg, 3, pos);
   }
 
 void
-gavl_msg_get_gui_motion(gavl_msg_t * msg, int64_t * time, int * scale,
+gavl_msg_get_gui_motion(gavl_msg_t * msg, 
                         int * mask, int * x, int * y, double * pos)
   
   {
-  if(time)
-    *time = gavl_msg_get_arg_time(msg, 0);
-  if(scale)
-    *scale = gavl_msg_get_arg_int(msg, 1);
   if(mask)
-    *mask = gavl_msg_get_arg_int(msg, 2);
+    *mask = gavl_msg_get_arg_int(msg, 0);
   if(x)
-    *x = gavl_msg_get_arg_int(msg, 3);
+    *x = gavl_msg_get_arg_int(msg, 1);
   if(y)
-    *y = gavl_msg_get_arg_int(msg, 4);
+    *y = gavl_msg_get_arg_int(msg, 2);
   if(pos)
-    gavl_msg_get_arg_position(msg, 5, pos);
+    gavl_msg_get_arg_position(msg, 3, pos);
 
   }
 
