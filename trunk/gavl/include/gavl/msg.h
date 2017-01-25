@@ -101,20 +101,16 @@
 
 /** \brief Key was pressed
  *
- *  arg0: time (time)
- *  arg1: scale (int)
- *  arg2: Key  (see keycodes.h)
- *  arg3: Mask (see keycodes.h)
+ *  arg0: Key  (see keycodes.h)
+ *  arg1: Mask (see keycodes.h)
  */
 
 #define GAVL_MSG_GUI_KEY_PRESS       1  // Key was pressed
 
 /** \brief Key was released
  *
- *  arg0: time (time)
- *  arg1: scale (int)
- *  arg2: Key  (see keycodes.h)
- *  arg3: Mask (see keycodes.h)
+ *  arg0: Key  (see keycodes.h)
+ *  arg1: Mask (see keycodes.h)
  */
 
 #define GAVL_MSG_GUI_KEY_RELEASE     2  // Key was released
