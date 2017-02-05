@@ -173,6 +173,17 @@ int gavl_dictionary_set_string_nocopy(gavl_dictionary_t * d,
   return gavl_dictionary_set_nocopy(d, name, &v);
   }
 
+int gavl_dictionary_set_dictionary(gavl_dictionary_t * d,
+                                   const char * name, const gavl_dictionary_t * dict)
+  {
+  gavl_dictionary_t * dst;
+  gavl_value_t v;
+  gavl_value_init(&v);
+  
+  dst = gavl_value_set_dictionary(&v);
+  gavl_dictionary_copy(dst, dict);
+  return gavl_dictionary_set_nocopy(d, name, &v);
+  }
 
 int gavl_dictionary_set(gavl_dictionary_t * d, const char * name,
                          const gavl_value_t * val)
