@@ -86,11 +86,14 @@ void gavl_array_copy(gavl_array_t * dst, const gavl_array_t * src)
 
   dst->entries_alloc = src->entries_alloc;
   dst->num_entries   = src->num_entries;
-  dst->entries = calloc(dst->entries_alloc, sizeof(*dst->entries));
+
+  if(dst->num_entries)
+    {
+    dst->entries = calloc(dst->entries_alloc, sizeof(*dst->entries));
   
-  for(i = 0; i < dst->num_entries; i++)
-    gavl_value_copy(dst->entries + i, src->entries + i);
-  
+    for(i = 0; i < dst->num_entries; i++)
+      gavl_value_copy(dst->entries + i, src->entries + i);
+    }
   }
 
 int

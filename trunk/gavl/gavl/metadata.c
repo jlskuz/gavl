@@ -563,7 +563,7 @@ gavl_metadata_add_src(gavl_dictionary_t * m, const char * key,
 
 const gavl_dictionary_t *
 gavl_dictionary_get_string_src(const gavl_dictionary_t * m, const char * key, int idx,
-                      const char ** mimetype, const char ** location)
+                               const char ** mimetype, const char ** location)
   {
   const gavl_value_t * val;
   const gavl_dictionary_t * dict;
