@@ -676,10 +676,14 @@ int gavl_value_read(gavf_io_t * io, gavl_value_t * v)
       break;
     case GAVL_TYPE_AUDIOFORMAT:
       {
+      gavl_audio_format_t * afmt;
       gavl_buffer_t buf;
       gavl_buffer_init(&buf);
+
+      afmt = gavl_value_set_audio_format(v);
+      
       if(!gavf_io_read_buffer(io, &buf) ||
-         !gavl_audio_format_from_buffer(buf.buf, buf.len, v->v.audioformat))
+         !gavl_audio_format_from_buffer(buf.buf, buf.len, afmt))
         {
         gavl_buffer_free(&buf);
         return 0;
@@ -690,9 +694,12 @@ int gavl_value_read(gavf_io_t * io, gavl_value_t * v)
     case GAVL_TYPE_VIDEOFORMAT:
       {
       gavl_buffer_t buf;
+      gavl_video_format_t * vfmt;
       gavl_buffer_init(&buf);
+      vfmt = gavl_value_set_video_format(v);
+
       if(!gavf_io_read_buffer(io, &buf) ||
-         !gavl_video_format_from_buffer(buf.buf, buf.len, v->v.videoformat))
+         !gavl_video_format_from_buffer(buf.buf, buf.len, vfmt))
         {
         gavl_buffer_free(&buf);
         return 0;
