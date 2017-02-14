@@ -106,9 +106,14 @@ gavl_video_sink_put_frame(gavl_video_sink_t * s,
      s->get_func &&
      (df = s->get_func(s->priv)))
     {
-    gavl_video_frame_copy(&s->format, df, f);
-    gavl_video_frame_copy_metadata(df, f);
-    st = s->put_func(s->priv, df);
+    if(f)
+      {
+      gavl_video_frame_copy(&s->format, df, f);
+      gavl_video_frame_copy_metadata(df, f);
+      st = s->put_func(s->priv, df);
+      }
+    else
+      st = s->put_func(s->priv, f);
     }
   else
     st = s->put_func(s->priv, f);
