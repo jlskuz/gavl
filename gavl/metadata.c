@@ -89,12 +89,12 @@ gavl_dictionary_set_date_time(gavl_dictionary_t * m,
   gavl_dictionary_set_string(m, key, buf);
   }
 
-GAVL_PUBLIC int
+int
 gavl_dictionary_get_date(gavl_dictionary_t * m,
-                       const char * key,
-                       int * year,
-                       int * month,
-                       int * day)
+                         const char * key,
+                         int * year,
+                         int * month,
+                         int * day)
   {
   const char * val = gavl_dictionary_get_string(m, key);
   if(!val)

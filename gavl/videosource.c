@@ -176,14 +176,6 @@ void gavl_video_source_reset(gavl_video_source_t * s)
     gavl_video_frame_pool_reset(s->dst_fp);
   s->next_still_frame = NULL;
   s->fps_frame = NULL;
-
-#if 0
-  if(s->transfer_frame)
-    {
-    gavl_video_frame_destroy(s->transfer_frame);
-    s->transfer_frame = NULL;
-    }
-#endif
   }
 
 GAVL_PUBLIC
@@ -518,13 +510,14 @@ read_video_still(gavl_video_source_t * s,
                        s->dst_format.timescale,
                        s->next_still_frame->timestamp) >= s->next_pts)
     {
+    if(!s->dst_fp)
+      s->dst_fp = gavl_video_frame_pool_create(NULL, &s->dst_format);
+    if(!s->fps_frame)
+      s->fps_frame = gavl_video_frame_pool_get(s->dst_fp);
+
     /* Convert into local buffer */
     if(s->flags & FLAG_DO_CONVERT)
       {
-      if(!s->dst_fp)
-        s->dst_fp = gavl_video_frame_pool_create(NULL, &s->dst_format);
-      if(!s->fps_frame)
-        s->fps_frame = gavl_video_frame_pool_get(s->dst_fp);
       gavl_video_convert(s->cnv, s->next_still_frame, s->fps_frame);
       }
     else
@@ -582,8 +575,9 @@ void gavl_video_source_set_dst(gavl_video_source_t * s, int dst_flags,
   if(s->dst_format.framerate_mode == GAVL_FRAMERATE_CONSTANT)
     {
     if((s->src_format.framerate_mode == GAVL_FRAMERATE_VARIABLE) ||
+       ((s->src_format.framerate_mode == GAVL_FRAMERATE_CONSTANT) &&
        (s->src_format.timescale * s->dst_format.frame_duration !=
-        s->dst_format.timescale * s->src_format.frame_duration))
+        s->dst_format.timescale * s->src_format.frame_duration)))
       {
       convert_fps = 1;
       }

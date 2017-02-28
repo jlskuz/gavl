@@ -374,12 +374,12 @@ void gavl_value_append_nocopy(gavl_value_t * v, gavl_value_t * child)
     }
   else if(v->type != GAVL_TYPE_ARRAY)
     {
+    /* First element already there: Convert to array */
     gavl_array_t * arr;
     gavl_value_t save;
     gavl_value_move(&save, v);
     arr = gavl_value_set_array(v);
     
-    /* First element already there: Convert to array */
     gavl_array_push_nocopy(arr, &save);
     gavl_array_push_nocopy(arr, child);
     }
