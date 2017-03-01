@@ -258,12 +258,15 @@
 /* Images associated with media content */
 
 /** \brief Cover art
- *
- *  Format is w|h|mimetype|url
- *  Multiple formats and resolutions can be in arrays
  */
 
 #define GAVL_META_COVER_URL      "CoverURL"
+
+/* For embedded covers: Location is NULL and offset and size are given */
+#define GAVL_META_COVER_EMBEDDED "CoverEmbedded"
+#define GAVL_META_COVER_OFFSET   "CoverOffset"
+#define GAVL_META_COVER_SIZE     "CoverSize"
+
 #define GAVL_META_WALLPAPER_URL  "WallpaperURL"
 #define GAVL_META_POSTER_URL     "PosterURL"
 #define GAVL_META_ICON           "Icon"
