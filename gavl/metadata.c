@@ -285,31 +285,6 @@ char *
 gavl_metadata_join_arr(const gavl_dictionary_t * m,
                        const char * key, const char * glue)
   {
-#if 0
-  char * ret;
-  int ret_len;
-  int glue_len;
-  int i;
-  int idx = find_tag(m, key);
-  if(idx < 0)
-    return NULL;
-  
-  glue_len = strlen(glue);
-  
-  ret_len = strlen(m->tags[idx].val) + 1;
-  
-  for(i = 0; i < m->tags[idx].arr_len; i++)
-    ret_len += strlen(m->tags[idx].val_arr[i]) + glue_len;
-
-  ret = malloc(ret_len);
-  strncpy(ret, m->tags[idx].val, ret_len);
-  for(i = 0; i < m->tags[idx].arr_len; i++)
-    {
-    strncat(ret, glue, ret_len - strlen(ret));
-    strncat(ret, m->tags[idx].val_arr[i], ret_len - strlen(ret));
-    }
-  return ret;
-#else
   char * ret;
   int ret_len;
   int glue_len;
@@ -366,10 +341,54 @@ gavl_metadata_join_arr(const gavl_dictionary_t * m,
   else
     return NULL;
   
-#endif
   }
 
-// Format is w|h|mimetype|url
+//
+
+void gavl_metadata_add_image_embedded(gavl_dictionary_t * m,
+                                      const char * key,
+                                      int w, int h,
+                                      const char * mimetype,
+                                      int64_t offset,
+                                      int64_t size)
+  {
+  gavl_value_t child;
+  gavl_value_t val;
+
+  gavl_dictionary_t * dict;
+
+  gavl_value_init(&child);
+
+  dict = gavl_value_set_dictionary(&child);
+
+  gavl_value_init(&val);
+  
+  gavl_value_set_long(&val, offset);
+  gavl_dictionary_set_nocopy(dict, GAVL_META_COVER_OFFSET, &val);
+
+  gavl_value_set_long(&val, size);
+  gavl_dictionary_set_nocopy(dict, GAVL_META_COVER_SIZE, &val);
+
+  if(mimetype)
+    {
+    gavl_value_set_string(&val, mimetype);
+    gavl_dictionary_set_nocopy(dict, GAVL_META_MIMETYPE, &val);
+    }
+  if(w > 0)
+    {
+    gavl_value_set_int(&val, w);
+    gavl_dictionary_set_nocopy(dict, GAVL_META_WIDTH, &val);
+    }
+  if(h > 0)
+    {
+    gavl_value_set_int(&val, h);
+    gavl_dictionary_set_nocopy(dict, GAVL_META_HEIGHT, &val);
+    }
+  gavl_dictionary_append_nocopy(m, key, &child);
+  }
+                         
+
+// 
 
 void gavl_metadata_add_image_uri(gavl_dictionary_t * m,
                                  const char * key,
@@ -398,12 +417,12 @@ void gavl_metadata_add_image_uri(gavl_dictionary_t * m,
   if(w > 0)
     {
     gavl_value_set_int(&val, w);
-    gavl_dictionary_set_nocopy(dict, "w", &val);
+    gavl_dictionary_set_nocopy(dict, GAVL_META_WIDTH, &val);
     }
   if(h > 0)
     {
     gavl_value_set_int(&val, h);
-    gavl_dictionary_set_nocopy(dict, "h", &val);
+    gavl_dictionary_set_nocopy(dict, GAVL_META_HEIGHT, &val);
     }
   gavl_dictionary_append_nocopy(m, key, &child);
   }
@@ -443,9 +462,9 @@ const char * gavl_dictionary_get_string_image_uri(const gavl_dictionary_t * m,
   /* mimetype, width, height */
   if(mimetype && (val = gavl_dictionary_get(dict, GAVL_META_MIMETYPE)))
     *mimetype = gavl_strdup(gavl_value_get_string_c(val));
-  if(wp  && (val = gavl_dictionary_get(dict, "w")))
+  if(wp  && (val = gavl_dictionary_get(dict, GAVL_META_WIDTH)))
     gavl_value_get_int(val, wp);
-  if(hp  && (val = gavl_dictionary_get(dict, "h")))
+  if(hp  && (val = gavl_dictionary_get(dict, GAVL_META_HEIGHT)))
     gavl_value_get_int(val, hp);
 
   return ret;
