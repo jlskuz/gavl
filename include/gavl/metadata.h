@@ -219,11 +219,11 @@ gavl_dictionary_set_date(gavl_dictionary_t * m,
  */
   
 GAVL_PUBLIC int
-gavl_dictionary_get_date(gavl_dictionary_t * m,
-                                const char * key,
-                                int * year,
-                                int * month,
-                                int * day);
+gavl_dictionary_get_date(const gavl_dictionary_t * m,
+                         const char * key,
+                         int * year,
+                         int * month,
+                         int * day);
 
 /** \brief Set a date/time tag
  *  \arg m A metadata structure
@@ -259,14 +259,14 @@ gavl_dictionary_set_date_time(gavl_dictionary_t * m,
  */
   
 GAVL_PUBLIC int
-gavl_dictionary_get_date_time(gavl_dictionary_t * m,
-                                     const char * key,
-                                     int * year,
-                                     int * month,
-                                     int * day,
-                                     int * hour,
-                                     int * minute,
-                                     int * second);
+gavl_dictionary_get_date_time(const gavl_dictionary_t * m,
+                              const char * key,
+                              int * year,
+                              int * month,
+                              int * day,
+                              int * hour,
+                              int * minute,
+                              int * second);
 
 /** \brief Format a date string
  *  \arg year Year
@@ -382,6 +382,13 @@ gavl_metadata_add_image_embedded(gavl_dictionary_t * m,
                                  int64_t offset,
                                  int64_t size);
 
+GAVL_PUBLIC const gavl_dictionary_t *
+gavl_dictionary_get_image_max(const gavl_dictionary_t * m,
+                              const char * key,
+                              int w, int h,
+                              const char * mimetype);
+
+  
 GAVL_PUBLIC gavl_dictionary_t *
 gavl_metadata_add_src(gavl_dictionary_t * m, const char * key,
                       const char * mimetype, const char * location);

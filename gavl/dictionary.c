@@ -308,6 +308,16 @@ const gavl_value_t * gavl_dictionary_get_item(const gavl_dictionary_t * d, const
   return gavl_value_get_item(&d->entries[idx].v, item);
   }
 
+GAVL_PUBLIC
+void gavl_dictionary_delete_item(gavl_dictionary_t * d, const char * name, int item)
+  {
+  int idx;
+  if((idx = gavl_dictionary_find(d, name, 0)) < 0)
+    return;
+  return gavl_value_delete_item(&d->entries[idx].v, item);
+  }
+
+
 gavl_value_t * gavl_dictionary_get_item_nc(gavl_dictionary_t * d, const char * name, int item)
   {
   int idx;
