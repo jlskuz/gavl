@@ -414,6 +414,20 @@ const gavl_value_t * gavl_value_get_item(const gavl_value_t * v, int item)
     return NULL;
   }
 
+void gavl_value_delete_item(gavl_value_t * v, int item)
+  {
+  if(v->type == GAVL_TYPE_UNDEFINED)
+    return;
+
+  if(v->type == GAVL_TYPE_ARRAY)
+    return gavl_array_splice_val(&v->v.array, item, 1, NULL);
+  else if(!item)
+    {
+    gavl_value_free(v);
+    gavl_value_init(v);
+    }
+  }
+
 gavl_value_t * gavl_value_get_item_nc(gavl_value_t * v, int item)
   {
   if(v->type == GAVL_TYPE_UNDEFINED)
