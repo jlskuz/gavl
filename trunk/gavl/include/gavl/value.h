@@ -64,7 +64,8 @@ typedef void (*gavl_dictionary_foreach_func)(void * priv, const char * name, con
 GAVL_PUBLIC
 void gavl_dictionary_init(gavl_dictionary_t * d);
 
-
+GAVL_PUBLIC
+void gavl_dictionary_reset(gavl_dictionary_t * d);
 
 GAVL_PUBLIC
 const char * gavl_dictionary_get_string(const gavl_dictionary_t * d,
@@ -244,6 +245,9 @@ struct gavl_array_s
 
 GAVL_PUBLIC
 void gavl_array_init(gavl_array_t * d);
+
+GAVL_PUBLIC
+void gavl_array_reset(gavl_array_t * d);
 
 GAVL_PUBLIC
 void gavl_array_push(gavl_array_t * d, const gavl_value_t * val);

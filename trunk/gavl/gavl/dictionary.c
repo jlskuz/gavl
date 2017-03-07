@@ -35,6 +35,13 @@ void gavl_dictionary_init(gavl_dictionary_t * d)
   memset(d, 0, sizeof(*d));
   }
 
+void gavl_dictionary_reset(gavl_dictionary_t * d)
+  {
+  gavl_dictionary_free(d);
+  gavl_dictionary_init(d);
+  }
+
+
 int gavl_dictionary_find(const gavl_dictionary_t * m, const char * name, int ign)
   {
   int i;
@@ -99,7 +106,11 @@ dict_set(gavl_dictionary_t * d, const char * name, const gavl_value_t * val,
         memmove(d->entries + idx,
                 d->entries + idx + 1,
                 (d->num_entries - 1 - idx) * sizeof(*d->entries));
+        memset(d->entries + (d->num_entries - 1), 0, sizeof(*d->entries));
         }
+      else
+        memset(d->entries + idx, 0, sizeof(*d->entries));
+      
       d->num_entries--;
       }
     return 1;

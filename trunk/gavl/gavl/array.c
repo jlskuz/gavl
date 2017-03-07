@@ -78,6 +78,12 @@ void gavl_array_free(gavl_array_t * d)
     }
   }
 
+void gavl_array_reset(gavl_array_t * d)
+  {
+  gavl_array_free(d);
+  gavl_array_init(d);
+  }
+
 void gavl_array_copy(gavl_array_t * dst, const gavl_array_t * src)
   {
   int i;
@@ -95,6 +101,8 @@ void gavl_array_copy(gavl_array_t * dst, const gavl_array_t * src)
       gavl_value_copy(dst->entries + i, src->entries + i);
     }
   }
+
+
 
 int
 gavl_array_compare(const gavl_array_t * m1,
