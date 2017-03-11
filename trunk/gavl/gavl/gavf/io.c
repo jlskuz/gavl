@@ -727,21 +727,21 @@ int gavl_value_read(gavf_io_t * io, gavl_value_t * v)
       break;
     case GAVL_TYPE_DICTIONARY:
       {
-      gavl_dictionary_read(io, &v->v.dictionary);
+      gavl_dictionary_read(io, v->v.dictionary);
       }
       break;
     case GAVL_TYPE_ARRAY:
       {
       int i;
-      if(!gavf_io_read_int32v(io, &v->v.array.num_entries))
+      if(!gavf_io_read_int32v(io, &v->v.array->num_entries))
         return 0;
 
-      v->v.array.entries_alloc = v->v.array.num_entries;
-      v->v.array.entries = calloc(v->v.array.entries_alloc, sizeof(*v->v.array.entries));
+      v->v.array->entries_alloc = v->v.array->num_entries;
+      v->v.array->entries = calloc(v->v.array->entries_alloc, sizeof(*v->v.array->entries));
 
-      for(i = 0; i < v->v.array.num_entries; i++)
+      for(i = 0; i < v->v.array->num_entries; i++)
         {
-        if(!gavl_value_read(io, &v->v.array.entries[i]))
+        if(!gavl_value_read(io, &v->v.array->entries[i]))
           return 0;
         }
       break;
@@ -856,17 +856,17 @@ int gavl_value_write(gavf_io_t * io, const gavl_value_t * v)
         return 0;
       break;
     case GAVL_TYPE_DICTIONARY:
-      if(!gavl_dictionary_write(io, &v->v.dictionary))
+      if(!gavl_dictionary_write(io, v->v.dictionary))
         return 0;
       break;
     case GAVL_TYPE_ARRAY:
       {
       int i;
-      if(!gavf_io_write_int32v(io, v->v.array.num_entries))
+      if(!gavf_io_write_int32v(io, v->v.array->num_entries))
         return 0;
-      for(i = 0; i < v->v.array.num_entries; i++)
+      for(i = 0; i < v->v.array->num_entries; i++)
         {
-        if(!gavl_value_write(io, &v->v.array.entries[i]))
+        if(!gavl_value_write(io, &v->v.array->entries[i]))
           return 0;
         }
       }

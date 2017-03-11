@@ -26,6 +26,9 @@ int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h)
       if(!gavf_io_read_uint32v(io, &h->format.text.timescale))
         return 0;
       break;
+    case GAVF_STREAM_NONE:
+    case GAVF_STREAM_MSG:
+      break;
     }
   return 1;
   }
@@ -52,6 +55,9 @@ void gavf_stream_header_apply_footer(gavf_stream_header_t * h)
                                      &h->format.audio,
                                      &h->ci,
                                      &h->m);
+      break;
+    case GAVF_STREAM_NONE:
+    case GAVF_STREAM_MSG:
       break;
     }
   }
@@ -81,6 +87,9 @@ int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h)
     case GAVF_STREAM_TEXT:
       if(!gavf_io_write_uint32v(io, h->format.text.timescale))
         return 0;
+      break;
+    case GAVF_STREAM_NONE:
+    case GAVF_STREAM_MSG:
       break;
     }
   return 1;
@@ -113,6 +122,9 @@ void gavf_stream_header_dump(const gavf_stream_header_t * h)
       break;
     case GAVF_STREAM_TEXT:
       fprintf(stderr, "    Timescale: %d\n", h->format.text.timescale);
+      break;
+    case GAVF_STREAM_NONE:
+    case GAVF_STREAM_MSG:
       break;
     }
   fprintf(stderr, "    Metadata:\n");

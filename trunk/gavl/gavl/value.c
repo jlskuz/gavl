@@ -132,10 +132,10 @@ int gavl_value_compare(const gavl_value_t * v1, const gavl_value_t * v2)
       CMP_NUM_ARR(v1->v.position, v2->v.position, 2);
       break;
     case GAVL_TYPE_DICTIONARY:
-      return gavl_dictionary_compare(&v1->v.dictionary, &v2->v.dictionary);
+      return gavl_dictionary_compare(v1->v.dictionary, v2->v.dictionary);
       break;
     case GAVL_TYPE_ARRAY:
-      return gavl_array_compare(&v1->v.array, &v2->v.array);
+      return gavl_array_compare(v1->v.array, v2->v.array);
       break;
     }
   return 0;
@@ -194,10 +194,10 @@ void gavl_value_copy(gavl_value_t * dst, const gavl_value_t * src)
       memcpy(dst->v.position, src->v.position, 2 * sizeof(dst->v.position[0]));
       break;
     case GAVL_TYPE_DICTIONARY:
-      gavl_dictionary_copy(&dst->v.dictionary, &src->v.dictionary);
+      gavl_dictionary_copy(dst->v.dictionary, src->v.dictionary);
       break;
     case GAVL_TYPE_ARRAY:
-      gavl_array_copy(&dst->v.array, &src->v.array);
+      gavl_array_copy(dst->v.array, src->v.array);
       break;
     }
   }
@@ -219,10 +219,12 @@ void gavl_value_free(gavl_value_t * v)
         free(v->v.str);
       break;
     case GAVL_TYPE_DICTIONARY:
-      gavl_dictionary_free(&v->v.dictionary);
+      gavl_dictionary_free(v->v.dictionary);
+      free(v->v.dictionary);
       break;
     case GAVL_TYPE_ARRAY:
-      gavl_array_free(&v->v.array);
+      gavl_array_free(v->v.array);
+      free(v->v.array);
       break;
     case GAVL_TYPE_AUDIOFORMAT:
       free(v->v.audioformat);
@@ -300,14 +302,16 @@ gavl_dictionary_t * gavl_value_set_dictionary(gavl_value_t * v)
   {
   gavl_value_reset(v);
   v->type = GAVL_TYPE_DICTIONARY;
-  return &v->v.dictionary;
+  v->v.dictionary = calloc(1, sizeof(*v->v.dictionary));
+  return v->v.dictionary;
   }
 
 gavl_array_t * gavl_value_set_array(gavl_value_t * v)
   {
   gavl_value_reset(v);
   v->type = GAVL_TYPE_ARRAY;
-  return &v->v.array;
+  v->v.array = calloc(1, sizeof(*v->v.array));
+  return v->v.array;
   }
 
 double * gavl_value_set_position(gavl_value_t * v)
@@ -360,7 +364,7 @@ void gavl_value_append(gavl_value_t * v, const gavl_value_t * child)
   else
     {
     /* Append to array */
-    gavl_array_push(&v->v.array, child);
+    gavl_array_push(v->v.array, child);
     }
   }
 
@@ -386,7 +390,7 @@ void gavl_value_append_nocopy(gavl_value_t * v, gavl_value_t * child)
   else
     {
     /* Append to array */
-    gavl_array_push_nocopy(&v->v.array, child);
+    gavl_array_push_nocopy(v->v.array, child);
     }
   }
 
@@ -396,7 +400,7 @@ int gavl_value_get_num_items(const gavl_value_t * v)
     return 0;
   
   if(v->type == GAVL_TYPE_ARRAY)
-    return v->v.array.num_entries; 
+    return v->v.array->num_entries; 
   
   return 1;
   }
@@ -407,7 +411,7 @@ const gavl_value_t * gavl_value_get_item(const gavl_value_t * v, int item)
     return NULL;
   
   if(v->type == GAVL_TYPE_ARRAY)
-    return gavl_array_get(&v->v.array, item);
+    return gavl_array_get(v->v.array, item);
   else if(!item)
     return v;
   else
@@ -420,7 +424,7 @@ void gavl_value_delete_item(gavl_value_t * v, int item)
     return;
 
   if(v->type == GAVL_TYPE_ARRAY)
-    return gavl_array_splice_val(&v->v.array, item, 1, NULL);
+    return gavl_array_splice_val(v->v.array, item, 1, NULL);
   else if(!item)
     {
     gavl_value_free(v);
@@ -434,7 +438,7 @@ gavl_value_t * gavl_value_get_item_nc(gavl_value_t * v, int item)
     return NULL;
   
   if(v->type == GAVL_TYPE_ARRAY)
-    return gavl_array_get_nc(&v->v.array, item);
+    return gavl_array_get_nc(v->v.array, item);
   else if(!item)
     return v;
   else
@@ -615,7 +619,21 @@ const gavl_audio_format_t * gavl_value_get_audio_format(const gavl_value_t * v)
   return v->v.audioformat;
   }
 
+gavl_audio_format_t * gavl_value_get_audio_format_nc(gavl_value_t * v)
+  {
+  if(v->type != GAVL_TYPE_AUDIOFORMAT)
+    return NULL;
+  return v->v.audioformat;
+  }
+
 const gavl_video_format_t * gavl_value_get_video_format(const gavl_value_t * v)
+  {
+  if(v->type != GAVL_TYPE_VIDEOFORMAT)
+    return NULL;
+  return v->v.videoformat;
+  }
+
+gavl_video_format_t * gavl_value_get_video_format_nc(gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_VIDEOFORMAT)
     return NULL;
@@ -626,28 +644,28 @@ const gavl_dictionary_t * gavl_value_get_dictionary(const gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_DICTIONARY)
     return NULL;
-  return &v->v.dictionary;
+  return v->v.dictionary;
   }
 
 gavl_dictionary_t * gavl_value_get_dictionary_nc(gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_DICTIONARY)
     return NULL;
-  return &v->v.dictionary;
+  return v->v.dictionary;
   }
 
 const gavl_array_t * gavl_value_get_array(const gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_ARRAY)
     return NULL;
-  return &v->v.array;
+  return v->v.array;
   }
 
 gavl_array_t * gavl_value_get_array_nc(gavl_value_t * v)
   {
   if(v->type != GAVL_TYPE_ARRAY)
     return NULL;
-  return &v->v.array;
+  return v->v.array;
   }
 
 const double * gavl_value_get_position(const gavl_value_t * v)
@@ -716,11 +734,11 @@ void gavl_value_dump(const gavl_value_t * v, int indent)
       break;
     case GAVL_TYPE_DICTIONARY:
       gavl_dprintf("\n");
-      gavl_dictionary_dump(&v->v.dictionary, indent + 2);
+      gavl_dictionary_dump(v->v.dictionary, indent + 2);
       
       break;
     case GAVL_TYPE_ARRAY:
-      gavl_array_dump(&v->v.array, indent);
+      gavl_array_dump(v->v.array, indent);
       break;
     }
 

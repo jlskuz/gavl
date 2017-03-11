@@ -23,6 +23,8 @@
 
 #include <gavl/gavl.h>
 #include <gavl/metadata.h>
+#include <gavl/metatags.h>
+#include <gavl/trackinfo.h>
 
 #include <gavl/edl.h>
 #include <gavl/utils.h>
@@ -30,6 +32,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define GAVL_EDL_TRACK_IDX  "tidx"
+#define GAVL_EDL_STREAM_IDX "sidx"
+#define GAVL_EDL_SRC_TIME   "stime"
+#define GAVL_EDL_DST_TIME   "dtime"
+#define GAVL_EDL_DST_DUR    "ddur"
 
 static char * my_strdup(char * s)
   {
@@ -414,4 +422,286 @@ gavl_edl_dst_time_to_src(const gavl_edl_track_t * t,
                                    dst_time - ret->dst_time);
     }
   return ret;
+  }
+
+/* edl <-> Dictionary */
+
+/*
+  typedef struct
+  {
+  char * url;   //!< Location of that segment. If NULL, the "master url" in \ref gavl_edl_t is valid.
+
+  int track;        //!<  Track index for multitrack inputs
+  int stream;       //!<  Index of the A/V stream
+  int timescale;    //!<  Source timescale
+    
+  int64_t src_time; //!< Time within the source in source timescale
+  
+  int64_t dst_time;  //!< Time  within the destination in destination timescale
+  int64_t dst_duration; //!< Duration within the destination in destination timescale
+
+  int32_t speed_num; //!< Playback speed numerator
+  int32_t speed_den; //!< Playback speed demoninator
+  
+  } gavl_edl_segment_t;
+ */
+
+#define GAVL_EDL_TRACK_IDX     "tidx"
+#define GAVL_EDL_STREAM_IDX    "sidx"
+#define GAVL_EDL_SRC_TIME      "stime"
+#define GAVL_EDL_DST_TIME      "dtime"
+#define GAVL_EDL_DST_DUR       "ddur"
+#define GAVL_EDL_SPEED_NUM "spnum"
+#define GAVL_EDL_SPEED_DEN "spden"
+#define GAVL_EDL_SEGMENTS  "segs"
+
+static int segment_from_dictionary(gavl_edl_segment_t * seg, 
+                                   const gavl_dictionary_t * dict)
+  {
+  seg->url = gavl_strdup(gavl_dictionary_get_string(dict, GAVL_META_URI)); 
+
+  if(!gavl_dictionary_get_int(dict,  GAVL_EDL_TRACK_IDX,  &seg->track) ||
+     !gavl_dictionary_get_int(dict,  GAVL_EDL_STREAM_IDX, &seg->stream) ||
+     !gavl_dictionary_get_int(dict,  GAVL_META_STREAM_TIMESCALE,      &seg->timescale) ||
+     !gavl_dictionary_get_long(dict, GAVL_EDL_SRC_TIME,   &seg->src_time) ||
+     !gavl_dictionary_get_long(dict, GAVL_EDL_DST_TIME,   &seg->dst_time) ||
+     !gavl_dictionary_get_long(dict, GAVL_EDL_DST_DUR,    &seg->dst_duration) ||
+     !gavl_dictionary_get_int(dict,  GAVL_EDL_SPEED_NUM,  &seg->speed_num) ||
+     !gavl_dictionary_get_int(dict,  GAVL_EDL_SPEED_DEN,  &seg->speed_den))
+    return 0;
+
+  return 1;
+
+  }
+
+
+static void segment_to_dictionary(const gavl_edl_segment_t * seg, 
+                                 gavl_dictionary_t * dict)
+  {
+  if(seg->url)
+    gavl_dictionary_set_string(dict, GAVL_META_URI, seg->url);
+
+  gavl_dictionary_set_int(dict,  GAVL_EDL_TRACK_IDX,  seg->track);
+  gavl_dictionary_set_int(dict,  GAVL_EDL_STREAM_IDX, seg->stream);
+  gavl_dictionary_set_int(dict,  GAVL_META_STREAM_TIMESCALE,  seg->timescale);
+  gavl_dictionary_set_long(dict, GAVL_EDL_SRC_TIME,   seg->src_time);
+  gavl_dictionary_set_long(dict, GAVL_EDL_DST_TIME,   seg->dst_time);
+  gavl_dictionary_set_long(dict, GAVL_EDL_DST_DUR,    seg->dst_duration);
+  gavl_dictionary_set_int(dict,  GAVL_EDL_SPEED_NUM,  seg->speed_num);
+  gavl_dictionary_set_int(dict,  GAVL_EDL_SPEED_DEN,  seg->speed_den);
+  }
+
+/*
+  typedef struct
+  {
+  gavl_edl_segment_t * segments; //!< Segments
+  int num_segments;              //!< Number of segments 
+  int timescale;                 //!< Destination timescale
+  } gavl_edl_stream_t;
+  
+ */
+
+static int stream_from_dictionary(gavl_edl_stream_t * s, 
+                                  const gavl_dictionary_t * dict)
+  {
+  const gavl_array_t * segs;
+  
+  if(!gavl_dictionary_get_int(dict,  GAVL_META_STREAM_TIMESCALE,      &s->timescale))
+    return 0;
+  
+  if((segs = gavl_dictionary_get_array(dict, GAVL_EDL_SEGMENTS)) &&
+     (segs->num_entries > 0))
+    {
+    int i;
+    const gavl_value_t * seg_val;
+    const gavl_dictionary_t * seg_dict;
+
+    gavl_edl_segment_t * seg;
+    
+    for(i = 0; i < segs->num_entries; i++)
+      {
+      if(!(seg_val = gavl_array_get(segs, i)) ||
+         !(seg_dict = gavl_value_get_dictionary(seg_val)) ||
+         !(seg = gavl_edl_add_segment(s)) ||
+         !segment_from_dictionary(seg, seg_dict))
+        return 0;
+      }
+    }
+  return 1;
+  }
+
+static void stream_to_dictionary(const gavl_edl_stream_t * s, 
+                                 gavl_dictionary_t * dict)
+  {
+  
+  gavl_dictionary_set_int(dict,  GAVL_META_STREAM_TIMESCALE, s->timescale);
+  
+  if(s->num_segments)
+    {
+    int i;
+    gavl_value_t segs_val;
+    gavl_array_t * segs;
+
+    gavl_value_t seg_val;
+    gavl_dictionary_t * seg;
+    
+    gavl_value_init(&segs_val);
+    segs = gavl_value_set_array(&segs_val);
+
+    for(i = 0; i < s->num_segments; i++)
+      {
+      gavl_value_init(&seg_val);
+      seg = gavl_value_set_dictionary(&seg_val);
+      segment_to_dictionary(&s->segments[i], seg);
+      gavl_array_push_nocopy(segs, &seg_val);
+      }
+    gavl_dictionary_set_nocopy(dict, GAVL_EDL_SEGMENTS, &segs_val);
+    }
+  
+  }
+
+/*
+typedef struct
+  {
+  gavl_dictionary_t   metadata;        //!< Metadata (optional)
+  
+  int num_audio_streams;             //!< Number of logical audio streams
+  gavl_edl_stream_t * audio_streams; //!< Logical audio streams
+
+  int num_video_streams;             //!< Number of logical video streams
+  gavl_edl_stream_t * video_streams; //!< Logical video streams
+
+  int num_text_streams;     //!< Number of logical text subtitle streams
+  gavl_edl_stream_t * text_streams; //!< Logical text subtitle streams
+
+  int num_overlay_streams;  //!< Number of logical overlay subtitle streams
+  gavl_edl_stream_t * overlay_streams; //!< Logical overlay subtitle streams
+  
+  } gavl_edl_track_t;
+*/
+
+static int track_from_dictionary(gavl_edl_track_t * t, 
+                                 const gavl_dictionary_t * dict)
+  {
+  int i;
+  int num;
+  gavl_edl_stream_t * s;
+  const gavl_dictionary_t * dict_s;
+
+  num = gavl_track_get_num_audio_streams(dict);
+  for(i = 0; i < num; i++)
+    {
+    if(!(dict_s = gavl_track_get_audio_stream(dict, i)))
+      return 0;
+    
+    s = gavl_edl_add_audio_stream(t);
+    if(!stream_from_dictionary(s, dict_s))
+      return 0;
+    
+    }
+  
+  num = gavl_track_get_num_video_streams(dict);
+  for(i = 0; i < num; i++)
+    {
+    if(!(dict_s = gavl_track_get_video_stream(dict, i)))
+      return 0;
+    s = gavl_edl_add_video_stream(t);
+    if(!stream_from_dictionary(s, dict_s))
+      return 0;
+    
+    }
+
+  num = gavl_track_get_num_text_streams(dict);
+  for(i = 0; i < num; i++)
+    {
+    if(!(dict_s = gavl_track_get_text_stream(dict, i)))
+      return 0;
+    s = gavl_edl_add_text_stream(t);
+    if(!stream_from_dictionary(s, dict_s))
+      return 0;
+    
+    }
+
+  num = gavl_track_get_num_overlay_streams(dict);
+  for(i = 0; i < num; i++)
+    {
+    if(!(dict_s = gavl_track_get_overlay_stream(dict, i)))
+      return 0;
+    s = gavl_edl_add_overlay_stream(t);
+    if(!stream_from_dictionary(s, dict_s))
+      return 0;
+    
+    }
+  return 1;
+  }
+
+static void track_to_dictionary(const gavl_edl_track_t * t, 
+                                gavl_dictionary_t * dict)
+  {
+  int i;
+  const gavl_edl_stream_t * s;
+  gavl_dictionary_t * dict_s;
+
+  for(i = 0; i < t->num_audio_streams; i++)
+    {
+    s = t->audio_streams + i;
+    dict_s = gavl_track_append_audio_stream(dict);
+    stream_to_dictionary(s, dict_s);
+    }
+  for(i = 0; i < t->num_video_streams; i++)
+    {
+    s = t->video_streams + i;
+    dict_s = gavl_track_append_video_stream(dict);
+    stream_to_dictionary(s, dict_s);
+    }
+  for(i = 0; i < t->num_text_streams; i++)
+    {
+    s = t->text_streams + i;
+    dict_s = gavl_track_append_text_stream(dict);
+    stream_to_dictionary(s, dict_s);
+    }
+  for(i = 0; i < t->num_overlay_streams; i++)
+    {
+    s = t->overlay_streams + i;
+    dict_s = gavl_track_append_overlay_stream(dict);
+    stream_to_dictionary(s, dict_s);
+    }
+  
+  }
+
+void gavl_edl_to_dictionary(const gavl_edl_t * edl, gavl_dictionary_t * dict)
+  {
+  int i;
+  const gavl_edl_track_t * t;
+  gavl_dictionary_t * dict_t;
+  
+  if(edl->url)
+    gavl_dictionary_set_string(dict, GAVL_META_URI, edl->url);
+  
+  for(i = 0; i < edl->num_tracks; i++)
+    {
+    t = edl->tracks + i;
+    dict_t = gavl_append_track(dict);
+    track_to_dictionary(t, dict_t);
+    }
+  }
+
+int gavl_edl_from_dictionary(gavl_edl_t * edl, const gavl_dictionary_t * dict)
+  {
+  int i, num;
+
+  gavl_edl_track_t * t;
+  const gavl_dictionary_t * dict_t;
+  
+  edl->url = gavl_strdup(gavl_dictionary_get_string(dict, GAVL_META_URI)); 
+  num = gavl_get_num_tracks(dict);
+
+  for(i = 0; i < num; i++)
+    {
+    t = gavl_edl_add_track(edl);
+    dict_t = gavl_get_track(dict, i);
+    if(!track_from_dictionary(t, dict_t))
+      return 0;
+    }
+  return 1;
   }

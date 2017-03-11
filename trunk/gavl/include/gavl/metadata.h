@@ -401,61 +401,7 @@ GAVL_PUBLIC
 int gavl_metadata_has_src(const gavl_dictionary_t * m, const char * key,
                           const char * location);
 
-/*
- *  Storage of multiple streams in a dictionary
- */
-  
-/* */
-GAVL_PUBLIC
-gavl_dictionary_t * gavl_dictionary_get_audio_stream(gavl_dictionary_t * d, int i);
-
-GAVL_PUBLIC
-const gavl_dictionary_t * gavl_dictionary_get_audio_stream_c(const gavl_dictionary_t * d, int i);
-
-GAVL_PUBLIC
-int gavl_dictionary_get_num_audio_streams(const gavl_dictionary_t * d);
-  
-GAVL_PUBLIC
-gavl_dictionary_t * gavl_dictionary_append_audio_stream(gavl_dictionary_t * d);
-
-/* */
-GAVL_PUBLIC
-gavl_dictionary_t * gavl_dictionary_get_video_stream(gavl_dictionary_t * d, int i);
-
-GAVL_PUBLIC
-const gavl_dictionary_t * gavl_dictionary_get_video_stream_c(const gavl_dictionary_t * d, int i);
-  
-GAVL_PUBLIC
-int gavl_dictionary_get_num_video_streams(const gavl_dictionary_t * d);
-  
-GAVL_PUBLIC
-gavl_dictionary_t * gavl_dictionary_append_video_stream(gavl_dictionary_t * d);
-
-/* */
-GAVL_PUBLIC
-gavl_dictionary_t * gavl_dictionary_get_text_stream(gavl_dictionary_t * d, int i);
-
-GAVL_PUBLIC
-const gavl_dictionary_t * gavl_dictionary_get_text_stream_c(const gavl_dictionary_t * d, int i);
-
-GAVL_PUBLIC
-int gavl_dictionary_get_num_text_streams(const gavl_dictionary_t * d);
-  
-GAVL_PUBLIC
-gavl_dictionary_t * gavl_dictionary_append_text_stream(gavl_dictionary_t * d);
-  
-/* */
-GAVL_PUBLIC
-gavl_dictionary_t * gavl_dictionary_get_overlay_stream(gavl_dictionary_t * d, int i);
-
-GAVL_PUBLIC
-const gavl_dictionary_t * gavl_dictionary_get_overlay_stream_c(const gavl_dictionary_t * d, int i);
-
-GAVL_PUBLIC
-int gavl_dictionary_get_num_overlay_streams(const gavl_dictionary_t * d);
-  
-GAVL_PUBLIC
-gavl_dictionary_t * gavl_dictionary_append_overlay_stream(gavl_dictionary_t * d);
+   
   
 /**
  * @}

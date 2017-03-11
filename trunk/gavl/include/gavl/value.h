@@ -212,6 +212,9 @@ gavl_array_t * gavl_dictionary_get_array_nc(gavl_dictionary_t * d, const char * 
 GAVL_PUBLIC
 const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_t * d, const char * name);
 
+GAVL_PUBLIC
+gavl_dictionary_t *  gavl_dictionary_get_dictionary_nc(gavl_dictionary_t * d, const char * name);
+
 /*
  *  Can be used within a foreach_func to know, if this is the last entry
  */
@@ -311,10 +314,10 @@ struct gavl_value_s
     int64_t l;
     double d;
     char * str;
-    gavl_dictionary_t dictionary;
-    gavl_array_t array;
     double color[4];
     double position[2];
+    gavl_dictionary_t * dictionary;
+    gavl_array_t * array;
     gavl_audio_format_t * audioformat;
     gavl_video_format_t * videoformat;
     } v;
@@ -416,8 +419,16 @@ void gavl_value_from_string(gavl_value_t * v, const char * str);
 
 GAVL_PUBLIC
 const gavl_audio_format_t * gavl_value_get_audio_format(const gavl_value_t * v);
+
+GAVL_PUBLIC
+gavl_audio_format_t * gavl_value_get_audio_format_nc(gavl_value_t * v);
+
+
 GAVL_PUBLIC
 const gavl_video_format_t * gavl_value_get_video_format(const gavl_value_t * v);
+
+GAVL_PUBLIC
+gavl_video_format_t * gavl_value_get_video_format_nc(gavl_value_t * v);
 
 GAVL_PUBLIC
 const gavl_dictionary_t * gavl_value_get_dictionary(const gavl_value_t * v);

@@ -140,6 +140,7 @@ ssim.c \
 time.c \
 timecode.c \
 timer.c \
+trackinfo.c \
 transform.c \
 transform_context.c \
 transform_table.c \

@@ -39,7 +39,7 @@ static gavl_array_t * get_chapters(gavl_chapter_list_t * list)
     gavl_dictionary_set_nocopy(list, GAVL_CHAPTERLIST_CHAPTERS, &val);
     valp = gavl_dictionary_get_nc(list, GAVL_CHAPTERLIST_CHAPTERS);
     }
-  return &valp->v.array;
+  return valp->v.array;
   }
 
 static const gavl_array_t * get_chapters_c(const gavl_chapter_list_t * list)
@@ -77,7 +77,7 @@ gavl_dictionary_t * gavl_chapter_list_insert(gavl_chapter_list_t * list, int ind
 
   gavl_array_splice_val_nocopy(arr, index, 0, &val);
 
-  return &arr->entries[index].v.dictionary;
+  return arr->entries[index].v.dictionary;
   }
 
 void gavl_chapter_list_delete(gavl_chapter_list_t * list, int index)
@@ -150,7 +150,7 @@ gavl_dictionary_t * gavl_chapter_list_get(gavl_chapter_list_t * list, int idx)
 
   if((idx < 0) || (idx >= arr->num_entries) || (arr->entries[idx].type != GAVL_TYPE_DICTIONARY))
     return NULL;
-  return &arr->entries[idx].v.dictionary;
+  return arr->entries[idx].v.dictionary;
   }
 
 int64_t gavl_chapter_list_get_time(const gavl_chapter_list_t * list, int idx)
@@ -186,7 +186,7 @@ gavl_chapter_list_get_c(const gavl_chapter_list_t * list, int idx)
   if((idx < 0) || (idx >= arr->num_entries) ||
      (arr->entries[idx].type != GAVL_TYPE_DICTIONARY))
     return NULL;
-  return &arr->entries[idx].v.dictionary;
+  return arr->entries[idx].v.dictionary;
   }
 
 gavl_dictionary_t *
@@ -214,6 +214,6 @@ gavl_dictionary_get_chapter_list(gavl_dictionary_t * m)
   if(!(val = gavl_dictionary_get_nc(m, GAVL_CHAPTERLIST_CHAPTERLIST)) ||
      (val->type != GAVL_TYPE_DICTIONARY))
     return NULL;
-  return &val->v.dictionary;
+  return val->v.dictionary;
   
   }

@@ -212,10 +212,12 @@ void gavf_io_buf_reset(gavf_io_t * io);
 
 typedef enum
   {
-    GAVF_STREAM_AUDIO   = 0,
-    GAVF_STREAM_VIDEO   = 1,
-    GAVF_STREAM_TEXT    = 2,
-    GAVF_STREAM_OVERLAY = 3,
+    GAVF_STREAM_NONE    = 0,
+    GAVF_STREAM_AUDIO   = 1,
+    GAVF_STREAM_VIDEO   = 2,
+    GAVF_STREAM_TEXT    = 3,
+    GAVF_STREAM_OVERLAY = 4,
+    GAVF_STREAM_MSG     = 5,
   } gavf_stream_type_t;
 
 /* Return short name */
