@@ -325,7 +325,7 @@ int gavl_msg_get_arg_dictionary_c(const gavl_msg_t * msg, int arg,
   if(msg->args[arg].type != GAVL_TYPE_DICTIONARY)
     return 0;
   
-  gavl_dictionary_copy(m, &msg->args[arg].v.dictionary);
+  gavl_dictionary_copy(m, msg->args[arg].v.dictionary);
   return 1;
   }
 

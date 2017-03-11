@@ -302,6 +302,14 @@ const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_
   return gavl_value_get_dictionary(val);
   }
 
+gavl_dictionary_t *  gavl_dictionary_get_dictionary_nc(gavl_dictionary_t * d, const char * name)
+  {
+  gavl_value_t * val;
+  if(!(val = gavl_dictionary_get_nc(d, name)))
+    return NULL;
+  return gavl_value_get_dictionary_nc(val);
+  }
+
 const gavl_value_t * gavl_dictionary_get_i(const gavl_dictionary_t * d, const char * name)
   {
   int idx;
@@ -572,7 +580,7 @@ gavl_dictionary_get_child(gavl_dictionary_t * d, const char * name)
   if((idx = gavl_dictionary_find(d, name, 0)) >= 0)
     {
     if(d->entries[idx].v.type == GAVL_TYPE_DICTIONARY)
-      return &d->entries[idx].v.v.dictionary;
+      return d->entries[idx].v.v.dictionary;
     else
       return NULL; // Should never happen if the naming schemes are sane
     }
@@ -582,7 +590,7 @@ gavl_dictionary_get_child(gavl_dictionary_t * d, const char * name)
   dict_set(d, name, &val, 0 /* ign */, 0 /* cpy */ );
 
   idx = gavl_dictionary_find(d, name, 0);
-  return &d->entries[idx].v.v.dictionary;
+  return d->entries[idx].v.v.dictionary;
   }
 
 int gavl_dictionary_is_last(const gavl_dictionary_t * d, const char * name)

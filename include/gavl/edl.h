@@ -32,10 +32,11 @@ extern "C" {
  */
 
 typedef struct gavl_edl_s gavl_edl_t;
-
+  
+  
 /** \brief One segment of a physical stream to appear in a logical stream
  */
-
+  
 typedef struct
   {
   char * url;   //!< Location of that segment. If NULL, the "master url" in \ref gavl_edl_t is valid.
@@ -211,6 +212,11 @@ gavl_edl_dst_time_to_src(const gavl_edl_track_t * t,
 GAVL_PUBLIC gavl_time_t
 gavl_edl_track_get_duration(const gavl_edl_track_t * t);
 
+
+/* Convert to / from dictionary for easy transporting */
+
+GAVL_PUBLIC void gavl_edl_to_dictionary(const gavl_edl_t * edl, gavl_dictionary_t * dict);
+GAVL_PUBLIC int gavl_edl_from_dictionary(gavl_edl_t * edl, const gavl_dictionary_t * dict);
   
 #ifdef __cplusplus
 }

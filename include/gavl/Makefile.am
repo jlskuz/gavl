@@ -14,6 +14,7 @@ hw_vaapi_x11.h \
 keycodes.h \
 numptr.h \
 timecode.h \
+trackinfo.h \
 gavldefs.h \
 metadata.h \
 metatags.h \

@@ -570,6 +570,9 @@ int gavf_stream_get_timescale(const gavf_stream_header_t * sh)
     case GAVF_STREAM_TEXT:
       return sh->format.text.timescale;
       break;
+    case GAVF_STREAM_NONE:
+    case GAVF_STREAM_MSG:
+      break;
     }
   return 0;
   }
@@ -604,6 +607,10 @@ static void init_streams(gavf_t * g)
         break;
       case GAVF_STREAM_TEXT:
         gavf_stream_init_text(g, &g->streams[i], g->ph.num_streams);
+        break;
+      case GAVF_STREAM_NONE:
+        break;
+      case GAVF_STREAM_MSG:
         break;
       }
     g->streams[i].pb =

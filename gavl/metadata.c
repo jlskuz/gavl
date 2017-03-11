@@ -235,11 +235,11 @@ static char * metadata_get_arr_internal(const gavl_dictionary_t * m,
     {
     if(i < 0)
       return NULL;
-    if(i >= val->v.array.num_entries)
+    if(i >= val->v.array->num_entries)
       return NULL;
-    if(val->v.array.entries[i].type != GAVL_TYPE_STRING)
+    if(val->v.array->entries[i].type != GAVL_TYPE_STRING)
       return NULL;
-    return val->v.array.entries[i].v.str;
+    return val->v.array->entries[i].v.str;
     }
   else if((val->type == GAVL_TYPE_STRING) && !i)
     return val->v.str;
@@ -276,7 +276,7 @@ int gavl_dictionary_get_arr_len(const gavl_dictionary_t * m,
   else if(val->type == GAVL_TYPE_STRING)
     return 1;
   else if(val->type == GAVL_TYPE_ARRAY)
-    return val->v.array.num_entries;
+    return val->v.array->num_entries;
   else
     return 0;
   }
@@ -305,7 +305,7 @@ gavl_metadata_join_arr(const gavl_dictionary_t * m,
 
     idx = 0;
     
-    arr = &val->v.array;
+    arr = val->v.array;
     for(i = 0; i < arr->num_entries; i++)
       {
       if(arr->entries[i].type != GAVL_TYPE_STRING)
@@ -440,12 +440,12 @@ static const gavl_dictionary_t * get_image(const gavl_dictionary_t * m,
     return NULL;
   
   if((val->type == GAVL_TYPE_DICTIONARY) && !idx)
-    dict = &val->v.dictionary;
+    dict = val->v.dictionary;
   else if(val->type == GAVL_TYPE_ARRAY)
     {
-    if((val = gavl_array_get(&val->v.array, idx)) &&
+    if((val = gavl_array_get(val->v.array, idx)) &&
        (val->type == GAVL_TYPE_DICTIONARY))
-      dict = &val->v.dictionary;
+      dict = val->v.dictionary;
     }
 
   return dict;
@@ -597,7 +597,7 @@ gavl_metadata_add_src(gavl_dictionary_t * m, const char * key,
     if(valp->type != GAVL_TYPE_DICTIONARY)
       return NULL;
     
-    ret = &valp->v.dictionary;
+    ret = valp->v.dictionary;
     
     loc = gavl_dictionary_get_string(ret, GAVL_META_URI);
     
@@ -628,9 +628,9 @@ gavl_metadata_add_src(gavl_dictionary_t * m, const char * key,
   valp = &m->entries[idx].v;
   
   if(valp->type == GAVL_TYPE_ARRAY)
-    return &valp->v.array.entries[valp->v.array.num_entries-1].v.dictionary;
+    return valp->v.array->entries[valp->v.array->num_entries-1].v.dictionary;
   else if(valp->type == GAVL_TYPE_DICTIONARY)
-    return &valp->v.dictionary;
+    return valp->v.dictionary;
   else
     return NULL;
   }
@@ -646,7 +646,7 @@ gavl_dictionary_get_string_src(const gavl_dictionary_t * m, const char * key, in
      (val->type != GAVL_TYPE_DICTIONARY))
     return NULL;
 
-  dict = &val->v.dictionary;
+  dict = val->v.dictionary;
   
   if(location)
     *location = gavl_dictionary_get_string(dict, GAVL_META_URI);
@@ -671,147 +671,3 @@ int gavl_metadata_has_src(const gavl_dictionary_t * m, const char * key,
   return 0;
   }
 
-/* */
-
-static gavl_dictionary_t *
-dictionary_get_stream(gavl_dictionary_t * d, int i, const char * tag)
-  {
-  gavl_array_t * arr;
-  gavl_value_t * val;
-
-  if((arr = gavl_dictionary_get_array_nc(d, tag)) &&
-     (val = gavl_array_get_nc(arr, i)))
-    return gavl_value_get_dictionary_nc(val);
-
-  return NULL; 
-  }
-
-static const gavl_dictionary_t *
-dictionary_get_stream_c(const gavl_dictionary_t * d, int i, const char * tag)
-  {
-  const gavl_array_t * arr;
-  const gavl_value_t * val;
-
-  if((arr = gavl_dictionary_get_array(d, tag)) &&
-     (val = gavl_array_get(arr, i)))
-    return gavl_value_get_dictionary(val);
-  
-  return NULL; 
-  }
-
-static int
-dictionary_get_num_streams(const gavl_dictionary_t * d, const char * tag)
-  {
-  const gavl_array_t * arr;
-
-  if(!(arr = gavl_dictionary_get_array(d, tag)))
-    return 0;
-  return arr->num_entries;
-  }
-
-static gavl_dictionary_t *
-append_stream(gavl_dictionary_t * d, const char * tag)
-  {
-  gavl_value_t val;
-  gavl_array_t * arr;
-  
-  if(!(arr = gavl_dictionary_get_array_nc(d, tag)))
-    {
-    gavl_value_init(&val);
-    gavl_value_set_array(&val);
-    gavl_dictionary_set_nocopy(d, tag, &val);
-    arr = gavl_dictionary_get_array_nc(d, tag);
-    }
-
-  gavl_value_init(&val);
-  gavl_value_set_dictionary(&val);
-  gavl_array_splice_val_nocopy(arr, arr->num_entries, 0, &val);
-
-  return &arr->entries[arr->num_entries-1].v.dictionary;
-  }
-
-gavl_dictionary_t * gavl_dictionary_get_audio_stream(gavl_dictionary_t * d, int i)
-  {
-  return dictionary_get_stream(d, i, GAVL_META_AUDIO_STREAMS);
-  }
-
-const gavl_dictionary_t * gavl_dictionary_get_audio_stream_c(const gavl_dictionary_t * d, int i)
-  {
-  return dictionary_get_stream_c(d, i, GAVL_META_AUDIO_STREAMS);
-  }
-  
-
-int gavl_dictionary_get_num_audio_streams(const gavl_dictionary_t * d)
-  {
-  return dictionary_get_num_streams(d, GAVL_META_AUDIO_STREAMS);
-  }
-  
-gavl_dictionary_t * gavl_dictionary_append_audio_stream(gavl_dictionary_t * d)
-  {
-  return append_stream(d, GAVL_META_AUDIO_STREAMS);
-  }
-
-/* */
-gavl_dictionary_t * gavl_dictionary_get_video_stream(gavl_dictionary_t * d, int i)
-  {
-  return dictionary_get_stream(d, i, GAVL_META_VIDEO_STREAMS);
-  }
-
-const gavl_dictionary_t * gavl_dictionary_get_video_stream_c(const gavl_dictionary_t * d, int i)
-  {
-  return dictionary_get_stream_c(d, i, GAVL_META_VIDEO_STREAMS);
-  }
-  
-int gavl_dictionary_get_num_video_streams(const gavl_dictionary_t * d)
-  {
-  return dictionary_get_num_streams(d, GAVL_META_VIDEO_STREAMS);
-  }
-  
-gavl_dictionary_t * gavl_dictionary_append_video_stream(gavl_dictionary_t * d)
-  {
-  return append_stream(d, GAVL_META_VIDEO_STREAMS);
-  }
-
-/* */
-gavl_dictionary_t * gavl_dictionary_get_text_stream(gavl_dictionary_t * d, int i)
-  {
-  return dictionary_get_stream(d, i, GAVL_META_TEXT_STREAMS);
-  }
-
-const gavl_dictionary_t * gavl_dictionary_get_text_stream_c(const gavl_dictionary_t * d, int i)
-  {
-  return dictionary_get_stream_c(d, i, GAVL_META_TEXT_STREAMS);
-  }
-
-int gavl_dictionary_get_num_text_streams(const gavl_dictionary_t * d)
-  {
-  return dictionary_get_num_streams(d, GAVL_META_TEXT_STREAMS);
-
-  }
-  
-gavl_dictionary_t * gavl_dictionary_append_text_stream(gavl_dictionary_t * d)
-  {
-  return append_stream(d, GAVL_META_TEXT_STREAMS);
-  }
-  
-/* */
-gavl_dictionary_t * gavl_dictionary_get_overlay_stream(gavl_dictionary_t * d, int i)
-  {
-  return dictionary_get_stream(d, i, GAVL_META_OVERLAY_STREAMS);
-  }
-
-const gavl_dictionary_t * gavl_dictionary_get_overlay_stream_c(const gavl_dictionary_t * d, int i)
-  {
-  return dictionary_get_stream_c(d, i, GAVL_META_OVERLAY_STREAMS);
-  }
-
-int gavl_dictionary_get_num_overlay_streams(const gavl_dictionary_t * d)
-  {
-  return dictionary_get_num_streams(d, GAVL_META_OVERLAY_STREAMS);
-  }
-  
-gavl_dictionary_t * gavl_dictionary_append_overlay_stream(gavl_dictionary_t * d)
-  {
-  return append_stream(d, GAVL_META_OVERLAY_STREAMS);
-  }
-     
