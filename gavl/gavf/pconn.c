@@ -150,10 +150,10 @@ put_packet_func(void * priv, gavl_packet_t * p)
   gavl_packet_dump(p);
 #endif
   /* Fist packet */
-  if(s->h->foot.pts_start == GAVL_TIME_UNDEFINED)
+  if(s->h->stats.pts_start == GAVL_TIME_UNDEFINED)
     s->next_sync_pts = p->pts;
   
-  gavf_stream_footer_update(&s->h->foot, p);
+  gavf_stream_stats_update(&s->h->stats, p);
   
   return gavf_flush_packets(s->g, s);
   

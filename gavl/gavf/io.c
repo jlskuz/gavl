@@ -651,8 +651,12 @@ int gavl_msg_write(const gavl_msg_t * msg, gavf_io_t * io)
 
 int gavl_value_read(gavf_io_t * io, gavl_value_t * v)
   {
-  if(!gavf_io_read_int32v(io, (int32_t*)&v->type))
+  gavl_type_t gavl_type;
+
+  if(!gavf_io_read_int32v(io, (int32_t*)&gavl_type))
     return 0;
+
+  gavl_value_set_type(v, gavl_type);
   
   switch(v->type)
     {

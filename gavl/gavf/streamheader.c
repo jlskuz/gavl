@@ -37,21 +37,21 @@ void gavf_stream_header_apply_footer(gavf_stream_header_t * h)
   {
   /* Set maximum packet size */
   if(!h->ci.max_packet_size)
-    h->ci.max_packet_size = h->foot.size_max;
+    h->ci.max_packet_size = h->stats.size_max;
 
   switch(h->type)
     {
     case GAVF_STREAM_VIDEO:
-      gavf_stream_footer_apply_video(&h->foot, 
-                                     &h->format.video,
-                                     &h->ci,
-                                     &h->m);
+      gavf_stream_stats_apply_video(&h->stats, 
+                                    &h->format.video,
+                                    &h->ci,
+                                    &h->m);
       break;
     case GAVF_STREAM_OVERLAY:
     case GAVF_STREAM_TEXT:
       break;
     case GAVF_STREAM_AUDIO:
-      gavf_stream_footer_apply_audio(&h->foot, 
+      gavf_stream_stats_apply_audio(&h->stats, 
                                      &h->format.audio,
                                      &h->ci,
                                      &h->m);
@@ -131,16 +131,16 @@ void gavf_stream_header_dump(const gavf_stream_header_t * h)
   gavl_dictionary_dump(&h->m, 6);
   
   fprintf(stderr, "    Footer: ");
-  if(h->foot.pts_start == GAVL_TIME_UNDEFINED)
+  if(h->stats.pts_start == GAVL_TIME_UNDEFINED)
     fprintf(stderr, "Not present\n");
   else
     {
     fprintf(stderr, "Present\n");
-    fprintf(stderr, "      size_min:     %d\n", h->foot.size_min);
-    fprintf(stderr, "      size_max:     %d\n", h->foot.size_max);
-    fprintf(stderr, "      duration_min: %"PRId64"\n", h->foot.duration_min);
-    fprintf(stderr, "      duration_max: %"PRId64"\n", h->foot.duration_max);
-    fprintf(stderr, "      pts_start:    %"PRId64"\n", h->foot.pts_start);
-    fprintf(stderr, "      pts_end:      %"PRId64"\n", h->foot.pts_end);
+    fprintf(stderr, "      size_min:     %d\n", h->stats.size_min);
+    fprintf(stderr, "      size_max:     %d\n", h->stats.size_max);
+    fprintf(stderr, "      duration_min: %"PRId64"\n", h->stats.duration_min);
+    fprintf(stderr, "      duration_max: %"PRId64"\n", h->stats.duration_max);
+    fprintf(stderr, "      pts_start:    %"PRId64"\n", h->stats.pts_start);
+    fprintf(stderr, "      pts_end:      %"PRId64"\n", h->stats.pts_end);
     }
   }

@@ -149,7 +149,9 @@ void gavl_value_copy(gavl_value_t * dst, const gavl_value_t * src)
     gavl_value_init(dst);
     return;
     }
-  dst->type = src->type;
+
+  gavl_value_set_type(dst, src->type);
+  
   switch(src->type)
     {
     case GAVL_TYPE_UNDEFINED:
@@ -219,18 +221,26 @@ void gavl_value_free(gavl_value_t * v)
         free(v->v.str);
       break;
     case GAVL_TYPE_DICTIONARY:
-      gavl_dictionary_free(v->v.dictionary);
-      free(v->v.dictionary);
+      if(v->v.dictionary)
+        {
+        gavl_dictionary_free(v->v.dictionary);
+        free(v->v.dictionary);
+        }
       break;
     case GAVL_TYPE_ARRAY:
-      gavl_array_free(v->v.array);
-      free(v->v.array);
+      if(v->v.array)
+        {
+        gavl_array_free(v->v.array);
+        free(v->v.array);
+        }
       break;
     case GAVL_TYPE_AUDIOFORMAT:
-      free(v->v.audioformat);
+      if(v->v.audioformat)
+        free(v->v.audioformat);
       break;
     case GAVL_TYPE_VIDEOFORMAT:
-      free(v->v.videoformat);
+      if(v->v.videoformat)
+        free(v->v.videoformat);
       break;
     }
   }
@@ -744,3 +754,34 @@ void gavl_value_dump(const gavl_value_t * v, int indent)
 
   }
 
+GAVL_PUBLIC
+void gavl_value_set_type(gavl_value_t * v, gavl_type_t  t)
+  {
+  switch(t)
+    {
+    case GAVL_TYPE_UNDEFINED:
+    case GAVL_TYPE_INT:
+    case GAVL_TYPE_LONG:
+    case GAVL_TYPE_FLOAT:
+    case GAVL_TYPE_COLOR_RGB:
+    case GAVL_TYPE_COLOR_RGBA:
+    case GAVL_TYPE_POSITION:
+    case GAVL_TYPE_STRING:
+      v->type = t;
+      break;
+    case GAVL_TYPE_AUDIOFORMAT:
+      gavl_value_set_audio_format(v);
+      break;
+    case GAVL_TYPE_VIDEOFORMAT:
+      gavl_value_set_video_format(v);
+      break;
+    case GAVL_TYPE_DICTIONARY:
+      gavl_value_set_dictionary(v);
+      break;
+    case GAVL_TYPE_ARRAY:
+      gavl_value_set_array(v);
+      break;
+    }
+  
+  
+  }

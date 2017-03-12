@@ -288,7 +288,7 @@ gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s)
     for(i = 0; i < g->ph.num_streams; i++)
       {
       if(!(g->streams[i].flags & STREAM_FLAG_DISCONTINUOUS) &&
-         (g->streams[i].h->foot.pts_start == GAVL_TIME_UNDEFINED))
+         (g->streams[i].h->stats.pts_start == GAVL_TIME_UNDEFINED))
         return GAVL_SINK_OK;
       }
     }

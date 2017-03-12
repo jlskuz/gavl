@@ -107,10 +107,10 @@ add_stream(gavf_program_header_t * ph, const gavl_dictionary_t * m)
   ret->id = ph->num_streams;
   
   /* Initialize footer */
-  ret->foot.duration_min = GAVL_TIME_UNDEFINED;
-  ret->foot.duration_max = GAVL_TIME_UNDEFINED;
-  ret->foot.pts_start    = GAVL_TIME_UNDEFINED;
-  ret->foot.pts_end      = GAVL_TIME_UNDEFINED;
+  ret->stats.duration_min = GAVL_TIME_UNDEFINED;
+  ret->stats.duration_max = GAVL_TIME_UNDEFINED;
+  ret->stats.pts_start    = GAVL_TIME_UNDEFINED;
+  ret->stats.pts_end      = GAVL_TIME_UNDEFINED;
   return ret;
   }
 
@@ -300,16 +300,16 @@ int gavf_program_header_get_duration(const gavf_program_header_t * ph,
   
   for(i = 0; i < ph->num_streams; i++)
     {
-    if(ph->streams[i].foot.pts_start == GAVL_TIME_UNDEFINED)
+    if(ph->streams[i].stats.pts_start == GAVL_TIME_UNDEFINED)
       return 0;
 
     ts = gavf_stream_get_timescale(&ph->streams[i]);
     
-    test = gavl_time_unscale(ts, ph->streams[i].foot.pts_start);
+    test = gavl_time_unscale(ts, ph->streams[i].stats.pts_start);
     if((start == GAVL_TIME_UNDEFINED) || (start > test))
       start = test;
 
-    test = gavl_time_unscale(ts, ph->streams[i].foot.pts_end);
+    test = gavl_time_unscale(ts, ph->streams[i].stats.pts_end);
     if((start == GAVL_TIME_UNDEFINED) || (end < test))
       end = test;
     }

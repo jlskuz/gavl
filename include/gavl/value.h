@@ -371,6 +371,10 @@ GAVL_PUBLIC
 gavl_value_t * gavl_value_get_item_nc(gavl_value_t * v, int item);
 
 GAVL_PUBLIC
+void gavl_value_set_type(gavl_value_t * v, gavl_type_t  t);
+
+
+GAVL_PUBLIC
 void gavl_value_set_int(gavl_value_t * v, int val);
 
 GAVL_PUBLIC
