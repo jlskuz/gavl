@@ -236,25 +236,25 @@ typedef struct
   int64_t total_bytes;   // For average bitrate 
   int64_t total_packets; // For average framerate
   
-  } gavf_stream_footer_t;
+  } gavf_stream_stats_t;
 
 GAVL_PUBLIC
-void gavf_stream_footer_init(gavf_stream_footer_t*);
+void gavf_stream_stats_init(gavf_stream_stats_t*);
 
 GAVL_PUBLIC
-void gavf_stream_footer_update(gavf_stream_footer_t*,gavl_packet_t*p);
+void gavf_stream_stats_update(gavf_stream_stats_t*,const gavl_packet_t*p);
 
 GAVL_PUBLIC
-void gavf_stream_footer_apply_audio(gavf_stream_footer_t * f, 
-                                    gavl_audio_format_t * fmt,
-                                    gavl_compression_info_t * ci,
-                                    gavl_dictionary_t * m);
+void gavf_stream_stats_apply_audio(gavf_stream_stats_t * f, 
+                                   const gavl_audio_format_t * fmt,
+                                   gavl_compression_info_t * ci,
+                                   gavl_dictionary_t * m);
 
 GAVL_PUBLIC
-void gavf_stream_footer_apply_video(gavf_stream_footer_t * f, 
-                                    gavl_video_format_t * fmt,
-                                    gavl_compression_info_t * ci,
-                                    gavl_dictionary_t * m);
+void gavf_stream_stats_apply_video(gavf_stream_stats_t * f, 
+                                   gavl_video_format_t * fmt,
+                                   gavl_compression_info_t * ci,
+                                   gavl_dictionary_t * m);
 
 typedef struct
   {
@@ -276,7 +276,7 @@ typedef struct
     } format;
 
   gavl_dictionary_t m;
-  gavf_stream_footer_t foot;
+  gavf_stream_stats_t stats;
   } gavf_stream_header_t;
 
 GAVL_PUBLIC

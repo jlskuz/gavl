@@ -50,14 +50,14 @@ int gavf_footer_check(gavf_t * g)
     {
     s = g->ph.streams + i;
 
-    if(!gavf_io_read_uint32v(g->io, &s->foot.size_min) ||
-       !gavf_io_read_uint32v(g->io, &s->foot.size_max) ||
-       !gavf_io_read_int64v(g->io, &s->foot.duration_min) ||
-       !gavf_io_read_int64v(g->io, &s->foot.duration_max) ||
-       !gavf_io_read_int64v(g->io, &s->foot.pts_start) ||
-       !gavf_io_read_int64v(g->io, &s->foot.pts_end) ||
-       !gavf_io_read_int64v(g->io, &s->foot.total_bytes) ||
-       !gavf_io_read_int64v(g->io, &s->foot.total_packets))
+    if(!gavf_io_read_uint32v(g->io, &s->stats.size_min) ||
+       !gavf_io_read_uint32v(g->io, &s->stats.size_max) ||
+       !gavf_io_read_int64v(g->io, &s->stats.duration_min) ||
+       !gavf_io_read_int64v(g->io, &s->stats.duration_max) ||
+       !gavf_io_read_int64v(g->io, &s->stats.pts_start) ||
+       !gavf_io_read_int64v(g->io, &s->stats.pts_end) ||
+       !gavf_io_read_int64v(g->io, &s->stats.total_bytes) ||
+       !gavf_io_read_int64v(g->io, &s->stats.total_packets))
       goto end;
 
     /* Set some useful values from the footer */
@@ -104,14 +104,14 @@ int gavf_footer_write(gavf_t * g)
     {
     s = g->ph.streams + i;
 
-    if(!gavf_io_write_uint32v(g->io, s->foot.size_min) ||
-       !gavf_io_write_uint32v(g->io, s->foot.size_max) ||
-       !gavf_io_write_int64v(g->io, s->foot.duration_min) ||
-       !gavf_io_write_int64v(g->io, s->foot.duration_max) ||
-       !gavf_io_write_int64v(g->io, s->foot.pts_start) ||
-       !gavf_io_write_int64v(g->io, s->foot.pts_end) ||
-       !gavf_io_write_int64v(g->io, s->foot.total_bytes) ||
-       !gavf_io_write_int64v(g->io, s->foot.total_packets))
+    if(!gavf_io_write_uint32v(g->io, s->stats.size_min) ||
+       !gavf_io_write_uint32v(g->io, s->stats.size_max) ||
+       !gavf_io_write_int64v(g->io, s->stats.duration_min) ||
+       !gavf_io_write_int64v(g->io, s->stats.duration_max) ||
+       !gavf_io_write_int64v(g->io, s->stats.pts_start) ||
+       !gavf_io_write_int64v(g->io, s->stats.pts_end) ||
+       !gavf_io_write_int64v(g->io, s->stats.total_bytes) ||
+       !gavf_io_write_int64v(g->io, s->stats.total_packets))
       return 0;
     }
 
@@ -148,11 +148,11 @@ void gavf_footer_init(gavf_program_header_t * ph)
   for(i = 0; i < ph->num_streams; i++)
     {
     s = ph->streams + i;
-    gavf_stream_footer_init(&s->foot);
+    gavf_stream_stats_init(&s->stats);
     }
   }
 
-void gavf_stream_footer_init(gavf_stream_footer_t * f)
+void gavf_stream_stats_init(gavf_stream_stats_t * f)
   {
   memset(f, 0, sizeof(*f));
   f->duration_min = GAVL_TIME_UNDEFINED;
@@ -161,7 +161,7 @@ void gavf_stream_footer_init(gavf_stream_footer_t * f)
   f->pts_end      = GAVL_TIME_UNDEFINED;
   }
   
-void gavf_stream_footer_update(gavf_stream_footer_t * f, gavl_packet_t * p)
+void gavf_stream_stats_update(gavf_stream_stats_t * f, const gavl_packet_t * p)
   {
   if(f->pts_start == GAVL_TIME_UNDEFINED)
     {
@@ -199,28 +199,28 @@ void gavf_stream_footer_update(gavf_stream_footer_t * f, gavl_packet_t * p)
   f->total_bytes += p->data_len;
   }
 
-static void footer_apply_common(gavf_stream_footer_t * f,
+static void footer_apply_common(gavf_stream_stats_t * f,
                                 gavl_compression_info_t * ci,
                                 gavl_dictionary_t * m, int timescale)
   {
-  if(ci->max_packet_size <= 0)
+  if(ci && (ci->max_packet_size <= 0))
     ci->max_packet_size = f->size_max;
-
-  if(ci->bitrate <= 0)
+  
+  if(ci && (ci->bitrate <= 0))
     {
     double avg_rate =
       (double)(f->total_bytes) / 
       (gavl_time_to_seconds(gavl_time_unscale(timescale,
                                               f->pts_end-f->pts_start)) * 125.0);
-    gavl_dictionary_set_float(m, GAVL_META_AVG_FRAMERATE, avg_rate);
+    gavl_dictionary_set_float(m, GAVL_META_AVG_BITRATE, avg_rate);
     }
   
   }
 
-void gavf_stream_footer_apply_audio(gavf_stream_footer_t * f, 
-                                    gavl_audio_format_t * fmt,
-                                    gavl_compression_info_t * ci,
-                                    gavl_dictionary_t * m)
+void gavf_stream_stats_apply_audio(gavf_stream_stats_t * f, 
+                                   const gavl_audio_format_t * fmt,
+                                   gavl_compression_info_t * ci,
+                                   gavl_dictionary_t * m)
   {
   if(f->pts_start == GAVL_TIME_UNDEFINED)
     return;
@@ -228,10 +228,10 @@ void gavf_stream_footer_apply_audio(gavf_stream_footer_t * f,
   footer_apply_common(f, ci, m, fmt->samplerate);
   }
 
-void gavf_stream_footer_apply_video(gavf_stream_footer_t * f, 
-                                    gavl_video_format_t * fmt,
-                                    gavl_compression_info_t * ci,
-                                    gavl_dictionary_t * m)
+void gavf_stream_stats_apply_video(gavf_stream_stats_t * f, 
+                                   gavl_video_format_t * fmt,
+                                   gavl_compression_info_t * ci,
+                                   gavl_dictionary_t * m)
   {
   if(f->pts_start == GAVL_TIME_UNDEFINED)
     return;

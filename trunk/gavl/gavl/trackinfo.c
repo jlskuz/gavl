@@ -451,7 +451,6 @@ gavl_dictionary_t * gavl_append_track(gavl_dictionary_t * dict)
   track_init(new_track, num);
   gavl_array_push_nocopy(arr, &val);
   
-  
   return arr->entries[num].v.dictionary;
   }
 
