@@ -338,8 +338,8 @@ int gavl_msg_get_arg_dictionary(gavl_msg_t * msg, int arg,
   if(msg->args[arg].type != GAVL_TYPE_DICTIONARY)
     return 0;
   
-  memcpy(m, &msg->args[arg].v.dictionary, sizeof(*m));
-  memset(&msg->args[arg].v.dictionary, 0, sizeof(*m));
+  memcpy(m, msg->args[arg].v.dictionary, sizeof(*m));
+  gavl_dictionary_init(msg->args[arg].v.dictionary);
   return 1;
   }
 
