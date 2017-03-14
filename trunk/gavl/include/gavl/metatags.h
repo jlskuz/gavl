@@ -305,7 +305,8 @@
 #define GAVL_META_SELECTED           "Selected"    // Track is selected in a GUI
 
 
-#define GAVL_META_STREAM_PTS_START "pts_start"
+#define GAVL_META_STREAM_PTS_START "PTSStart"
+#define GAVL_META_STREAM_PTS_END   "PTSEnd"
 #define GAVL_META_STREAM_DURATION  "duration"
 #define GAVL_META_STREAM_RAWSIZE   "rawsize"
 #define GAVL_META_STREAM_FORMAT    "fmt"

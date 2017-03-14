@@ -205,6 +205,13 @@ static void footer_apply_common(gavf_stream_stats_t * f,
   {
   if(ci && (ci->max_packet_size <= 0))
     ci->max_packet_size = f->size_max;
+
+  if(f->pts_start > 0)
+    gavl_dictionary_set_long(m, GAVL_META_STREAM_PTS_START, f->pts_start);
+  if(f->pts_end > 0)
+    gavl_dictionary_set_long(m, GAVL_META_STREAM_PTS_END, f->pts_end);
+  if(f->pts_end > f->pts_start)
+    gavl_dictionary_set_long(m, GAVL_META_STREAM_DURATION, f->pts_end - f->pts_start);
   
   if((!ci || (ci->bitrate <= 0)) && (f->total_bytes > 0) && (f->pts_end > f->pts_start))
     {
@@ -214,6 +221,7 @@ static void footer_apply_common(gavf_stream_stats_t * f,
                                               f->pts_end-f->pts_start)) * 125.0);
     gavl_dictionary_set_float(m, GAVL_META_AVG_BITRATE, avg_rate);
     }
+
   
   }
 
