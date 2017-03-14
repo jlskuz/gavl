@@ -206,7 +206,7 @@ static void footer_apply_common(gavf_stream_stats_t * f,
   if(ci && (ci->max_packet_size <= 0))
     ci->max_packet_size = f->size_max;
   
-  if(ci && (ci->bitrate <= 0))
+  if((!ci || (ci->bitrate <= 0)) && (f->total_bytes > 0) && (f->pts_end > f->pts_start))
     {
     double avg_rate =
       (double)(f->total_bytes) / 
@@ -240,13 +240,13 @@ void gavf_stream_stats_apply_video(gavf_stream_stats_t * f,
 
   if(fmt->framerate_mode == GAVL_FRAMERATE_VARIABLE)
     {
-    if(f->duration_min == f->duration_max)
+    if((f->duration_min != GAVL_TIME_UNDEFINED) && (f->duration_min == f->duration_max))
       {
       /* Detect constant framerate */
       fmt->framerate_mode = GAVL_FRAMERATE_CONSTANT;
       fmt->frame_duration = f->duration_min;
       }
-    else
+    else if((f->total_packets > 0) && (f->pts_end > f->pts_start))
       {
       double avg_rate =
         (double)f->total_packets / 
