@@ -164,7 +164,21 @@
 
 #define GAVL_MSG_GUI_WINDOW_COORDS 7  // Window coordinates changed
 
+/** \brief Window coordinates changed
+ *
+ *  arg0: direction (int)
+ */
+
+#define GAVL_MSG_GUI_SWIPE         8  // Swipe (touch screen)
+
+#define GAVL_MSG_GUI_SWIPE_UP      1
+#define GAVL_MSG_GUI_SWIPE_DOWN    2
+#define GAVL_MSG_GUI_SWIPE_LEFT    3
+#define GAVL_MSG_GUI_SWIPE_RIGHT   4
+
 /* Commands */
+
+
 
 /** \brief Set window title
  *
