@@ -102,7 +102,13 @@ void gavl_array_copy(gavl_array_t * dst, const gavl_array_t * src)
     }
   }
 
-
+void gavl_array_foreach(const gavl_array_t * a,
+                        gavl_array_foreach_func func, void * priv)
+  {
+  int i;
+  for(i = 0; i < a->num_entries; i++)
+    func(priv, i, &a->entries[i]);
+  }
 
 int
 gavl_array_compare(const gavl_array_t * m1,

@@ -180,8 +180,19 @@ const gavl_dictionary_t * gavl_stream_get_metadata(const gavl_dictionary_t*);
 
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_track_get_metadata_nc(gavl_dictionary_t*);
+
 GAVL_PUBLIC
 const gavl_dictionary_t * gavl_track_get_metadata(const gavl_dictionary_t*);
+
+GAVL_PUBLIC
+void gavl_track_compute_duration(gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
+gavl_time_t gavl_track_get_duration(const gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
+void gavl_track_set_duration(gavl_dictionary_t * dict, gavl_time_t dur);
+
 
 
 #endif // GAVL_TRACKINFO_H_INCLUDED
