@@ -565,3 +565,80 @@ const gavl_dictionary_t * gavl_track_get_metadata(const gavl_dictionary_t * dict
     return NULL;
   }
 
+
+static void get_stream_duration(void * priv, 
+                                int idx,
+                                const gavl_value_t * v)
+  {
+  gavl_time_t * t;
+  gavl_time_t test_duration;
+  const gavl_dictionary_t * s;
+  const gavl_dictionary_t * m;
+  int timescale;
+  int64_t stream_duration;
+  
+  t = priv;
+  
+  if(!(s = gavl_value_get_dictionary(v)))
+    return;
+  
+  if(!(m = gavl_dictionary_get_dictionary(s, GAVL_META_METADATA)))
+    return;
+    
+  if(!(gavl_dictionary_get_int(m, GAVL_META_STREAM_SAMPLE_TIMESCALE, &timescale)))
+    return;
+    
+  if((timescale <= 0))
+    return;
+  
+  if(!(gavl_dictionary_get_long(m, GAVL_META_STREAM_DURATION, &stream_duration)))
+    return;
+  
+  test_duration = gavl_time_unscale(timescale, stream_duration);
+  if(test_duration > *t)
+    *t = test_duration;
+  }
+
+
+void gavl_track_compute_duration(gavl_dictionary_t * dict)
+  {
+  gavl_array_t * arr;  
+  gavl_time_t dur = 0;
+  gavl_dictionary_t * m = gavl_track_get_metadata_nc(dict);
+  
+  if(gavl_dictionary_get_long(m, GAVL_META_APPROX_DURATION, &dur) && (dur > 0))
+    return;
+  
+  if((arr = gavl_dictionary_get_array_nc(dict, GAVL_META_AUDIO_STREAMS)))
+    gavl_array_foreach(arr, get_stream_duration, &dur);
+  
+  if((arr = gavl_dictionary_get_array_nc(dict, GAVL_META_VIDEO_STREAMS)))
+    gavl_array_foreach(arr, get_stream_duration, &dur);
+  
+  if((arr = gavl_dictionary_get_array_nc(dict, GAVL_META_TEXT_STREAMS)))
+    gavl_array_foreach(arr, get_stream_duration, &dur);
+  
+  if((arr = gavl_dictionary_get_array_nc(dict, GAVL_META_OVERLAY_STREAMS)))
+    gavl_array_foreach(arr, get_stream_duration, &dur);
+
+  if(dur > 0)
+    gavl_track_set_duration(dict, dur);
+  
+  }
+  
+gavl_time_t gavl_track_get_duration(const gavl_dictionary_t * dict)
+  {
+  gavl_time_t dur;
+  const gavl_dictionary_t * m = gavl_track_get_metadata(dict);
+  
+  if(gavl_dictionary_get_long(m, GAVL_META_APPROX_DURATION, &dur) && (dur > 0))
+    return dur;
+  else
+    return GAVL_TIME_UNDEFINED;
+  }
+
+void gavl_track_set_duration(gavl_dictionary_t * dict, gavl_time_t dur)
+  {
+  gavl_dictionary_t * m = gavl_track_get_metadata_nc(dict);
+  gavl_dictionary_set_long(m, GAVL_META_APPROX_DURATION, dur);
+  }

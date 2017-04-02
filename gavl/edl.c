@@ -462,7 +462,7 @@ static int segment_from_dictionary(gavl_edl_segment_t * seg,
 
   if(!gavl_dictionary_get_int(dict,  GAVL_EDL_TRACK_IDX,  &seg->track) ||
      !gavl_dictionary_get_int(dict,  GAVL_EDL_STREAM_IDX, &seg->stream) ||
-     !gavl_dictionary_get_int(dict,  GAVL_META_STREAM_TIMESCALE,      &seg->timescale) ||
+     !gavl_dictionary_get_int(dict,  GAVL_META_STREAM_SAMPLE_TIMESCALE, &seg->timescale) ||
      !gavl_dictionary_get_long(dict, GAVL_EDL_SRC_TIME,   &seg->src_time) ||
      !gavl_dictionary_get_long(dict, GAVL_EDL_DST_TIME,   &seg->dst_time) ||
      !gavl_dictionary_get_long(dict, GAVL_EDL_DST_DUR,    &seg->dst_duration) ||
@@ -483,7 +483,7 @@ static void segment_to_dictionary(const gavl_edl_segment_t * seg,
 
   gavl_dictionary_set_int(dict,  GAVL_EDL_TRACK_IDX,  seg->track);
   gavl_dictionary_set_int(dict,  GAVL_EDL_STREAM_IDX, seg->stream);
-  gavl_dictionary_set_int(dict,  GAVL_META_STREAM_TIMESCALE,  seg->timescale);
+  gavl_dictionary_set_int(dict,  GAVL_META_STREAM_SAMPLE_TIMESCALE,  seg->timescale);
   gavl_dictionary_set_long(dict, GAVL_EDL_SRC_TIME,   seg->src_time);
   gavl_dictionary_set_long(dict, GAVL_EDL_DST_TIME,   seg->dst_time);
   gavl_dictionary_set_long(dict, GAVL_EDL_DST_DUR,    seg->dst_duration);
@@ -506,7 +506,7 @@ static int stream_from_dictionary(gavl_edl_stream_t * s,
   {
   const gavl_array_t * segs;
   
-  if(!gavl_dictionary_get_int(dict,  GAVL_META_STREAM_TIMESCALE,      &s->timescale))
+  if(!gavl_dictionary_get_int(dict,  GAVL_META_STREAM_SAMPLE_TIMESCALE,      &s->timescale))
     return 0;
   
   if((segs = gavl_dictionary_get_array(dict, GAVL_EDL_SEGMENTS)) &&
@@ -534,7 +534,7 @@ static void stream_to_dictionary(const gavl_edl_stream_t * s,
                                  gavl_dictionary_t * dict)
   {
   
-  gavl_dictionary_set_int(dict,  GAVL_META_STREAM_TIMESCALE, s->timescale);
+  gavl_dictionary_set_int(dict,  GAVL_META_STREAM_SAMPLE_TIMESCALE, s->timescale);
   
   if(s->num_segments)
     {

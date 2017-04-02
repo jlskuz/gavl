@@ -57,7 +57,8 @@ typedef struct
   gavl_dict_entry_t * entries;
   } gavl_dictionary_t;
 
-typedef void (*gavl_dictionary_foreach_func)(void * priv, const char * name, const gavl_value_t * val);
+typedef void (*gavl_dictionary_foreach_func)(void * priv, const char * name,
+                                             const gavl_value_t * val);
 
 /* Dictionary functions */
 
@@ -246,6 +247,10 @@ struct gavl_array_s
   struct gavl_value_s * entries;
   };
 
+typedef void (*gavl_array_foreach_func)(void * priv, int idx,
+                                        const gavl_value_t * val);
+
+
 GAVL_PUBLIC
 void gavl_array_init(gavl_array_t * d);
 
@@ -274,8 +279,16 @@ GAVL_PUBLIC
 void gavl_array_dump(const gavl_array_t * a, int indent);
 
 GAVL_PUBLIC
+void gavl_array_foreach(const gavl_array_t * a,
+                        gavl_array_foreach_func func, void * priv);
+
+GAVL_PUBLIC
 int gavl_array_compare(const gavl_array_t * m1,
                        const gavl_array_t * m2);
+
+GAVL_PUBLIC
+void gavl_array_foreach(const gavl_array_t * a,
+                        gavl_array_foreach_func func, void * priv);
 
 GAVL_PUBLIC
 int gavl_array_move_entry(gavl_array_t * m1,
@@ -300,6 +313,8 @@ GAVL_PUBLIC
 void gavl_array_splice_array_nocopy(gavl_array_t * arr,
                                    int idx, int del,
                                    gavl_array_t * add);
+
+
 
 
 /* Value */

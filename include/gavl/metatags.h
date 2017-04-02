@@ -310,7 +310,13 @@
 #define GAVL_META_STREAM_DURATION  "duration"
 #define GAVL_META_STREAM_RAWSIZE   "rawsize"
 #define GAVL_META_STREAM_FORMAT    "fmt"
-#define GAVL_META_STREAM_TIMESCALE "timescale"
+#define GAVL_META_STREAM_PACKET_TIMESCALE "pscale"
+#define GAVL_META_STREAM_SAMPLE_TIMESCALE "sscale"
+
+#define GAVL_META_STREAM_PACKET_SIZE_MIN "minsize"
+#define GAVL_META_STREAM_PACKET_SIZE_MAX "maxsize"
+#define GAVL_META_STREAM_PACKET_DURATION_MIN "mindur"
+#define GAVL_META_STREAM_PACKET_DURATION_MAX "maxdur"
 
 #define GAVL_META_AUDIO_STREAMS    "astreams"
 #define GAVL_META_VIDEO_STREAMS    "vstreams"

@@ -226,8 +226,8 @@ const char * gavf_stream_type_name(gavf_stream_type_t t);
 
 typedef struct
   {
-  uint32_t size_min;
-  uint32_t size_max;
+  int32_t size_min;
+  int32_t size_max;
   int64_t  duration_min;
   int64_t  duration_max;
   int64_t  pts_start;
@@ -245,6 +245,12 @@ GAVL_PUBLIC
 void gavf_stream_stats_update(gavf_stream_stats_t*,const gavl_packet_t*p);
 
 GAVL_PUBLIC
+void gavf_stream_stats_update_params(gavf_stream_stats_t * f,
+                                     int64_t pts, int64_t duration, int data_len,
+                                     int flags);
+
+
+GAVL_PUBLIC
 void gavf_stream_stats_apply_audio(gavf_stream_stats_t * f, 
                                    const gavl_audio_format_t * fmt,
                                    gavl_compression_info_t * ci,
@@ -255,6 +261,11 @@ void gavf_stream_stats_apply_video(gavf_stream_stats_t * f,
                                    gavl_video_format_t * fmt,
                                    gavl_compression_info_t * ci,
                                    gavl_dictionary_t * m);
+
+GAVL_PUBLIC
+void gavf_stream_stats_apply_subtitle(gavf_stream_stats_t * f, 
+                                      gavl_dictionary_t * m);
+
 
 typedef struct
   {
