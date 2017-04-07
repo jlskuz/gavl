@@ -55,6 +55,10 @@ gavl_audio_format_t * gavl_track_get_audio_format_nc(gavl_dictionary_t * d, int 
 GAVL_PUBLIC
 void gavl_track_delete_audio_stream(gavl_dictionary_t * d, int stream);
 
+GAVL_PUBLIC
+void gavl_track_set_num_audio_streams(gavl_dictionary_t * d, int num);
+
+
 /* Video */
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_track_get_video_stream_nc(gavl_dictionary_t * d, int i);
@@ -89,6 +93,9 @@ gavl_video_format_t * gavl_track_get_video_format_nc(gavl_dictionary_t * d, int 
 GAVL_PUBLIC
 void gavl_track_delete_video_stream(gavl_dictionary_t * d, int stream);
 
+GAVL_PUBLIC
+void gavl_track_set_num_video_streams(gavl_dictionary_t * d, int num);
+
 
 /* Text */
 GAVL_PUBLIC
@@ -111,6 +118,9 @@ gavl_dictionary_t * gavl_track_get_text_metadata_nc(gavl_dictionary_t * d, int s
 
 GAVL_PUBLIC
 void gavl_track_delete_text_stream(gavl_dictionary_t * d, int stream);
+
+GAVL_PUBLIC
+void gavl_track_set_num_text_streams(gavl_dictionary_t * d, int num);
 
 
 /* Overlay */
@@ -140,6 +150,10 @@ gavl_video_format_t * gavl_track_get_overlay_format_nc(gavl_dictionary_t * d, in
 
 GAVL_PUBLIC
 void gavl_track_delete_overlay_stream(gavl_dictionary_t * d, int stream);
+
+GAVL_PUBLIC
+void gavl_track_set_num_overlay_streams(gavl_dictionary_t * d, int num);
+
 
 /* Tracks */
 GAVL_PUBLIC
