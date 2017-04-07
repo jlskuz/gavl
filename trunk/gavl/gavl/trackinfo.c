@@ -642,3 +642,52 @@ void gavl_track_set_duration(gavl_dictionary_t * dict, gavl_time_t dur)
   gavl_dictionary_t * m = gavl_track_get_metadata_nc(dict);
   gavl_dictionary_set_long(m, GAVL_META_APPROX_DURATION, dur);
   }
+
+void gavl_track_set_num_audio_streams(gavl_dictionary_t * dict, int num)
+  {
+  int i;
+
+  /* Delete previous streams */
+  gavl_dictionary_set(dict, GAVL_META_AUDIO_STREAMS, NULL);
+
+  for(i = 0; i < num; i++)
+    gavl_track_append_audio_stream(dict);
+ 
+  }
+
+void gavl_track_set_num_video_streams(gavl_dictionary_t * dict, int num)
+  {
+  int i;
+
+  /* Delete previous streams */
+  gavl_dictionary_set(dict, GAVL_META_VIDEO_STREAMS, NULL);
+
+  for(i = 0; i < num; i++)
+    gavl_track_append_video_stream(dict);
+  
+  }
+
+void gavl_track_set_num_text_streams(gavl_dictionary_t * dict, int num)
+  {
+  int i;
+
+  /* Delete previous streams */
+  gavl_dictionary_set(dict, GAVL_META_TEXT_STREAMS, NULL);
+
+  for(i = 0; i < num; i++)
+    gavl_track_append_text_stream(dict);
+  
+  }
+
+void gavl_track_set_num_overlay_streams(gavl_dictionary_t * dict, int num)
+  {
+  int i;
+
+  /* Delete previous streams */
+  gavl_dictionary_set(dict, GAVL_META_OVERLAY_STREAMS, NULL);
+
+  for(i = 0; i < num; i++)
+    gavl_track_append_overlay_stream(dict);
+  
+  }
+
