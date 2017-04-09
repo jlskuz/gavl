@@ -115,10 +115,10 @@ GAVL_PUBLIC
 int gavl_chapter_list_get_num(const gavl_chapter_list_t * list);
 
 GAVL_PUBLIC
-gavl_dictionary_t * gavl_chapter_list_get(gavl_chapter_list_t * list, int idx);
+gavl_dictionary_t * gavl_chapter_list_get_nc(gavl_chapter_list_t * list, int idx);
   
 GAVL_PUBLIC
-const gavl_dictionary_t * gavl_chapter_list_get_c(const gavl_chapter_list_t * list, int idx);
+const gavl_dictionary_t * gavl_chapter_list_get(const gavl_chapter_list_t * list, int idx);
 
 GAVL_PUBLIC
 int64_t gavl_chapter_list_get_time(const gavl_chapter_list_t * list, int idx);
@@ -132,11 +132,11 @@ gavl_dictionary_add_chapter_list(gavl_dictionary_t * m, int timescale);
   
 GAVL_PUBLIC
 gavl_dictionary_t *
-gavl_dictionary_get_chapter_list(gavl_dictionary_t * m);
+gavl_dictionary_get_chapter_list_nc(gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 const gavl_dictionary_t *
-gavl_dictionary_get_chapter_list_c(const gavl_dictionary_t * m);
+gavl_dictionary_get_chapter_list(const gavl_dictionary_t * m);
 
   
 /**
