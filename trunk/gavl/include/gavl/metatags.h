@@ -182,6 +182,8 @@
 
 #define GAVL_META_VENDOR      "Vendor"
 
+#define GAVL_META_DISK_NAME   "DiskName"
+
 /** \brief Model name of the device, which created the file
  */
 
@@ -324,7 +326,7 @@
 #define GAVL_META_OVERLAY_STREAMS  "ostreams"
 #define GAVL_META_METADATA         "metadata"
 #define GAVL_META_EDL              "edl"
-#define GAVL_META_TRACKS           "tracks" // Array containing single tracks
+#define GAVL_META_TRACKS           GAVL_META_CHILDREN // Array containing single tracks
 
 /**
  *

@@ -691,3 +691,29 @@ void gavl_track_set_num_overlay_streams(gavl_dictionary_t * dict, int num)
   
   }
 
+int gavl_track_can_seek(const gavl_dictionary_t * track)
+  {
+  int val = 0;
+  const gavl_dictionary_t * m;
+
+  if(!(m = gavl_track_get_metadata(track)) ||
+     !gavl_dictionary_get_int(m, GAVL_META_CAN_SEEK, &val) ||
+     !val)
+    return 0;
+
+  return 1;
+  }
+
+int gavl_track_can_pause(const gavl_dictionary_t * track)
+  {
+  int val = 0;
+  const gavl_dictionary_t * m;
+
+  if(!(m = gavl_track_get_metadata(track)) ||
+     !gavl_dictionary_get_int(m, GAVL_META_CAN_PAUSE, &val) ||
+     !val)
+    return 0;
+
+  return 1;
+  
+  }

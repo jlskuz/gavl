@@ -144,7 +144,7 @@ int gavl_chapter_list_get_num(const gavl_chapter_list_t * list)
   return arr->num_entries;
   }
 
-gavl_dictionary_t * gavl_chapter_list_get(gavl_chapter_list_t * list, int idx)
+gavl_dictionary_t * gavl_chapter_list_get_nc(gavl_chapter_list_t * list, int idx)
   {
   gavl_array_t * arr = get_chapters(list);
 
@@ -158,7 +158,7 @@ int64_t gavl_chapter_list_get_time(const gavl_chapter_list_t * list, int idx)
   const gavl_dictionary_t * chap;
   int64_t t = GAVL_TIME_UNDEFINED;
 
-  if(!(chap = gavl_chapter_list_get_c(list, idx)) ||
+  if(!(chap = gavl_chapter_list_get(list, idx)) ||
      !gavl_dictionary_get_long(chap, GAVL_CHAPTERLIST_TIME, &t))
     return GAVL_TIME_UNDEFINED;
   return t;
@@ -169,14 +169,14 @@ const char * gavl_chapter_list_get_label(const gavl_chapter_list_t * list, int i
   const gavl_dictionary_t * chap;
   const char * ret;
   
-  if(!(chap = gavl_chapter_list_get_c(list, idx)) ||
+  if(!(chap = gavl_chapter_list_get(list, idx)) ||
      !(ret = gavl_dictionary_get_string(chap, GAVL_META_LABEL)))
     return NULL;
   return ret;
   }
 
 const gavl_dictionary_t *
-gavl_chapter_list_get_c(const gavl_chapter_list_t * list, int idx)
+gavl_chapter_list_get(const gavl_chapter_list_t * list, int idx)
   {
   const gavl_array_t * arr;
 
@@ -199,7 +199,7 @@ gavl_dictionary_add_chapter_list(gavl_dictionary_t * m, int timescale)
   }
   
 const gavl_dictionary_t *
-gavl_dictionary_get_chapter_list_c(const gavl_dictionary_t * m)
+gavl_dictionary_get_chapter_list(const gavl_dictionary_t * m)
   {
   const gavl_value_t * val;
   if(!(val = gavl_dictionary_get(m, GAVL_CHAPTERLIST_CHAPTERLIST)))
@@ -208,7 +208,7 @@ gavl_dictionary_get_chapter_list_c(const gavl_dictionary_t * m)
   }
 
 gavl_dictionary_t *
-gavl_dictionary_get_chapter_list(gavl_dictionary_t * m)
+gavl_dictionary_get_chapter_list_nc(gavl_dictionary_t * m)
   {
   gavl_value_t * val;
   if(!(val = gavl_dictionary_get_nc(m, GAVL_CHAPTERLIST_CHAPTERLIST)) ||

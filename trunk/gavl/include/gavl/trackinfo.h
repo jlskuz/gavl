@@ -154,7 +154,6 @@ void gavl_track_delete_overlay_stream(gavl_dictionary_t * d, int stream);
 GAVL_PUBLIC
 void gavl_track_set_num_overlay_streams(gavl_dictionary_t * d, int num);
 
-
 /* Tracks */
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_append_track(gavl_dictionary_t*);
@@ -170,6 +169,13 @@ int gavl_get_num_tracks(const gavl_dictionary_t*);
 
 GAVL_PUBLIC
 void gavl_delete_track(gavl_dictionary_t*, int idx);
+
+GAVL_PUBLIC
+int gavl_track_can_seek(const gavl_dictionary_t * track);
+
+GAVL_PUBLIC
+int gavl_track_can_pause(const gavl_dictionary_t * track);
+
 
 // GAVL_PUBLIC
 
