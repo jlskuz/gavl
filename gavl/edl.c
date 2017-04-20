@@ -33,11 +33,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define GAVL_EDL_TRACK_IDX  "tidx"
-#define GAVL_EDL_STREAM_IDX "sidx"
-#define GAVL_EDL_SRC_TIME   "stime"
-#define GAVL_EDL_DST_TIME   "dtime"
-#define GAVL_EDL_DST_DUR    "ddur"
+#define GAVL_EDL_TRACK_IDX     "tidx"
+#define GAVL_EDL_STREAM_IDX    "sidx"
+#define GAVL_EDL_SRC_TIME      "stime"
+#define GAVL_EDL_DST_TIME      "dtime"
+#define GAVL_EDL_DST_DUR       "ddur"
+#define GAVL_EDL_SPEED_NUM     "spnum"
+#define GAVL_EDL_SPEED_DEN     "spden"
+#define GAVL_EDL_SEGMENTS      "segs"
 
 static char * my_strdup(char * s)
   {
@@ -446,14 +449,6 @@ gavl_edl_dst_time_to_src(const gavl_edl_track_t * t,
   } gavl_edl_segment_t;
  */
 
-#define GAVL_EDL_TRACK_IDX     "tidx"
-#define GAVL_EDL_STREAM_IDX    "sidx"
-#define GAVL_EDL_SRC_TIME      "stime"
-#define GAVL_EDL_DST_TIME      "dtime"
-#define GAVL_EDL_DST_DUR       "ddur"
-#define GAVL_EDL_SPEED_NUM "spnum"
-#define GAVL_EDL_SPEED_DEN "spden"
-#define GAVL_EDL_SEGMENTS  "segs"
 
 static int segment_from_dictionary(gavl_edl_segment_t * seg, 
                                    const gavl_dictionary_t * dict)

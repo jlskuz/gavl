@@ -58,6 +58,16 @@ typedef struct
   
   } gavl_edl_segment_t;
 
+void gavl_edl_segment_set_url(gavl_edl_segment_t * seg, const char * url); 
+void gavl_edl_segment_set_speed(gavl_edl_segment_t * seg, int num, int den); 
+void gavl_edl_segment_set(gavl_edl_segment_t * seg,
+                          int track,
+                          int stream,
+                          int timescale,
+                          int64_t src_time,
+                          int64_t dst_time,
+                          int64_t dst_duration);
+  
 /** \brief A locical stream
  */
 
