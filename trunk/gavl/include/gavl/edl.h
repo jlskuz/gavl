@@ -31,12 +31,15 @@ extern "C" {
  *  \brief Forward declaration
  */
 
-typedef struct gavl_edl_s gavl_edl_t;
   
   
 /** \brief One segment of a physical stream to appear in a logical stream
  */
-  
+
+#if 0  
+
+typedef struct gavl_edl_s gavl_edl_t;
+
 typedef struct
   {
   char * url;   //!< Location of that segment. If NULL, the "master url" in \ref gavl_edl_t is valid.
@@ -57,7 +60,10 @@ typedef struct
   int32_t speed_den; //!< Playback speed demoninator
   
   } gavl_edl_segment_t;
-
+#else
+typedef gavl_dictionary_t gavl_edl_segment_t;
+#endif
+  
 void gavl_edl_segment_set_url(gavl_edl_segment_t * seg, const char * url); 
 void gavl_edl_segment_set_speed(gavl_edl_segment_t * seg, int num, int den); 
 void gavl_edl_segment_set(gavl_edl_segment_t * seg,
@@ -67,10 +73,20 @@ void gavl_edl_segment_set(gavl_edl_segment_t * seg,
                           int64_t src_time,
                           int64_t dst_time,
                           int64_t dst_duration);
+
+const char * gavl_edl_segment_get_url(const gavl_edl_segment_t * seg); 
+void gavl_edl_segment_get_speed(const gavl_edl_segment_t * seg, int * num, int * den); 
+int gavl_edl_segment_get(const gavl_edl_segment_t * seg,
+                          int * track,
+                          int * stream,
+                          int * timescale,
+                          int64_t * src_time,
+                          int64_t * dst_time,
+                          int64_t * dst_duration);
   
 /** \brief A locical stream
  */
-
+#if 0
 typedef struct
   {
   gavl_edl_segment_t * segments; //!< Segments
@@ -108,13 +124,7 @@ struct gavl_edl_s
   gavl_edl_track_t * tracks;  //!< Logical tracks
   char * url;                 //!< Filename if all streams are from the same file
   };
-
-/** \brief Create an empty EDL
- *  \returns A newly allocated EDL
- */
-
-GAVL_PUBLIC
-gavl_edl_t * gavl_edl_create();
+ 
 
 /** \brief Append a track to the EDL
     \param e An EDL
@@ -156,15 +166,6 @@ gavl_edl_stream_t * gavl_edl_add_text_stream(gavl_edl_track_t * t);
 GAVL_PUBLIC
 gavl_edl_stream_t * gavl_edl_add_overlay_stream(gavl_edl_track_t * t);
 
-/** \brief Append a segment to an EDL stream
-    \param s An EDL stream
- *  \returns The new segment
- */
-
-GAVL_PUBLIC
-gavl_edl_segment_t * gavl_edl_add_segment(gavl_edl_stream_t * s);
-
-
 /** \brief Copy an entire EDL
     \param e An EDL
  *  \returns Copy of the EDL
@@ -179,6 +180,27 @@ gavl_edl_t * gavl_edl_copy(const gavl_edl_t * e);
 
 GAVL_PUBLIC
 void gavl_edl_destroy(gavl_edl_t * e);
+
+  
+#endif
+
+/** \brief Create an empty EDL
+ *  \returns A newly allocated EDL
+ */
+
+GAVL_PUBLIC
+gavl_dictionary_t * gavl_edl_create(gavl_dictionary_t * parent);
+
+  
+/** \brief Append a segment to an EDL stream
+    \param s An EDL stream
+ *  \returns The new segment
+ */
+  
+GAVL_PUBLIC
+gavl_edl_segment_t * gavl_edl_add_segment(gavl_dictionary_t * s);
+
+#if 0
 
 /** \brief Dump an EDL to stderr
     \param e An EDL
@@ -197,7 +219,7 @@ void gavl_edl_dump(const gavl_edl_t * e);
  */
   
 GAVL_PUBLIC
-int64_t gavl_edl_src_time_to_dst(const gavl_edl_stream_t * st,
+int64_t gavl_edl_src_time_to_dst(const gavl_dictionary_t * st,
                                  const gavl_edl_segment_t * seg,
                                  int64_t src_time);
 
@@ -212,21 +234,20 @@ int64_t gavl_edl_src_time_to_dst(const gavl_edl_stream_t * st,
   
 GAVL_PUBLIC
 const gavl_edl_segment_t *
-gavl_edl_dst_time_to_src(const gavl_edl_track_t * t,
-                         const gavl_edl_stream_t * st,
+gavl_edl_dst_time_to_src(const gavl_dictionary_t * t,
+                         const gavl_dictionary_t * st,
                          int64_t dst_time,
                          int64_t * src_time,
                          int64_t * mute_time);
                              
-
 GAVL_PUBLIC gavl_time_t
 gavl_edl_track_get_duration(const gavl_edl_track_t * t);
-
+#endif
 
 /* Convert to / from dictionary for easy transporting */
 
-GAVL_PUBLIC void gavl_edl_to_dictionary(const gavl_edl_t * edl, gavl_dictionary_t * dict);
-GAVL_PUBLIC int gavl_edl_from_dictionary(gavl_edl_t * edl, const gavl_dictionary_t * dict);
+// GAVL_PUBLIC void gavl_edl_to_dictionary(const gavl_edl_t * edl, gavl_dictionary_t * dict);
+// GAVL_PUBLIC int gavl_edl_from_dictionary(gavl_edl_t * edl, const gavl_dictionary_t * dict);
   
 #ifdef __cplusplus
 }
