@@ -415,6 +415,9 @@ void gavl_dictionary_dump(const gavl_dictionary_t * m, int indent)
   {
   int len, i, j;
   int max_key_len = 0;
+
+  gavl_diprintf(indent, "{\n");
+
   
   for(i = 0; i < m->num_entries; i++)
     {
@@ -434,11 +437,11 @@ void gavl_dictionary_dump(const gavl_dictionary_t * m, int indent)
     
     for(j = 0; j < max_key_len - len; j++)
       fprintf(stderr, " ");
-    gavl_value_dump(&m->entries[i].v, 0);
+    gavl_value_dump(&m->entries[i].v, indent + 2);
 
-    if(i < m->num_entries-1)
-      fprintf(stderr, "\n");
+    fprintf(stderr, "\n");
     }
+  gavl_diprintf(indent, "}");
   }
 
 static void merge_func_r(void * priv, const char * name, const gavl_value_t * val)

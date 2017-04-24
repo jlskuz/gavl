@@ -28,19 +28,12 @@
 
 #include <gavl/edl.h>
 #include <gavl/utils.h>
+#include <gavl/gavf.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define GAVL_EDL_TRACK_IDX     "tidx"
-#define GAVL_EDL_STREAM_IDX    "sidx"
-#define GAVL_EDL_SRC_TIME      "stime"
-#define GAVL_EDL_DST_TIME      "dtime"
-#define GAVL_EDL_DST_DUR       "ddur"
-#define GAVL_EDL_SPEED_NUM     "spnum"
-#define GAVL_EDL_SPEED_DEN     "spden"
-#define GAVL_EDL_SEGMENTS      "segs"
 
 
 gavl_dictionary_t * gavl_edl_create(gavl_dictionary_t * parent)
@@ -687,3 +680,85 @@ int gavl_edl_from_dictionary(gavl_edl_t * edl, const gavl_dictionary_t * dict)
   }
 
 #endif
+
+static void finalize_stream(void * priv, 
+                            int idx,
+                            const gavl_value_t * v_c)
+  {
+  int track;
+  int stream;
+  int timescale;
+  int64_t src_time;
+  int64_t dst_time;
+  int64_t dst_duration;
+  
+  gavl_value_t * v;
+  gavl_array_t * arr;
+  gavl_dictionary_t * seg;
+  gavl_dictionary_t * s;
+
+  gavf_stream_stats_t stats;
+  
+  arr = priv;
+  v = gavl_array_get_nc(arr, idx);
+  if(!(s = gavl_value_get_dictionary_nc(v)) ||
+     !(arr = gavl_dictionary_get_array_nc(s, GAVL_EDL_SEGMENTS)))
+    return;
+
+  gavf_stream_stats_init(&stats);
+  
+  if(!(v = gavl_array_get_nc(arr, 0)) ||
+     !(seg = gavl_value_get_dictionary_nc(v)) ||
+     !gavl_edl_segment_get(seg, &track, &stream, &timescale, &src_time, &dst_time, &dst_duration))
+    return;
+
+  stats.pts_start = dst_time;
+
+  if(!(v = gavl_array_get_nc(arr, arr->num_entries-1)) ||
+     !(seg = gavl_value_get_dictionary_nc(v)) ||
+     !gavl_edl_segment_get(seg, &track, &stream, &timescale, &src_time, &dst_time, &dst_duration))
+    return;
+  
+  stats.pts_end = dst_time + dst_duration;
+
+  gavf_stream_stats_apply_generic(&stats, NULL, gavl_stream_get_metadata_nc(s));
+  
+  }
+
+
+static void finalize_track(void * priv, 
+                           int idx,
+                           const gavl_value_t * v_c)
+  {
+  gavl_value_t * v;
+  gavl_array_t * arr;
+  gavl_dictionary_t * t;
+  
+  arr = priv;
+  v = gavl_array_get_nc(arr, idx);
+  if(!(t = gavl_value_get_dictionary_nc(v)))
+    return;
+  
+  if((arr = gavl_dictionary_get_array_nc(t, GAVL_META_AUDIO_STREAMS)))
+    gavl_array_foreach(arr, finalize_stream, arr);
+  
+  if((arr = gavl_dictionary_get_array_nc(t, GAVL_META_VIDEO_STREAMS)))
+    gavl_array_foreach(arr, finalize_stream, arr);
+  
+  if((arr = gavl_dictionary_get_array_nc(t, GAVL_META_TEXT_STREAMS)))
+    gavl_array_foreach(arr, finalize_stream, arr);
+  
+  if((arr = gavl_dictionary_get_array_nc(t, GAVL_META_OVERLAY_STREAMS)))
+    gavl_array_foreach(arr, finalize_stream, arr);
+
+  gavl_track_compute_duration(t);
+  }
+
+void gavl_edl_finalize(gavl_dictionary_t * edl)
+  {
+  gavl_array_t * arr;
+
+  if((arr = gavl_dictionary_get_array_nc(edl, GAVL_META_CHILDREN)))
+    gavl_array_foreach(arr, finalize_track, arr);
+  
+  }

@@ -207,9 +207,9 @@ void gavf_stream_stats_update_params(gavf_stream_stats_t * f,
     f->total_bytes += data_len;
   }
 
-static void footer_apply_common(gavf_stream_stats_t * f,
-                                gavl_compression_info_t * ci,
-                                gavl_dictionary_t * m)
+void gavf_stream_stats_apply_generic(gavf_stream_stats_t * f,
+                                     gavl_compression_info_t * ci,
+                                     gavl_dictionary_t * m)
   {
   if(ci && (ci->max_packet_size <= 0))
     ci->max_packet_size = f->size_max;
@@ -259,8 +259,9 @@ void gavf_stream_stats_apply_audio(gavf_stream_stats_t * f,
                                    gavl_compression_info_t * ci,
                                    gavl_dictionary_t * m)
   {
-  calc_bitrate(f, fmt->samplerate, ci, m);
-  footer_apply_common(f, ci, m);
+  if(fmt)
+    calc_bitrate(f, fmt->samplerate, ci, m);
+  gavf_stream_stats_apply_generic(f, ci, m);
   }
 
 void gavf_stream_stats_apply_video(gavf_stream_stats_t * f, 
@@ -268,11 +269,12 @@ void gavf_stream_stats_apply_video(gavf_stream_stats_t * f,
                                    gavl_compression_info_t * ci,
                                    gavl_dictionary_t * m)
   {
-  calc_bitrate(f, fmt->timescale, ci, m);
+  if(fmt)
+    calc_bitrate(f, fmt->timescale, ci, m);
   
-  footer_apply_common(f, ci, m);
+  gavf_stream_stats_apply_generic(f, ci, m);
   
-  if(fmt->framerate_mode == GAVL_FRAMERATE_VARIABLE)
+  if(fmt && (fmt->framerate_mode == GAVL_FRAMERATE_VARIABLE))
     {
     if((f->duration_min > 0) && (f->duration_min == f->duration_max))
       {
@@ -295,5 +297,5 @@ void gavf_stream_stats_apply_video(gavf_stream_stats_t * f,
 void gavf_stream_stats_apply_subtitle(gavf_stream_stats_t * f, 
                                       gavl_dictionary_t * m)
   {
-  footer_apply_common(f, NULL, m);
+  gavf_stream_stats_apply_generic(f, NULL, m);
   }

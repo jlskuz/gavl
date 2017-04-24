@@ -228,17 +228,17 @@ static void do_indent(int num)
 
 void gavl_audio_format_dump(const gavl_audio_format_t * format)
   {
-  gavl_audio_format_dumpi(format, 0);
+  gavl_audio_format_dumpi(format, 2);
   }
 
 void gavl_audio_format_dumpi(const gavl_audio_format_t * f, int indent)
   {
   int i;
   do_indent(indent);
-  fprintf(stderr, "  Channels:          %d\n", f->num_channels);
+  fprintf(stderr, "Channels:          %d\n", f->num_channels);
 
   do_indent(indent);
-  fprintf(stderr, "  Channel order:     ");
+  fprintf(stderr, "Channel order:     ");
   for(i = 0; i < f->num_channels; i++)
     {
     fprintf(stderr, "%s", gavl_channel_id_to_string(f->channel_locations[i]));
@@ -248,34 +248,34 @@ void gavl_audio_format_dumpi(const gavl_audio_format_t * f, int indent)
   fprintf(stderr, "\n");
 
   do_indent(indent);
-  fprintf(stderr, "  Samplerate:        %d\n", f->samplerate);
+  fprintf(stderr, "Samplerate:        %d\n", f->samplerate);
 
   do_indent(indent);
-  fprintf(stderr, "  Samples per frame: %d\n", f->samples_per_frame);
+  fprintf(stderr, "Samples per frame: %d\n", f->samples_per_frame);
 
   do_indent(indent);
-  fprintf(stderr, "  Interleave Mode:   %s\n",
+  fprintf(stderr, "Interleave Mode:   %s\n",
           gavl_interleave_mode_to_string(f->interleave_mode));
 
   do_indent(indent);
-  fprintf(stderr, "  Sample format:     %s\n",
+  fprintf(stderr, "Sample format:     %s\n",
           gavl_sample_format_to_string(f->sample_format));
   
   if(gavl_front_channels(f) == 3)
     {
     do_indent(indent);
     if(f->center_level > 0.0)
-      fprintf(stderr, "  Center level:      %0.1f dB\n", 20 * log10(f->center_level));
+      fprintf(stderr, "Center level:      %0.1f dB\n", 20 * log10(f->center_level));
     else
-      fprintf(stderr, "  Center level:      Zero\n");
+      fprintf(stderr, "Center level:      Zero\n");
     }
   if(gavl_rear_channels(f))
     {
     do_indent(indent);
     if(f->rear_level > 0.0)
-      fprintf(stderr, "  Rear level:        %0.1f dB\n", 20 * log10(f->rear_level));
+      fprintf(stderr, "Rear level:        %0.1f dB\n", 20 * log10(f->rear_level));
     else
-      fprintf(stderr, "  Rear level:        Zero\n");
+      fprintf(stderr, "Rear level:        Zero\n");
     }
   }
 

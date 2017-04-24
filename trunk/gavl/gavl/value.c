@@ -738,16 +738,17 @@ void gavl_value_dump(const gavl_value_t * v, int indent)
       break;
     case GAVL_TYPE_STRING:
       if(!v->v.str)
-        gavl_diprintf(indent, "NULL");
+        gavl_diprintf(0, "NULL");
       else
-        gavl_diprintf(indent, "\"%s\"", v->v.str);
+        gavl_diprintf(0, "\"%s\"", v->v.str);
       break;
     case GAVL_TYPE_DICTIONARY:
       gavl_dprintf("\n");
-      gavl_dictionary_dump(v->v.dictionary, indent + 2);
+      gavl_dictionary_dump(v->v.dictionary, indent);
       
       break;
     case GAVL_TYPE_ARRAY:
+      gavl_dprintf("\n");
       gavl_array_dump(v->v.array, indent);
       break;
     }

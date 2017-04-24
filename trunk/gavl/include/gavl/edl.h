@@ -31,6 +31,14 @@ extern "C" {
  *  \brief Forward declaration
  */
 
+#define GAVL_EDL_TRACK_IDX     "tidx"
+#define GAVL_EDL_STREAM_IDX    "sidx"
+#define GAVL_EDL_SRC_TIME      "stime"
+#define GAVL_EDL_DST_TIME      "dtime"
+#define GAVL_EDL_DST_DUR       "ddur"
+#define GAVL_EDL_SPEED_NUM     "spnum"
+#define GAVL_EDL_SPEED_DEN     "spden"
+#define GAVL_EDL_SEGMENTS      "segs"
   
   
 /** \brief One segment of a physical stream to appear in a logical stream
@@ -63,9 +71,14 @@ typedef struct
 #else
 typedef gavl_dictionary_t gavl_edl_segment_t;
 #endif
-  
+
+GAVL_PUBLIC 
 void gavl_edl_segment_set_url(gavl_edl_segment_t * seg, const char * url); 
+
+GAVL_PUBLIC
 void gavl_edl_segment_set_speed(gavl_edl_segment_t * seg, int num, int den); 
+
+GAVL_PUBLIC
 void gavl_edl_segment_set(gavl_edl_segment_t * seg,
                           int track,
                           int stream,
@@ -74,8 +87,13 @@ void gavl_edl_segment_set(gavl_edl_segment_t * seg,
                           int64_t dst_time,
                           int64_t dst_duration);
 
+GAVL_PUBLIC
 const char * gavl_edl_segment_get_url(const gavl_edl_segment_t * seg); 
+
+GAVL_PUBLIC
 void gavl_edl_segment_get_speed(const gavl_edl_segment_t * seg, int * num, int * den); 
+
+GAVL_PUBLIC
 int gavl_edl_segment_get(const gavl_edl_segment_t * seg,
                           int * track,
                           int * stream,
@@ -83,6 +101,11 @@ int gavl_edl_segment_get(const gavl_edl_segment_t * seg,
                           int64_t * src_time,
                           int64_t * dst_time,
                           int64_t * dst_duration);
+
+
+GAVL_PUBLIC
+void gavl_edl_finalize(gavl_dictionary_t * edl);
+  
   
 /** \brief A locical stream
  */
