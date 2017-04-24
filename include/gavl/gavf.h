@@ -266,6 +266,11 @@ GAVL_PUBLIC
 void gavf_stream_stats_apply_subtitle(gavf_stream_stats_t * f, 
                                       gavl_dictionary_t * m);
 
+GAVL_PUBLIC
+void gavf_stream_stats_apply_generic(gavf_stream_stats_t * f,
+                                     gavl_compression_info_t * ci,
+                                     gavl_dictionary_t * m);
+
 
 typedef struct
   {

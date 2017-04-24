@@ -127,7 +127,6 @@ static void init_stream(gavl_dictionary_t * dict)
   gavl_dictionary_get_child(dict, GAVL_META_METADATA);
   }
 
-
 /* Audio */
 
 static void init_audio_stream(gavl_dictionary_t * dict)
