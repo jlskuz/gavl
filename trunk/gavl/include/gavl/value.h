@@ -186,7 +186,7 @@ gavl_dictionary_compare(const gavl_dictionary_t * m1,
 
 GAVL_PUBLIC
 gavl_dictionary_t *
-gavl_dictionary_get_child(gavl_dictionary_t *, const char * name);
+gavl_dictionary_get_dictionary_create(gavl_dictionary_t *, const char * name);
 
 GAVL_PUBLIC void
 gavl_dictionary_delete_fields(gavl_dictionary_t * m, const char * fields[]);

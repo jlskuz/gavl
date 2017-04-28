@@ -193,7 +193,7 @@ gavl_dictionary_t *
 gavl_dictionary_add_chapter_list(gavl_dictionary_t * m, int timescale)
   {
   gavl_dictionary_t * ret;
-  ret = gavl_dictionary_get_child(m, GAVL_CHAPTERLIST_CHAPTERLIST);
+  ret = gavl_dictionary_get_dictionary_create(m, GAVL_CHAPTERLIST_CHAPTERLIST);
   gavl_chapter_list_set_timescale(ret, timescale);
   return ret;
   }

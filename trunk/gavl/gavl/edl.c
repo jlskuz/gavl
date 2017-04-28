@@ -37,8 +37,9 @@
 
 
 gavl_dictionary_t * gavl_edl_create(gavl_dictionary_t * parent)
+
   {
-  return gavl_dictionary_get_child(parent, GAVL_META_EDL);
+  return gavl_dictionary_get_dictionary_create(parent, GAVL_META_EDL);
   }
 
 #if 0
