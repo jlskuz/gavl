@@ -105,7 +105,7 @@ append_stream(gavl_dictionary_t * d, const char * tag)
 
   gavl_value_init(&val);
   s = gavl_value_set_dictionary(&val);
-  m = gavl_dictionary_get_child(s, GAVL_META_METADATA);
+  m = gavl_dictionary_get_dictionary_create(s, GAVL_META_METADATA);
   gavl_dictionary_set_int(m, GAVL_META_IDX, arr->num_entries);
   gavl_array_splice_val_nocopy(arr, arr->num_entries, 0, &val);
 
@@ -124,7 +124,7 @@ static void delete_stream(gavl_dictionary_t * d, const char * tag, int idx)
 
 static void init_stream(gavl_dictionary_t * dict)
   {
-  gavl_dictionary_get_child(dict, GAVL_META_METADATA);
+  gavl_dictionary_get_dictionary_create(dict, GAVL_META_METADATA);
   }
 
 /* Audio */
@@ -411,7 +411,7 @@ void gavl_track_delete_overlay_stream(gavl_dictionary_t * d, int stream)
 static void track_init(gavl_dictionary_t * track, int idx)
   {
   gavl_dictionary_t * m;
-  m = gavl_dictionary_get_child(track, GAVL_META_METADATA);
+  m = gavl_dictionary_get_dictionary_create(track, GAVL_META_METADATA);
   gavl_dictionary_set_int(m, GAVL_META_IDX, idx);
   }
 

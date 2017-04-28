@@ -576,7 +576,7 @@ void gavl_dictionary_append_nocopy_i(gavl_dictionary_t * d, const char * name,
 
 
 gavl_dictionary_t *
-gavl_dictionary_get_child(gavl_dictionary_t * d, const char * name)
+gavl_dictionary_get_dictionary_create(gavl_dictionary_t * d, const char * name)
   {
   gavl_value_t val;
   int idx;
