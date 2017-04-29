@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 /* */
 
@@ -458,6 +459,9 @@ const gavl_dictionary_t * gavl_get_track(const gavl_dictionary_t * dict, int idx
   const gavl_value_t * val;
   const gavl_array_t * tracks;
 
+  if((idx < 0) && !gavl_dictionary_get_int(dict, GAVL_META_CURIDX, &idx))
+    idx = 0;
+  
   if(!(tracks = get_tracks(dict)) ||
      !(val = gavl_array_get(tracks, idx)))
     return NULL;
@@ -468,6 +472,9 @@ gavl_dictionary_t * gavl_get_track_nc(gavl_dictionary_t * dict, int idx)
   {
   gavl_value_t * val;
   gavl_array_t * tracks;
+
+  if((idx < 0) && !gavl_dictionary_get_int(dict, GAVL_META_CURIDX, &idx))
+    idx = 0;
 
   if(!(tracks = get_tracks_nc(dict)) ||
      !(val = gavl_array_get_nc(tracks, idx)))
@@ -624,7 +631,305 @@ void gavl_track_compute_duration(gavl_dictionary_t * dict)
     gavl_track_set_duration(dict, dur);
   
   }
+
+/* Detect various patterns in filenames */
+
+static int is_skip_char(char c)
+  {
+  return isspace(c) || (c == '_') || (c == '-');
+  }
+
+static const char * detect_date(const char * filename, gavl_dictionary_t * metadata)
+  {
+  int year;
+  int month;
+  int day;
   
+  const char * pos = strrchr(filename, '(');
+  if(!pos)
+    return NULL;
+
+  year = 9999;
+  month = 99;
+  day = 99;
+  
+  if(sscanf(pos, "(%d-%d-%d)", &year, &month, &day) < 3)
+    {
+    month = 99;
+    day = 99;
+
+    if(sscanf(pos, "(%d)", &year) < 1)
+      {
+      year = 9999;
+      return NULL;
+      }
+    }
+  pos--;
+  while(is_skip_char(*pos) && (pos > filename))
+    pos--;
+  pos++;
+
+  gavl_dictionary_set_date(metadata, GAVL_META_DATE, year, month, day);
+  
+  return pos;
+  }
+
+
+static const char * detect_episode_tag(const char * filename, const char * end, 
+                                       int * season_p, int * idx_p)
+  {
+  const char * pos;
+  int season, idx;
+  if(!end)
+    end = filename + strlen(filename);
+
+  pos = filename;
+  
+  while(pos < end)
+    {
+    if((sscanf(pos, "S%dE%d", &season, &idx) == 2) ||
+       (sscanf(pos, "s%de%d", &season, &idx) == 2))
+      {
+      if(season_p)
+        *season_p = season;
+      if(idx_p)
+        *idx_p = idx;
+      return pos;
+      }
+    pos++;
+    }
+  return NULL;
+  }
+
+/* "Show - S1E2 - Episode (1990)" */
+
+static int detect_episode(const char * filename, gavl_dictionary_t * dict)
+  {
+  int season = 0;
+  int idx = 0;
+  
+  const char * tag;
+  const char * pos;
+  const char * end = detect_date(filename, dict);
+  if(!end)
+    end = filename + strlen(filename);
+
+  tag = detect_episode_tag(filename, end, &season, &idx);
+  if(!tag)
+    return 0;
+
+  pos = tag;
+  while(!is_skip_char(*pos) && (pos < end))
+    pos++;
+  if(pos == end)
+    return 0;
+  while(is_skip_char(*pos) && (pos < end))
+    pos++;
+
+  if(pos == end)
+    return 0;
+
+  gavl_dictionary_set_string_nocopy(dict, GAVL_META_TITLE, gavl_strndup(pos, end));
+  
+  pos = tag;
+  pos--;
+
+  while(is_skip_char(*pos) && (pos > filename))
+    pos--;
+
+  if(pos == filename)
+    {
+    gavl_dictionary_set(dict, GAVL_META_TITLE, NULL);
+    return 0;
+    }
+  pos++;
+  
+  gavl_dictionary_set_string_nocopy(dict, GAVL_META_SHOW, gavl_strndup(filename, pos));
+  return 1;  
+  }
+
+
+
+
+/* "Movie title (1990)" */
+
+static int detect_movie_singlefile(const char * filename, gavl_dictionary_t * dict)
+  {
+  const char * end;
+
+  if(!(end = detect_date(filename, dict)))
+    end = filename + strlen(filename);
+  
+  gavl_dictionary_set_string_nocopy(dict, GAVL_META_TITLE, gavl_strndup(filename, end));
+  return 1;
+  }
+
+/* "Movie title (1990) CD1" */
+
+static char * detect_multipart_tag(char * filename, int * part)
+  {
+  char * pos = filename + strlen(filename) - 3;
+
+  while(pos > filename)
+    {
+    if(!strncasecmp(pos, "CD", 2) && isdigit(pos[2]))
+      {
+      if(part)
+        *part = atoi(pos+2);
+      return pos;
+      }
+    else if(!strncasecmp(pos, "part", 4) && isdigit(pos[4]))
+      {
+      if(part)
+        *part = atoi(pos+4);
+      return pos;
+      }
+    pos--;
+    }
+  return NULL;
+  }
+
+static int detect_movie_multifile(char * basename, gavl_dictionary_t * dict)
+  {
+  int idx = 0;
+  char * pos;
+  const char * end = basename + strlen(basename);
+  
+  pos = detect_multipart_tag(basename, &idx);
+  
+  if(!pos)
+    return 0;
+  
+  end = detect_date(basename, dict);
+  if(!end)
+    {
+    end = pos;
+    end--;
+ 
+    while(is_skip_char(*end) && (end > basename))
+      end--;
+    end++;
+    }
+  
+  gavl_dictionary_set_string_nocopy(dict, GAVL_META_TITLE, gavl_strndup(basename, end));
+  
+  gavl_dictionary_set_string(dict, GAVL_META_LABEL, basename);
+  gavl_dictionary_set_int(dict, GAVL_META_IDX, idx);
+
+  pos--;
+  while(is_skip_char(*pos) && (pos > basename))
+    pos--;
+  pos++;
+  *pos = '\0';
+  return 1;
+  }
+
+void gavl_track_finalize(gavl_dictionary_t * dict)
+  {
+  const char * media_class = NULL;
+  gavl_dictionary_t * m;
+  
+  int num_audio_streams;
+  int num_video_streams;
+  const char * location;
+  char * path = NULL;
+  char * basename = NULL;
+
+  m = gavl_track_get_metadata_nc(dict);
+  
+  if(gavl_dictionary_get_string_src(m, GAVL_META_SRC, 0,
+                                    NULL, &location) &&
+     (location[0] == '/'))
+    {
+    char * pos;
+    
+    path = gavl_strdup(location);
+    
+    if((pos = strrchr(path, '/')))
+      {
+      *pos = '\0';
+      basename = pos + 1;
+      
+      if((pos = strrchr(basename, '.')))
+        *pos = '\0';
+      }
+    }
+  
+  num_audio_streams = gavl_track_get_num_audio_streams(dict);
+  num_video_streams = gavl_track_get_num_video_streams(dict);
+
+  
+  /* Figure out the media type */
+  if((num_audio_streams == 1) &&
+     (!num_video_streams))
+    {
+    /* Audio file */
+    media_class = GAVL_META_MEDIA_CLASS_AUDIO_FILE;
+    }
+  else if(num_video_streams >= 1)
+    {
+    const gavl_video_format_t * fmt;
+    if((!num_audio_streams) &&
+       (num_video_streams == 1) &&
+       (fmt = gavl_track_get_video_format(dict, 0)) && 
+       (fmt->framerate_mode == GAVL_FRAMERATE_STILL))
+      {
+      /* Photo */
+      media_class = GAVL_META_MEDIA_CLASS_IMAGE;
+      }
+    else
+      {
+      /* Video */
+      media_class = GAVL_META_MEDIA_CLASS_VIDEO_FILE;
+      }
+    }
+
+  if(media_class)
+    {
+    if(!strcmp(media_class, GAVL_META_MEDIA_CLASS_AUDIO_FILE))
+      {
+      /* Check for audio broadcast */
+      if(gavl_dictionary_get(m, GAVL_META_STATION))
+        media_class = GAVL_META_MEDIA_CLASS_AUDIO_BROADCAST;
+
+      /* Check for song */
+      else if(gavl_dictionary_get(m, GAVL_META_ARTIST) &&
+              gavl_dictionary_get(m, GAVL_META_TITLE) &&
+              gavl_dictionary_get(m, GAVL_META_ALBUM))
+        {
+        media_class = GAVL_META_MEDIA_CLASS_SONG;
+        }
+      }
+    else if(!strcmp(media_class, GAVL_META_MEDIA_CLASS_IMAGE))
+      {
+      
+      }
+    else if(!strcmp(media_class, GAVL_META_MEDIA_CLASS_VIDEO_FILE))
+      {
+      if(num_video_streams == 1)
+        {
+        /* Check for episode */
+
+        if(basename && detect_episode(basename, m))
+          media_class = GAVL_META_MEDIA_CLASS_TV_EPISODE;
+        /* Check for movie */
+        else if(basename && detect_movie_multifile(basename, m))
+          media_class = GAVL_META_MEDIA_CLASS_MOVIE_PART;
+        else if(basename && detect_movie_singlefile(basename, m))
+          media_class = GAVL_META_MEDIA_CLASS_MOVIE;
+        }
+      }
+    }
+  if(media_class)
+    gavl_dictionary_set_string(m, GAVL_META_MEDIA_CLASS, media_class);
+
+  gavl_track_compute_duration(dict);
+  
+  if(path)
+    free(path);
+  
+  }
+
 gavl_time_t gavl_track_get_duration(const gavl_dictionary_t * dict)
   {
   gavl_time_t dur;

@@ -216,6 +216,16 @@ const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_
 GAVL_PUBLIC
 gavl_dictionary_t *  gavl_dictionary_get_dictionary_nc(gavl_dictionary_t * d, const char * name);
 
+/* For compatibility with old heap API */
+
+GAVL_PUBLIC
+gavl_dictionary_t *  gavl_dictionary_create();
+
+GAVL_PUBLIC
+void gavl_dictionary_destroy(gavl_dictionary_t *);
+
+
+
 /*
  *  Can be used within a foreach_func to know, if this is the last entry
  */
