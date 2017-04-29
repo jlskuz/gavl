@@ -603,3 +603,17 @@ int gavl_dictionary_is_last(const gavl_dictionary_t * d, const char * name)
   else
     return 0;
   }
+
+gavl_dictionary_t *  gavl_dictionary_create()
+  {
+  gavl_dictionary_t * ret = malloc(sizeof(*ret));
+  gavl_dictionary_init(ret);
+  return ret;
+  }
+  
+
+void gavl_dictionary_destroy(gavl_dictionary_t * d)
+  {
+  gavl_dictionary_free(d);
+  free(d);
+  }

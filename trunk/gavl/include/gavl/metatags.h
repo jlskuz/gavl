@@ -328,6 +328,8 @@
 #define GAVL_META_EDL              "edl"
 #define GAVL_META_TRACKS           GAVL_META_CHILDREN // Array containing single tracks
 
+#define GAVL_META_CURIDX           "curidx" // Index of "current" child
+
 /**
  *
  *

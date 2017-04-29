@@ -208,6 +208,9 @@ GAVL_PUBLIC
 void gavl_track_compute_duration(gavl_dictionary_t * dict);
 
 GAVL_PUBLIC
+void gavl_track_finalize(gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
 gavl_time_t gavl_track_get_duration(const gavl_dictionary_t * dict);
 
 GAVL_PUBLIC
