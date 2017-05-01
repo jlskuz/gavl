@@ -264,6 +264,9 @@
 
 #define GAVL_META_COVER_URL      "CoverURL"
 
+/* Size of the oject in bytes */
+#define GAVL_META_TOTAL_BYTES    "totalbytes"
+
 /* For embedded covers: Location is NULL and offset and size are given */
 #define GAVL_META_COVER_EMBEDDED "CoverEmbedded"
 #define GAVL_META_COVER_OFFSET   "CoverOffset"
@@ -310,7 +313,7 @@
 #define GAVL_META_STREAM_PTS_START "PTSStart"
 #define GAVL_META_STREAM_PTS_END   "PTSEnd"
 #define GAVL_META_STREAM_DURATION  "duration"
-#define GAVL_META_STREAM_RAWSIZE   "rawsize"
+#define GAVL_META_STREAM_RAWSIZE   GAVL_META_TOTAL_BYTES
 #define GAVL_META_STREAM_FORMAT    "fmt"
 #define GAVL_META_STREAM_PACKET_TIMESCALE "pscale"
 #define GAVL_META_STREAM_SAMPLE_TIMESCALE "sscale"
