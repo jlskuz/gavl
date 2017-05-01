@@ -482,6 +482,11 @@ gavl_dictionary_t * gavl_get_track_nc(gavl_dictionary_t * dict, int idx)
   return gavl_value_get_dictionary_nc(val);
   }
 
+void gavl_set_current_track(gavl_dictionary_t * dict, int idx)
+  {
+  gavl_dictionary_set_int(dict, GAVL_META_CURIDX, idx);
+  }
+
 int gavl_get_num_tracks(const gavl_dictionary_t * dict)
   {
   const gavl_array_t * tracks;
@@ -837,8 +842,8 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
 
   m = gavl_track_get_metadata_nc(dict);
   
-  if(gavl_dictionary_get_string_src(m, GAVL_META_SRC, 0,
-                                    NULL, &location) &&
+  if(gavl_dictionary_get_src(m, GAVL_META_SRC, 0,
+                             NULL, &location) &&
      (location[0] == '/'))
     {
     char * pos;

@@ -216,6 +216,9 @@ gavl_time_t gavl_track_get_duration(const gavl_dictionary_t * dict);
 GAVL_PUBLIC
 void gavl_track_set_duration(gavl_dictionary_t * dict, gavl_time_t dur);
 
+GAVL_PUBLIC
+void gavl_set_current_track(gavl_dictionary_t * dict, int idx);
+
 
 
 #endif // GAVL_TRACKINFO_H_INCLUDED

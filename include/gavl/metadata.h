@@ -389,14 +389,21 @@ gavl_dictionary_get_image_max(const gavl_dictionary_t * m,
                               const char * mimetype);
 
   
-GAVL_PUBLIC gavl_dictionary_t *
+GAVL_PUBLIC
+gavl_dictionary_t *
 gavl_metadata_add_src(gavl_dictionary_t * m, const char * key,
                       const char * mimetype, const char * location);
 
-GAVL_PUBLIC const gavl_dictionary_t *
-gavl_dictionary_get_string_src(const gavl_dictionary_t * m, const char * key, int idx,
-                               const char ** mimetype, const char ** location);
+GAVL_PUBLIC
+const gavl_dictionary_t *
+gavl_dictionary_get_src(const gavl_dictionary_t * m, const char * key, int idx,
+                        const char ** mimetype, const char ** location);
 
+GAVL_PUBLIC 
+gavl_dictionary_t *
+gavl_dictionary_get_src_nc(gavl_dictionary_t * m, const char * key, int idx);
+
+  
 GAVL_PUBLIC 
 int gavl_metadata_has_src(const gavl_dictionary_t * m, const char * key,
                           const char * location);
