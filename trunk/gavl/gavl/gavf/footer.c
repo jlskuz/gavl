@@ -214,14 +214,14 @@ void gavf_stream_stats_apply_generic(gavf_stream_stats_t * f,
   if(ci && (ci->max_packet_size <= 0))
     ci->max_packet_size = f->size_max;
 
-  if(f->pts_start >= 0)
+  if((f->pts_start != GAVL_TIME_UNDEFINED) && (f->pts_start != 0))
     gavl_dictionary_set_long(m, GAVL_META_STREAM_PTS_START, f->pts_start);
   if(f->pts_end > 0)
     gavl_dictionary_set_long(m, GAVL_META_STREAM_PTS_END, f->pts_end);
   if(f->pts_end > 0)
     {
     int64_t duration = f->pts_end;
-    if(f->pts_start > 0)
+    if((f->pts_start != GAVL_TIME_UNDEFINED) && (f->pts_start != 0))
       duration -= f->pts_start;
     gavl_dictionary_set_long(m, GAVL_META_STREAM_DURATION, duration);
     }
