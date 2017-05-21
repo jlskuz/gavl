@@ -28,13 +28,31 @@
 #include <gavl/utils.h>
 #include <gavl/msg.h>
 #include <gavl/gavf.h>
+#include <gavl/trackinfo.h>
 
+void gavl_msg_set_client_id(gavl_msg_t * msg, const char * id)
+  {
+  if(msg->ClientID)
+    return;
+  
+  gavl_dictionary_set_string(&msg->header, GAVL_MSG_CLIENT_ID, id);
+  msg->ClientID = gavl_dictionary_get_string(&msg->header, GAVL_MSG_CLIENT_ID);
+  }
 
+const char * gavl_msg_get_client_id(gavl_msg_t * msg)
+  {
+  return msg->ClientID;
+  }
 
 void gavl_msg_set_id_ns(gavl_msg_t * msg, int id, int ns)
   {
-  msg->id = id;
-  msg->ns = ns;
+  gavl_dictionary_init(&msg->header);
+  gavl_dictionary_set_int(&msg->header, GAVL_MSG_ID, id);
+  msg->ID = id;
+
+  gavl_dictionary_set_int(&msg->header, GAVL_MSG_NS, id);
+  msg->NS = ns;
+    
   msg->num_args = 0;
 
   /* Zero everything */
@@ -48,8 +66,8 @@ void gavl_msg_set_id(gavl_msg_t * msg, int id)
 
 int gavl_msg_get_id_ns(gavl_msg_t * msg, int * ns)
   {
-  *ns = msg->ns;
-  return msg->id;
+  *ns = msg->NS;
+  return msg->ID;
   }
 
 void gavl_msg_copy(gavl_msg_t * dst, const gavl_msg_t * src)
@@ -57,12 +75,11 @@ void gavl_msg_copy(gavl_msg_t * dst, const gavl_msg_t * src)
   int i;
 
   /* Also clears all memory */
-  gavl_msg_set_id(dst, src->id);
-
-  dst->id       = src->id;
-  dst->ns       = src->ns;
+  gavl_msg_set_id_ns(dst, src->ID, src->NS);
+  
   dst->num_args = src->num_args;
-
+  gavl_dictionary_copy(&dst->header, &src->header);
+  
   for(i = 0; i < src->num_args; i++)
     gavl_value_copy(&dst->args[i], &src->args[i]); 
   }
@@ -205,7 +222,7 @@ void gavl_msg_get_arg(gavl_msg_t * msg, int arg, gavl_value_t * val)
 
 int gavl_msg_get_id(gavl_msg_t * msg)
   {
-  return msg->id;
+  return msg->ID;
   }
 
 int gavl_msg_get_arg_int(const gavl_msg_t * msg, int arg)
@@ -346,7 +363,7 @@ int gavl_msg_get_arg_dictionary(gavl_msg_t * msg, int arg,
 void gavl_msg_init(gavl_msg_t * m)
   {
   memset(m, 0, sizeof(*m));
-  m->id = -1;
+  m->ID = -1;
   }
 
 gavl_msg_t * gavl_msg_create()
@@ -364,10 +381,13 @@ void gavl_msg_free(gavl_msg_t * m)
   for(i = 0; i < m->num_args; i++)
     gavl_value_free(&m->args[i]);
   
+  gavl_dictionary_reset(&m->header);
+  
   memset(m->args, 0, GAVL_MSG_MAX_ARGS * sizeof(m->args[0]));
   m->num_args = 0;
-  m->id = -1;
-  m->ns = 0;
+  m->ID = -1;
+  m->ID = 0;
+  m->ClientID = NULL;
   }
 
 void gavl_msg_destroy(gavl_msg_t * m)
@@ -380,7 +400,7 @@ void gavl_msg_dump(const gavl_msg_t * msg, int indent)
   {
   int i;
 
-  gavl_diprintf(indent, "Message NS: %d ID: %d (%08x) args: %d\n", msg->ns, msg->id, msg->id, msg->num_args);
+  gavl_diprintf(indent, "Message NS: %d ID: %d (%08x) args: %d\n", msg->NS, msg->ID, msg->ID, msg->num_args);
     
   for(i = 0; i < msg->num_args; i++)
     {
@@ -601,5 +621,63 @@ gavl_msg_get_gui_motion(gavl_msg_t * msg,
 
 int gavl_msg_match(const gavl_msg_t * m, uint32_t id, uint32_t ns)
   {
-  return ((m->id == id) && (m->ns == ns)) ? 1 : 0;
+  return ((m->ID == id) && (m->NS == ns)) ? 1 : 0;
+  }
+
+void gavl_msg_apply_header(gavl_msg_t * msg)
+  {
+  const gavl_value_t * val;
+  if((val = gavl_dictionary_get(&msg->header, GAVL_MSG_CLIENT_ID)))
+    msg->ClientID = gavl_value_get_string_c(val);
+
+  if((val = gavl_dictionary_get(&msg->header, GAVL_MSG_ID)) &&
+     (val->type == GAVL_TYPE_INT))
+    msg->ID = val->v.i;
+
+  if((val = gavl_dictionary_get(&msg->header, GAVL_MSG_NS)) &&
+     (val->type == GAVL_TYPE_INT))
+    msg->NS = val->v.i;
+  }
+
+void gavl_msg_set_splice_children(gavl_msg_t * msg, int msg_ns, int msg_id,
+                                  const char * ctx,
+                                  int last, int idx, int del, const gavl_value_t * add)
+  {
+  gavl_msg_set_id_ns(msg, msg_id, msg_ns);
+
+  if(ctx)
+    gavl_dictionary_set_string(&msg->header, GAVL_MSG_CONTEXT_ID, ctx);
+  
+  gavl_msg_set_arg_int(msg, 0, last);
+  gavl_msg_set_arg_int(msg, 1, idx);
+  gavl_msg_set_arg_int(msg, 2, del);
+  gavl_msg_set_arg(msg,     3, add);
+  }
+
+int gavl_msg_get_splice_children(gavl_msg_t * msg,
+                                 int * last, int * idx, int * del, gavl_value_t * add)
+  {
+  *last = gavl_msg_get_arg_int(msg, 0);
+  *idx  = gavl_msg_get_arg_int(msg, 1);
+  *del  = gavl_msg_get_arg_int(msg, 2);
+  gavl_msg_get_arg(msg, 3, add);
+  return 1;
+  }
+
+int gavl_msg_splice_children(gavl_msg_t * msg, gavl_dictionary_t * dict)
+  {
+  int ret = 0;
+  int last;
+  int idx;
+  int del;
+  gavl_value_t val;
+  gavl_value_init(&val);
+  
+  if(gavl_msg_get_splice_children(msg, &last, &idx, &del, &val))
+    {
+    gavl_track_splice_children(dict, idx, del, &val);
+    ret = 1;
+    }
+  gavl_value_free(&val);
+  return ret;
   }

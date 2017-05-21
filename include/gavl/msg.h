@@ -196,22 +196,26 @@
 
 #define GAVL_MSG_GUI_ACCEL         6  // Accelerator was triggered
 
-
+/* Header fields */
+#define GAVL_MSG_ID         "ID"
+#define GAVL_MSG_NS         "NS"
+#define GAVL_MSG_CLIENT_ID  "ClientID"
+#define GAVL_MSG_CONTEXT_ID "ContextID"
 
 /** \brief Message type
  */
 
 struct gavl_msg_s
   {
-  uint32_t ns;  // Namespace
-  uint32_t id;
-  int num_args;
-
+  gavl_dictionary_t header;
+  int NS;  // Namespace
+  int ID;
+  const char * ClientID; // For function calls
+  
   // Where to send the answer. Meaning defined at a higher level.
-  void * sender; 
   
+  int num_args;
   gavl_value_t args[GAVL_MSG_MAX_ARGS];
-  
   };
 
 typedef struct gavl_msg_s gavl_msg_t;
@@ -521,6 +525,15 @@ int gavl_msg_get_arg_dictionary_c(const gavl_msg_t * msg, int arg,
 GAVL_PUBLIC
 void gavl_msg_dump(const gavl_msg_t * msg, int indent);
 
+GAVL_PUBLIC
+void gavl_msg_apply_header(gavl_msg_t * msg);
+
+GAVL_PUBLIC
+void gavl_msg_set_client_id(gavl_msg_t * msg, const char * id);
+
+GAVL_PUBLIC
+const char * gavl_msg_get_client_id(gavl_msg_t * msg);
+
 /*
  *  Utilities
  */
@@ -585,5 +598,19 @@ GAVL_PUBLIC void
 gavl_msg_get_gui_motion(gavl_msg_t * msg,
                         int * mask, int * x, int * y, double * pos);
                         
+
+GAVL_PUBLIC void
+gavl_msg_set_splice_children(gavl_msg_t * msg, int msg_ns, int msg_id,
+                             const char * ctx,
+                                  int last, int idx, int del, const gavl_value_t * add);
+
+GAVL_PUBLIC 
+int gavl_msg_get_splice_children(gavl_msg_t * msg,
+                                 int * last, int * idx, int * del, gavl_value_t * add);
+
+GAVL_PUBLIC 
+int gavl_msg_splice_children(gavl_msg_t * msg, gavl_dictionary_t * dict);
+
+  
 
 #endif // GAVL_MSG_H_INCLUDED

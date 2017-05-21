@@ -97,6 +97,7 @@ GAVL_PUBLIC
 void gavl_track_set_num_video_streams(gavl_dictionary_t * d, int num);
 
 
+
 /* Text */
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_track_get_text_stream_nc(gavl_dictionary_t * d, int i);
@@ -176,6 +177,9 @@ int gavl_track_can_seek(const gavl_dictionary_t * track);
 GAVL_PUBLIC
 int gavl_track_can_pause(const gavl_dictionary_t * track);
 
+GAVL_PUBLIC
+void gavl_track_splice_children(gavl_dictionary_t * dict, int idx, int del,
+                                const gavl_value_t * val);
 
 // GAVL_PUBLIC
 
@@ -219,6 +223,20 @@ void gavl_track_set_duration(gavl_dictionary_t * dict, gavl_time_t dur);
 GAVL_PUBLIC
 void gavl_set_current_track(gavl_dictionary_t * dict, int idx);
 
+GAVL_PUBLIC
+void gavl_track_set_gui_state(gavl_dictionary_t * track, const char * state, int val);
+
+GAVL_PUBLIC
+int gavl_track_get_gui_state(const gavl_dictionary_t * track, const char * state);
+
+GAVL_PUBLIC
+void gavl_track_clear_gui_state(gavl_dictionary_t * track);
+
+GAVL_PUBLIC
+gavl_array_t * gavl_get_tracks_nc(gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
+const gavl_array_t * gavl_get_tracks(const gavl_dictionary_t * dict);
 
 
 #endif // GAVL_TRACKINFO_H_INCLUDED

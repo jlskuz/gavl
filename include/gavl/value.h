@@ -274,6 +274,18 @@ GAVL_PUBLIC
 void gavl_array_push_nocopy(gavl_array_t * d, gavl_value_t * val);
 
 GAVL_PUBLIC
+void gavl_array_unshift(gavl_array_t * d, const gavl_value_t * val);
+
+GAVL_PUBLIC
+void gavl_array_unshift_nocopy(gavl_array_t * d, gavl_value_t * val);
+
+GAVL_PUBLIC
+int gavl_array_pop(gavl_array_t * d, gavl_value_t * val);
+
+GAVL_PUBLIC
+int gavl_array_shift(gavl_array_t * d, gavl_value_t * val);
+
+GAVL_PUBLIC
 const gavl_value_t * gavl_array_get(const gavl_array_t * d, int idx);
 
 GAVL_PUBLIC
@@ -325,6 +337,13 @@ void gavl_array_splice_array_nocopy(gavl_array_t * arr,
                                    gavl_array_t * add);
 
 
+/* For compatibility with old heap API */
+
+GAVL_PUBLIC
+gavl_array_t *  gavl_array_create();
+
+GAVL_PUBLIC
+void gavl_array_destroy(gavl_array_t *);
 
 
 /* Value */

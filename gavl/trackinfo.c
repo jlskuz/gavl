@@ -416,7 +416,7 @@ static void track_init(gavl_dictionary_t * track, int idx)
   gavl_dictionary_set_int(m, GAVL_META_IDX, idx);
   }
 
-static gavl_array_t * get_tracks_nc(gavl_dictionary_t * dict)
+gavl_array_t * gavl_get_tracks_nc(gavl_dictionary_t * dict)
   {
   gavl_array_t * ret;
 
@@ -431,7 +431,7 @@ static gavl_array_t * get_tracks_nc(gavl_dictionary_t * dict)
   return ret;
   }
 
-static const gavl_array_t * get_tracks(const gavl_dictionary_t * dict)
+const gavl_array_t * gavl_get_tracks(const gavl_dictionary_t * dict)
   {
   return gavl_dictionary_get_array(dict, GAVL_META_TRACKS);
   }
@@ -441,7 +441,7 @@ gavl_dictionary_t * gavl_append_track(gavl_dictionary_t * dict)
   int num;
   gavl_dictionary_t * new_track;
   gavl_value_t val;
-  gavl_array_t * arr = get_tracks_nc(dict);
+  gavl_array_t * arr = gavl_get_tracks_nc(dict);
 
   num = arr->num_entries;
   
@@ -462,7 +462,7 @@ const gavl_dictionary_t * gavl_get_track(const gavl_dictionary_t * dict, int idx
   if((idx < 0) && !gavl_dictionary_get_int(dict, GAVL_META_CURIDX, &idx))
     idx = 0;
   
-  if(!(tracks = get_tracks(dict)) ||
+  if(!(tracks = gavl_get_tracks(dict)) ||
      !(val = gavl_array_get(tracks, idx)))
     return NULL;
   return gavl_value_get_dictionary(val);
@@ -476,7 +476,7 @@ gavl_dictionary_t * gavl_get_track_nc(gavl_dictionary_t * dict, int idx)
   if((idx < 0) && !gavl_dictionary_get_int(dict, GAVL_META_CURIDX, &idx))
     idx = 0;
 
-  if(!(tracks = get_tracks_nc(dict)) ||
+  if(!(tracks = gavl_get_tracks_nc(dict)) ||
      !(val = gavl_array_get_nc(tracks, idx)))
     return NULL;
   return gavl_value_get_dictionary_nc(val);
@@ -490,17 +490,33 @@ void gavl_set_current_track(gavl_dictionary_t * dict, int idx)
 int gavl_get_num_tracks(const gavl_dictionary_t * dict)
   {
   const gavl_array_t * tracks;
-  if(!(tracks = get_tracks(dict)))
+  if(!(tracks = gavl_get_tracks(dict)))
     return 0;
   return tracks->num_entries;
   }
 
 void gavl_delete_track(gavl_dictionary_t * dict, int idx)
   {
-  gavl_array_t * tracks;
-  if((tracks = get_tracks_nc(dict)))
-    gavl_array_splice_val(tracks, idx, 1, NULL);
+  gavl_track_splice_children(dict, idx, 1, NULL);
   }
+
+void gavl_track_splice_children(gavl_dictionary_t * dict, int idx, int del,
+                                const gavl_value_t * val)
+  {
+  gavl_array_t * tracks;
+  if(!(tracks = gavl_get_tracks_nc(dict)))
+    return;
+  
+  if(!val || (val->type == GAVL_TYPE_DICTIONARY) || (val->type == GAVL_TYPE_UNDEFINED))
+    {
+    gavl_array_splice_val(tracks, idx, del, val);
+    }
+  else if(val->type == GAVL_TYPE_ARRAY)
+    {
+    gavl_array_splice_array(tracks, idx, del, val->v.array);
+    }
+  }
+
 
 gavl_audio_format_t * gavl_stream_get_audio_format_nc(gavl_dictionary_t * dict)
   {
@@ -1025,4 +1041,35 @@ int gavl_track_can_pause(const gavl_dictionary_t * track)
 
   return 1;
   
+  }
+
+#define META_GUI "gui"
+
+void gavl_track_set_gui_state(gavl_dictionary_t * track, const char * state, int val)
+  {
+  int old_val = 0;
+  gavl_dictionary_t * gui = gavl_dictionary_get_dictionary_create(track, META_GUI);
+
+  gavl_dictionary_get_int(track, state, &old_val);
+  
+  if((val < 0) || (val > 1))
+    val = !old_val;
+  
+  gavl_dictionary_set_int(gui, state, val);
+  }
+
+int gavl_track_get_gui_state(const gavl_dictionary_t * track, const char * state)
+  {
+  int ret = 0;
+  const gavl_dictionary_t * gui = gavl_dictionary_get_dictionary(track, META_GUI);
+
+  if(!gui || !gavl_dictionary_get_int(gui, state, &ret))
+    return 0;
+  
+  return ret;
+  }
+
+void gavl_track_clear_gui_state(gavl_dictionary_t * track)
+  {
+  gavl_dictionary_set(track, META_GUI, NULL);
   }
