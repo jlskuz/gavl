@@ -662,7 +662,7 @@ gavl_dictionary_get_src_nc(gavl_dictionary_t * m, const char * key, int idx)
   gavl_value_t * val;
   gavl_dictionary_t * dict;
   
-  if(!(val = gavl_dictionary_get_item(m, key, idx)) ||
+  if(!(val = gavl_dictionary_get_item_nc(m, key, idx)) ||
      (val->type != GAVL_TYPE_DICTIONARY))
     return NULL;
   

@@ -191,9 +191,12 @@ void gavl_array_splice_val(gavl_array_t * arr,
   gavl_value_t * val;
   int num = 0;
 
+  if(add && (add->type == GAVL_TYPE_UNDEFINED))
+    add = NULL;
+
   if(add)
     num = 1;
-
+  
   val = do_splice(arr, idx, del, num);
 
   if(add)
@@ -266,6 +269,36 @@ void gavl_array_push_nocopy(gavl_array_t * d, gavl_value_t * val)
   gavl_array_splice_val_nocopy(d, -1, 0, val);
   }
 
+void gavl_array_unshift(gavl_array_t * d, const gavl_value_t * val)
+  {
+  gavl_array_splice_val(d, 0, 0, val);
+  }
+
+void gavl_array_unshift_nocopy(gavl_array_t * d, gavl_value_t * val)
+  {
+  gavl_array_splice_val_nocopy(d, 0, 0, val);
+  }
+
+int gavl_array_pop(gavl_array_t * d, gavl_value_t * val)
+  {
+  if(d->num_entries < 1)
+    return 0;
+  
+  gavl_value_move(val, &d->entries[d->num_entries-1]);
+  gavl_array_splice_val(d, d->num_entries-1, 1, NULL);
+  return 1;
+  }
+
+int gavl_array_shift(gavl_array_t * d, gavl_value_t * val)
+  {
+  if(d->num_entries < 1)
+    return 0;
+  
+  gavl_value_move(val, &d->entries[0]);
+  gavl_array_splice_val(d, 0, 1, NULL);
+  return 1;
+  }
+
 int gavl_array_move_entry(gavl_array_t * m1,
                           int src_pos, int dst_pos)
   {
@@ -282,3 +315,15 @@ int gavl_array_move_entry(gavl_array_t * m1,
   return 1;
   }
 
+gavl_array_t *  gavl_array_create()
+  {
+  gavl_array_t * ret = malloc(sizeof(*ret));
+  gavl_array_init(ret);
+  return ret;
+  }
+
+void gavl_array_destroy(gavl_array_t * arr)
+  {
+  gavl_array_free(arr);
+  free(arr);
+  }

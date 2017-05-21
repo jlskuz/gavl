@@ -582,19 +582,9 @@ int gavl_msg_read(gavl_msg_t * ret, gavf_io_t * io)
   memset(ret, 0, sizeof(*ret));
 
   /* Message Namespace */
-  
-  if(!gavf_io_read_int32v(io, &val_i))
-    return 0;
-  
-  ret->ns = val_i;
-  
-  /* Message ID */
-  
-  if(!gavf_io_read_int32v(io, &val_i))
-    return 0;
-  
-  ret->id = val_i;
 
+  gavl_dictionary_read(io, &ret->header);
+  
   //  fprintf(stderr, "Got ID: %d\n", ret->id);
   
   /* Number of arguments */
@@ -606,6 +596,8 @@ int gavl_msg_read(gavl_msg_t * ret, gavf_io_t * io)
 
   for(i = 0; i < ret->num_args; i++)
     gavl_value_read(io, &ret->args[i]);
+
+  gavl_msg_apply_header(ret);
   
 #ifdef DUMP_MSG_READ
   fprintf(stderr, "read message:\n");
@@ -624,16 +616,8 @@ int gavl_msg_write(const gavl_msg_t * msg, gavf_io_t * io)
   gavl_msg_dump(msg, 1);
 #endif
   
-  /* Namespace */
-
-  if(!gavf_io_write_int32v(io, msg->ns))
-    return 0;
+  gavl_dictionary_write(io, &msg->header);
   
-  /* Message id */
-
-  if(!gavf_io_write_int32v(io, msg->id))
-    return 0;
-
   /* Number of arguments */
 
   if(!gavf_io_write_int32v(io, msg->num_args))

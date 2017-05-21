@@ -201,19 +201,11 @@ gavl_dictionary_add_chapter_list(gavl_dictionary_t * m, int timescale)
 const gavl_dictionary_t *
 gavl_dictionary_get_chapter_list(const gavl_dictionary_t * m)
   {
-  const gavl_value_t * val;
-  if(!(val = gavl_dictionary_get(m, GAVL_CHAPTERLIST_CHAPTERLIST)))
-    return NULL;
-  return gavl_value_get_dictionary(val);
+  return gavl_dictionary_get_dictionary(m, GAVL_CHAPTERLIST_CHAPTERLIST);
   }
 
 gavl_dictionary_t *
 gavl_dictionary_get_chapter_list_nc(gavl_dictionary_t * m)
   {
-  gavl_value_t * val;
-  if(!(val = gavl_dictionary_get_nc(m, GAVL_CHAPTERLIST_CHAPTERLIST)) ||
-     (val->type != GAVL_TYPE_DICTIONARY))
-    return NULL;
-  return val->v.dictionary;
-  
+  return gavl_dictionary_get_dictionary_nc(m, GAVL_CHAPTERLIST_CHAPTERLIST);
   }

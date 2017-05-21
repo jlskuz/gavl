@@ -306,8 +306,6 @@
 #define GAVL_META_RATING             "Rating"      // Rating (float, 0.0..1.0)
 #define GAVL_META_PARENTAL_CONTROL   "ParentalControl" // mpaa or FSK (or whatever) rating
 
-#define GAVL_META_ERROR              "Error"       // Indicate, that an error occurrent during loading of a track
-#define GAVL_META_SELECTED           "Selected"    // Track is selected in a GUI
 
 
 #define GAVL_META_STREAM_PTS_START "PTSStart"
@@ -378,7 +376,16 @@
 #define GAVL_META_MEDIA_CLASS_ROOT_DIRECTORIES   "container.root.directories"
 #define GAVL_META_MEDIA_CLASS_ROOT_PHOTOS        "container.root.photos"
 
+/* GUI States */
 
+// Indicate, that an error occurrent during loading of a track
+#define GAVL_META_GUI_ERROR          "GUIError" 
+
+// Track is selected in a GUI
+#define GAVL_META_GUI_SELECTED       "GUISelected"
+
+// Track is current in a GUI
+#define GAVL_META_GUI_CURRENT        "GUICurrent"
 
 /**
  * @}
