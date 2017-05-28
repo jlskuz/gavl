@@ -528,6 +528,15 @@ int gavl_msg_get_arg_dictionary_c(const gavl_msg_t * msg, int arg,
 
 
 GAVL_PUBLIC
+void gavl_msg_set_arg_array(gavl_msg_t * msg, int arg,
+                            const gavl_array_t * m);
+
+GAVL_PUBLIC
+void gavl_msg_set_arg_array_nocopy(gavl_msg_t * msg, int arg,
+                                   gavl_array_t * m);
+
+
+GAVL_PUBLIC
 void gavl_msg_dump(const gavl_msg_t * msg, int indent);
 
 GAVL_PUBLIC
@@ -607,7 +616,12 @@ gavl_msg_get_gui_motion(gavl_msg_t * msg,
 GAVL_PUBLIC void
 gavl_msg_set_splice_children(gavl_msg_t * msg, int msg_ns, int msg_id,
                              const char * ctx,
-                                  int last, int idx, int del, const gavl_value_t * add);
+                             int last, int idx, int del, const gavl_value_t * add);
+
+GAVL_PUBLIC void
+gavl_msg_set_splice_children_nocopy(gavl_msg_t * msg, int msg_ns, int msg_id,
+                                    const char * ctx,
+                                    int last, int idx, int del, gavl_value_t * add);
 
 GAVL_PUBLIC 
 int gavl_msg_get_splice_children(gavl_msg_t * msg,
