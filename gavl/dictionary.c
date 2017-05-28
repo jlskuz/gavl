@@ -411,6 +411,12 @@ void gavl_dictionary_copy(gavl_dictionary_t * dst, const gavl_dictionary_t * src
   gavl_dictionary_foreach(src, dict_copy_func, dst);
   }
 
+void gavl_dictionary_move(gavl_dictionary_t * dst, gavl_dictionary_t * src)
+  {
+  memcpy(dst, src, sizeof(*dst));
+  gavl_dictionary_init(src);
+  }
+  
 void gavl_dictionary_dump(const gavl_dictionary_t * m, int indent)
   {
   int len, i, j;

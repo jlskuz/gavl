@@ -503,7 +503,12 @@ void gavl_msg_get_arg_video_format(gavl_msg_t * msg, int arg,
 
 GAVL_PUBLIC
 void gavl_msg_set_arg_dictionary(gavl_msg_t * msg, int arg,
-                               const gavl_dictionary_t * m);
+                                 const gavl_dictionary_t * m);
+
+GAVL_PUBLIC
+void gavl_msg_set_arg_dictionary_nocopy(gavl_msg_t * msg, int arg,
+                                        gavl_dictionary_t * m);
+
 
 /** \brief Get a matadata argument
  *  \param msg A message
