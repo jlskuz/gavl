@@ -192,9 +192,8 @@ int gavl_msg_set_arg_nocopy(gavl_msg_t * msg, int arg, gavl_value_t * val)
   {
   if(!check_arg(arg))
     return 0;
-  
-  memcpy(&msg->args[arg], val, sizeof(*val));
-  gavl_value_init(val);
+
+  gavl_value_move(&msg->args[arg], val);
   
   if(arg+1 > msg->num_args)
     msg->num_args = arg + 1;
@@ -336,11 +335,27 @@ void gavl_msg_set_arg_dictionary(gavl_msg_t * msg, int arg,
 void gavl_msg_set_arg_dictionary_nocopy(gavl_msg_t * msg, int arg,
                                         gavl_dictionary_t * m)
   {
-  gavl_dictionary_move(gavl_value_set_dictionary(&msg->args[arg]), m);
+  gavl_value_set_dictionary_nocopy(&msg->args[arg], m);
   if(arg+1 > msg->num_args)
     msg->num_args = arg + 1;
   }
-  
+
+void gavl_msg_set_arg_array(gavl_msg_t * msg, int arg,
+                            const gavl_array_t * m)
+  {
+  gavl_array_copy(gavl_value_set_array(&msg->args[arg]), m);
+  if(arg+1 > msg->num_args)
+    msg->num_args = arg + 1;
+  }
+
+void gavl_msg_set_arg_array_nocopy(gavl_msg_t * msg, int arg,
+                                   gavl_array_t * m)
+  {
+  gavl_value_set_array_nocopy(&msg->args[arg], m);
+  if(arg+1 > msg->num_args)
+    msg->num_args = arg + 1;
+  }
+
 int gavl_msg_get_arg_dictionary_c(const gavl_msg_t * msg, int arg,
                                 gavl_dictionary_t * m)
   {
@@ -660,6 +675,20 @@ void gavl_msg_set_splice_children(gavl_msg_t * msg, int msg_ns, int msg_id,
   gavl_msg_set_arg_int(msg, 1, idx);
   gavl_msg_set_arg_int(msg, 2, del);
   gavl_msg_set_arg(msg,     3, add);
+  }
+
+void gavl_msg_set_splice_children_nocopy(gavl_msg_t * msg, int msg_ns, int msg_id,
+                                         const char * ctx, int last, int idx, int del, gavl_value_t * add)
+  {
+  gavl_msg_set_id_ns(msg, msg_id, msg_ns);
+
+  if(ctx)
+    gavl_dictionary_set_string(&msg->header, GAVL_MSG_CONTEXT_ID, ctx);
+  
+  gavl_msg_set_arg_int(msg,    0, last);
+  gavl_msg_set_arg_int(msg,    1, idx);
+  gavl_msg_set_arg_int(msg,    2, del);
+  gavl_msg_set_arg_nocopy(msg, 3, add);
   }
 
 int gavl_msg_get_splice_children(gavl_msg_t * msg,

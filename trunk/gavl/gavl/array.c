@@ -102,6 +102,12 @@ void gavl_array_copy(gavl_array_t * dst, const gavl_array_t * src)
     }
   }
 
+void gavl_array_move(gavl_array_t * dst, gavl_array_t * src)
+  {
+  memcpy(dst, src, sizeof(*dst));
+  gavl_array_init(src);
+  }
+
 void gavl_array_foreach(const gavl_array_t * a,
                         gavl_array_foreach_func func, void * priv)
   {

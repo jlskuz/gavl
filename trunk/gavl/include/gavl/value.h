@@ -133,6 +133,7 @@ GAVL_PUBLIC
 int gavl_dictionary_set_dictionary(gavl_dictionary_t * d,
                                    const char * name, const gavl_dictionary_t * dict);
 
+
 GAVL_PUBLIC
 const gavl_value_t *
 gavl_dictionary_get_item(const gavl_dictionary_t * d, const char * name, int item);
@@ -301,6 +302,9 @@ GAVL_PUBLIC
 void gavl_array_copy(gavl_array_t * dst, const gavl_array_t * src); 
 
 GAVL_PUBLIC
+void gavl_array_move(gavl_array_t * dst, gavl_array_t * src); 
+
+GAVL_PUBLIC
 void gavl_array_dump(const gavl_array_t * a, int indent);
 
 GAVL_PUBLIC
@@ -439,8 +443,15 @@ GAVL_PUBLIC
 gavl_video_format_t * gavl_value_set_video_format(gavl_value_t * v);
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_value_set_dictionary(gavl_value_t * v);
+
+GAVL_PUBLIC
+void gavl_value_set_dictionary_nocopy(gavl_value_t * v, gavl_dictionary_t * val);
+
 GAVL_PUBLIC
 gavl_array_t * gavl_value_set_array(gavl_value_t * v);
+
+GAVL_PUBLIC
+void gavl_value_set_array_nocopy(gavl_value_t * v, gavl_array_t * val);
 
 GAVL_PUBLIC
 double * gavl_value_set_position(gavl_value_t * v);
@@ -502,10 +513,10 @@ GAVL_PUBLIC
 const double * gavl_value_get_color_rgba(const gavl_value_t * v);
 
 /* For initializing values statically */
-#define GAVL_VALUE_INIT_INT(val)  { .type = GAVL_TYPE_INT, .v.i = val }
-#define GAVL_VALUE_INIT_LONG(val) { .type = GAVL_TYPE_LONG, .v.l = val }
-#define GAVL_VALUE_INIT_FLOAT(val) { .type = GAVL_TYPE_FLOAT, .v.d = val }
-#define GAVL_VALUE_INIT_STRING(val) { .type = GAVL_TYPE_STRING, .v.str = val }
+#define GAVL_VALUE_INIT_INT(val)               { .type = GAVL_TYPE_INT, .v.i = val }
+#define GAVL_VALUE_INIT_LONG(val)              { .type = GAVL_TYPE_LONG, .v.l = val }
+#define GAVL_VALUE_INIT_FLOAT(val)             { .type = GAVL_TYPE_FLOAT, .v.d = val }
+#define GAVL_VALUE_INIT_STRING(val)            { .type = GAVL_TYPE_STRING, .v.str = val }
 #define GAVL_VALUE_INIT_COLOR_RGB(r, g, b)     { .type = GAVL_TYPE_COLOR_RGB,  .v.color = {r, g, b, 1.0 } }
 #define GAVL_VALUE_INIT_COLOR_RGBA(r, g, b, a) { .type = GAVL_TYPE_COLOR_RGBA, .v.color = {r, g, b, a } }
 #define GAVL_VALUE_INIT_POSITION(x, y) { .type = GAVL_TYPE_POSITION, .v.position = {x, y} }

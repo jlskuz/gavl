@@ -316,6 +316,20 @@ gavl_dictionary_t * gavl_value_set_dictionary(gavl_value_t * v)
   return v->v.dictionary;
   }
 
+void gavl_value_set_dictionary_nocopy(gavl_value_t * v, gavl_dictionary_t * val)
+  {
+  gavl_value_reset(v);
+  v->type = GAVL_TYPE_DICTIONARY;
+  v->v.dictionary = val;
+  }
+
+void gavl_value_set_array_nocopy(gavl_value_t * v, gavl_array_t * val)
+  {
+  gavl_value_reset(v);
+  v->type = GAVL_TYPE_ARRAY;
+  v->v.array = val;
+  }
+
 gavl_array_t * gavl_value_set_array(gavl_value_t * v)
   {
   gavl_value_reset(v);

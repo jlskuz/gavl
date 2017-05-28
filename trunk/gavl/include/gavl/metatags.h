@@ -365,6 +365,8 @@
 #define GAVL_META_MEDIA_CLASS_DIRECTORY           "container.directory" // On filesystem
 #define GAVL_META_MEDIA_CLASS_MOVIE_MULTIPART     "container.movie.multipart"
 
+#define GAVL_META_MEDIA_CLASS_MULTITRACK_FILE     "container.multitrackfile"
+
 /* Root Containers */
 #define GAVL_META_MEDIA_CLASS_ROOT               "container.root" 
 #define GAVL_META_MEDIA_CLASS_ROOT_MUSICALBUMS   "container.root.musicalbums" 
