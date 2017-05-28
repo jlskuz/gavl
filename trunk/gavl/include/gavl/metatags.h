@@ -336,34 +336,34 @@
  *
  */
 
-#define GAVL_META_MEDIA_CLASS                    "MediaClass"
-#define GAVL_META_CHILD_CLASS                    "ChildClass"
+#define GAVL_META_MEDIA_CLASS                     "MediaClass"
+#define GAVL_META_CHILD_CLASS                     "ChildClass"
 
 /* Value for class */
-#define GAVL_META_MEDIA_CLASS_AUDIO_FILE         "item.audio"
-#define GAVL_META_MEDIA_CLASS_VIDEO_FILE         "item.video"
-#define GAVL_META_MEDIA_CLASS_SONG               "item.audio.song"
-#define GAVL_META_MEDIA_CLASS_MOVIE              "item.video.movie"
-#define GAVL_META_MEDIA_CLASS_MOVIE_PART         "item.video.movie.part"
-#define GAVL_META_MEDIA_CLASS_TV_EPISODE         "item.video.episode"
-#define GAVL_META_MEDIA_CLASS_AUDIO_BROADCAST    "item.audio.broadcast"
-#define GAVL_META_MEDIA_CLASS_VIDEO_BROADCAST    "item.video.broadcast"
-#define GAVL_META_MEDIA_CLASS_IMAGE              "item.image"
-#define GAVL_META_MEDIA_CLASS_FILE               "item.file"
+#define GAVL_META_MEDIA_CLASS_AUDIO_FILE          "item.audio"
+#define GAVL_META_MEDIA_CLASS_VIDEO_FILE          "item.video"
+#define GAVL_META_MEDIA_CLASS_SONG                "item.audio.song"
+#define GAVL_META_MEDIA_CLASS_MOVIE               "item.video.movie"
+#define GAVL_META_MEDIA_CLASS_MOVIE_PART          "item.video.movie.part"
+#define GAVL_META_MEDIA_CLASS_TV_EPISODE          "item.video.episode"
+#define GAVL_META_MEDIA_CLASS_AUDIO_BROADCAST     "item.audio.broadcast"
+#define GAVL_META_MEDIA_CLASS_VIDEO_BROADCAST     "item.video.broadcast"
+#define GAVL_META_MEDIA_CLASS_IMAGE               "item.image"
+#define GAVL_META_MEDIA_CLASS_FILE                "item.file"
 
 /* Container values */
-#define GAVL_META_MEDIA_CLASS_CONTAINER          "container"       // Generic
-#define GAVL_META_MEDIA_CLASS_MUSICALBUM         "container.musicalbum" 
-#define GAVL_META_MEDIA_CLASS_PLAYLIST           "container.playlist"
-#define GAVL_META_MEDIA_CLASS_CONTAINER_ACTOR    "container.category.actor" 
-#define GAVL_META_MEDIA_CLASS_CONTAINER_DIRECTOR "container.category.director" 
-#define GAVL_META_MEDIA_CLASS_CONTAINER_ARTIST   "container.category.artist" 
-#define GAVL_META_MEDIA_CLASS_CONTAINER_COUNTRY  "container.category.country" 
-#define GAVL_META_MEDIA_CLASS_CONTAINER_GENRE    "container.category.genre" 
-#define GAVL_META_MEDIA_CLASS_TV_SEASON          "container.season"
-#define GAVL_META_MEDIA_CLASS_TV_SHOW            "container.tvshow"
-#define GAVL_META_MEDIA_CLASS_DIRECTORY          "container.directory"
-#define GAVL_META_MEDIA_CLASS_MOVIE_MULTIPART    "container.movie.multipart"
+#define GAVL_META_MEDIA_CLASS_CONTAINER           "container"       // Generic
+#define GAVL_META_MEDIA_CLASS_MUSICALBUM          "container.musicalbum" 
+#define GAVL_META_MEDIA_CLASS_PLAYLIST            "container.playlist"
+#define GAVL_META_MEDIA_CLASS_CONTAINER_ACTOR     "container.category.actor" 
+#define GAVL_META_MEDIA_CLASS_CONTAINER_DIRECTOR  "container.category.director" 
+#define GAVL_META_MEDIA_CLASS_CONTAINER_ARTIST    "container.category.artist" 
+#define GAVL_META_MEDIA_CLASS_CONTAINER_COUNTRY   "container.category.country" 
+#define GAVL_META_MEDIA_CLASS_CONTAINER_GENRE     "container.category.genre" 
+#define GAVL_META_MEDIA_CLASS_TV_SEASON           "container.season"
+#define GAVL_META_MEDIA_CLASS_TV_SHOW             "container.tvshow"
+#define GAVL_META_MEDIA_CLASS_DIRECTORY           "container.directory" // On filesystem
+#define GAVL_META_MEDIA_CLASS_MOVIE_MULTIPART     "container.movie.multipart"
 
 /* Root Containers */
 #define GAVL_META_MEDIA_CLASS_ROOT               "container.root" 
@@ -375,6 +375,12 @@
 #define GAVL_META_MEDIA_CLASS_ROOT_WEBRADIO      "container.root.webradio"
 #define GAVL_META_MEDIA_CLASS_ROOT_DIRECTORIES   "container.root.directories"
 #define GAVL_META_MEDIA_CLASS_ROOT_PHOTOS        "container.root.photos"
+
+#define GAVL_META_MEDIA_CLASS_ROOT_INCOMING      "container.root.incoming" 
+#define GAVL_META_MEDIA_CLASS_ROOT_FAVORITES     "container.root.favorites" 
+#define GAVL_META_MEDIA_CLASS_ROOT_BOOKMARKS     "container.root.bookmarks" 
+#define GAVL_META_MEDIA_CLASS_ROOT_LIBRARY       "container.root.library"
+#define GAVL_META_MEDIA_CLASS_ROOT_NETWORK       "container.root.network"
 
 /* GUI States */
 

@@ -333,6 +333,14 @@ void gavl_msg_set_arg_dictionary(gavl_msg_t * msg, int arg,
     msg->num_args = arg + 1;
   }
 
+void gavl_msg_set_arg_dictionary_nocopy(gavl_msg_t * msg, int arg,
+                                        gavl_dictionary_t * m)
+  {
+  gavl_dictionary_move(gavl_value_set_dictionary(&msg->args[arg]), m);
+  if(arg+1 > msg->num_args)
+    msg->num_args = arg + 1;
+  }
+  
 int gavl_msg_get_arg_dictionary_c(const gavl_msg_t * msg, int arg,
                                 gavl_dictionary_t * m)
   {

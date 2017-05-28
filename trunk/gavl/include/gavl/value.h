@@ -169,6 +169,9 @@ GAVL_PUBLIC
 void gavl_dictionary_copy(gavl_dictionary_t * dst, const gavl_dictionary_t * src); 
 
 GAVL_PUBLIC
+void gavl_dictionary_move(gavl_dictionary_t * dst, gavl_dictionary_t * src);
+
+GAVL_PUBLIC
 void gavl_dictionary_dump(const gavl_dictionary_t * m, int indent);
 
 GAVL_PUBLIC
