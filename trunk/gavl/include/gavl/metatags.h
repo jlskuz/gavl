@@ -101,6 +101,9 @@
 
 #define GAVL_META_MTIME       "mtime" // time_t (from stat()) as long
 
+/* Size of the oject in bytes */
+#define GAVL_META_TOTAL_BYTES    "totalbytes"
+
 /** \brief Generic year
  */
 
@@ -259,13 +262,14 @@
 
 /* Images associated with media content */
 
+
 /** \brief Cover art
  */
 
+
+
 #define GAVL_META_COVER_URL      "CoverURL"
 
-/* Size of the oject in bytes */
-#define GAVL_META_TOTAL_BYTES    "totalbytes"
 
 /* For embedded covers: Location is NULL and offset and size are given */
 #define GAVL_META_COVER_EMBEDDED "CoverEmbedded"

@@ -28,7 +28,6 @@
 #define GAVL_MSG_NONE     -1 //!< Reserved ID for non valid message
 #define GAVL_MSG_MAX_ARGS  8 //!< Maximum number of args
 
-#define GAVL_MSG_NS_TRANSPORT 1
 #define GAVL_MSG_NS_GENERIC   2
 #define GAVL_MSG_NS_SRC       3
 #define GAVL_MSG_NS_GUI       4
@@ -36,22 +35,18 @@
 /* Message IDs */
 
 /*
- *  GAVL_MSG_NS_TRANSPORT
- */
-
-/** \brief 
- *  
- *  For implementing block-free duplex connections.
- */
-
-#define GAVL_MSG_READY          1 // Initial handshake, sent by client, echoed by server
-#define GAVL_MSG_EOT            2 // End of transmission, it's peer's turn
-#define GAVL_MSG_ACK            3 // Acknowledge, can have application specific args
-#define GAVL_MSG_BYE            4 // Quit, connection is closed IMMEDIATELY after
-
-/*
  *  GAVL_MSG_NS_GENERIC
  */
+
+/** \brief Quit
+ */
+
+#define GAVL_CMD_QUIT      1
+
+/** \brief Quit (acknowledge)
+ */
+
+#define GAVL_MSG_QUIT      100
 
 /** \brief Generic progress callback
  *
@@ -59,7 +54,7 @@
  *  arg0: Percentage (0.0..1.0)
  */
 
-#define GAVL_MSG_PROGRESS      1
+#define GAVL_MSG_PROGRESS      101
 
 /*
  *  GAVL_MSG_NS_SRC
@@ -201,6 +196,7 @@
 #define GAVL_MSG_NS         "NS"
 #define GAVL_MSG_CLIENT_ID  "ClientID"
 #define GAVL_MSG_CONTEXT_ID "ContextID"
+#define GAVL_MSG_TIMESTAMP  "TS"      // gavl_time_t (GAVL_TYPE_LONG)
 
 /** \brief Message type
  */
@@ -547,6 +543,13 @@ void gavl_msg_set_client_id(gavl_msg_t * msg, const char * id);
 
 GAVL_PUBLIC
 const char * gavl_msg_get_client_id(gavl_msg_t * msg);
+
+GAVL_PUBLIC
+gavl_time_t gavl_msg_get_timestamp(gavl_msg_t * msg);
+
+GAVL_PUBLIC
+void gavl_msg_set_timestamp(gavl_msg_t * msg, gavl_time_t);
+
 
 /*
  *  Utilities

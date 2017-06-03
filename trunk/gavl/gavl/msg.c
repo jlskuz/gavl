@@ -718,3 +718,16 @@ int gavl_msg_splice_children(gavl_msg_t * msg, gavl_dictionary_t * dict)
   gavl_value_free(&val);
   return ret;
   }
+
+gavl_time_t gavl_msg_get_timestamp(gavl_msg_t * msg)
+  {
+  gavl_time_t ret = GAVL_TIME_UNDEFINED;
+  gavl_dictionary_get_long(&msg->header, GAVL_MSG_TIMESTAMP, &ret);
+  return ret;
+  }
+
+
+void gavl_msg_set_timestamp(gavl_msg_t * msg, gavl_time_t t)
+  {
+  gavl_dictionary_set_long(&msg->header, GAVL_MSG_TIMESTAMP, t);
+  }
