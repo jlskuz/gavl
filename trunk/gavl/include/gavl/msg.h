@@ -60,7 +60,6 @@
  *  GAVL_MSG_NS_SRC
  */
 
-
 /** \brief Global metadata changed
  *
  *  arg0: time (time)
