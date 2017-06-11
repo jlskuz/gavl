@@ -515,6 +515,7 @@ void gavl_track_splice_children(gavl_dictionary_t * dict, int idx, int del,
     {
     gavl_array_splice_array(tracks, idx, del, val->v.array);
     }
+  gavl_track_update_children(dict);
   }
 
 
@@ -1072,4 +1073,21 @@ int gavl_track_get_gui_state(const gavl_dictionary_t * track, const char * state
 void gavl_track_clear_gui_state(gavl_dictionary_t * track)
   {
   gavl_dictionary_set(track, META_GUI, NULL);
+  }
+
+void gavl_track_update_children(gavl_dictionary_t * dict)
+  {
+  int i;
+  gavl_dictionary_t * m;
+  gavl_array_t * arr;
+  arr = gavl_get_tracks_nc(dict);
+  m = gavl_dictionary_get_dictionary_create(dict, GAVL_META_METADATA);
+
+  gavl_dictionary_set_int(m, GAVL_META_NUM_CHILDREN, arr->num_entries);
+
+  for(i = 0; i < arr->num_entries; i++)
+    {
+    m = gavl_track_get_metadata_nc(gavl_get_track_nc(dict, i));
+    gavl_dictionary_set_int(m, GAVL_META_IDX, i);
+    }
   }
