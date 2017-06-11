@@ -181,6 +181,9 @@ GAVL_PUBLIC
 void gavl_track_splice_children(gavl_dictionary_t * dict, int idx, int del,
                                 const gavl_value_t * val);
 
+GAVL_PUBLIC
+void gavl_track_update_children(gavl_dictionary_t * dict);
+
 // GAVL_PUBLIC
 
 GAVL_PUBLIC

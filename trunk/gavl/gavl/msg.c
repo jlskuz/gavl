@@ -50,7 +50,7 @@ void gavl_msg_set_id_ns(gavl_msg_t * msg, int id, int ns)
   gavl_dictionary_set_int(&msg->header, GAVL_MSG_ID, id);
   msg->ID = id;
 
-  gavl_dictionary_set_int(&msg->header, GAVL_MSG_NS, id);
+  gavl_dictionary_set_int(&msg->header, GAVL_MSG_NS, ns);
   msg->NS = ns;
     
   msg->num_args = 0;
@@ -423,7 +423,9 @@ void gavl_msg_dump(const gavl_msg_t * msg, int indent)
   {
   int i;
 
-  gavl_diprintf(indent, "Message NS: %d ID: %d (%08x) args: %d\n", msg->NS, msg->ID, msg->ID, msg->num_args);
+  gavl_diprintf(indent, "Message\n");
+  gavl_dictionary_dump(&msg->header, indent + 2);
+  gavl_dprintf("\n");
     
   for(i = 0; i < msg->num_args; i++)
     {
