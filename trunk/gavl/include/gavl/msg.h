@@ -541,13 +541,16 @@ GAVL_PUBLIC
 void gavl_msg_set_client_id(gavl_msg_t * msg, const char * id);
 
 GAVL_PUBLIC
-const char * gavl_msg_get_client_id(gavl_msg_t * msg);
+const char * gavl_msg_get_client_id(const gavl_msg_t * msg);
 
 GAVL_PUBLIC
-gavl_time_t gavl_msg_get_timestamp(gavl_msg_t * msg);
+gavl_time_t gavl_msg_get_timestamp(const gavl_msg_t * msg);
 
 GAVL_PUBLIC
 void gavl_msg_set_timestamp(gavl_msg_t * msg, gavl_time_t);
+
+GAVL_PUBLIC 
+void gavl_msg_copy_header_field(gavl_msg_t * dst, const gavl_msg_t * src, const char * key);
 
 
 /*
@@ -632,6 +635,5 @@ int gavl_msg_get_splice_children(gavl_msg_t * msg,
 GAVL_PUBLIC 
 int gavl_msg_splice_children(gavl_msg_t * msg, gavl_dictionary_t * dict);
 
-  
 
 #endif // GAVL_MSG_H_INCLUDED
