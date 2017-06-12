@@ -30,6 +30,7 @@
 #include <gavl/gavf.h>
 #include <gavl/trackinfo.h>
 
+
 void gavl_msg_set_client_id(gavl_msg_t * msg, const char * id)
   {
   if(msg->ClientID)
@@ -39,7 +40,7 @@ void gavl_msg_set_client_id(gavl_msg_t * msg, const char * id)
   msg->ClientID = gavl_dictionary_get_string(&msg->header, GAVL_MSG_CLIENT_ID);
   }
 
-const char * gavl_msg_get_client_id(gavl_msg_t * msg)
+const char * gavl_msg_get_client_id(const gavl_msg_t * msg)
   {
   return msg->ClientID;
   }
@@ -721,7 +722,7 @@ int gavl_msg_splice_children(gavl_msg_t * msg, gavl_dictionary_t * dict)
   return ret;
   }
 
-gavl_time_t gavl_msg_get_timestamp(gavl_msg_t * msg)
+gavl_time_t gavl_msg_get_timestamp(const gavl_msg_t * msg)
   {
   gavl_time_t ret = GAVL_TIME_UNDEFINED;
   gavl_dictionary_get_long(&msg->header, GAVL_MSG_TIMESTAMP, &ret);
@@ -732,4 +733,12 @@ gavl_time_t gavl_msg_get_timestamp(gavl_msg_t * msg)
 void gavl_msg_set_timestamp(gavl_msg_t * msg, gavl_time_t t)
   {
   gavl_dictionary_set_long(&msg->header, GAVL_MSG_TIMESTAMP, t);
+  }
+
+void gavl_msg_copy_header_field(gavl_msg_t * dst, const gavl_msg_t * src, const char * key) 
+  {
+  if(!strcmp(key, GAVL_MSG_CLIENT_ID))
+    gavl_msg_set_client_id(dst, gavl_msg_get_client_id(src));
+  else
+    gavl_dictionary_set(&dst->header, key, gavl_dictionary_get(&src->header, key));
   }
