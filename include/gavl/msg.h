@@ -205,7 +205,6 @@ struct gavl_msg_s
   gavl_dictionary_t header;
   int NS;  // Namespace
   int ID;
-  const char * ClientID; // For function calls
   
   // Where to send the answer. Meaning defined at a higher level.
   

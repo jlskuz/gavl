@@ -33,16 +33,14 @@
 
 void gavl_msg_set_client_id(gavl_msg_t * msg, const char * id)
   {
-  if(msg->ClientID)
+  if(gavl_dictionary_get(&msg->header, GAVL_MSG_CLIENT_ID))
     return;
-  
   gavl_dictionary_set_string(&msg->header, GAVL_MSG_CLIENT_ID, id);
-  msg->ClientID = gavl_dictionary_get_string(&msg->header, GAVL_MSG_CLIENT_ID);
   }
 
 const char * gavl_msg_get_client_id(const gavl_msg_t * msg)
   {
-  return msg->ClientID;
+  return gavl_dictionary_get_string(&msg->header, GAVL_MSG_CLIENT_ID);
   }
 
 void gavl_msg_set_id_ns(gavl_msg_t * msg, int id, int ns)
@@ -411,7 +409,6 @@ void gavl_msg_free(gavl_msg_t * m)
   m->num_args = 0;
   m->ID = -1;
   m->ID = 0;
-  m->ClientID = NULL;
   }
 
 void gavl_msg_destroy(gavl_msg_t * m)
@@ -653,9 +650,7 @@ int gavl_msg_match(const gavl_msg_t * m, uint32_t id, uint32_t ns)
 void gavl_msg_apply_header(gavl_msg_t * msg)
   {
   const gavl_value_t * val;
-  if((val = gavl_dictionary_get(&msg->header, GAVL_MSG_CLIENT_ID)))
-    msg->ClientID = gavl_value_get_string_c(val);
-
+  
   if((val = gavl_dictionary_get(&msg->header, GAVL_MSG_ID)) &&
      (val->type == GAVL_TYPE_INT))
     msg->ID = val->v.i;
