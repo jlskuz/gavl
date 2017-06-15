@@ -856,7 +856,7 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
   const char * location;
   char * path = NULL;
   char * basename = NULL;
-
+  
   m = gavl_track_get_metadata_nc(dict);
   
   if(gavl_dictionary_get_src(m, GAVL_META_SRC, 0,
@@ -879,11 +879,9 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
   
   num_audio_streams = gavl_track_get_num_audio_streams(dict);
   num_video_streams = gavl_track_get_num_video_streams(dict);
-
   
   /* Figure out the media type */
-  if((num_audio_streams == 1) &&
-     (!num_video_streams))
+  if((num_audio_streams == 1) && !num_video_streams)
     {
     /* Audio file */
     media_class = GAVL_META_MEDIA_CLASS_AUDIO_FILE;
@@ -891,7 +889,8 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
   else if(num_video_streams >= 1)
     {
     const gavl_video_format_t * fmt;
-    if((!num_audio_streams) &&
+
+    if(!num_audio_streams &&
        (num_video_streams == 1) &&
        (fmt = gavl_track_get_video_format(dict, 0)) && 
        (fmt->framerate_mode == GAVL_FRAMERATE_STILL))
