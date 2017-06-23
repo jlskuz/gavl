@@ -561,7 +561,14 @@ int gavl_value_get_long(const gavl_value_t * v, int64_t * val)
   return 1;
   }
 
-const char * gavl_value_get_string_c(const gavl_value_t * v)
+const char * gavl_value_get_string(const gavl_value_t * v)
+  {
+  if(v->type == GAVL_TYPE_STRING)
+    return v->v.str;
+  return NULL;
+  }
+
+char * gavl_value_get_string_nc(gavl_value_t * v)
   {
   if(v->type == GAVL_TYPE_STRING)
     return v->v.str;

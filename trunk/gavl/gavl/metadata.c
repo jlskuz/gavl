@@ -471,11 +471,11 @@ const char * gavl_dictionary_get_string_image_uri(const gavl_dictionary_t * m,
   if(!(val = gavl_dictionary_get(dict, GAVL_META_URI)))
     return NULL;
 
-  ret = gavl_value_get_string_c(val);
+  ret = gavl_value_get_string(val);
 
   /* mimetype, width, height */
   if(mimetype && (val = gavl_dictionary_get(dict, GAVL_META_MIMETYPE)))
-    *mimetype = gavl_strdup(gavl_value_get_string_c(val));
+    *mimetype = gavl_strdup(gavl_value_get_string(val));
 
   if(wp  && (val = gavl_dictionary_get(dict, GAVL_META_WIDTH)))
     gavl_value_get_int(val, wp);

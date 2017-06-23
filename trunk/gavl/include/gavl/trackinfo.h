@@ -182,6 +182,10 @@ void gavl_track_splice_children(gavl_dictionary_t * dict, int idx, int del,
                                 const gavl_value_t * val);
 
 GAVL_PUBLIC
+void gavl_track_splice_children_nocopy(gavl_dictionary_t * dict, int idx, int del,
+                                       gavl_value_t * val);
+
+GAVL_PUBLIC
 void gavl_track_update_children(gavl_dictionary_t * dict);
 
 // GAVL_PUBLIC
@@ -240,6 +244,15 @@ gavl_array_t * gavl_get_tracks_nc(gavl_dictionary_t * dict);
 
 GAVL_PUBLIC
 const gavl_array_t * gavl_get_tracks(const gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
+const gavl_dictionary_t * gavl_get_track_by_id(const gavl_dictionary_t * dict, const char * id);
+
+GAVL_PUBLIC
+gavl_dictionary_t * gavl_get_track_by_id_nc(gavl_dictionary_t * dict, const char * id);
+
+GAVL_PUBLIC
+int gavl_get_track_idx_by_id(const gavl_dictionary_t * dict, const char * id);
 
 
 #endif // GAVL_TRACKINFO_H_INCLUDED
