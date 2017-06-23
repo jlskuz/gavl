@@ -640,7 +640,7 @@ int gavl_audio_format_from_dictionary(gavl_audio_format_t * fmt, const gavl_dict
     
   for(i = 0; i < fmt->num_channels; i++)
     {
-    if(!(str = gavl_value_get_string_c(&arr->entries[i])))
+    if(!(str = gavl_value_get_string(&arr->entries[i])))
       goto fail;
     fmt->channel_locations[i] = gavl_short_string_to_channel_id(str);
     }

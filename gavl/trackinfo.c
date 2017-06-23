@@ -450,7 +450,7 @@ gavl_dictionary_t * gavl_append_track(gavl_dictionary_t * dict)
   
   track_init(new_track, num);
   gavl_array_push_nocopy(arr, &val);
-  
+  gavl_track_update_children(dict);
   return arr->entries[num].v.dictionary;
   }
 
@@ -516,6 +516,25 @@ void gavl_track_splice_children(gavl_dictionary_t * dict, int idx, int del,
     gavl_array_splice_array(tracks, idx, del, val->v.array);
     }
   gavl_track_update_children(dict);
+  }
+
+void gavl_track_splice_children_nocopy(gavl_dictionary_t * dict, int idx, int del,
+                                       gavl_value_t * val)
+  {
+  gavl_array_t * tracks;
+  if(!(tracks = gavl_get_tracks_nc(dict)))
+    return;
+  
+  if(!val || (val->type == GAVL_TYPE_DICTIONARY) || (val->type == GAVL_TYPE_UNDEFINED))
+    {
+    gavl_array_splice_val_nocopy(tracks, idx, del, val);
+    }
+  else if(val->type == GAVL_TYPE_ARRAY)
+    {
+    gavl_array_splice_array_nocopy(tracks, idx, del, val->v.array);
+    }
+  gavl_track_update_children(dict);
+  gavl_value_reset(val);
   }
 
 
@@ -1089,4 +1108,63 @@ void gavl_track_update_children(gavl_dictionary_t * dict)
     m = gavl_track_get_metadata_nc(gavl_get_track_nc(dict, i));
     gavl_dictionary_set_int(m, GAVL_META_IDX, i);
     }
+  }
+
+int gavl_get_track_idx_by_id(const gavl_dictionary_t * dict, const char * id)
+  {
+  int i;
+  const gavl_dictionary_t * track;
+  const gavl_dictionary_t * m;
+  const char * track_id;
+
+  int num = gavl_get_num_tracks(dict);
+  
+  for(i = 0; i < num; i++)
+    {
+    if((track = gavl_get_track(dict, i)) &&
+       (m = gavl_track_get_metadata(track)) &&
+       (track_id = gavl_dictionary_get_string(m, GAVL_META_ID)) &&
+       !strcmp(track_id, id))
+      return i;
+    }
+  return -1;
+  }
+
+const gavl_dictionary_t * gavl_get_track_by_id(const gavl_dictionary_t * dict, const char * id)
+  {
+  int i;
+  const gavl_dictionary_t * track;
+  const gavl_dictionary_t * m;
+  const char * track_id;
+
+  int num = gavl_get_num_tracks(dict);
+  
+  for(i = 0; i < num; i++)
+    {
+    if((track = gavl_get_track(dict, i)) &&
+       (m = gavl_track_get_metadata(track)) &&
+       (track_id = gavl_dictionary_get_string(m, GAVL_META_ID)) &&
+       !strcmp(track_id, id))
+      return track;
+    }
+  return NULL;
+  }
+
+gavl_dictionary_t * gavl_get_track_by_id_nc(gavl_dictionary_t * dict, const char * id)
+  {
+  int i;
+  gavl_dictionary_t * track;
+  const gavl_dictionary_t * m;
+  const char * track_id;
+  int num = gavl_get_num_tracks(dict);
+  
+  for(i = 0; i < num; i++)
+    {
+    if((track = gavl_get_track_nc(dict, i)) &&
+       (m = gavl_track_get_metadata(track)) &&
+       (track_id = gavl_dictionary_get_string(m, GAVL_META_ID)) &&
+       !strcmp(track_id, id))
+      return track;
+    }
+  return NULL;
   }

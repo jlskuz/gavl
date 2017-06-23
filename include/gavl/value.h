@@ -468,8 +468,12 @@ GAVL_PUBLIC
 int gavl_value_get_float(const gavl_value_t * v, double * val);
 GAVL_PUBLIC
 int gavl_value_get_long(const gavl_value_t * v, int64_t * val);
+
 GAVL_PUBLIC
-const char * gavl_value_get_string_c(const gavl_value_t * v);
+const char * gavl_value_get_string(const gavl_value_t * v);
+
+GAVL_PUBLIC
+char * gavl_value_get_string_nc(gavl_value_t * v);
 
 GAVL_PUBLIC
 char * gavl_value_to_string(const gavl_value_t * v);
