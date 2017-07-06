@@ -169,6 +169,11 @@ GAVL_PUBLIC
 int gavl_get_num_tracks(const gavl_dictionary_t*);
 
 GAVL_PUBLIC
+int gavl_get_num_tracks_loaded(const gavl_dictionary_t * dict,
+                               int * total);
+
+
+GAVL_PUBLIC
 void gavl_delete_track(gavl_dictionary_t*, int idx);
 
 GAVL_PUBLIC
