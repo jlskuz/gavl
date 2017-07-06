@@ -195,11 +195,9 @@
 /** \brief Name of the station for Radio or TV streams
  */
 
-#define GAVL_META_STATION      "Station"
-
-#define GAVL_META_STATION_URL  "StationURL"
-
-
+#define GAVL_META_STATION           "Station"
+#define GAVL_META_STATION_URL       "StationURL"
+#define GAVL_META_STATION_LOGO_URL  "StationLogo"
 
 /** \brief Approximate duration
  */
@@ -363,7 +361,9 @@
 #define GAVL_META_MEDIA_CLASS_CONTAINER_DIRECTOR  "container.category.director" 
 #define GAVL_META_MEDIA_CLASS_CONTAINER_ARTIST    "container.category.artist" 
 #define GAVL_META_MEDIA_CLASS_CONTAINER_COUNTRY   "container.category.country" 
-#define GAVL_META_MEDIA_CLASS_CONTAINER_GENRE     "container.category.genre" 
+#define GAVL_META_MEDIA_CLASS_CONTAINER_GENRE     "container.category.genre"
+#define GAVL_META_MEDIA_CLASS_CONTAINER_LANGUAGE  "container.category.language"
+#define GAVL_META_MEDIA_CLASS_CONTAINER_TAG       "container.category.tag"
 #define GAVL_META_MEDIA_CLASS_TV_SEASON           "container.season"
 #define GAVL_META_MEDIA_CLASS_TV_SHOW             "container.tvshow"
 #define GAVL_META_MEDIA_CLASS_DIRECTORY           "container.directory" // On filesystem
