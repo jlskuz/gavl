@@ -289,7 +289,10 @@
 #define GAVL_META_AUDIO_SAMPLERATE   "Samplerate"
 #define GAVL_META_AUDIO_BITRATE      "AudioBitrate"
 #define GAVL_META_VIDEO_BITRATE      "VideoBitrate"
-#define GAVL_META_VIDEO_RESOLUTION   "VideoResolution"
+#define GAVL_META_AUDIO_CODEC        "AudioCodec"
+#define GAVL_META_VIDEO_CODEC        "VideoCodec"
+#define GAVL_META_VIDEO_BITRATE      "VideoBitrate"
+
 #define GAVL_META_VIDEO_ASPECT_RATIO "VideoAspectRatio" // Human readable e.g. (16:9)
 
 #define GAVL_META_WIDTH  "w"

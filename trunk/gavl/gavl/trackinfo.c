@@ -888,6 +888,54 @@ static int detect_movie_multifile(char * basename, gavl_dictionary_t * dict)
   return 1;
   }
 
+static void finalize_audio(gavl_dictionary_t * dict)
+  {
+  const char * var;
+  gavl_dictionary_t * m;
+  const gavl_dictionary_t * sm;
+  const gavl_audio_format_t * fmt;
+  int val_i;
+  
+  if(!(m = gavl_track_get_metadata_nc(dict)) ||
+     !(fmt = gavl_track_get_audio_format(dict, 0)) ||
+     !(sm = gavl_track_get_audio_metadata(dict, 0)))
+    return;
+  
+  if(fmt->num_channels)
+    gavl_dictionary_set_int(m, GAVL_META_AUDIO_CHANNELS, fmt->num_channels);
+  if(fmt->samplerate)
+    gavl_dictionary_set_int(m, GAVL_META_AUDIO_SAMPLERATE, fmt->samplerate);
+  
+  if(gavl_dictionary_get_int(sm, GAVL_META_BITRATE, &val_i))
+    gavl_dictionary_set_int(m, GAVL_META_AUDIO_BITRATE, val_i);
+  
+  if((var = gavl_dictionary_get_string(sm, GAVL_META_FORMAT)))
+    gavl_dictionary_set_string(m, GAVL_META_AUDIO_CODEC, var);
+  
+  }
+
+static void finalize_video(gavl_dictionary_t * dict)
+  {
+  const char * var;
+  gavl_dictionary_t * m;
+  const gavl_dictionary_t * sm;
+  const gavl_video_format_t * fmt;
+  
+  if(!(m = gavl_track_get_metadata_nc(dict)) ||
+     !(fmt = gavl_track_get_video_format(dict, 0)) ||
+     !(sm = gavl_track_get_video_metadata(dict, 0)))
+    return;
+
+  if(fmt->image_width && fmt->image_height)
+    {
+    gavl_dictionary_set_int(m, GAVL_META_WIDTH, fmt->image_width);
+    gavl_dictionary_set_int(m, GAVL_META_HEIGHT, fmt->image_height);
+    }
+
+  if((var = gavl_dictionary_get_string(sm, GAVL_META_FORMAT)))
+    gavl_dictionary_set_string(m, GAVL_META_VIDEO_CODEC, var);
+  }
+
 void gavl_track_finalize(gavl_dictionary_t * dict)
   {
   const char * media_class = NULL;
@@ -895,30 +943,12 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
   
   int num_audio_streams;
   int num_video_streams;
-  const char * location;
-  char * path = NULL;
   char * basename = NULL;
+
+  
   
   m = gavl_track_get_metadata_nc(dict);
-  
-  if(gavl_dictionary_get_src(m, GAVL_META_SRC, 0,
-                             NULL, &location) &&
-     (location[0] == '/'))
-    {
-    char * pos;
-    
-    path = gavl_strdup(location);
-    
-    if((pos = strrchr(path, '/')))
-      {
-      *pos = '\0';
-      basename = pos + 1;
-      
-      if((pos = strrchr(basename, '.')))
-        *pos = '\0';
-      }
-    }
-  
+
   num_audio_streams = gavl_track_get_num_audio_streams(dict);
   num_video_streams = gavl_track_get_num_video_streams(dict);
   
@@ -951,6 +981,8 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
     {
     if(!strcmp(media_class, GAVL_META_MEDIA_CLASS_AUDIO_FILE))
       {
+      finalize_audio(dict);
+      
       /* Check for audio broadcast */
       if(gavl_dictionary_get(m, GAVL_META_STATION))
         media_class = GAVL_META_MEDIA_CLASS_AUDIO_BROADCAST;
@@ -969,6 +1001,10 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
       }
     else if(!strcmp(media_class, GAVL_META_MEDIA_CLASS_VIDEO_FILE))
       {
+      finalize_video(dict);
+      if(num_audio_streams > 0)
+        finalize_audio(dict);
+      
       if(num_video_streams == 1)
         {
         /* Check for episode */
@@ -987,10 +1023,6 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
     gavl_dictionary_set_string(m, GAVL_META_MEDIA_CLASS, media_class);
 
   gavl_track_compute_duration(dict);
-  
-  if(path)
-    free(path);
-  
   }
 
 gavl_time_t gavl_track_get_duration(const gavl_dictionary_t * dict)
