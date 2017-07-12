@@ -333,3 +333,9 @@ void gavl_array_destroy(gavl_array_t * arr)
   gavl_array_free(arr);
   free(arr);
   }
+
+void gavl_array_sort(gavl_array_t * arr, int (*compare)(const void *, const void *))
+  {
+  qsort(arr->entries, arr->num_entries, sizeof(*arr->entries), compare);
+  }
+

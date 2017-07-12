@@ -307,7 +307,7 @@
 #define GAVL_META_IDX                "idx"         // Index in parent container
 #define GAVL_META_TOTAL              "total"       // Total number (maximum idx + 1)
 #define GAVL_META_SHOW               "Show"        // TV Show, this item belongs to
-#define GAVL_META_SEASON             "Season"      // Season, this episode belongs to
+#define GAVL_META_SEASON             "Season"      // Season, this episode belongs to (integer but can be non-continuous)
 #define GAVL_META_RATING             "Rating"      // Rating (float, 0.0..1.0)
 #define GAVL_META_PARENTAL_CONTROL   "ParentalControl" // mpaa or FSK (or whatever) rating
 
@@ -350,6 +350,8 @@
 #define GAVL_META_MEDIA_CLASS_SONG                "item.audio.song"
 #define GAVL_META_MEDIA_CLASS_MOVIE               "item.video.movie"
 #define GAVL_META_MEDIA_CLASS_MOVIE_PART          "item.video.movie.part"
+#define GAVL_META_MEDIA_CLASS_MOVIE_MULTIPART     "item.video.movie.multipart"
+
 #define GAVL_META_MEDIA_CLASS_TV_EPISODE          "item.video.episode"
 #define GAVL_META_MEDIA_CLASS_AUDIO_BROADCAST     "item.audio.broadcast"
 #define GAVL_META_MEDIA_CLASS_VIDEO_BROADCAST     "item.video.broadcast"
@@ -370,7 +372,6 @@
 #define GAVL_META_MEDIA_CLASS_TV_SEASON           "container.season"
 #define GAVL_META_MEDIA_CLASS_TV_SHOW             "container.tvshow"
 #define GAVL_META_MEDIA_CLASS_DIRECTORY           "container.directory" // On filesystem
-#define GAVL_META_MEDIA_CLASS_MOVIE_MULTIPART     "container.movie.multipart"
 
 #define GAVL_META_MEDIA_CLASS_MULTITRACK_FILE     "container.multitrackfile"
 
