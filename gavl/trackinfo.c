@@ -809,6 +809,7 @@ static int detect_episode(const char * filename, gavl_dictionary_t * dict)
   pos++;
   
   gavl_dictionary_set_string_nocopy(dict, GAVL_META_SHOW, gavl_strndup(filename, pos));
+  gavl_dictionary_set_int(dict, GAVL_META_SEASON, season);
   return 1;  
   }
 
@@ -945,10 +946,21 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
   int num_video_streams;
   char * basename = NULL;
 
-  
-  
-  m = gavl_track_get_metadata_nc(dict);
+  const char * location;
+  const char * pos1;
+  const char * pos2;
 
+  m = gavl_track_get_metadata_nc(dict);
+  
+  gavl_dictionary_get_src(m, GAVL_META_SRC, 0,
+                          NULL, &location);
+  
+  if(location && (pos1 = strrchr(location, '/')) &&
+     (pos2 = strrchr(location, '.')) && (pos2 > pos1))
+    {
+    basename = gavl_strndup(pos1+1, pos2);
+    }
+  
   num_audio_streams = gavl_track_get_num_audio_streams(dict);
   num_video_streams = gavl_track_get_num_video_streams(dict);
   
@@ -1021,8 +1033,11 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
     }
   if(media_class)
     gavl_dictionary_set_string(m, GAVL_META_MEDIA_CLASS, media_class);
-
+  
   gavl_track_compute_duration(dict);
+
+  if(basename)
+    free(basename);
   }
 
 gavl_time_t gavl_track_get_duration(const gavl_dictionary_t * dict)

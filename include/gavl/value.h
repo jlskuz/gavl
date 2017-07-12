@@ -343,6 +343,9 @@ void gavl_array_splice_array_nocopy(gavl_array_t * arr,
                                    int idx, int del,
                                    gavl_array_t * add);
 
+// uses qsort(3)
+GAVL_PUBLIC
+void gavl_array_sort(gavl_array_t * arr, int (*compare)(const void *, const void *));
 
 /* For compatibility with old heap API */
 
