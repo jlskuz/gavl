@@ -56,10 +56,10 @@ gavl_metadata_date_time_to_string(int year,
 
 void
 gavl_dictionary_set_date(gavl_dictionary_t * m,
-                       const char * key,
-                       int year,
-                       int month,
-                       int day)
+                         const char * key,
+                         int year,
+                         int month,
+                         int day)
   {
   // YYYY-MM-DD
   char buf[GAVL_METADATA_DATE_STRING_LEN];

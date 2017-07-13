@@ -354,7 +354,6 @@ const gavl_value_t * gavl_dictionary_get_item_i(const gavl_dictionary_t * d, con
   return gavl_value_get_item(&d->entries[idx].v, item);
   }
 
-
 const char * gavl_dictionary_get_string(const gavl_dictionary_t * d,
                                         const char * name)
   {
@@ -375,6 +374,43 @@ const char * gavl_dictionary_get_string_i(const gavl_dictionary_t * d,
   return v->v.str;
   }
 
+void gavl_dictionary_append_string_array_nocopy(gavl_dictionary_t * d,
+                                                const char * key, char * str)
+  {
+  gavl_value_t * val;
+  val = gavl_dictionary_get_nc(d, key);
+  
+  if(!val)
+    gavl_dictionary_set_string_nocopy(d, key, str);
+  else
+    {
+    gavl_value_t str_val;
+    gavl_value_init(&str_val);
+    gavl_value_set_string_nocopy(&str_val, str);
+    gavl_value_append_nocopy(val, &str_val);
+    }
+  
+  }
+
+void gavl_dictionary_append_string_array(gavl_dictionary_t * d,
+                                         const char * key, const char * val)
+  {
+  gavl_dictionary_append_string_array_nocopy(d, key, gavl_strdup(val));
+  }
+
+
+const char * gavl_dictionary_get_string_array(const gavl_dictionary_t * d,
+                                              const char * key, int idx)
+  {
+  const gavl_value_t * val;
+  const gavl_value_t * el;
+  
+  if((val = gavl_dictionary_get(d, key)) &&
+     (el = gavl_value_get_item(val, idx)))
+    return gavl_value_get_string(el);
+  else
+    return NULL;
+  }
 
 void gavl_dictionary_free(gavl_dictionary_t * d)
   {
