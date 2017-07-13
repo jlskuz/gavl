@@ -347,6 +347,21 @@ void gavl_array_splice_array_nocopy(gavl_array_t * arr,
 GAVL_PUBLIC
 void gavl_array_sort(gavl_array_t * arr, int (*compare)(const void *, const void *));
 
+GAVL_PUBLIC
+void gavl_dictionary_append_string_array_nocopy(gavl_dictionary_t * d,
+                                                const char * key, char * val);
+
+GAVL_PUBLIC
+void gavl_dictionary_append_string_array(gavl_dictionary_t * d,
+                                         const char * key, const char * val);
+
+GAVL_PUBLIC
+const char * gavl_dictionary_get_string_array(const gavl_dictionary_t * d,
+                                              const char * key, int idx);
+
+
+
+
 /* For compatibility with old heap API */
 
 GAVL_PUBLIC
