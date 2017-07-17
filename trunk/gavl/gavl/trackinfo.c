@@ -738,9 +738,8 @@ static const char * detect_date(const char * filename, gavl_dictionary_t * metad
   return pos;
   }
 
-
-static const char * detect_episode_tag(const char * filename, const char * end, 
-                                       int * season_p, int * idx_p)
+const char * gavl_detect_episode_tag(const char * filename, const char * end, 
+                                     int * season_p, int * idx_p)
   {
   const char * pos;
   int season, idx;
@@ -778,7 +777,7 @@ static int detect_episode(const char * filename, gavl_dictionary_t * dict)
   if(!end)
     end = filename + strlen(filename);
 
-  tag = detect_episode_tag(filename, end, &season, &idx);
+  tag = gavl_detect_episode_tag(filename, end, &season, &idx);
   if(!tag)
     return 0;
 

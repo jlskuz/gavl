@@ -622,6 +622,8 @@ gavl_metadata_add_src(gavl_dictionary_t * m, const char * key,
   
   if(mimetype)
     gavl_dictionary_set_string(ret, GAVL_META_MIMETYPE, mimetype);
+  if(location)
+    gavl_dictionary_set_string(ret, GAVL_META_MIMETYPE, location);
   
   gavl_dictionary_append_nocopy(m, key, &val);
   idx = gavl_dictionary_find(m, key, 0);
