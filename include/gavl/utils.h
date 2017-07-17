@@ -215,6 +215,10 @@ int gavl_string_ends_with(const char * str, const char * end);
 GAVL_PUBLIC
 int gavl_string_ends_with_i(const char * str, const char * end);
 
+GAVL_PUBLIC
+const char * gavl_detect_episode_tag(const char * filename, const char * end, 
+                                     int * season_p, int * idx_p);
+
 /* Buffer */
 
 typedef struct
@@ -244,6 +248,7 @@ void gavl_buffer_reset(gavl_buffer_t * buf);
 
 GAVL_PUBLIC
 void gavl_buffer_copy(gavl_buffer_t * dst, const gavl_buffer_t * src);
+
 
 
 #endif // GAVL_UTILS_H_INCLUDED
