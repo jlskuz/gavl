@@ -106,6 +106,21 @@ gavl_dictionary_get_date(const gavl_dictionary_t * m,
   }
 
 GAVL_PUBLIC int
+gavl_dictionary_get_year(const gavl_dictionary_t * m,
+                         const char * key)
+  {
+  int year;
+  int month;
+  int day;
+  
+  if(gavl_dictionary_get_date(m, key, &year, &month, &day) &&
+     (year != 9999))
+    return year;
+  else
+    return 0;
+  }
+
+GAVL_PUBLIC int
 gavl_dictionary_get_date_time(const gavl_dictionary_t * m,
                               const char * key,
                               int * year,
@@ -390,11 +405,11 @@ void gavl_metadata_add_image_embedded(gavl_dictionary_t * m,
 
 // 
 
-void gavl_metadata_add_image_uri(gavl_dictionary_t * m,
-                                 const char * key,
-                                 int w, int h,
-                                 const char * mimetype,
-                                 const char * uri)
+gavl_dictionary_t *  gavl_metadata_add_image_uri(gavl_dictionary_t * m,
+                                                 const char * key,
+                                                 int w, int h,
+                                                 const char * mimetype,
+                                                 const char * uri)
   {
   gavl_value_t child;
   gavl_value_t val;
@@ -425,7 +440,9 @@ void gavl_metadata_add_image_uri(gavl_dictionary_t * m,
     gavl_dictionary_set_nocopy(dict, GAVL_META_HEIGHT, &val);
     }
   gavl_dictionary_append_nocopy(m, key, &child);
+  return dict;
   }
+
 
 /* Generic routine */
 
@@ -586,30 +603,33 @@ gavl_metadata_add_src(gavl_dictionary_t * m, const char * key,
   gavl_value_t child_val;
   gavl_dictionary_t * ret;
   gavl_value_t * valp;
-  /* Check if the location is already there */
 
   const char * loc;
 
   idx = 0;
 
-  while((valp = gavl_dictionary_get_item_nc(m, GAVL_META_SRC, idx)))
+  if(location)
     {
-    if(valp->type != GAVL_TYPE_DICTIONARY)
-      return NULL;
-    
-    ret = valp->v.dictionary;
-    
-    loc = gavl_dictionary_get_string(ret, GAVL_META_URI);
-    
-    if(!strcmp(loc, location))
+    /* Check if the location is already there */
+    while((valp = gavl_dictionary_get_item_nc(m, GAVL_META_SRC, idx)))
       {
-      gavl_dictionary_set_int(m, GAVL_META_SRCIDX, idx);
-      return ret;
+      if(valp->type != GAVL_TYPE_DICTIONARY)
+        return NULL;
+    
+      ret = valp->v.dictionary;
+    
+      loc = gavl_dictionary_get_string(ret, GAVL_META_URI);
+    
+      if(!strcmp(loc, location))
+        {
+        gavl_dictionary_set_int(m, GAVL_META_SRCIDX, idx);
+        return ret;
+        }
+      else
+        idx++;
       }
-    else
-      idx++;
     }
-
+  
   ret = NULL;
   idx = 0;
   
@@ -618,12 +638,10 @@ gavl_metadata_add_src(gavl_dictionary_t * m, const char * key,
 
   ret = gavl_value_set_dictionary(&val);
   
-  gavl_dictionary_set_string(ret, GAVL_META_URI, location);
-  
   if(mimetype)
     gavl_dictionary_set_string(ret, GAVL_META_MIMETYPE, mimetype);
   if(location)
-    gavl_dictionary_set_string(ret, GAVL_META_MIMETYPE, location);
+    gavl_dictionary_set_string(ret, GAVL_META_URI, location);
   
   gavl_dictionary_append_nocopy(m, key, &val);
   idx = gavl_dictionary_find(m, key, 0);

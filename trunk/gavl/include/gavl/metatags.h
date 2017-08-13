@@ -311,6 +311,7 @@
 #define GAVL_META_RATING             "Rating"      // Rating (float, 0.0..1.0)
 #define GAVL_META_PARENTAL_CONTROL   "ParentalControl" // mpaa or FSK (or whatever) rating
 
+#define GAVL_META_NFO_FILE           "NFOFILE" // 
 
 
 #define GAVL_META_STREAM_PTS_START "PTSStart"
@@ -369,6 +370,7 @@
 #define GAVL_META_MEDIA_CLASS_CONTAINER_GENRE     "container.category.genre"
 #define GAVL_META_MEDIA_CLASS_CONTAINER_LANGUAGE  "container.category.language"
 #define GAVL_META_MEDIA_CLASS_CONTAINER_TAG       "container.category.tag"
+#define GAVL_META_MEDIA_CLASS_CONTAINER_YEAR      "container.category.year"
 #define GAVL_META_MEDIA_CLASS_TV_SEASON           "container.season"
 #define GAVL_META_MEDIA_CLASS_TV_SHOW             "container.tvshow"
 #define GAVL_META_MEDIA_CLASS_DIRECTORY           "container.directory" // On filesystem
