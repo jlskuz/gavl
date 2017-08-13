@@ -208,6 +208,17 @@ gavl_dictionary_set_date(gavl_dictionary_t * m,
                                 int year,
                                 int month,
                                 int day);
+/** \brief Get the year from a tag
+ *  \arg m A metadata structure
+ *  \arg key Key
+ *  \returns The year or 0
+ *  
+ */
+
+GAVL_PUBLIC int
+gavl_dictionary_get_year(const gavl_dictionary_t * m,
+                         const char * key);
+
   
 /** \brief Get a date tag
  *  \arg m A metadata structure
@@ -354,7 +365,7 @@ gavl_dictionary_set_string_endian(gavl_dictionary_t * m);
 GAVL_PUBLIC int
 gavl_metadata_do_swap_endian(const gavl_dictionary_t * m);
 
-GAVL_PUBLIC void
+GAVL_PUBLIC gavl_dictionary_t *
 gavl_metadata_add_image_uri(gavl_dictionary_t * m,
                             const char * key,
                             int w, int h,
