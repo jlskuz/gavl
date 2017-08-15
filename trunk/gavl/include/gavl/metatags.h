@@ -310,6 +310,7 @@
 #define GAVL_META_SEASON             "Season"      // Season, this episode belongs to (integer but can be non-continuous)
 #define GAVL_META_RATING             "Rating"      // Rating (float, 0.0..1.0)
 #define GAVL_META_PARENTAL_CONTROL   "ParentalControl" // mpaa or FSK (or whatever) rating
+#define GAVL_META_TAG                "Tag" // Arbitrary tag
 
 #define GAVL_META_NFO_FILE           "NFOFILE" // 
 
