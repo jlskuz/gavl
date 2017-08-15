@@ -809,6 +809,7 @@ static int detect_episode(const char * filename, gavl_dictionary_t * dict)
   
   gavl_dictionary_set_string_nocopy(dict, GAVL_META_SHOW, gavl_strndup(filename, pos));
   gavl_dictionary_set_int(dict, GAVL_META_SEASON, season);
+  gavl_dictionary_set_int(dict, GAVL_META_IDX, idx-1);
   return 1;  
   }
 

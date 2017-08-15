@@ -245,6 +245,9 @@ static char * metadata_get_arr_internal(const gavl_dictionary_t * m,
     val = gavl_dictionary_get_i(m, key);
   else
     val = gavl_dictionary_get(m, key);
+
+  if(!val)
+    return NULL;
   
   if(val->type == GAVL_TYPE_ARRAY)
     {

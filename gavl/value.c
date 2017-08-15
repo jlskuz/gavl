@@ -290,6 +290,8 @@ void gavl_value_set_string_nocopy(gavl_value_t * v, char * str)
   gavl_value_reset(v);
   v->type = GAVL_TYPE_STRING;
   v->v.str = str;
+  if(v->v.str)
+    gavl_strtrim(v->v.str);
   }
 
 gavl_audio_format_t * gavl_value_set_audio_format(gavl_value_t * v)
