@@ -165,12 +165,12 @@ char * gavl_strncat(char * old, const char * start, const char * end);
 
 /** \brief Cut leading and trailing spaces
  *  \param str The string to trim inplace
- *  
+ *  \returns str
  * 
  */
 
 GAVL_PUBLIC
-void gavl_strtrim(char * str);
+char * gavl_strtrim(char * str);
 
 /** \brief Escape a string
  *  \param old Old string (will be freed)
