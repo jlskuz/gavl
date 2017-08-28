@@ -266,7 +266,7 @@ int gavl_string_ends_with_i(const char * str, const char * end)
   return !strcasecmp(str + slen - elen, end) ? 1 : 0;
   }
 
-void gavl_strtrim(char * str)
+char * gavl_strtrim(char * str)
   {
   char * pos = str;
   while(isspace(*pos) && (*pos != '\0'))
@@ -292,6 +292,7 @@ void gavl_strtrim(char * str)
       break;
     pos--;
     }
+  return str;
   }
 
 
