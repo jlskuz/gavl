@@ -338,6 +338,8 @@
 
 #define GAVL_META_CURIDX           "curidx" // Index of "current" child
 
+#define GAVL_META_PARTS            "parts" // Parts of a multipart movie
+
 /**
  *
  *
