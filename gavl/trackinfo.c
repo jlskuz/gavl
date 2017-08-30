@@ -939,6 +939,8 @@ static void finalize_video(gavl_dictionary_t * dict)
 
 void gavl_track_finalize(gavl_dictionary_t * dict)
   {
+  gavl_time_t duration;
+  
   const char * media_class = NULL;
   gavl_dictionary_t * m;
   
@@ -1017,7 +1019,7 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
       if(num_audio_streams > 0)
         finalize_audio(dict);
       
-      if(num_video_streams == 1)
+      if((num_video_streams == 1) && gavl_dictionary_get_long(m, GAVL_META_APPROX_DURATION, &duration) && (duration > 0))
         {
         /* Check for episode */
 
