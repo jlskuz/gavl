@@ -991,6 +991,8 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
       }
     }
 
+  gavl_track_compute_duration(dict);
+  
   if(media_class)
     {
     if(!strcmp(media_class, GAVL_META_MEDIA_CLASS_AUDIO_FILE))
@@ -1036,8 +1038,6 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
   if(media_class)
     gavl_dictionary_set_string(m, GAVL_META_MEDIA_CLASS, media_class);
   
-  gavl_track_compute_duration(dict);
-
   if(basename)
     free(basename);
   }
