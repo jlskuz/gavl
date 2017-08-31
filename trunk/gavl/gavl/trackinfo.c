@@ -939,7 +939,7 @@ static void finalize_video(gavl_dictionary_t * dict)
 
 void gavl_track_finalize(gavl_dictionary_t * dict)
   {
-  gavl_time_t duration;
+  gavl_time_t duration = GAVL_TIME_UNDEFINED;
   
   const char * media_class = NULL;
   gavl_dictionary_t * m;
