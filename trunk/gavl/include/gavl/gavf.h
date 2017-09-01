@@ -172,6 +172,63 @@ int gavl_dictionary_write(gavf_io_t * io, const gavl_dictionary_t * dict);
 GAVL_PUBLIC
 int gavl_dictionary_read(gavf_io_t * io, gavl_dictionary_t * dict);
 
+/* Read/write fixed length integers */
+
+GAVL_PUBLIC
+int gavf_io_read_8(gavf_io_t * ctx, uint8_t * ret);
+
+GAVL_PUBLIC
+int gavf_io_read_16_le(gavf_io_t * ctx,uint16_t * ret);
+
+GAVL_PUBLIC
+int gavf_io_read_32_le(gavf_io_t * ctx,uint32_t * ret);
+
+GAVL_PUBLIC
+int gavf_io_read_24_le(gavf_io_t * ctx,uint32_t * ret);
+
+GAVL_PUBLIC
+int gavf_io_read_64_le(gavf_io_t * ctx,uint64_t * ret);
+
+GAVL_PUBLIC
+int gavf_io_read_16_be(gavf_io_t * ctx,uint16_t * ret);
+
+GAVL_PUBLIC
+int gavf_io_read_24_be(gavf_io_t * ctx,uint32_t * ret);
+
+GAVL_PUBLIC
+int gavf_io_read_32_be(gavf_io_t * ctx,uint32_t * ret);
+
+GAVL_PUBLIC
+int gavf_io_read_64_be(gavf_io_t * ctx, uint64_t * ret);
+
+/* Write */
+
+GAVL_PUBLIC
+int gavf_io_write_8(gavf_io_t * ctx, uint8_t val);
+
+GAVL_PUBLIC
+int gavf_io_write_16_le(gavf_io_t * ctx, uint16_t val);
+
+GAVL_PUBLIC
+int gavf_io_write_32_le(gavf_io_t * ctx,uint32_t val);
+
+GAVL_PUBLIC
+int gavf_io_write_24_le(gavf_io_t * ctx,uint32_t val);
+
+GAVL_PUBLIC
+int gavf_io_write_64_le(gavf_io_t * ctx,uint64_t val);
+
+GAVL_PUBLIC
+int gavf_io_write_16_be(gavf_io_t * ctx,uint16_t val);
+
+GAVL_PUBLIC
+int gavf_io_write_24_be(gavf_io_t * ctx,uint32_t val);
+
+GAVL_PUBLIC
+int gavf_io_write_32_be(gavf_io_t * ctx,uint32_t val);
+
+GAVL_PUBLIC
+int gavf_io_write_64_be(gavf_io_t * ctx, uint64_t val);
 
 /** \brief Read a message using a callback
  *  \param ret Where the message will be copied

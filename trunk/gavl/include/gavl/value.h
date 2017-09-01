@@ -439,6 +439,9 @@ GAVL_PUBLIC
 gavl_value_t * gavl_value_get_item_nc(gavl_value_t * v, int item);
 
 GAVL_PUBLIC
+char * gavl_value_join_arr(const gavl_value_t * val, const char * glue);
+
+GAVL_PUBLIC
 void gavl_value_set_type(gavl_value_t * v, gavl_type_t  t);
 
 

@@ -412,6 +412,180 @@ int gavf_io_read_int32v(gavf_io_t * io, int32_t * num)
   return 1;
   }
 
+/* Fixed size LE/BE I/O */
+
+int gavf_io_read_8(gavf_io_t * ctx, uint8_t * ret)
+  {
+  if(gavf_io_read_data(ctx, ret, 1) < 1)
+    return 0;
+  return 1;
+  }
+
+int gavf_io_read_16_le(gavf_io_t * ctx,uint16_t * ret)
+  {
+  uint8_t data[2];
+  if(gavf_io_read_data(ctx, data, 2) < 2)
+    return 0;
+  *ret = GAVL_PTR_2_16LE(data);
+  
+  return 1;
+  }
+
+int gavf_io_read_32_le(gavf_io_t * ctx,uint32_t * ret)
+  {
+  uint8_t data[4];
+  if(gavf_io_read_data(ctx, data, 4) < 4)
+    return 0;
+  *ret = GAVL_PTR_2_32LE(data);
+  return 1;
+  }
+
+int gavf_io_read_24_le(gavf_io_t * ctx,uint32_t * ret)
+  {
+  uint8_t data[3];
+  if(gavf_io_read_data(ctx, data, 3) < 3)
+    return 0;
+  *ret = GAVL_PTR_2_24LE(data);
+  return 1;
+  }
+
+int gavf_io_read_64_le(gavf_io_t * ctx,uint64_t * ret)
+  {
+  uint8_t data[8];
+  if(gavf_io_read_data(ctx, data, 8) < 8)
+    return 0;
+  *ret = GAVL_PTR_2_64LE(data);
+  return 1;
+  }
+
+int gavf_io_read_16_be(gavf_io_t * ctx,uint16_t * ret)
+  {
+  uint8_t data[2];
+  if(gavf_io_read_data(ctx, data, 2) < 2)
+    return 0;
+
+  *ret = GAVL_PTR_2_16BE(data);
+  return 1;
+  }
+
+int gavf_io_read_24_be(gavf_io_t * ctx,uint32_t * ret)
+  {
+  uint8_t data[3];
+  if(gavf_io_read_data(ctx, data, 3) < 3)
+    return 0;
+  *ret = GAVL_PTR_2_24BE(data);
+  return 1;
+  }
+
+
+int gavf_io_read_32_be(gavf_io_t * ctx,uint32_t * ret)
+  {
+  uint8_t data[4];
+  if(gavf_io_read_data(ctx, data, 4) < 4)
+    return 0;
+
+  *ret = GAVL_PTR_2_32BE(data);
+  return 1;
+  }
+    
+int gavf_io_read_64_be(gavf_io_t * ctx, uint64_t * ret)
+  {
+  uint8_t data[8];
+  if(gavf_io_read_data(ctx, data, 8) < 8)
+    return 0;
+  
+  *ret = GAVL_PTR_2_64BE(data);
+  return 1;
+  }
+
+/* Write */
+
+int gavf_io_write_8(gavf_io_t * ctx, uint8_t val)
+  {
+  if(gavf_io_write_data(ctx, &val, 1) < 1)
+    return 0;
+  return 1;
+  }
+
+int gavf_io_write_16_le(gavf_io_t * ctx, uint16_t val)
+  {
+  uint8_t data[2];
+  GAVL_16LE_2_PTR(val, data);
+
+  if(gavf_io_write_data(ctx, data, 2) < 2)
+    return 0;
+
+  return 1;
+  }
+
+int gavf_io_write_32_le(gavf_io_t * ctx,uint32_t val)
+  {
+  uint8_t data[4];
+  GAVL_32LE_2_PTR(val, data);
+
+
+  if(gavf_io_write_data(ctx, data, 4) < 4)
+    return 0;
+  return 1;
+  }
+
+int gavf_io_write_24_le(gavf_io_t * ctx,uint32_t val)
+  {
+  uint8_t data[3];
+  GAVL_24LE_2_PTR(val, data);
+
+  if(gavf_io_write_data(ctx, data, 3) < 3)
+    return 0;
+  return 1;
+  }
+
+int gavf_io_write_64_le(gavf_io_t * ctx,uint64_t val)
+  {
+  uint8_t data[8];
+  GAVL_64LE_2_PTR(val, data);
+  if(gavf_io_write_data(ctx, data, 8) < 8)
+    return 0;
+  return 1;
+  }
+
+int gavf_io_write_16_be(gavf_io_t * ctx,uint16_t val)
+  {
+  uint8_t data[2];
+  GAVL_16BE_2_PTR(val, data);
+  if(gavf_io_write_data(ctx, data, 2) < 2)
+    return 0;
+  return 1;
+  }
+
+int gavf_io_write_24_be(gavf_io_t * ctx,uint32_t val)
+  {
+  uint8_t data[3];
+  GAVL_24BE_2_PTR(val, data);
+  if(gavf_io_write_data(ctx, data, 3) < 3)
+    return 0;
+  return 1;
+  }
+
+
+int gavf_io_write_32_be(gavf_io_t * ctx,uint32_t val)
+  {
+  uint8_t data[4];
+  GAVL_32BE_2_PTR(val, data);
+  if(gavf_io_write_data(ctx, data, 4) < 4)
+    return 0;
+  return 1;
+  }
+    
+int gavf_io_write_64_be(gavf_io_t * ctx, uint64_t val)
+  {
+  uint8_t data[8];
+  GAVL_64BE_2_PTR(val, data);
+  if(gavf_io_write_data(ctx, data, 8) < 8)
+    return 0;
+  return 1;
+  }
+
+
 /* int <-> float conversion routines taken from
    ffmpeg */
 
