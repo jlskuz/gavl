@@ -358,6 +358,9 @@ GAVL_PUBLIC
 const char * gavl_dictionary_get_string_array(const gavl_dictionary_t * d,
                                               const char * key, int idx);
 
+GAVL_PUBLIC
+int gavl_dictionary_has_string_array(const gavl_dictionary_t * d,
+                                     const char * key, const char * val);
 
 
 

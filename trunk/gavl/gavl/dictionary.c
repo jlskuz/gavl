@@ -398,7 +398,6 @@ void gavl_dictionary_append_string_array(gavl_dictionary_t * d,
   gavl_dictionary_append_string_array_nocopy(d, key, gavl_strdup(val));
   }
 
-
 const char * gavl_dictionary_get_string_array(const gavl_dictionary_t * d,
                                               const char * key, int idx)
   {
@@ -410,6 +409,22 @@ const char * gavl_dictionary_get_string_array(const gavl_dictionary_t * d,
     return gavl_value_get_string(el);
   else
     return NULL;
+  }
+
+int gavl_dictionary_has_string_array(const gavl_dictionary_t * d,
+                                     const char * key, const char * val)
+  {
+  const char * str;
+  int idx;
+
+  idx = 0;
+  while((str = gavl_dictionary_get_string_array(d, key, idx)))
+    {
+    if(!strcmp(str, val))
+      return 1;
+    idx++;
+    }
+  return 0;
   }
 
 void gavl_dictionary_free(gavl_dictionary_t * d)
