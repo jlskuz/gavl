@@ -1182,6 +1182,15 @@ void gavl_track_update_children(gavl_dictionary_t * dict)
     }
   }
 
+const char * gavl_track_get_id(const gavl_dictionary_t * dict)
+  {
+  const gavl_dictionary_t * m;
+
+  if((m = gavl_track_get_metadata(dict)))
+    return gavl_dictionary_get_string(m, GAVL_META_ID);
+  else
+    return NULL;
+  }
 
 int gavl_get_track_idx_by_id(const gavl_dictionary_t * dict, const char * id)
   {
