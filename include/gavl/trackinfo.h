@@ -259,5 +259,7 @@ gavl_dictionary_t * gavl_get_track_by_id_nc(gavl_dictionary_t * dict, const char
 GAVL_PUBLIC
 int gavl_get_track_idx_by_id(const gavl_dictionary_t * dict, const char * id);
 
+GAVL_PUBLIC
+const char * gavl_track_get_id(const gavl_dictionary_t * dict);
 
 #endif // GAVL_TRACKINFO_H_INCLUDED
