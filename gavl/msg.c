@@ -207,13 +207,18 @@ const gavl_value_t * gavl_msg_get_arg_c(const gavl_msg_t * msg, int arg)
   return &msg->args[arg];
   }
 
+gavl_value_t * gavl_msg_get_arg_nc(gavl_msg_t * msg, int arg)
+  {
+  if(!check_arg(arg))
+    return NULL;
+  return &msg->args[arg];
+  }
+
 void gavl_msg_get_arg(gavl_msg_t * msg, int arg, gavl_value_t * val)
   {
   if(!check_arg(arg))
     return;
-  
-  memcpy(val, &msg->args[arg], sizeof(*val));
-  gavl_value_init(&msg->args[arg]);
+  gavl_value_move(val, &msg->args[arg]);
   }
   
 /* Get basic types */
@@ -369,7 +374,7 @@ int gavl_msg_get_arg_dictionary_c(const gavl_msg_t * msg, int arg,
   }
 
 int gavl_msg_get_arg_dictionary(gavl_msg_t * msg, int arg,
-                              gavl_dictionary_t * m)
+                                gavl_dictionary_t * m)
   {
   gavl_dictionary_free(m);
   gavl_dictionary_init(m);

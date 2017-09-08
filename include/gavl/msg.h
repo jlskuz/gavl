@@ -303,6 +303,9 @@ GAVL_PUBLIC
 const gavl_value_t * gavl_msg_get_arg_c(const gavl_msg_t * msg, int idx);
 
 GAVL_PUBLIC
+gavl_value_t * gavl_msg_get_arg_nc(gavl_msg_t * msg, int arg);
+
+GAVL_PUBLIC
 void gavl_msg_get_arg(gavl_msg_t * msg, int idx, gavl_value_t * val);
 
 /** \brief Set an integer argument
