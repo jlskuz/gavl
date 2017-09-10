@@ -196,10 +196,12 @@ void gavl_value_copy(gavl_value_t * dst, const gavl_value_t * src)
       memcpy(dst->v.position, src->v.position, 2 * sizeof(dst->v.position[0]));
       break;
     case GAVL_TYPE_DICTIONARY:
-      gavl_dictionary_copy(dst->v.dictionary, src->v.dictionary);
+      if(src->v.dictionary)
+        gavl_dictionary_copy(dst->v.dictionary, src->v.dictionary);
       break;
     case GAVL_TYPE_ARRAY:
-      gavl_array_copy(dst->v.array, src->v.array);
+      if(src->v.array)
+        gavl_array_copy(dst->v.array, src->v.array);
       break;
     }
   }
@@ -835,7 +837,7 @@ char * gavl_value_join_arr(const gavl_value_t * val, const char * glue)
     arr = val->v.array;
     for(i = 0; i < arr->num_entries; i++)
       {
-      if(arr->entries[i].type != GAVL_TYPE_STRING)
+      if((arr->entries[i].type != GAVL_TYPE_STRING) || !arr->entries[i].v.str)
         continue;
       
       if(idx)

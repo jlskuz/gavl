@@ -1177,7 +1177,7 @@ void gavl_track_update_children(gavl_dictionary_t * dict)
 
   for(i = 0; i < arr->num_entries; i++)
     {
-    m = gavl_track_get_metadata_nc(gavl_get_track_nc(dict, i));
+    m = gavl_dictionary_get_dictionary_create(gavl_get_track_nc(dict, i), GAVL_META_METADATA);
     gavl_dictionary_set_int(m, GAVL_META_IDX, i);
     }
   }
@@ -1190,6 +1190,17 @@ const char * gavl_track_get_id(const gavl_dictionary_t * dict)
     return gavl_dictionary_get_string(m, GAVL_META_ID);
   else
     return NULL;
+  }
+
+void gavl_track_set_id_nocopy(gavl_dictionary_t * dict, char * id)
+  {
+  gavl_dictionary_t * m = gavl_dictionary_get_dictionary_create(dict, GAVL_META_METADATA);
+  gavl_dictionary_set_string_nocopy(m, GAVL_META_ID, id);
+  }
+
+void gavl_track_set_id(gavl_dictionary_t * dict, const char * id)
+  {
+  gavl_track_set_id_nocopy(dict, gavl_strdup(id));
   }
 
 int gavl_get_track_idx_by_id(const gavl_dictionary_t * dict, const char * id)
