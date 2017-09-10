@@ -262,4 +262,11 @@ int gavl_get_track_idx_by_id(const gavl_dictionary_t * dict, const char * id);
 GAVL_PUBLIC
 const char * gavl_track_get_id(const gavl_dictionary_t * dict);
 
+GAVL_PUBLIC
+void gavl_track_set_id_nocopy(gavl_dictionary_t * dict, char * id);
+
+GAVL_PUBLIC
+void gavl_track_set_id(gavl_dictionary_t * dict, const char * id);
+
+
 #endif // GAVL_TRACKINFO_H_INCLUDED
