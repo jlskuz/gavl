@@ -1165,6 +1165,25 @@ void gavl_track_clear_gui_state(gavl_dictionary_t * track)
   gavl_dictionary_set(track, META_GUI, NULL);
   }
 
+void gavl_track_copy_gui_state(gavl_dictionary_t * dst, const gavl_dictionary_t * src)
+  {
+  gavl_dictionary_t * dst_gui;
+  gavl_dictionary_t tmp;
+  
+  const gavl_dictionary_t * src_gui = gavl_dictionary_get_dictionary(src, META_GUI);
+
+  if(!src_gui)
+    return;
+  
+  dst_gui = gavl_dictionary_get_dictionary_create(dst, META_GUI);
+
+  gavl_dictionary_init(&tmp);
+  
+  gavl_dictionary_merge(&tmp, src_gui, dst_gui);
+  gavl_dictionary_reset(dst_gui);
+  gavl_dictionary_move(dst_gui, &tmp);
+  }
+
 void gavl_track_update_children(gavl_dictionary_t * dict)
   {
   int i;
