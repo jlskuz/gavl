@@ -90,11 +90,13 @@ static int64_t get_time(const gavl_chapter_list_t * list, int idx)
   {
   int64_t ret = GAVL_TIME_UNDEFINED;
   const gavl_array_t * arr;
+  const gavl_dictionary_t * dict;
   
   if((idx < 0) ||
      !(arr = get_chapters_c(list)) ||
      (idx >= arr->num_entries) ||
-     !gavl_value_get_long(&arr->entries[idx], &ret))
+     !(dict = gavl_value_get_dictionary(&arr->entries[idx])) ||
+     !gavl_dictionary_get_long(dict, GAVL_CHAPTERLIST_TIME, &ret))
     {
     return GAVL_TIME_UNDEFINED;
     }
@@ -114,10 +116,10 @@ int gavl_chapter_list_get_current(const gavl_chapter_list_t * list,
   
   time_scaled = gavl_time_scale(timescale, time);
   
-  for(i = 0; i < arr->num_entries-1; i++)
+  for(i = 1; i < arr->num_entries; i++)
     {
-    if(time_scaled < get_time(list, i))
-      return i;
+    if(get_time(list, i) > time_scaled)
+      return i - 1;
     }
   return arr->num_entries-1;
   }
