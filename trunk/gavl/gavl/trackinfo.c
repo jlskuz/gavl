@@ -948,7 +948,7 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
   int num_video_streams;
   char * basename = NULL;
 
-  const char * location;
+  const char * location = NULL;
   const char * pos1;
   const char * pos2;
 
