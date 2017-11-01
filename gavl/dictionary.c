@@ -631,7 +631,6 @@ void gavl_dictionary_append_nocopy_i(gavl_dictionary_t * d, const char * name,
   dict_append_internal(d, name, val, NULL, 1);
   }
 
-
 gavl_dictionary_t *
 gavl_dictionary_get_dictionary_create(gavl_dictionary_t * d, const char * name)
   {
@@ -651,6 +650,27 @@ gavl_dictionary_get_dictionary_create(gavl_dictionary_t * d, const char * name)
 
   idx = gavl_dictionary_find(d, name, 0);
   return d->entries[idx].v.v.dictionary;
+  }
+
+gavl_array_t *
+gavl_dictionary_get_array_create(gavl_dictionary_t * d, const char * name)
+  {
+  gavl_value_t val;
+  int idx;
+  if((idx = gavl_dictionary_find(d, name, 0)) >= 0)
+    {
+    if(d->entries[idx].v.type == GAVL_TYPE_ARRAY)
+      return d->entries[idx].v.v.array;
+    else
+      return NULL; // Should never happen if the naming schemes are sane
+    }
+
+  gavl_value_init(&val);
+  gavl_value_set_array(&val);
+  dict_set(d, name, &val, 0 /* ign */, 0 /* cpy */ );
+
+  idx = gavl_dictionary_find(d, name, 0);
+  return d->entries[idx].v.v.array;
   }
 
 int gavl_dictionary_is_last(const gavl_dictionary_t * d, const char * name)
