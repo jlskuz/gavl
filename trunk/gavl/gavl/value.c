@@ -726,6 +726,11 @@ const double * gavl_value_get_color_rgba(const gavl_value_t * v)
 
 void gavl_value_dump(const gavl_value_t * v, int indent)
   {
+  if(!v)
+    {
+    gavl_diprintf(0, "NULL");
+    return;
+    }
   switch(v->type)
     {
     case GAVL_TYPE_UNDEFINED:

@@ -191,6 +191,11 @@ GAVL_PUBLIC
 gavl_dictionary_t *
 gavl_dictionary_get_dictionary_create(gavl_dictionary_t *, const char * name);
 
+GAVL_PUBLIC
+gavl_array_t *
+gavl_dictionary_get_array_create(gavl_dictionary_t * d, const char * name);
+
+
 GAVL_PUBLIC void
 gavl_dictionary_delete_fields(gavl_dictionary_t * m, const char * fields[]);
 
