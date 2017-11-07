@@ -398,6 +398,9 @@
 #define GAVL_META_MEDIA_CLASS_ROOT_LIBRARY       "container.root.library"
 #define GAVL_META_MEDIA_CLASS_ROOT_NETWORK       "container.root.network"
 
+/* Remote media server */
+#define GAVL_META_MEDIA_CLASS_ROOT_SERVER        "container.root.server"
+
 /* GUI States */
 
 // Indicate, that an error occurrent during loading of a track
