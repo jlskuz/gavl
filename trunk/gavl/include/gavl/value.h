@@ -134,6 +134,10 @@ int gavl_dictionary_set_dictionary(gavl_dictionary_t * d,
                                    const char * name, const gavl_dictionary_t * dict);
 
 GAVL_PUBLIC
+int gavl_dictionary_set_dictionary_nocopy(gavl_dictionary_t * d,
+                                          const char * name, gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
 const gavl_value_t *
 gavl_dictionary_get_item(const gavl_dictionary_t * d, const char * name, int item);
 
