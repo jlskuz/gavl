@@ -494,6 +494,15 @@ gavl_dictionary_get_image_max(const gavl_dictionary_t * m,
     if(!gavl_dictionary_get_int(dict, GAVL_META_WIDTH, &val_w))
       val_w = -1;
     
+    if(!gavl_dictionary_get_int(dict, GAVL_META_HEIGHT, &val_h))
+      val_h = -1;
+
+#if 0    
+    fprintf(stderr, "Testing image:\n");
+    gavl_dictionary_dump(dict, 2);
+    fprintf(stderr, "\n");
+#endif
+    
     /* Too wide */
     if((w > 0) && (val_w > 0) && (val_w > w))
       {
@@ -502,7 +511,7 @@ gavl_dictionary_get_image_max(const gavl_dictionary_t * m,
       }
 
     /* Too high */
-    if((h > 0) && gavl_dictionary_get_int(dict, GAVL_META_HEIGHT, &val_h) && (val_h > h))
+    if((h > 0) && (val_h > 0) && (val_h > h))
       {
       i++;
       continue;
@@ -515,11 +524,14 @@ gavl_dictionary_get_image_max(const gavl_dictionary_t * m,
       continue;
       }
 
-    if((i_max < 0) || ((val_w > 0) && (w_max < w)))
+    if((i_max < 0) || ((val_w > 0) && (w_max < val_w)))
       {
       i_max = i;
-      w_max = w;
+      w_max = val_w;
       }
+
+    //    fprintf(stderr, "i_max: %d w_max: %d\n", i_max, w_max);
+    
     i++;
     }
 
