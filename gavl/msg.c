@@ -361,7 +361,7 @@ void gavl_msg_set_arg_array_nocopy(gavl_msg_t * msg, int arg,
   }
 
 int gavl_msg_get_arg_dictionary_c(const gavl_msg_t * msg, int arg,
-                                gavl_dictionary_t * m)
+                                  gavl_dictionary_t * m)
   {
   gavl_dictionary_free(m);
   gavl_dictionary_init(m);
