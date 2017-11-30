@@ -340,6 +340,14 @@ const gavl_value_t * gavl_dictionary_get_item(const gavl_dictionary_t * d, const
   return gavl_value_get_item(&d->entries[idx].v, item);
   }
 
+int gavl_dictionary_get_num_items(const gavl_dictionary_t * d, const char * name)
+  {
+  int idx;
+  if((idx = gavl_dictionary_find(d, name, 0)) < 0)
+    return 0;
+  return gavl_value_get_num_items(&d->entries[idx].v);
+  }
+  
 GAVL_PUBLIC
 void gavl_dictionary_delete_item(gavl_dictionary_t * d, const char * name, int item)
   {
