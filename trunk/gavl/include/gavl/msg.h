@@ -517,11 +517,11 @@ void gavl_msg_set_arg_dictionary_nocopy(gavl_msg_t * msg, int arg,
 
 GAVL_PUBLIC
 int gavl_msg_get_arg_dictionary(gavl_msg_t * msg, int arg,
-                               gavl_dictionary_t * m);
+                                gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 int gavl_msg_get_arg_dictionary_c(const gavl_msg_t * msg, int arg,
-                                gavl_dictionary_t * m);
+                                  gavl_dictionary_t * m);
 
 
 GAVL_PUBLIC
