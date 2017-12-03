@@ -399,6 +399,11 @@ gavl_dictionary_get_image_max(const gavl_dictionary_t * m,
                               int w, int h,
                               const char * mimetype);
 
+GAVL_PUBLIC const gavl_dictionary_t *
+gavl_dictionary_get_image_max_proto(const gavl_dictionary_t * m,
+                                    const char * key,
+                                    int w, int h,
+                                    const char * mimetype, const char * protocol);
   
 GAVL_PUBLIC
 gavl_dictionary_t *

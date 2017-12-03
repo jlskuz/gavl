@@ -224,17 +224,11 @@ void gavl_value_free(gavl_value_t * v)
       break;
     case GAVL_TYPE_DICTIONARY:
       if(v->v.dictionary)
-        {
-        gavl_dictionary_free(v->v.dictionary);
-        free(v->v.dictionary);
-        }
+        gavl_dictionary_destroy(v->v.dictionary);
       break;
     case GAVL_TYPE_ARRAY:
       if(v->v.array)
-        {
-        gavl_array_free(v->v.array);
-        free(v->v.array);
-        }
+        gavl_array_destroy(v->v.array);
       break;
     case GAVL_TYPE_AUDIOFORMAT:
       if(v->v.audioformat)
