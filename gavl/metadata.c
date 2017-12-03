@@ -477,10 +477,10 @@ gavl_metadata_get_image_embedded(gavl_dictionary_t * m,
 #endif
 
 const gavl_dictionary_t *
-gavl_dictionary_get_image_max(const gavl_dictionary_t * m,
-                              const char * key,
-                              int w, int h,
-                              const char * mimetype)
+gavl_dictionary_get_image_max_proto(const gavl_dictionary_t * m,
+                                    const char * key,
+                                    int w, int h,
+                                    const char * mimetype, const char * protocol)
   {
   int i = 0;
   const gavl_dictionary_t * dict;
@@ -524,6 +524,14 @@ gavl_dictionary_get_image_max(const gavl_dictionary_t * m,
       continue;
       }
 
+    if(protocol && (val_string = gavl_dictionary_get_string(dict, GAVL_META_URI)) &&
+       (!gavl_string_starts_with(val_string, protocol) ||
+        !gavl_string_starts_with(val_string + strlen(protocol), "://")))
+      {
+      i++;
+      continue;
+      }
+      
     if((i_max < 0) || ((val_w > 0) && (w_max < val_w)))
       {
       i_max = i;
@@ -539,6 +547,15 @@ gavl_dictionary_get_image_max(const gavl_dictionary_t * m,
     i_max = 0;
   
   return get_image(m, key, i_max);
+  }
+
+const gavl_dictionary_t *
+gavl_dictionary_get_image_max(const gavl_dictionary_t * m,
+                              const char * key,
+                              int w, int h,
+                              const char * mimetype)
+  {
+  return gavl_dictionary_get_image_max_proto(m, key, w, h, mimetype, NULL);
   }
 
 const char *
