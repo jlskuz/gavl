@@ -248,15 +248,19 @@
 
 #define GAVL_META_PLOT             "Plot"
 
-/** \brief Audio language
+/** \brief Audio languages
+ *  Array of language LABELS (not ISO codes) in the root
+ *  metadata dictionary
  */
 
-#define GAVL_META_AUDIO_LANGUAGE   "AudioLanguage"
+#define GAVL_META_AUDIO_LANGUAGES   "AudioLanguages"
 
 /** \brief Subtitle language
+ *  Array of language LABELS (not ISO codes) in the root
+ *  metadata dictionary
  */
 
-#define GAVL_META_SUBTITLE_LANGUAGE   "SubtitleLanguage"
+#define GAVL_META_SUBTITLE_LANGUAGES   "SubtitleLanguages"
 
 /* Images associated with media content */
 

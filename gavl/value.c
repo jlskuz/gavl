@@ -730,13 +730,13 @@ void gavl_value_dump(const gavl_value_t * v, int indent)
     case GAVL_TYPE_UNDEFINED:
       break;
     case GAVL_TYPE_INT:
-      gavl_diprintf(0, "%d", v->v.i);
+      gavl_diprintf(indent, "%d", v->v.i);
       break;
     case GAVL_TYPE_LONG:
-      gavl_diprintf(0, "%"PRId64, v->v.l);
+      gavl_diprintf(indent, "%"PRId64, v->v.l);
       break;
     case GAVL_TYPE_FLOAT:
-      gavl_diprintf(0, "%f", v->v.d);
+      gavl_diprintf(indent, "%f", v->v.d);
       break;
     case GAVL_TYPE_AUDIOFORMAT:
       gavl_diprintf(0, "\n");
@@ -747,24 +747,24 @@ void gavl_value_dump(const gavl_value_t * v, int indent)
       gavl_video_format_dumpi(v->v.videoformat, indent);
       break;
     case GAVL_TYPE_COLOR_RGB:
-      gavl_diprintf(0, "[ %f, %f, %f ]",
+      gavl_diprintf(indent, "[ %f, %f, %f ]",
                     v->v.color[0], v->v.color[1],
                     v->v.color[2]);
       break;
     case GAVL_TYPE_COLOR_RGBA:
-      gavl_diprintf(0, "[ %f, %f, %f, %f ]",
+      gavl_diprintf(indent, "[ %f, %f, %f, %f ]",
                     v->v.color[0], v->v.color[1],
                     v->v.color[2], v->v.color[3]);
       break;
     case GAVL_TYPE_POSITION:
-      gavl_diprintf(0, "[ %f, %f ]",
+      gavl_diprintf(indent, "[ %f, %f ]",
                     v->v.position[0], v->v.position[1]);
       break;
     case GAVL_TYPE_STRING:
       if(!v->v.str)
-        gavl_diprintf(0, "NULL");
+        gavl_diprintf(indent, "NULL");
       else
-        gavl_diprintf(0, "\"%s\"", v->v.str);
+        gavl_diprintf(indent, "\"%s\"", v->v.str);
       break;
     case GAVL_TYPE_DICTIONARY:
       gavl_dprintf("\n");
