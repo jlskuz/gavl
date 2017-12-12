@@ -20,6 +20,7 @@
  * *****************************************************************/
 
 #include <gavl/gavldefs.h>
+#include <X11/Xlib.h>
 
 /**
  * @file hw_vaapi_x11.h
