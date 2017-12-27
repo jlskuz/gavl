@@ -1197,11 +1197,12 @@ void gavl_track_update_children(gavl_dictionary_t * dict)
 
   for(i = 0; i < arr->num_entries; i++)
     {
-    //    if(!(track = gavl_get_track_nc(dict, i)))
+    //    if(!())
     //      fprintf(stderr, "Blupp %d %p %d %p\n", i, arr, arr->num_entries, arr->entries);
-    
-    m = gavl_dictionary_get_dictionary_create(track, GAVL_META_METADATA);
-    gavl_dictionary_set_int(m, GAVL_META_IDX, i);
+
+    if((track = gavl_get_track_nc(dict, i)) &&
+       (m = gavl_dictionary_get_dictionary_create(track, GAVL_META_METADATA)))
+      gavl_dictionary_set_int(m, GAVL_META_IDX, i);
     }
   }
 
