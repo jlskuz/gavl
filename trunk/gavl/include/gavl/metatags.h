@@ -357,6 +357,8 @@
 /* Value for class */
 #define GAVL_META_MEDIA_CLASS_AUDIO_FILE          "item.audio"
 #define GAVL_META_MEDIA_CLASS_VIDEO_FILE          "item.video"
+#define GAVL_META_MEDIA_CLASS_AUDIO_DISK_TRACK    "item.audio.disktrack"
+#define GAVL_META_MEDIA_CLASS_VIDEO_DISK_TRACK    "item.video.disktrack"
 #define GAVL_META_MEDIA_CLASS_SONG                "item.audio.song"
 #define GAVL_META_MEDIA_CLASS_MOVIE               "item.video.movie"
 #define GAVL_META_MEDIA_CLASS_MOVIE_PART          "item.video.movie.part"
@@ -368,6 +370,7 @@
 #define GAVL_META_MEDIA_CLASS_IMAGE               "item.image"
 #define GAVL_META_MEDIA_CLASS_FILE                "item.file"     // non-media file
 #define GAVL_META_MEDIA_CLASS_LOCATION            "item.location" // Location, which needs to be specified further
+
 
 /* Container values */
 #define GAVL_META_MEDIA_CLASS_CONTAINER           "container"       // Generic
