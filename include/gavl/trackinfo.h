@@ -271,5 +271,8 @@ void gavl_track_set_id_nocopy(gavl_dictionary_t * dict, char * id);
 GAVL_PUBLIC
 void gavl_track_set_id(gavl_dictionary_t * dict, const char * id);
 
+GAVL_PUBLIC
+void gavl_sort_tracks_by_label(gavl_array_t * children);
+
 
 #endif // GAVL_TRACKINFO_H_INCLUDED

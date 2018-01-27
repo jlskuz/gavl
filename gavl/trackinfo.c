@@ -1285,3 +1285,36 @@ gavl_dictionary_t * gavl_get_track_by_id_nc(gavl_dictionary_t * dict, const char
     }
   return NULL;
   }
+
+static int compare_metadata_string(const void * p1, const void * p2)
+  {
+  const char * s1;
+  const char * s2;
+  
+  const gavl_dictionary_t * dict1;
+  const gavl_dictionary_t * dict2;
+
+  if(!(dict1 = gavl_value_get_dictionary(p1)) ||
+     !(dict2 = gavl_value_get_dictionary(p2)) ||
+     !(dict1 = gavl_track_get_metadata(dict1)) ||
+     !(dict2 = gavl_track_get_metadata(dict2)) ||
+     !(s1 = gavl_dictionary_get_string(dict1, GAVL_META_LABEL)) ||
+     !(s2 = gavl_dictionary_get_string(dict2, GAVL_META_LABEL)))
+    return 0;
+  
+  return strcoll(s1, s2);
+  }
+  
+void gavl_sort_tracks_by_label(gavl_array_t * arr)
+  {
+  gavl_array_sort(arr, compare_metadata_string);
+  }
+
+/* 
+void gavl_sort_tracks_by_metadata_long(gavl_dictionary_t * dict,
+                                       const char * str)
+  {
+  
+  }
+
+*/
