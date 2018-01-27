@@ -275,7 +275,7 @@ char * gavl_strtrim(char * str)
   if(*pos == '\0') // String consists of whitespace
     {
     *str = '\0';
-    return;
+    return str;
     }
 
   if(pos > str)
