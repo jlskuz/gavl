@@ -339,3 +339,49 @@ void gavl_array_sort(gavl_array_t * arr, int (*compare)(const void *, const void
   qsort(arr->entries, arr->num_entries, sizeof(*arr->entries), compare);
   }
 
+/* String array */
+
+void gavl_string_array_add(gavl_array_t * arr, const char * str)
+  {
+  gavl_value_t val;
+
+  if(gavl_string_array_indexof(arr, str) >= 0)
+    return;
+  
+  gavl_value_init(&val);
+  gavl_value_set_string(&val, str);
+  gavl_array_splice_val_nocopy(arr, -1, 0, &val);
+  }
+
+const char * gavl_string_array_get(const gavl_array_t * arr, int idx)
+  {
+  const gavl_value_t * val;
+
+  if((val = gavl_array_get(arr, idx)))
+    return gavl_value_get_string(val);
+  return NULL;
+  }
+
+void gavl_string_array_delete(gavl_array_t * arr, const char * str)
+  {
+  int idx;
+
+  if((idx = gavl_string_array_indexof(arr, str)) < 0)
+    return;
+  gavl_array_splice_val(arr, idx, 1, NULL);
+  }
+
+int gavl_string_array_indexof(const gavl_array_t * arr, const char * str)
+  {
+  int i;
+  const char * str1;
+
+  for(i = 0; i < arr->num_entries; i++)
+    {
+    if((str1 = gavl_value_get_string(&arr->entries[i])) &&
+       !strcmp(str1, str))
+      return i;
+    }
+  return -1;
+  }
+
