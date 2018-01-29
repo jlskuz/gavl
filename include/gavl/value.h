@@ -551,6 +551,22 @@ const double * gavl_value_get_color_rgb(const gavl_value_t * v);
 GAVL_PUBLIC
 const double * gavl_value_get_color_rgba(const gavl_value_t * v);
 
+/* String array (convenience wrapper) */
+
+GAVL_PUBLIC
+void gavl_string_array_add(gavl_array_t * arr, const char * str);
+
+GAVL_PUBLIC
+void gavl_string_array_delete(gavl_array_t * arr, const char * str);
+
+GAVL_PUBLIC
+int gavl_string_array_indexof(const gavl_array_t * arr, const char * str);
+
+GAVL_PUBLIC
+const char * gavl_string_array_get(const gavl_array_t * arr, int idx);
+ 
+
+
 /* For initializing values statically */
 #define GAVL_VALUE_INIT_INT(val)               { .type = GAVL_TYPE_INT, .v.i = val }
 #define GAVL_VALUE_INIT_LONG(val)              { .type = GAVL_TYPE_LONG, .v.l = val }
