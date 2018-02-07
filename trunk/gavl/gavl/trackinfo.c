@@ -1045,7 +1045,10 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
 gavl_time_t gavl_track_get_duration(const gavl_dictionary_t * dict)
   {
   gavl_time_t dur;
-  const gavl_dictionary_t * m = gavl_track_get_metadata(dict);
+  const gavl_dictionary_t * m;
+
+  if(!(m = gavl_track_get_metadata(dict)))
+    return GAVL_TIME_UNDEFINED;
   
   if(gavl_dictionary_get_long(m, GAVL_META_APPROX_DURATION, &dur) && (dur > 0))
     return dur;
