@@ -593,10 +593,9 @@ gavl_metadata_add_src(gavl_dictionary_t * m, const char * key,
       if((ret = gavl_value_get_dictionary_nc(valp)) &&
          (loc = gavl_dictionary_get_string(ret, GAVL_META_URI)) &&
          !strcmp(loc, location))
-        {
+        return NULL;
+      else
         idx++;
-        continue;
-        }
       }
     }
   
