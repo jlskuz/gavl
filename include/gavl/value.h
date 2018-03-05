@@ -73,6 +73,11 @@ const char * gavl_dictionary_get_string(const gavl_dictionary_t * d,
                                         const char * name);
 
 GAVL_PUBLIC
+char * gavl_dictionary_get_string_nc(const gavl_dictionary_t * d,
+                                     const char * name);
+
+
+GAVL_PUBLIC
 const char * gavl_dictionary_get_string_i(const gavl_dictionary_t * d,
                                           const char * name);
 

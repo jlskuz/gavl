@@ -385,6 +385,16 @@ const char * gavl_dictionary_get_string(const gavl_dictionary_t * d,
   return v->v.str;
   }
 
+char * gavl_dictionary_get_string_nc(const gavl_dictionary_t * d,
+                                           const char * name)
+  {
+  gavl_value_t * v;
+  if(!(v = gavl_dictionary_get_nc(d, name)) ||
+     (v->type != GAVL_TYPE_STRING))
+    return NULL;
+  return v->v.str;
+  }
+
 const char * gavl_dictionary_get_string_i(const gavl_dictionary_t * d,
                                           const char * name)
   {
