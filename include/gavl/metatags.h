@@ -153,6 +153,11 @@
  */
 #define GAVL_META_FORMAT      "Format"
 
+/* Some defined formats */
+
+#define GAVL_META_FORMAT_MP3  "MP3"
+
+
 /** \brief Label
  *
  * For streams it's the label (e.g. "Directors comments")
