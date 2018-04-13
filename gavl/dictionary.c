@@ -385,8 +385,8 @@ const char * gavl_dictionary_get_string(const gavl_dictionary_t * d,
   return v->v.str;
   }
 
-char * gavl_dictionary_get_string_nc(const gavl_dictionary_t * d,
-                                           const char * name)
+char * gavl_dictionary_get_string_nc(gavl_dictionary_t * d,
+                                     const char * name)
   {
   gavl_value_t * v;
   if(!(v = gavl_dictionary_get_nc(d, name)) ||
