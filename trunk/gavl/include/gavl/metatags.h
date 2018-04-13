@@ -155,8 +155,8 @@
 
 /* Some defined formats */
 
-#define GAVL_META_FORMAT_MP3  "MP3"
-
+#define GAVL_META_FORMAT_MP3   "MP3"
+#define GAVL_META_FORMAT_FLAC  "Flac"
 
 /** \brief Label
  *
