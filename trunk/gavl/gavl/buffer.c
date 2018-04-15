@@ -86,3 +86,10 @@ void gavl_buffer_copy(gavl_buffer_t * dst, const gavl_buffer_t * src)
   dst->len = src->len;
   dst->pos = 0;
   }
+
+void gavl_buffer_append(gavl_buffer_t * dst, const gavl_buffer_t * src)
+  {
+  gavl_buffer_alloc(dst, dst->len + src->len);
+  memcpy(dst->buf + dst->len, src->buf, src->len);
+  dst->len += src->len;
+  }

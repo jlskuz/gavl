@@ -249,6 +249,9 @@ void gavl_buffer_reset(gavl_buffer_t * buf);
 GAVL_PUBLIC
 void gavl_buffer_copy(gavl_buffer_t * dst, const gavl_buffer_t * src);
 
+GAVL_PUBLIC
+void gavl_buffer_append(gavl_buffer_t * dst, const gavl_buffer_t * src);
+
 
 
 #endif // GAVL_UTILS_H_INCLUDED

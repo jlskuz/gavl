@@ -65,7 +65,7 @@ static int64_t seek_mem(void * priv, int64_t pos, int whence)
       real_pos = m->pos + pos;
       break;
     case SEEK_END:
-      real_pos = m->len - pos;
+      real_pos = m->len + pos;
       break;
     }
 

@@ -5,6 +5,33 @@
 
 /* Buffer as io */
 
+static int64_t seek_buf(void * priv, int64_t pos1, int whence)
+  {
+  int64_t pos;
+  gavl_buffer_t * buf = priv;
+  
+  switch(whence)
+    {
+    case SEEK_SET:
+      pos = pos1;
+      break;
+    case SEEK_CUR:
+      pos = buf->pos + pos1;
+      break;
+    case SEEK_END:
+      pos = buf->len + pos1;
+      break;
+    }
+
+  if((pos < 0) || (pos > buf->len))
+    {
+    fprintf(stderr, "Bug in seek_buf: pos: %"PRId64"\n", pos);
+    return buf->pos;
+    }
+  buf->pos = pos;
+  return buf->pos;
+  }
+
 static int read_buf(void * priv, uint8_t * data, int len)
   {
   gavl_buffer_t * buf = priv;
@@ -23,11 +50,17 @@ static int write_buf(void * priv, const uint8_t * data, int len)
   {
   gavl_buffer_t * buf = priv;
 
-  if(!gavl_buffer_alloc(buf, buf->len + len))
-    return 0;
+  if(buf->pos + len > buf->len)
+    {
+    if(!gavl_buffer_alloc(buf, buf->pos + len))
+      return 0;
+    }
   
-  memcpy(buf->buf + buf->len, data, len);
-  buf->len += len;
+  memcpy(buf->buf + buf->pos, data, len);
+  buf->pos += len;
+  
+  if(buf->len < buf->pos)
+    buf->len = buf->pos;
   return len;
   }
 
@@ -43,7 +76,7 @@ gavf_io_t * gavf_io_create_buf_read()
   
   return gavf_io_create(read_buf,
                         NULL,
-                        NULL,
+                        seek_buf,
                         close_buf,
                         NULL,
                         buf);
@@ -55,7 +88,7 @@ gavf_io_t * gavf_io_create_buf_write()
 
   return gavf_io_create(NULL,
                         write_buf,
-                        NULL,
+                        seek_buf,
                         close_buf,
                         NULL,
                         buf);
@@ -77,7 +110,7 @@ void gavf_io_init_buf_read(gavf_io_t * io, gavl_buffer_t * buf)
   gavf_io_init(io,
                read_buf,
                NULL,
-               NULL,
+               seek_buf,
                NULL,
                NULL,
                buf);
@@ -88,7 +121,7 @@ void gavf_io_init_buf_write(gavf_io_t * io, gavl_buffer_t * buf)
   gavf_io_init(io,
                NULL,
                write_buf,
-               NULL,
+               seek_buf,
                NULL,
                NULL,
                buf);
