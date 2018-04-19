@@ -418,17 +418,7 @@ static void track_init(gavl_dictionary_t * track, int idx)
 
 gavl_array_t * gavl_get_tracks_nc(gavl_dictionary_t * dict)
   {
-  gavl_array_t * ret;
-
-  if(!(ret = gavl_dictionary_get_array_nc(dict, GAVL_META_TRACKS)))
-    {
-    gavl_value_t val;
-    gavl_value_init(&val);
-    gavl_value_set_array(&val);
-    gavl_dictionary_set_nocopy(dict, GAVL_META_TRACKS, &val);
-    ret = gavl_dictionary_get_array_nc(dict, GAVL_META_TRACKS);
-    }
-  return ret;
+  return gavl_dictionary_get_array_create(dict, GAVL_META_TRACKS);
   }
 
 const gavl_array_t * gavl_get_tracks(const gavl_dictionary_t * dict)
