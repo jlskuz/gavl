@@ -142,10 +142,17 @@ dict_set(gavl_dictionary_t * d, const char * name, const gavl_value_t * val,
 int gavl_dictionary_set_string(gavl_dictionary_t * d,
                                 const char * name, const char * val)
   {
-  gavl_value_t v;
-  gavl_value_init(&v);
-  gavl_value_set_string(&v, val);
-  return gavl_dictionary_set_nocopy(d, name, &v);
+  if(!val)
+    {
+    return gavl_dictionary_set(d, name, NULL);
+    }
+  else
+    {
+    gavl_value_t v;
+    gavl_value_init(&v);
+    gavl_value_set_string(&v, val);
+    return gavl_dictionary_set_nocopy(d, name, &v);
+    }
   }
 
 int gavl_dictionary_set_int(gavl_dictionary_t * d,
