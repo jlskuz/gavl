@@ -385,6 +385,30 @@ int gavl_msg_get_arg_dictionary(gavl_msg_t * msg, int arg,
   return 1;
   }
 
+int gavl_msg_get_arg_array(gavl_msg_t * msg, int arg,
+                           gavl_array_t * arr)
+  {
+  gavl_array_reset(arr);
+  
+  if(msg->args[arg].type != GAVL_TYPE_ARRAY)
+    return 0;
+  
+  gavl_array_move(arr, msg->args[arg].v.array);
+  return 1;
+  }
+
+int gavl_msg_get_arg_array_c(const gavl_msg_t * msg, int arg,
+                             gavl_array_t * arr)
+  {
+  gavl_array_reset(arr);
+
+  if(msg->args[arg].type != GAVL_TYPE_ARRAY)
+    return 0;
+  gavl_array_copy(arr, msg->args[arg].v.array);
+  return 1;
+  }
+
+
 void gavl_msg_init(gavl_msg_t * m)
   {
   memset(m, 0, sizeof(*m));

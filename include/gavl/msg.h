@@ -510,9 +510,9 @@ void gavl_msg_set_arg_dictionary_nocopy(gavl_msg_t * msg, int arg,
 /** \brief Get a matadata argument
  *  \param msg A message
  *  \param arg Argument index (starting with 0)
- *  \param m Returns metadata
+ *  \param m Returns dictionary
  *
- *  Don't pass uninitalized memory as metadata.
+ *  Don't pass uninitalized memory as dictionary
  */
 
 GAVL_PUBLIC
@@ -532,6 +532,13 @@ GAVL_PUBLIC
 void gavl_msg_set_arg_array_nocopy(gavl_msg_t * msg, int arg,
                                    gavl_array_t * m);
 
+GAVL_PUBLIC
+int gavl_msg_get_arg_array(gavl_msg_t * msg, int arg,
+                           gavl_array_t * arr);
+
+GAVL_PUBLIC
+int gavl_msg_get_arg_array_c(const gavl_msg_t * msg, int arg,
+                             gavl_array_t * arr);
 
 GAVL_PUBLIC
 void gavl_msg_dump(const gavl_msg_t * msg, int indent);
