@@ -407,6 +407,60 @@ void gavl_track_delete_overlay_stream(gavl_dictionary_t * d, int stream)
   delete_stream(d, GAVL_META_OVERLAY_STREAMS, stream);
   }
 
+/* Text */
+
+static void init_data_stream(gavl_dictionary_t * dict)
+  {
+  gavl_value_t fmt_val;
+  
+  init_stream(dict);
+
+  gavl_value_init(&fmt_val);
+  gavl_value_set_video_format(&fmt_val);
+  gavl_dictionary_set_nocopy(dict, GAVL_META_STREAM_FORMAT, &fmt_val);
+  }
+
+gavl_dictionary_t * gavl_track_get_data_stream_nc(gavl_dictionary_t * d, int i)
+  {
+  return get_stream_nc(d, i, GAVL_META_DATA_STREAMS);
+  }
+
+const gavl_dictionary_t * gavl_track_get_data_stream(const gavl_dictionary_t * d, int i)
+  {
+  return get_stream(d, i, GAVL_META_DATA_STREAMS);
+  }
+
+int gavl_track_get_num_data_streams(const gavl_dictionary_t * d)
+  {
+  return dictionary_get_num_streams(d, GAVL_META_DATA_STREAMS);
+
+  }
+  
+gavl_dictionary_t * gavl_track_append_data_stream(gavl_dictionary_t * d)
+  {
+  gavl_dictionary_t * s =  append_stream(d, GAVL_META_DATA_STREAMS);
+  init_data_stream(s);
+  return s;
+  }
+
+const gavl_dictionary_t * gavl_track_get_data_metadata(const gavl_dictionary_t * d, int stream)
+  {
+  return get_stream_metadata(d, stream, GAVL_META_DATA_STREAMS);
+  }
+
+gavl_dictionary_t * gavl_track_get_data_metadata_nc(gavl_dictionary_t * d, int stream)
+  {
+  return get_stream_metadata_nc(d, stream, GAVL_META_DATA_STREAMS);
+  }
+
+void gavl_track_delete_data_stream(gavl_dictionary_t * d, int stream)
+  {
+  delete_stream(d, GAVL_META_DATA_STREAMS, stream);
+
+  }
+
+
+
 /* Track */
 
 static void track_init(gavl_dictionary_t * track, int idx)
@@ -1099,6 +1153,19 @@ void gavl_track_set_num_overlay_streams(gavl_dictionary_t * dict, int num)
     gavl_track_append_overlay_stream(dict);
   
   }
+
+void gavl_track_set_num_data_streams(gavl_dictionary_t * dict, int num)
+  {
+  int i;
+
+  /* Delete previous streams */
+  gavl_dictionary_set(dict, GAVL_META_DATA_STREAMS, NULL);
+
+  for(i = 0; i < num; i++)
+    gavl_track_append_data_stream(dict);
+  
+  }
+
 
 int gavl_track_can_seek(const gavl_dictionary_t * track)
   {
