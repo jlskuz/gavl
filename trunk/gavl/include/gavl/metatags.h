@@ -343,6 +343,7 @@
 #define GAVL_META_VIDEO_STREAMS    "vstreams"
 #define GAVL_META_TEXT_STREAMS     "tstreams"
 #define GAVL_META_OVERLAY_STREAMS  "ostreams"
+#define GAVL_META_DATA_STREAMS     "dstreams"
 #define GAVL_META_METADATA         "metadata"
 #define GAVL_META_EDL              "edl"
 #define GAVL_META_TRACKS           GAVL_META_CHILDREN // Array containing single tracks
@@ -350,6 +351,9 @@
 #define GAVL_META_CURIDX           "curidx" // Index of "current" child
 
 #define GAVL_META_PARTS            "parts" // Parts of a multipart movie
+
+#define GAVL_META_DATA_FORMAT_MSG  "msg"
+#define GAVL_META_DATA_ROLE_EVENTS "evt"
 
 /**
  *

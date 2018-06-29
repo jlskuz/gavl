@@ -780,7 +780,6 @@ int gavl_msg_read(gavl_msg_t * ret, gavf_io_t * io)
   return 1;
   }
 
-
 int gavl_msg_write(const gavl_msg_t * msg, gavf_io_t * io)
   {
   int i;
@@ -1052,9 +1051,35 @@ int gavl_msg_from_buffer(const uint8_t * buf, int len, gavl_msg_t * msg)
   int result;
   gavf_io_t * io = gavf_io_create_mem_read(buf, len);
   result = gavl_msg_read(msg, io);
-
+  
   //  fprintf(stderr, "bg_msg_from_buffer: %"PRId64"/%d\n", gavf_io_position(io), len);
   
   gavf_io_destroy(io);
   return result;
+  }
+
+int gavf_msg_to_packet(const gavl_msg_t * msg,
+                       gavl_packet_t * dst,
+                       int64_t time, int stream_id)
+  {
+  dst->pts = time;
+  dst->id = stream_id;
+
+  gavl_packet_free(dst);
+
+  dst->data = gavl_msg_to_buffer(&dst->data_len, msg);
+  
+  return 1;
+  }
+
+int gavf_packet_to_msg(const gavl_packet_t * src,
+                       gavl_msg_t * msg,
+                       int64_t * time, int * stream_id)
+  {
+  if(time)
+    *time = src->pts;
+
+  if(stream_id)
+    *stream_id = src->id;
+  return gavl_msg_from_buffer(src->data, src->data_len, msg);
   }

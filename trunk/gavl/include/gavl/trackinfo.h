@@ -96,8 +96,6 @@ void gavl_track_delete_video_stream(gavl_dictionary_t * d, int stream);
 GAVL_PUBLIC
 void gavl_track_set_num_video_streams(gavl_dictionary_t * d, int num);
 
-
-
 /* Text */
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_track_get_text_stream_nc(gavl_dictionary_t * d, int i);
@@ -154,6 +152,31 @@ void gavl_track_delete_overlay_stream(gavl_dictionary_t * d, int stream);
 
 GAVL_PUBLIC
 void gavl_track_set_num_overlay_streams(gavl_dictionary_t * d, int num);
+
+/* Data */
+GAVL_PUBLIC
+gavl_dictionary_t * gavl_track_get_data_stream_nc(gavl_dictionary_t * d, int i);
+
+GAVL_PUBLIC
+const gavl_dictionary_t * gavl_track_get_data_stream(const gavl_dictionary_t * d, int i);
+
+GAVL_PUBLIC
+int gavl_track_get_num_data_streams(const gavl_dictionary_t * d);
+  
+GAVL_PUBLIC
+gavl_dictionary_t * gavl_track_append_data_stream(gavl_dictionary_t * d);
+
+GAVL_PUBLIC
+const gavl_dictionary_t * gavl_track_get_data_metadata(const gavl_dictionary_t * d, int stream);
+
+GAVL_PUBLIC
+gavl_dictionary_t * gavl_track_get_data_metadata_nc(gavl_dictionary_t * d, int stream);
+
+GAVL_PUBLIC
+void gavl_track_delete_data_stream(gavl_dictionary_t * d, int stream);
+
+GAVL_PUBLIC
+void gavl_track_set_num_data_streams(gavl_dictionary_t * d, int num);
 
 /* Tracks */
 GAVL_PUBLIC

@@ -703,4 +703,18 @@ int gavf_write_gavl_packet(gavf_io_t * io,
                            int64_t last_sync_pts,
                            const gavl_packet_t * p);
 
+/* Utilify functions for messages */
+
+GAVL_PUBLIC
+int gavf_msg_to_packet(const gavl_msg_t * msg,
+                       gavl_packet_t * dst,
+                       int64_t time, int stream_id);
+
+GAVL_PUBLIC
+int gavf_packet_to_msg(const gavl_packet_t * src,
+                       gavl_msg_t * msg,
+                       int64_t * time, int * stream_id);
+
+
+
 #endif // GAVF_H_INCLUDED
