@@ -214,6 +214,9 @@ struct gavl_msg_s
 
 typedef struct gavl_msg_s gavl_msg_t;
 
+typedef int (*gavl_handle_msg_func)(void *, gavl_msg_t *);
+
+
 /** \brief Create a message
  *  \returns A newly allocated message
  */
