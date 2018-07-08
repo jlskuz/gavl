@@ -175,6 +175,14 @@ int gavf_program_header_add_text_stream(gavf_program_header_t * ph,
   return ph->num_streams-1;
   }
 
+int gavf_program_header_add_msg_stream(gavf_program_header_t * ph,
+                                       const gavl_dictionary_t * m)
+  {
+  gavf_stream_header_t * h = add_stream(ph, m);
+  h->type = GAVF_STREAM_MSG;
+  return ph->num_streams-1;
+  }
+
 void gavf_program_header_free(gavf_program_header_t * ph)
   {
   int i;

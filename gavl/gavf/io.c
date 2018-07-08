@@ -27,6 +27,11 @@ void gavf_io_init(gavf_io_t * ret,
   ret->priv = priv;
   }
 
+void * gavf_io_get_priv(gavf_io_t * io)
+  {
+  return io->priv;
+  }
+
 int gavf_io_can_seek(gavf_io_t * io)
   {
   return io->seek_func ? 1 : 0;

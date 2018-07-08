@@ -926,12 +926,12 @@ GAVL_PUBLIC gavl_packet_t *
 gavl_packet_sink_get_packet(gavl_packet_sink_t * s);
 
 /** \brief Output a frame
- *  \param s A video sink
- *  \param f Frame
+ *  \param s A packet sink
+ *  \param p Packet
  *  \returns \ref GAVL_SINK_ERROR if an error happened, \ref GAVL_SINK_OK else.
  *
  *  The frame must be the same as returned by the preceeding call to
- *  \ref gavl_video_sink_get_frame if it was not NULL.
+ *  \ref gavl_packet_sink_get_packet if it was not NULL.
  */
 
 GAVL_PUBLIC gavl_sink_status_t

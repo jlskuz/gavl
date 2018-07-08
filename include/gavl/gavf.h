@@ -54,6 +54,9 @@ gavf_io_t * gavf_io_create(gavf_read_func  r,
                            void * data);
 
 GAVL_PUBLIC
+void * gavf_io_get_priv(gavf_io_t * io);
+
+GAVL_PUBLIC
 void gavf_io_destroy(gavf_io_t *);
 
 GAVL_PUBLIC
@@ -550,6 +553,10 @@ int gavf_add_overlay_stream(gavf_t * g,
                             const gavl_compression_info_t * ci,
                             const gavl_video_format_t * format,
                             const gavl_dictionary_t * m);
+
+GAVL_PUBLIC
+int gavf_add_msg_stream(gavf_t * g,
+                        const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
 void gavf_add_streams(gavf_t * g, const gavf_program_header_t * ph);

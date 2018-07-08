@@ -19,6 +19,7 @@ stream_types[] =
     { GAVF_STREAM_VIDEO, "video" },
     { GAVF_STREAM_TEXT,  "text"  },
     { GAVF_STREAM_OVERLAY,  "overlay" },
+    { GAVF_STREAM_MSG,      "msg"  },
   };
 
 GAVL_PUBLIC
@@ -238,7 +239,6 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
     gavl_packet_dump(p);
     }
   
-  
   s->packets_since_sync++;
 
   if(!gavf_io_flush(g->io))
@@ -250,7 +250,8 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
   return GAVL_SINK_OK;
   }
 
-int gavf_write_gavl_packet(gavf_io_t * io, gavf_io_t * hdr_io, int packet_duration, int packet_flags, int64_t last_sync_pts,
+int gavf_write_gavl_packet(gavf_io_t * io, gavf_io_t * hdr_io, int packet_duration,
+                           int packet_flags, int64_t last_sync_pts,
                            const gavl_packet_t * p)
   {
   gavl_buffer_t * buf;
@@ -556,6 +557,29 @@ static void gavf_stream_init_text(gavf_t * g, gavf_stream_t * s,
     }
   }
 
+static void gavf_stream_init_msg(gavf_t * g, gavf_stream_t * s,
+                                 int num_streams)
+  {
+  s->packet_flags |= (GAVF_PACKET_WRITE_PTS|GAVF_PACKET_WRITE_DURATION);
+
+  //  if(num_streams > 1)
+  //    s->flags |= STREAM_FLAG_DISCONTINUOUS;
+  
+  if(g->wr)
+    {
+    /* Create packet sink */
+    gavf_stream_create_packet_sink(g, s);
+    }
+  else
+    {
+    /* Create packet source */
+    gavf_stream_create_packet_src(g, s);
+
+    /* Set redundant metadata fields */
+    set_implicit_stream_fields(s);
+    }
+  }
+
 int gavf_stream_get_timescale(const gavf_stream_header_t * sh)
   {
   switch(sh->type)
@@ -608,9 +632,10 @@ static void init_streams(gavf_t * g)
       case GAVF_STREAM_TEXT:
         gavf_stream_init_text(g, &g->streams[i], g->ph.num_streams);
         break;
-      case GAVF_STREAM_NONE:
-        break;
       case GAVF_STREAM_MSG:
+        gavf_stream_init_msg(g, &g->streams[i], g->ph.num_streams);
+        break;
+      case GAVF_STREAM_NONE:
         break;
       }
     g->streams[i].pb =
@@ -1153,6 +1178,7 @@ int gavf_add_audio_stream(gavf_t * g,
   return gavf_program_header_add_audio_stream(&g->ph, ci, format, m);
   }
 
+
 int gavf_add_video_stream(gavf_t * g,
                           const gavl_compression_info_t * ci,
                           const gavl_video_format_t * format,
@@ -1176,6 +1202,13 @@ int gavf_add_overlay_stream(gavf_t * g,
   {
   return gavf_program_header_add_overlay_stream(&g->ph, ci, format, m);
   }
+
+int gavf_add_msg_stream(gavf_t * g,
+                            const gavl_dictionary_t * m)
+  {
+  
+  }
+
 
 void gavf_add_streams(gavf_t * g, const gavf_program_header_t * ph)
   {

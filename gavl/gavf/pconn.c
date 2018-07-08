@@ -102,18 +102,13 @@ void gavf_stream_create_packet_src(gavf_t * g, gavf_stream_t * s)
     }
   else
     {
+    flags = GAVL_SOURCE_SRC_ALLOC;
     if(s->flags & STREAM_FLAG_DISCONTINUOUS)
-      {
       func = read_packet_func_buffer_discont;
-      flags = GAVL_SOURCE_SRC_ALLOC;
-      }
     else
-      {
       func = read_packet_func_buffer_cont;
-      flags = GAVL_SOURCE_SRC_ALLOC;
-      }
     }
-
+  
   switch(s->h->type)
     {
     case GAVF_STREAM_AUDIO:
@@ -129,8 +124,10 @@ void gavf_stream_create_packet_src(gavf_t * g, gavf_stream_t * s)
       s->psrc = gavl_packet_source_create_text(func, s, flags,
                                                s->h->format.text.timescale);
       break;
-    case GAVF_STREAM_NONE:
     case GAVF_STREAM_MSG:
+      s->psrc = gavl_packet_source_create(func, s, flags);
+      break;
+    case GAVF_STREAM_NONE:
       break;
     }
   }
