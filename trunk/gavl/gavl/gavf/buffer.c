@@ -12,14 +12,14 @@ static int64_t seek_buf(void * priv, int64_t pos1, int whence)
   
   switch(whence)
     {
-    case SEEK_SET:
-      pos = pos1;
-      break;
     case SEEK_CUR:
       pos = buf->pos + pos1;
       break;
     case SEEK_END:
       pos = buf->len + pos1;
+      break;
+    default:
+      pos = pos1;
       break;
     }
 

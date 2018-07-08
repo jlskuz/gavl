@@ -63,17 +63,25 @@ int gavf_program_header_add_audio_stream(gavf_program_header_t * ph,
                                          const gavl_compression_info_t * ci,
                                          const gavl_audio_format_t * format,
                                          const gavl_dictionary_t * m);
+
 int gavf_program_header_add_video_stream(gavf_program_header_t * ph,
                                          const gavl_compression_info_t * ci,
                                          const gavl_video_format_t * format,
                                          const gavl_dictionary_t * m);
+
 int gavf_program_header_add_overlay_stream(gavf_program_header_t * ph,
                                            const gavl_compression_info_t * ci,
                                            const gavl_video_format_t * format,
                                            const gavl_dictionary_t * m);
+
 int gavf_program_header_add_text_stream(gavf_program_header_t * ph,
                                         uint32_t timescale,
                                         const gavl_dictionary_t * m);
+
+int gavf_program_header_add_msg_stream(gavf_program_header_t * ph,
+                                       const gavl_dictionary_t * m);
+
+
 int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph);
 int gavf_program_header_write(gavf_io_t * io,
                               const gavf_program_header_t * ph);
