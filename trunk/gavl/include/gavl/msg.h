@@ -25,6 +25,8 @@
 #include <gavl/gavldefs.h>
 #include <gavl/value.h>
 
+#define GAVL_MSG_HEADER_TIMESTAMP "timestamp" // Always GAVL_TIME_SCALE
+
 #define GAVL_MSG_NONE     -1 //!< Reserved ID for non valid message
 #define GAVL_MSG_MAX_ARGS  8 //!< Maximum number of args
 
@@ -577,10 +579,10 @@ gavl_msg_get_progress(gavl_msg_t * msg, char ** activity, float * perc);
 
 
 GAVL_PUBLIC void
-gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, int scale, const gavl_dictionary_t * m);
+gavl_msg_set_src_metadata(gavl_msg_t * msg, gavl_time_t time, const gavl_dictionary_t * m);
 
 GAVL_PUBLIC void
-gavl_msg_get_src_metadata(gavl_msg_t * msg, int64_t * time, int * scale, gavl_dictionary_t * m);
+gavl_msg_get_src_metadata(gavl_msg_t * msg, gavl_time_t * time, gavl_dictionary_t * m);
 
 GAVL_PUBLIC void
 gavl_msg_set_src_aspect(gavl_msg_t * msg, int64_t time, int scale, int stream,

@@ -185,26 +185,6 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
     if(g->sync_distance)
       g->last_sync_time = pts;
     }
-
-  /* Write stored metadata if there is one */
-  if(g->meta_buf.len)
-    {
-    if(!gavf_io_cb(g->io, GAVF_IO_CB_METADATA_START, &g->metadata))
-      return GAVL_SINK_ERROR;
-
-    if((gavf_io_write_data(g->io,
-                           (const uint8_t*)GAVF_TAG_METADATA_HEADER, 1) < 1) ||
-       !gavf_io_write_buffer(g->io, &g->meta_buf))
-      return GAVL_SINK_ERROR;
-    gavl_buffer_reset(&g->meta_buf);
-
-    if(!gavf_io_flush(g->io))
-      return GAVL_SINK_ERROR;
-    
-    if(!gavf_io_cb(g->io, GAVF_IO_CB_METADATA_END, &g->metadata))
-      return GAVL_SINK_ERROR;
-
-    }
   
   // If a stream has B-frames, this won't be correct
   // for the next sync timestamp (it will be taken from the
@@ -681,6 +661,7 @@ gavf_t * gavf_create()
   {
   gavf_t * ret;
   ret = calloc(1, sizeof(*ret));
+  ret->msg_id = -1;
   return ret;
   }
 
@@ -787,9 +768,6 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
   g->opt.flags &= ~(GAVF_OPT_FLAG_SYNC_INDEX|
                     GAVF_OPT_FLAG_PACKET_INDEX);
   
-  /* Initialize packet buffer */
-  gavf_io_init_buf_read(&g->meta_io, &g->meta_buf);
-  
   /* Read up to the first sync header */
 
   while(1)
@@ -859,7 +837,6 @@ gavf_program_header_t * gavf_get_program_header(gavf_t * g)
 const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
   {
   char c[8];
-  uint32_t len;
 
 #ifdef DUMP_EOF
   fprintf(stderr, "gavf_packet_read_header\n");
@@ -918,60 +895,6 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
         return &g->pkthdr;
         }
       }
-    else if(c[0] == GAVF_TAG_METADATA_HEADER_C)
-      {
-      /* Inline metadata */
-      if(g->opt.metadata_cb ||
-         (g->opt.flags & GAVF_OPT_FLAG_DUMP_METADATA))
-        {
-        gavl_dictionary_t m;
-        gavl_dictionary_init(&m);
-        
-        gavl_buffer_reset(&g->meta_buf);
-        
-        if(!gavf_io_read_buffer(g->io, &g->meta_buf) ||
-           !gavl_dictionary_read(&g->meta_io, &m))
-          {
-#ifdef DUMP_EOF
-          fprintf(stderr, "EOF 4\n");
-#endif
-          goto got_eof;
-          }
-        if(!gavl_metadata_equal(&g->metadata, &m))
-          {
-          gavl_dictionary_free(&g->metadata);
-          memcpy(&g->metadata, &m, sizeof(m));
-
-          if(g->opt.metadata_cb)
-            g->opt.metadata_cb(g->opt.metadata_cb_priv,
-                               &g->metadata);
-
-          if(!gavf_io_cb(g->io, GAVF_IO_CB_METADATA_END, &g->metadata))
-            goto got_eof;
-          
-          if(g->opt.flags & GAVF_OPT_FLAG_DUMP_METADATA)
-            {
-            fprintf(stderr, "Got inline metadata\n");
-            gavl_dictionary_dump(&g->metadata, 2);
-            }
-          }
-        else
-          gavl_dictionary_free(&m);
-        }
-      else
-        {
-        if(!gavf_io_read_uint32v(g->io, &len))
-          {
-#ifdef DUMP_EOF
-          fprintf(stderr, "EOF 5\n");
-#endif
-          goto got_eof;
-          }
-        gavf_io_skip(g->io, len);
-        if(!gavf_io_cb(g->io, GAVF_IO_CB_METADATA_END, NULL))
-          goto got_eof;
-        }
-      }
     else
       {
       if(gavf_io_read_data(g->io, (uint8_t*)&c[1], 7) < 7)
@@ -1007,31 +930,28 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
   return NULL;
   }
 
-int gavf_update_metadata(gavf_t * g, const gavl_dictionary_t * m)
+int gavf_put_message(void * data, gavl_msg_t * m)
   {
-  if(gavl_metadata_equal(&g->metadata, m))
-    return 1;
+  gavl_packet_sink_t * sink;
+  gavl_packet_t * p;
+  gavl_msg_t msg;
+  gavf_t * g = data;
 
-  if(g->opt.flags & GAVF_OPT_FLAG_DUMP_METADATA)
-    {
-#if 0
-    fprintf(stderr, "Got inline metadata\n");
-#endif
-    gavl_dictionary_dump(m, 2);
-    }
+  gavl_dprintf("Got inline message\n");
+  gavl_msg_dump(m, 2);gavl_dprintf("\n");
   
-  gavl_dictionary_free(&g->metadata);
-  gavl_dictionary_init(&g->metadata);
-  gavl_dictionary_copy(&g->metadata, m);
-
-  /*
-   *  Write metadata to buffer.
-   *  Will be flushed after the next sync header.
-   */
-
-  gavl_buffer_reset(&g->meta_buf);
-  if(!gavl_dictionary_write(&g->meta_io, &g->metadata))
+  if(g->msg_id < 0)
+    {
+    fprintf(stderr, "BUG: Metadata update without metadata stream\n");
     return 0;
+    }
+
+  sink = gavf_get_packet_sink(g, g->msg_id);
+  p = gavl_packet_sink_get_packet(sink);
+
+  gavl_msg_init(&msg);
+  gavf_msg_to_packet(m, p, g->msg_id);
+  gavl_packet_sink_put_packet(sink, p);
   
   return 1;
   }
@@ -1162,8 +1082,6 @@ int gavf_open_write(gavf_t * g, gavf_io_t * io,
 
   g->pkt_io = gavf_io_create_buf_write();
 
-  gavf_io_init_buf_write(&g->meta_io, &g->meta_buf);
-
   if(m)
     gavl_dictionary_copy(&g->ph.m, m);
   
@@ -1203,12 +1121,13 @@ int gavf_add_overlay_stream(gavf_t * g,
   return gavf_program_header_add_overlay_stream(&g->ph, ci, format, m);
   }
 
-int gavf_add_msg_stream(gavf_t * g,
-                            const gavl_dictionary_t * m)
+int gavf_add_msg_stream(gavf_t * g, const gavl_dictionary_t * m)
   {
-  
+  if(g->msg_id >= 0)
+    return g->msg_id;
+  g->msg_id = gavf_program_header_add_msg_stream(&g->ph, m);
+  return g->msg_id;
   }
-
 
 void gavf_add_streams(gavf_t * g, const gavf_program_header_t * ph)
   {
@@ -1463,6 +1382,7 @@ void gavf_close(gavf_t * g)
   gavf_packet_index_free(&g->pi);
   gavf_program_header_free(&g->ph);
 
+#if 0  
   if(g->write_vframe)
     {
     gavl_video_frame_null(g->write_vframe);
@@ -1474,7 +1394,8 @@ void gavf_close(gavf_t * g)
     gavl_audio_frame_null(g->write_aframe);
     gavl_audio_frame_destroy(g->write_aframe);
     }
-
+#endif
+  
   if(g->sync_pts)
     free(g->sync_pts);
   
@@ -1482,9 +1403,6 @@ void gavf_close(gavf_t * g)
 
   if(g->pkt_io)
     gavf_io_destroy(g->pkt_io);
-  
-  gavl_buffer_free(&g->meta_buf);
-  gavl_dictionary_free(&g->metadata);
   
   free(g);
   }

@@ -130,7 +130,7 @@ void gavf_stream_header_dump(const gavf_stream_header_t * h)
   fprintf(stderr, "    Metadata:\n");
   gavl_dictionary_dump(&h->m, 6);
   
-  fprintf(stderr, "    Footer: ");
+  fprintf(stderr, "\n    Footer: ");
   if(h->stats.pts_start == GAVL_TIME_UNDEFINED)
     fprintf(stderr, "Not present\n");
   else

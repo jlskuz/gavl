@@ -18,11 +18,11 @@ int gavf_options_get_flags(gavf_options_t * opt)
   }
 
 
-void gavf_options_set_metadata_callback(gavf_options_t * opt, 
-                                        void (*cb)(void*,const gavl_dictionary_t*),
-                                        void *cb_priv)
+void gavf_options_set_msg_callback(gavf_options_t * opt, 
+                                   gavl_handle_msg_func cb,
+                                   void *cb_priv)
   {
-  opt->metadata_cb = cb;
-  opt->metadata_cb_priv = cb_priv;
+  opt->msg_cb = cb;
+  opt->msg_cb_priv = cb_priv;
   }
 
