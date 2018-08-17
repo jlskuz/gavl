@@ -197,8 +197,9 @@ struct gavf_options_s
   {
   uint32_t flags;
   gavl_time_t sync_distance;
-  void (*metadata_cb)(void * priv, const gavl_dictionary_t * m);
-  void * metadata_cb_priv;
+
+  gavl_handle_msg_func msg_cb;
+  void * msg_cb_priv;
   };
 
 /* Extension header */
@@ -260,9 +261,6 @@ int gavf_extension_write(gavf_io_t * io, uint32_t key, uint32_t len,
 
 #define GAVF_TAG_PACKET_HEADER    "P"
 #define GAVF_TAG_PACKET_HEADER_C  'P'
-
-#define GAVF_TAG_METADATA_HEADER   "M"
-#define GAVF_TAG_METADATA_HEADER_C 'M'
 
 typedef struct
   {
@@ -343,11 +341,6 @@ struct gavf_s
   gavf_options_t opt;
   
   gavf_io_t * pkt_io;
-
-  /* Inline metadata support */
-  gavf_io_t meta_io;
-  gavl_buffer_t meta_buf;
-  gavl_dictionary_t metadata;
   
   uint64_t first_sync_pos;
   
@@ -365,7 +358,7 @@ struct gavf_s
   encoding_mode_t encoding_mode;
   encoding_mode_t final_encoding_mode;
 
-  
+  int msg_id;
   };
 
 /* Footer */

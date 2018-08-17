@@ -486,26 +486,21 @@ gavl_msg_get_progress(gavl_msg_t * msg, char ** activity, float * perc)
     *perc = gavl_msg_get_arg_float(msg, 1);
   }
 
-
-
 void
-gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, int scale, const gavl_dictionary_t * m)
+gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, const gavl_dictionary_t * m)
   {
   gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_METADATA_CHANGED, GAVL_MSG_NS_SRC);
   gavl_msg_set_arg_time(msg, 0, time);
-  gavl_msg_set_arg_int(msg, 1, scale);
-  gavl_msg_set_arg_dictionary(msg, 2, m);
+  gavl_msg_set_arg_dictionary(msg, 1, m);
   }
 
 void
-gavl_msg_get_src_metadata(gavl_msg_t * msg, int64_t * time, int * scale, gavl_dictionary_t * m)
+gavl_msg_get_src_metadata(gavl_msg_t * msg, int64_t * time, gavl_dictionary_t * m)
   {
   if(time)
     *time = gavl_msg_get_arg_time(msg, 0);
-  if(scale)
-    *scale = gavl_msg_get_arg_int(msg, 1);
   if(m)
-    gavl_msg_get_arg_dictionary(msg, 2, m);
+    gavl_msg_get_arg_dictionary(msg, 1, m);
   }
 
 

@@ -201,8 +201,9 @@ void gavf_program_header_dump(const gavf_program_header_t * ph)
   
   fprintf(stderr, "Program header\n");
   fprintf(stderr, "  Metadata\n");
-  gavl_dictionary_dump(&ph->m, 4);
+  gavl_dictionary_dump(&ph->m, 4); fprintf(stderr, "\n");
 
+  
   num = gavf_program_header_get_num_streams(ph, GAVF_STREAM_AUDIO);
   for(i = 0; i < num; i++)
     {
@@ -232,6 +233,14 @@ void gavf_program_header_dump(const gavf_program_header_t * ph)
     {
     h = gavf_program_header_get_stream(ph, i, GAVF_STREAM_OVERLAY);
     fprintf(stderr, "  Overlay stream %d\n", i+1);
+    gavf_stream_header_dump(h);
+    }
+
+  num = gavf_program_header_get_num_streams(ph, GAVF_STREAM_MSG);
+  for(i = 0; i < num; i++)
+    {
+    h = gavf_program_header_get_stream(ph, i, GAVF_STREAM_MSG);
+    fprintf(stderr, "  Message stream %d\n", i+1);
     gavf_stream_header_dump(h);
     }
   

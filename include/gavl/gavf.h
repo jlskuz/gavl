@@ -24,8 +24,6 @@ typedef struct gavf_options_s gavf_options_t;
 #define GAVF_IO_CB_PROGRAM_HEADER_END   (1|0x100)
 #define GAVF_IO_CB_PACKET_START         2
 #define GAVF_IO_CB_PACKET_END           (2|0x100)
-#define GAVF_IO_CB_METADATA_START       3
-#define GAVF_IO_CB_METADATA_END         (3|0x100)
 #define GAVF_IO_CB_SYNC_HEADER_START    4
 #define GAVF_IO_CB_SYNC_HEADER_END      (4|0x100)
 
@@ -417,9 +415,10 @@ void gavf_options_set_sync_distance(gavf_options_t *,
                                     gavl_time_t sync_distance);
 
 GAVL_PUBLIC
-void gavf_options_set_metadata_callback(gavf_options_t *, 
-                                        void (*cb)(void*,const gavl_dictionary_t*),
-                                        void *cb_priv);
+void gavf_options_set_msg_callback(gavf_options_t *, 
+                                   gavl_handle_msg_func cb,
+                                   void *cb_priv);
+
 
 /* General functions */
 
@@ -575,7 +574,7 @@ GAVL_PUBLIC
 int gavf_write_audio_frame(gavf_t *, int stream, gavl_audio_frame_t * frame);
 
 GAVL_PUBLIC
-int gavf_update_metadata(gavf_t *, const gavl_dictionary_t * m);
+int gavf_put_message(void*, gavl_msg_t * m);
 
 GAVL_PUBLIC gavl_packet_sink_t *
 gavf_get_packet_sink(gavf_t *, uint32_t id);
@@ -715,12 +714,12 @@ int gavf_write_gavl_packet(gavf_io_t * io,
 GAVL_PUBLIC
 int gavf_msg_to_packet(const gavl_msg_t * msg,
                        gavl_packet_t * dst,
-                       int64_t time, int stream_id);
+                       int stream_id);
 
 GAVL_PUBLIC
 int gavf_packet_to_msg(const gavl_packet_t * src,
                        gavl_msg_t * msg,
-                       int64_t * time, int * stream_id);
+                       int * stream_id);
 
 
 
