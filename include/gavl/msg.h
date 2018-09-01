@@ -87,7 +87,24 @@
  *  arg0: Percentage (float), negative means buffering finished
  */
 
-#define GAVL_MSG_SRC_BUFFERING 3
+#define GAVL_MSG_SRC_BUFFERING        3
+
+/** \brief Authentication request
+ *
+ *  arg0: String (e.g. domain name) (string)
+ */
+
+#define GAVL_MSG_SRC_AUTHENTICATE     4
+
+/** \brief Authentication request
+ *
+ *  arg0: Username (string)
+ *  arg1: Password (string)
+ */
+
+#define GAVL_CMD_SRC_AUTHENTICATE     1
+
+
 
 /* GUI Events */
 

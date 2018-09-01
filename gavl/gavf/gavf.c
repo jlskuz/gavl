@@ -950,7 +950,7 @@ int gavf_put_message(void * data, gavl_msg_t * m)
   p = gavl_packet_sink_get_packet(sink);
 
   gavl_msg_init(&msg);
-  gavf_msg_to_packet(m, p, g->msg_id);
+  gavf_msg_to_packet(m, p);
   gavl_packet_sink_put_packet(sink, p);
   
   return 1;
