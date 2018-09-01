@@ -1064,27 +1064,17 @@ int gavl_msg_from_buffer(const uint8_t * buf, int len, gavl_msg_t * msg)
   }
 
 int gavf_msg_to_packet(const gavl_msg_t * msg,
-                       gavl_packet_t * dst,
-                       int stream_id)
+                       gavl_packet_t * dst)
   {
   gavl_dictionary_get_long(&msg->header, GAVL_MSG_HEADER_TIMESTAMP, &dst->pts);
-
-  dst->id = stream_id;
-
   gavl_packet_free(dst);
-
   dst->data = gavl_msg_to_buffer(&dst->data_len, msg);
-  
   return 1;
   }
 
 int gavf_packet_to_msg(const gavl_packet_t * src,
-                       gavl_msg_t * msg,
-                       int * stream_id)
+                       gavl_msg_t * msg)
   {
   gavl_dictionary_set_long(&msg->header, GAVL_MSG_HEADER_TIMESTAMP, src->pts);
-  
-  if(stream_id)
-    *stream_id = src->id;
   return gavl_msg_from_buffer(src->data, src->data_len, msg);
   }

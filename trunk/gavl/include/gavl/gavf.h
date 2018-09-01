@@ -713,13 +713,11 @@ int gavf_write_gavl_packet(gavf_io_t * io,
 
 GAVL_PUBLIC
 int gavf_msg_to_packet(const gavl_msg_t * msg,
-                       gavl_packet_t * dst,
-                       int stream_id);
+                       gavl_packet_t * dst);
 
 GAVL_PUBLIC
 int gavf_packet_to_msg(const gavl_packet_t * src,
-                       gavl_msg_t * msg,
-                       int * stream_id);
+                       gavl_msg_t * msg);
 
 
 
