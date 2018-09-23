@@ -343,7 +343,7 @@
 #define GAVL_META_VIDEO_STREAMS    "vstreams"
 #define GAVL_META_TEXT_STREAMS     "tstreams"
 #define GAVL_META_OVERLAY_STREAMS  "ostreams"
-#define GAVL_META_DATA_STREAMS     "dstreams"
+#define GAVL_META_MSG_STREAMS      "mstreams"
 #define GAVL_META_METADATA         "metadata"
 #define GAVL_META_EDL              "edl"
 #define GAVL_META_TRACKS           GAVL_META_CHILDREN // Array containing single tracks

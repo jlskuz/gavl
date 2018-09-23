@@ -155,28 +155,28 @@ void gavl_track_set_num_overlay_streams(gavl_dictionary_t * d, int num);
 
 /* Data */
 GAVL_PUBLIC
-gavl_dictionary_t * gavl_track_get_data_stream_nc(gavl_dictionary_t * d, int i);
+gavl_dictionary_t * gavl_track_get_msg_stream_nc(gavl_dictionary_t * d, int i);
 
 GAVL_PUBLIC
-const gavl_dictionary_t * gavl_track_get_data_stream(const gavl_dictionary_t * d, int i);
+const gavl_dictionary_t * gavl_track_get_msg_stream(const gavl_dictionary_t * d, int i);
 
 GAVL_PUBLIC
-int gavl_track_get_num_data_streams(const gavl_dictionary_t * d);
+int gavl_track_get_num_msg_streams(const gavl_dictionary_t * d);
   
 GAVL_PUBLIC
-gavl_dictionary_t * gavl_track_append_data_stream(gavl_dictionary_t * d);
+gavl_dictionary_t * gavl_track_append_msg_stream(gavl_dictionary_t * d);
 
 GAVL_PUBLIC
-const gavl_dictionary_t * gavl_track_get_data_metadata(const gavl_dictionary_t * d, int stream);
+const gavl_dictionary_t * gavl_track_get_msg_metadata(const gavl_dictionary_t * d, int stream);
 
 GAVL_PUBLIC
-gavl_dictionary_t * gavl_track_get_data_metadata_nc(gavl_dictionary_t * d, int stream);
+gavl_dictionary_t * gavl_track_get_msg_metadata_nc(gavl_dictionary_t * d, int stream);
 
 GAVL_PUBLIC
-void gavl_track_delete_data_stream(gavl_dictionary_t * d, int stream);
+void gavl_track_delete_msg_stream(gavl_dictionary_t * d, int stream);
 
 GAVL_PUBLIC
-void gavl_track_set_num_data_streams(gavl_dictionary_t * d, int num);
+void gavl_track_set_num_msg_streams(gavl_dictionary_t * d, int num);
 
 /* Tracks */
 GAVL_PUBLIC
