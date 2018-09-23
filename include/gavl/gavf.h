@@ -379,6 +379,9 @@ int gavf_program_header_get_duration(const gavf_program_header_t * ph,
                                      gavl_time_t * start_p,
                                      gavl_time_t * duration_p);
 
+void gavl_program_header_to_track(const gavf_program_header_t * ph,
+                                  gavl_dictionary_t * track);
+
 
 typedef struct
   {
