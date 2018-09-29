@@ -3,6 +3,7 @@
 
 #include <gavfprivate.h>
 #include <gavl/trackinfo.h>
+#include <gavl/metatags.h>
 
 int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph)
   {
@@ -348,6 +349,9 @@ void gavl_program_header_to_track(const gavf_program_header_t * ph,
   gavl_dictionary_t * stream;
   int i;
   int ts;
+
+  m_dst = gavl_dictionary_get_dictionary_create(track, GAVL_META_METADATA);
+  gavl_dictionary_copy(m_dst, &ph->m);
   
   for(i = 0; i < ph->num_streams; i++)
     {
@@ -370,24 +374,25 @@ void gavl_program_header_to_track(const gavf_program_header_t * ph,
         gavl_video_format_t * fmt;
         stream = gavl_track_append_video_stream(track);
         fmt = gavl_stream_get_video_format_nc(stream);
-        gavl_audio_format_copy(fmt, &ph->streams[i].format.audio);
+        gavl_video_format_copy(fmt, &ph->streams[i].format.video);
         ts = fmt->timescale;
         }
         break;
       case GAVF_STREAM_TEXT:
         stream = gavl_track_append_text_stream(track);
-        
         ts = ph->streams[i].format.text.timescale;
-        
-        GAVL_META_STREAM_PACKET_TIMESCALE
         break;
       case GAVF_STREAM_OVERLAY:
+        {
+        gavl_video_format_t * fmt;
         stream = gavl_track_append_overlay_stream(track);
-
+        fmt = gavl_stream_get_video_format_nc(stream);
+        gavl_video_format_copy(fmt, &ph->streams[i].format.video);
+        ts = fmt->timescale;
+        }
         break;
       case GAVF_STREAM_MSG:
         stream = gavl_track_append_msg_stream(track);
-
         break;
       case GAVF_STREAM_NONE:
         break;
@@ -395,15 +400,16 @@ void gavl_program_header_to_track(const gavf_program_header_t * ph,
 
     if(!stream)
       continue;
-    
+
     m_dst = gavl_stream_get_metadata_nc(stream);
     gavl_dictionary_copy(m_dst, &ph->streams[i].m);
 
     if(ts)
       {
-      
+      gavl_dictionary_set_int(m_dst, GAVL_META_STREAM_PACKET_TIMESCALE, ts);
+      gavl_dictionary_set_int(m_dst, GAVL_META_STREAM_SAMPLE_TIMESCALE, ts);
       }
-
+    
     }
   
   }
