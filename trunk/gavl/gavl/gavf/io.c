@@ -257,19 +257,20 @@ static const int64_t int_offsets[] =
 
 static const uint64_t uint_limits[] =
   {
-    ((uint64_t)1)<<7,
-    ((uint64_t)1)<<14,
-    ((uint64_t)1)<<21,
-    ((uint64_t)1)<<28,
-    ((uint64_t)1)<<35,
-    ((uint64_t)1)<<42,
-    ((uint64_t)1)<<49,
-    ((uint64_t)1)<<56,
+    ((uint64_t)1)<<7,  // 128
+    ((uint64_t)1)<<14, // 16384
+    ((uint64_t)1)<<21, // 2097152
+    ((uint64_t)1)<<28, // 268435456
+    ((uint64_t)1)<<35, // 34359738368
+    ((uint64_t)1)<<42, // 4398046511104
+    ((uint64_t)1)<<49, // 562949953421312
+    ((uint64_t)1)<<56, // 72057594037927936
   };
 
 static int get_len_uint(uint64_t num)
   {
   int i;
+  
   for(i = 0; i < 8; i++)
     {
     if(num < uint_limits[i])
