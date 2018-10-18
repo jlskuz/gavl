@@ -880,8 +880,6 @@ AC_MSG_CHECKING(for neaacdec.h usability for faad2)
     int faad_minor;
     NeAACDecHandle dec;
 
-    if(sscanf(FAAD2_VERSION, "%d.%d", &faad_major, &faad_minor) < 2)
-      return -1;
     dec = NeAACDecOpen();
     if(!dec)
       return -1;
@@ -899,41 +897,6 @@ AC_MSG_CHECKING(for neaacdec.h usability for faad2)
     # program could not be run
     AC_MSG_RESULT(no)
 )
-
-if test "x$have_faad2" != "xtrue"; then
-
-AC_MSG_CHECKING(for faad.h usability for faad2)
-
-  AC_TRY_RUN([
-    #include <faad.h>
-    #include <stdio.h>
-    main()
-    {
-    int faad_major;
-    int faad_minor;
-    faacDecHandle dec;
-
-    if(sscanf(FAAD2_VERSION, "%d.%d", &faad_major, &faad_minor) < 2)
-      return -1;
-    dec = faacDecOpen();
-    if(!dec)
-      return -1;
-    return 0;
-    }
-  ],
-  [
-    # program could be run
-    have_faad2="true"
-    AC_MSG_RESULT(yes)
-    FAAD2_CFLAGS=$CFLAGS
-    FAAD2_LIBS=$LIBS
-
-  ],
-    # program could not be run
-    AC_MSG_RESULT(no)
-)
-fi
-
 
 CFLAGS=$OLD_CFLAGS
 LIBS=$OLD_LIBS
