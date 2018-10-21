@@ -215,6 +215,9 @@
 #define GAVL_MSG_CLIENT_ID  "ClientID"
 #define GAVL_MSG_CONTEXT_ID "ContextID"
 #define GAVL_MSG_TIMESTAMP  "TS"      // gavl_time_t (GAVL_TYPE_LONG)
+#define GAVL_MSG_NOT_LAST   "NotLast" // if nonzero means, that other messages follow
+#define GAVL_MSG_FUNCTION_TAG "FunctionTag"
+
 
 /** \brief Message type
  */
@@ -665,6 +668,15 @@ int gavl_msg_get_splice_children(gavl_msg_t * msg,
 
 GAVL_PUBLIC 
 int gavl_msg_splice_children(gavl_msg_t * msg, gavl_dictionary_t * dict);
+
+GAVL_PUBLIC 
+int gavl_msg_get_last(const gavl_msg_t * msg);
+
+GAVL_PUBLIC 
+void gavl_msg_set_last(gavl_msg_t * msg, int last);
+
+GAVL_PUBLIC 
+void gavl_msg_set_resp_for_req(gavl_msg_t * dst, const gavl_msg_t * src);
 
 
 #endif // GAVL_MSG_H_INCLUDED
