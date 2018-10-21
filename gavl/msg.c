@@ -691,10 +691,10 @@ void gavl_msg_set_splice_children(gavl_msg_t * msg, int msg_ns, int msg_id,
   if(ctx)
     gavl_dictionary_set_string(&msg->header, GAVL_MSG_CONTEXT_ID, ctx);
   
-  gavl_msg_set_arg_int(msg, 0, last);
-  gavl_msg_set_arg_int(msg, 1, idx);
-  gavl_msg_set_arg_int(msg, 2, del);
-  gavl_msg_set_arg(msg,     3, add);
+  gavl_msg_set_last(msg, last);
+  gavl_msg_set_arg_int(msg, 0, idx);
+  gavl_msg_set_arg_int(msg, 1, del);
+  gavl_msg_set_arg(msg,     2, add);
   }
 
 void gavl_msg_set_splice_children_nocopy(gavl_msg_t * msg, int msg_ns, int msg_id,
@@ -704,21 +704,38 @@ void gavl_msg_set_splice_children_nocopy(gavl_msg_t * msg, int msg_ns, int msg_i
 
   if(ctx)
     gavl_dictionary_set_string(&msg->header, GAVL_MSG_CONTEXT_ID, ctx);
+
+  gavl_msg_set_last(msg, last);
   
-  gavl_msg_set_arg_int(msg,    0, last);
-  gavl_msg_set_arg_int(msg,    1, idx);
-  gavl_msg_set_arg_int(msg,    2, del);
-  gavl_msg_set_arg_nocopy(msg, 3, add);
+  gavl_msg_set_arg_int(msg,    0, idx);
+  gavl_msg_set_arg_int(msg,    1, del);
+  gavl_msg_set_arg_nocopy(msg, 2, add);
   }
 
 int gavl_msg_get_splice_children(gavl_msg_t * msg,
                                  int * last, int * idx, int * del, gavl_value_t * add)
   {
-  *last = gavl_msg_get_arg_int(msg, 0);
-  *idx  = gavl_msg_get_arg_int(msg, 1);
-  *del  = gavl_msg_get_arg_int(msg, 2);
-  gavl_msg_get_arg(msg, 3, add);
+  *last = gavl_msg_get_last(msg);
+  *idx  = gavl_msg_get_arg_int(msg, 0);
+  *del  = gavl_msg_get_arg_int(msg, 1);
+  gavl_msg_get_arg(msg, 2, add);
   return 1;
+  }
+
+int gavl_msg_get_last(const gavl_msg_t * msg)
+  {
+  int notlast = 0;
+
+  if(gavl_dictionary_get_int(&msg->header, GAVL_MSG_NOT_LAST, &notlast) &&
+     notlast)
+    return 0;
+  return 1;
+  }
+
+void gavl_msg_set_last(gavl_msg_t * msg, int last)
+  {
+  if(!last)
+    gavl_dictionary_set_int(&msg->header, GAVL_MSG_NOT_LAST, 1);
   }
 
 int gavl_msg_splice_children(gavl_msg_t * msg, gavl_dictionary_t * dict)
@@ -758,4 +775,12 @@ void gavl_msg_copy_header_field(gavl_msg_t * dst, const gavl_msg_t * src, const 
     gavl_msg_set_client_id(dst, gavl_msg_get_client_id(src));
   else
     gavl_dictionary_set(&dst->header, key, gavl_dictionary_get(&src->header, key));
+  }
+
+void gavl_msg_set_resp_for_req(gavl_msg_t * dst, const gavl_msg_t * src)
+  {
+  gavl_msg_copy_header_field(dst, src, GAVL_MSG_CLIENT_ID);
+  gavl_msg_copy_header_field(dst, src, GAVL_MSG_CONTEXT_ID);
+  gavl_msg_copy_header_field(dst, src, GAVL_MSG_FUNCTION_TAG);
+  
   }
