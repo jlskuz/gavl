@@ -45,6 +45,8 @@
 /** \brief Unique ID within this database */
 
 #define GAVL_META_ID          "ID"
+#define GAVL_META_UUID        "UUID"
+
 #define GAVL_META_PARENT_ID   "ParentID" // Obsolete, can obtain from  ID
 #define GAVL_META_NEXT_ID     "NextID"
 #define GAVL_META_PREVIOUS_ID "PreviousID"
@@ -324,7 +326,6 @@
 #define GAVL_META_TAG                "Tag" // Arbitrary tag
 
 #define GAVL_META_NFO_FILE           "NFOFILE" // 
-
 
 #define GAVL_META_STREAM_PTS_START "PTSStart"
 #define GAVL_META_STREAM_PTS_END   "PTSEnd"
