@@ -96,6 +96,24 @@
 
 #define GAVL_MSG_SRC_AUTHENTICATE     4
 
+/** \brief Resync
+ *
+ *  Called after seeking. Must be the last packet before the new
+ *  sync header
+ */
+
+#define GAVL_MSG_SRC_RESYNC           5
+
+/** \brief Restart
+ *
+ *  Called after switching the "track" or program
+ *  Must be the last packet before the new
+ *  sync header
+ */
+
+#define GAVL_MSG_SRC_RESTART          6
+
+
 /** \brief Authentication request
  *
  *  arg0: Username (string)
@@ -103,6 +121,20 @@
  */
 
 #define GAVL_CMD_SRC_AUTHENTICATE     1
+
+/** \brief Multitrack support
+ *
+ *  arg0: Track (0)
+ */
+
+#define GAVL_CMD_SRC_SELECT_TRACK     2
+
+/** \brief Multitrack support
+ *
+ *  arg0: Track (0)
+ */
+
+#define GAVL_CMD_SRC_SEEK             3
 
 
 
