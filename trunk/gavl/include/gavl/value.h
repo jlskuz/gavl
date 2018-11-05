@@ -195,6 +195,10 @@ GAVL_PUBLIC
 void gavl_dictionary_merge2(gavl_dictionary_t * dst,
                             const gavl_dictionary_t * src);
 
+GAVL_PUBLIC
+void gavl_dictionary_update_fields(gavl_dictionary_t * dst,
+                                   const gavl_dictionary_t * src);
+
 GAVL_PUBLIC int
 gavl_dictionary_compare(const gavl_dictionary_t * m1,
                         const gavl_dictionary_t * m2);
