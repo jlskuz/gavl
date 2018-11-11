@@ -25,7 +25,7 @@
 /** \defgroup metatags Defined metadata keys
  *  \ingroup metadata
  *
- *  For interoperabiolity reasons, try to use these macros
+ *  For interoperability reasons, try to use these macros
  *  as metadata keys whenever possible.
  *
  *  Since 1.4.0
@@ -423,6 +423,20 @@
 #define GAVL_META_MEDIA_CLASS_ROOT_LIBRARY       "container.root.library"
 #define GAVL_META_MEDIA_CLASS_ROOT_NETWORK       "container.root.network"
 
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE            "container.root.removable"
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE_AUDIOCD    "container.root.removable.cd.audio"
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE_VCD        "container.root.removable.cd.vcd"
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE_SVCD       "container.root.removable.cd.svcd"
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE_VIDEODVD   "container.root.removable.dvd.video"
+
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE_FILESYSTEM            "container.root.removable.filesystem"
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE_FILESYSTEM_HDD        "container.root.removable.filesystem.hdd"
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE_FILESYSTEM_PENDRIVE   "container.root.removable.filesystem.pendrive"
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE_FILESYSTEM_MEMORYCARD "container.root.removable.filesystem.memorycard"
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE_FILESYSTEM_MOBILE     "container.root.removable.filesystem.mobile"
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE_FILESYSTEM_CD         "container.root.removable.filesystem.cdrom"
+#define GAVL_META_MEDIA_CLASS_ROOT_REMOVABLE_FILESYSTEM_DVD        "container.root.removable.filesystem.dvd"
+
 /* Remote media server */
 #define GAVL_META_MEDIA_CLASS_ROOT_SERVER        "container.root.server"
 
@@ -436,6 +450,9 @@
 
 // Track is current in a GUI
 // #define GAVL_META_GUI_CURRENT        "GUICurrent"
+
+
+
 
 /**
  * @}
