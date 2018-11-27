@@ -1079,7 +1079,7 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
         }
       }
     }
-  if(media_class)
+  if(media_class && !gavl_dictionary_get_string(m, GAVL_META_MEDIA_CLASS))
     gavl_dictionary_set_string(m, GAVL_META_MEDIA_CLASS, media_class);
   
   if(basename)
