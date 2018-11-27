@@ -194,7 +194,7 @@
 
 #define GAVL_META_VENDOR      "Vendor"
 
-#define GAVL_META_DISK_NAME   "DiskName"
+#define GAVL_META_DISK_NAME   GAVL_META_LABEL
 
 /** \brief Model name of the device, which created the file
  */

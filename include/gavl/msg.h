@@ -124,18 +124,25 @@
 
 /** \brief Multitrack support
  *
- *  arg0: Track (0)
+ *  arg0: Track (int)
  */
 
 #define GAVL_CMD_SRC_SELECT_TRACK     2
 
-/** \brief Multitrack support
+/** \brief Seek support
  *
- *  arg0: Track (0)
+ *  arg0: Time  (long)
+ *  arg1: Scale (int)
  */
 
 #define GAVL_CMD_SRC_SEEK             3
 
+/** \brief Set the track we should jump to when this track is over.
+ *
+ *  arg0: Track (int)
+ */
+
+#define GAVL_CMD_SRC_SET_NEXT_TRACK   4
 
 
 /* GUI Events */
