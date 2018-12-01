@@ -104,15 +104,13 @@
 
 #define GAVL_MSG_SRC_RESYNC           5
 
-/** \brief Restart
+/** \brief End of file
  *
- *  Called after switching the "track" or program
- *  Must be the last packet before the new
- *  sync header
+ *  Transmitted as the last packet of a srream. After that, another
+ *  track (or the same again) can be selected and the stream can newly be set up
  */
 
-#define GAVL_MSG_SRC_RESTART          6
-
+#define GAVL_MSG_SRC_EOF              6
 
 /** \brief Authentication request
  *
@@ -125,6 +123,8 @@
 /** \brief Multitrack support
  *
  *  arg0: Track (int)
+ *
+ *  Calling this is only allowed right after GAVL_MSG_SRC_EOF was received
  */
 
 #define GAVL_CMD_SRC_SELECT_TRACK     2
@@ -143,7 +143,6 @@
  */
 
 #define GAVL_CMD_SRC_SET_NEXT_TRACK   4
-
 
 /* GUI Events */
 
