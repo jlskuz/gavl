@@ -250,8 +250,6 @@ int gavl_msg_read(gavl_msg_t * ret, gavf_io_t * io);
 GAVL_PUBLIC
 int gavl_msg_write(const gavl_msg_t * msg, gavf_io_t * io);
 
-
-
 /* Buffer as io */
 
 GAVL_PUBLIC

@@ -33,6 +33,7 @@
 #define GAVL_MSG_NS_GENERIC   2
 #define GAVL_MSG_NS_SRC       3
 #define GAVL_MSG_NS_GUI       4
+#define GAVL_MSG_NS_GAVF      5
 
 /* Message IDs */
 
@@ -106,7 +107,7 @@
 
 /** \brief End of file
  *
- *  Transmitted as the last packet of a srream. After that, another
+ *  Transmitted as the last packet of a track. After that, another
  *  track (or the same again) can be selected and the stream can newly be set up
  */
 
@@ -246,6 +247,20 @@
  */
 
 #define GAVL_MSG_GUI_ACCEL         6  // Accelerator was triggered
+
+
+// GAVL_MSG_NS_GAVF
+/* These messages control the low-level packet flow in order to allow
+   format changes, resyncs etc. They are included into a gavf message stream */
+
+/* Receiver -> Source: Acknowledge the arrival of a media (i.e. no message) packet */
+#define GAVL_MSG_GAVF_PACKET_ACK   1
+
+/* Source -> receiver: EOF encountered. After this message was sent, one can seek or select another track
+   with the Source API */
+
+#define GAVL_MSG_GAVF_MSG_EOF      2
+
 
 /* Header fields */
 #define GAVL_MSG_ID         "ID"
