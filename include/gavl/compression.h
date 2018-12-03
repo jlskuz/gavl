@@ -23,6 +23,7 @@
 #define GAVL_COMPRESSION_H_INCLUDED
 
 #include <gavl/gavldefs.h>
+#include <gavl/value.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -444,6 +445,12 @@ void gavl_packet_dump(const gavl_packet_t * p);
 GAVL_PUBLIC
 void gavl_packet_save(const gavl_packet_t * p,
                       const char * filename);
+
+GAVL_PUBLIC
+void gavl_compression_info_to_dictionary(const gavl_compression_info_t * info, gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
+void gavl_compression_info_from_dictionary(gavl_compression_info_t * info, const gavl_dictionary_t * dict);
   
 /**
  *  @}
