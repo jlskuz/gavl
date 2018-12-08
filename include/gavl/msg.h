@@ -99,8 +99,11 @@
 
 /** \brief Resync
  *
- *  Called after seeking. Must be the last packet before the new
- *  sync header
+ *  Sent after seeking. Must be the last packet before the new
+ *  sync header. Scale is taken from the seek command.
+ *
+ *  arg0: Time  (long)
+ *  arg1: Scale (int)
  */
 
 #define GAVL_MSG_SRC_RESYNC           5

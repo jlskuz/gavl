@@ -36,6 +36,7 @@ typedef enum
     GAVL_TYPE_POSITION    = 9,
     GAVL_TYPE_DICTIONARY  = 10,
     GAVL_TYPE_ARRAY       = 11,
+    GAVL_TYPE_BINARY      = 12, // Binary buffer
   } gavl_type_t;
 
 GAVL_PUBLIC
@@ -412,6 +413,7 @@ struct gavl_value_s
     gavl_array_t * array;
     gavl_audio_format_t * audioformat;
     gavl_video_format_t * videoformat;
+    gavl_buffer_t * buffer;
     } v;
   };
 
@@ -487,6 +489,15 @@ GAVL_PUBLIC
 gavl_video_format_t * gavl_value_set_video_format(gavl_value_t * v);
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_value_set_dictionary(gavl_value_t * v);
+
+GAVL_PUBLIC
+gavl_buffer_t * gavl_value_set_buffer(gavl_value_t * v);
+
+GAVL_PUBLIC
+const gavl_buffer_t * gavl_value_get_buffer(const gavl_value_t * v);
+
+GAVL_PUBLIC
+gavl_buffer_t * gavl_value_get_buffer_nc(gavl_value_t * v);
 
 GAVL_PUBLIC
 void gavl_value_set_dictionary_nocopy(gavl_value_t * v, gavl_dictionary_t * val);
