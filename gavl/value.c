@@ -46,6 +46,7 @@ types[] =
     { GAVL_TYPE_POSITION,    "pos" },
     { GAVL_TYPE_DICTIONARY,  "d" },
     { GAVL_TYPE_ARRAY,       "a" },
+    { GAVL_TYPE_BINARY,      "b" },
     { /* End */ },
   };
   
@@ -137,6 +138,32 @@ int gavl_value_compare(const gavl_value_t * v1, const gavl_value_t * v2)
     case GAVL_TYPE_ARRAY:
       return gavl_array_compare(v1->v.array, v2->v.array);
       break;
+    case GAVL_TYPE_BINARY:
+      {
+      int num;
+      int result;
+
+      if(!v1->v.buffer->len && !v2->v.buffer->len)
+        return 0;
+
+      if(!v1->v.buffer->len || !v2->v.buffer->len)
+        {
+        return CMP_NUM(v1->v.buffer->len, v2->v.buffer->len);
+        }
+        
+      if(v1->v.buffer->len > v2->v.buffer->len)
+        num = v2->v.buffer->len;
+      else
+        num = v1->v.buffer->len;
+      
+      result = memcmp(v1->v.buffer->buf, v2->v.buffer->buf, num);
+      
+      if(!result)
+        return CMP_NUM(v1->v.buffer->len, v2->v.buffer->len);
+      else
+        return result;
+      }
+      break;
     }
   return 0;
   }
@@ -173,7 +200,7 @@ void gavl_value_copy(gavl_value_t * dst, const gavl_value_t * src)
       const gavl_audio_format_t * fmt_src;
       gavl_audio_format_t * fmt_dst;
       fmt_src = gavl_value_get_audio_format(src);
-      fmt_dst = gavl_value_set_audio_format(dst);
+      fmt_dst = gavl_value_get_audio_format_nc(dst);
       gavl_audio_format_copy(fmt_dst, fmt_src);
       }
       break;
@@ -182,8 +209,17 @@ void gavl_value_copy(gavl_value_t * dst, const gavl_value_t * src)
       const gavl_video_format_t * fmt_src;
       gavl_video_format_t * fmt_dst;
       fmt_src = gavl_value_get_video_format(src);
-      fmt_dst = gavl_value_set_video_format(dst);
+      fmt_dst = gavl_value_get_video_format_nc(dst);
       gavl_video_format_copy(fmt_dst, fmt_src);
+      }
+      break;
+    case GAVL_TYPE_BINARY:
+      {
+      const gavl_buffer_t * buf_src;
+      gavl_buffer_t * buf_dst;
+      buf_src = gavl_value_get_binary(src);
+      buf_dst = gavl_value_get_binary_nc(dst);
+      gavl_buffer_copy(buf_dst, buf_src);
       }
       break;
     case GAVL_TYPE_COLOR_RGB:
@@ -238,6 +274,13 @@ void gavl_value_free(gavl_value_t * v)
       if(v->v.videoformat)
         free(v->v.videoformat);
       break;
+    case GAVL_TYPE_BINARY:
+      if(v->v.buffer)
+        {
+        gavl_buffer_free(v->v.buffer);
+        free(v->v.buffer);
+        }
+      break;
     }
   }
 
@@ -290,19 +333,26 @@ void gavl_value_set_string_nocopy(gavl_value_t * v, char * str)
     gavl_strtrim(v->v.str);
   }
 
-gavl_buffer_t * gavl_value_set_buffer(gavl_value_t * v)
+gavl_buffer_t * gavl_value_set_binary(gavl_value_t * v)
   {
-
+  gavl_value_reset(v);
+  v->type = GAVL_TYPE_BINARY;
+  v->v.buffer = calloc(1, sizeof(*v->v.buffer));
+  return v->v.buffer;
   }
 
-const gavl_buffer_t * gavl_value_get_buffer(const gavl_value_t * v)
+const gavl_buffer_t * gavl_value_get_binary(const gavl_value_t * v)
   {
-
+  if(v->type != GAVL_TYPE_BINARY)
+    return NULL;
+  return v->v.buffer;
   }
   
-gavl_buffer_t * gavl_value_get_buffer_nc(gavl_value_t * v)
+gavl_buffer_t * gavl_value_get_binary_nc(gavl_value_t * v)
   {
-
+  if(v->type != GAVL_TYPE_BINARY)
+    return NULL;
+  return v->v.buffer;
   }
 
 
@@ -791,6 +841,12 @@ void gavl_value_dump(const gavl_value_t * v, int indent)
       gavl_dprintf("\n");
       gavl_array_dump(v->v.array, indent);
       break;
+    case GAVL_TYPE_BINARY:
+      gavl_diprintf(indent, "%d bytes", v->v.buffer->len);
+      if(v->v.buffer->len)
+        gavl_hexdumpi(v->v.buffer->buf, v->v.buffer->len, 16, indent+2);
+      break;
+      
     }
 
   }
@@ -821,6 +877,9 @@ void gavl_value_set_type(gavl_value_t * v, gavl_type_t  t)
       break;
     case GAVL_TYPE_ARRAY:
       gavl_value_set_array(v);
+      break;
+    case GAVL_TYPE_BINARY:
+      gavl_value_set_binary(v);
       break;
     }
   

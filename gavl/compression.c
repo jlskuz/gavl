@@ -596,8 +596,6 @@ uint8_t * gavl_extract_xiph_header(uint8_t * global_header,
   return ret;
   }
 
-
-
 void gavl_compression_info_to_dictionary(const gavl_compression_info_t * info, gavl_dictionary_t * dict)
   {
 

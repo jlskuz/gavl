@@ -841,6 +841,12 @@ int gavl_value_read(gavf_io_t * io, gavl_value_t * v)
       if(!gavf_io_read_string(io, &v->v.str))
         return 0;
       break;
+    case GAVL_TYPE_BINARY:
+      {
+      if(!gavf_io_read_buffer(io, v->v.buffer))
+        return 0;
+      }
+      break;
     case GAVL_TYPE_AUDIOFORMAT:
       {
       gavl_audio_format_t * afmt;
@@ -974,6 +980,10 @@ int gavl_value_write(gavf_io_t * io, const gavl_value_t * v)
       break;
     case GAVL_TYPE_STRING:
       if(!gavf_io_write_string(io, v->v.str))
+        return 0;
+      break;
+    case GAVL_TYPE_BINARY:
+      if(!gavf_io_write_buffer(io, v->v.buffer))
         return 0;
       break;
     case GAVL_TYPE_AUDIOFORMAT:

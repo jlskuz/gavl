@@ -1370,6 +1370,120 @@ void gavl_sort_tracks_by_label(gavl_array_t * arr)
   gavl_array_sort(arr, compare_metadata_string);
   }
 
+/* Compression info */
+
+#if 0
+
+  uint32_t flags; //!< ORed combination of GAVL_COMPRESSION_* flags
+  gavl_codec_id_t id; //!< Codec ID
+  
+  uint8_t * global_header; //!< Global header
+  uint32_t global_header_len;  //!< Length of global header
+  
+  int32_t bitrate;             //!< Needed by some codecs, negative values mean VBR
+  int palette_size;            //!< Size of the embedded palette for image codecs
+  int pre_skip;                //!< Samples to skip at the start
+
+  uint32_t video_buffer_size;   //!< VBV buffer size for video (in BYTES)
+  
+  uint32_t max_packet_size;     //!< Maximum packet size or 0 if unknown
+
+  uint32_t max_ref_frames;      //!< Maximum reference frames (if > 2)
+#endif
+
+#define COMPRESSION_INFO_KEY                 "cmp"
+#define COMPRESSION_INFO_KEY_FLAGS           "flg"
+#define COMPRESSION_INFO_KEY_ID              "id"
+#define COMPRESSION_INFO_KEY_BITRATE         "br"
+#define COMPRESSION_INFO_KEY_PALETTE_SIZE    "ps"
+#define COMPRESSION_INFO_KEY_MAX_PACKET_SIZE "ms"
+#define COMPRESSION_INFO_KEY_MAX_REF_FRAMES  "mr"
+
+#define COMPRESSION_INFO_KEY_HEAD            "head"
+
+#define GET_INT(key, member) gavl_dictionary_get_int(cmp, key, &ret->member)
+
+#define SET_INT(key, member) if(info->member) gavl_dictionary_set_int(cmp, key, info->member)
+
+int gavl_stream_get_compression_info(const gavl_dictionary_t * s,
+                                     gavl_compression_info_t * ret)
+  {
+  const gavl_buffer_t * buf;
+  const gavl_dictionary_t * cmp;
+  int id = 0;
+  
+  if(!(cmp = gavl_dictionary_get_dictionary(s, COMPRESSION_INFO_KEY)))
+    return 0;
+  
+  if(!gavl_dictionary_get_int(cmp, COMPRESSION_INFO_KEY_ID, &id))
+    return 0;
+  
+  ret->id = id;
+  
+  GET_INT(COMPRESSION_INFO_KEY_FLAGS,   flags);
+  GET_INT(COMPRESSION_INFO_KEY_BITRATE, bitrate);
+  GET_INT(COMPRESSION_INFO_KEY_PALETTE_SIZE, palette_size);
+  GET_INT(COMPRESSION_INFO_KEY_MAX_PACKET_SIZE, max_packet_size);
+  GET_INT(COMPRESSION_INFO_KEY_MAX_REF_FRAMES, max_ref_frames);
+
+  if((buf = gavl_dictionary_get_binary(s, COMPRESSION_INFO_KEY_HEAD)) &&
+     (buf->len > 0))
+    {
+    ret->global_header = malloc(buf->len);
+    memcpy(ret->global_header, buf->buf, buf->len);
+    ret->global_header_len = buf->len;
+    }
+  return 1;
+  }
+  
+int gavl_track_get_audio_compression_info(const gavl_dictionary_t * t, int idx,
+                                          gavl_compression_info_t * ret)
+  {
+  if(!(t = gavl_track_get_audio_stream(t, idx)))
+    return 0;
+  
+  return gavl_stream_get_compression_info(t, ret);
+  }
+
+int gavl_track_get_video_compression_info(const gavl_dictionary_t * t, int idx,
+                                          gavl_compression_info_t * ret)
+  {
+  if(!(t = gavl_track_get_video_stream(t, idx)))
+    return 0;
+
+  return gavl_stream_get_compression_info(t, ret);
+  }
+
+int gavl_track_get_overlay_compression_info(const gavl_dictionary_t * t, int idx,
+                                            gavl_compression_info_t * ret)
+  {
+  if(!(t = gavl_track_get_overlay_stream(t, idx)))
+    return 0;
+  
+  return gavl_stream_get_compression_info(t, ret);
+  }
+
+void gavl_stream_set_compression_info(gavl_dictionary_t * s, const gavl_compression_info_t * info)
+  {
+  gavl_dictionary_t * cmp;
+  
+  cmp = gavl_dictionary_get_dictionary_create(s, COMPRESSION_INFO_KEY);
+
+  SET_INT(COMPRESSION_INFO_KEY_FLAGS,   flags);
+  SET_INT(COMPRESSION_INFO_KEY_ID,      id);
+  SET_INT(COMPRESSION_INFO_KEY_BITRATE, bitrate);
+  SET_INT(COMPRESSION_INFO_KEY_PALETTE_SIZE, palette_size);
+  SET_INT(COMPRESSION_INFO_KEY_MAX_PACKET_SIZE, max_packet_size);
+  SET_INT(COMPRESSION_INFO_KEY_MAX_REF_FRAMES, max_ref_frames);
+  
+  if(info->global_header_len > 0)
+    {
+    
+    }
+  }
+
+
+
 /* 
 void gavl_sort_tracks_by_metadata_long(gavl_dictionary_t * dict,
                                        const char * str)

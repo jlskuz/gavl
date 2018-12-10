@@ -214,6 +214,18 @@ int gavl_dictionary_set_dictionary(gavl_dictionary_t * d,
   }
 
 
+void gavl_dictionary_set_binary(const gavl_dictionary_t * d, const char * name, const uint8_t * buf, int len)
+  {
+  gavl_buffer_t * b;
+  gavl_value_t v;
+  gavl_value_init(&v);
+  
+  b = gavl_value_set_binary(&v);
+
+  gavl_buffer_alloc(b, len);
+  memcpy(b->buf, buf, len);
+  b->len = len;
+  }
 
 
 int gavl_dictionary_set(gavl_dictionary_t * d, const char * name,
@@ -329,6 +341,25 @@ gavl_dictionary_t *  gavl_dictionary_get_dictionary_nc(gavl_dictionary_t * d, co
     return NULL;
   return gavl_value_get_dictionary_nc(val);
   }
+
+gavl_buffer_t * gavl_dictionary_get_binary_nc(gavl_dictionary_t * d, const char * name)
+  {
+  gavl_value_t * val;
+  if(!(val = gavl_dictionary_get_nc(d, name)))
+    return NULL;
+  return gavl_value_get_binary_nc(val);
+  }
+
+const gavl_buffer_t * gavl_dictionary_get_binary(const gavl_dictionary_t * d, const char * name)
+  {
+  const gavl_value_t * val;
+  if(!(val = gavl_dictionary_get(d, name)))
+    return NULL;
+  return gavl_value_get_binary(val);
+  }
+
+
+
 
 const gavl_value_t * gavl_dictionary_get_i(const gavl_dictionary_t * d, const char * name)
   {

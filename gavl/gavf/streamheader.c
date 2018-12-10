@@ -1,4 +1,29 @@
 #include <gavfprivate.h>
+#include <gavl/metatags.h>
+
+#define KEY_TYPE "typ"
+
+
+
+void gavf_stream_header_to_dict(const gavf_stream_header_t * src, gavl_dictionary_t * dst)
+  {
+  gavl_dictionary_set_int(dst, KEY_TYPE, src->type);
+  gavl_dictionary_set_int(dst, GAVL_META_ID, src->id);
+  
+  }
+
+void gavf_stream_header_from_dict(gavf_stream_header_t * src, const gavl_dictionary_t * dst)
+  {
+  int type;
+  int id;
+
+  gavl_dictionary_get_int(dst, KEY_TYPE, &type);
+  gavl_dictionary_get_int(dst, GAVL_META_ID, &id);
+  
+  src->type = type;
+  src->id = id;
+  }
+
 
 int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h)
   {
