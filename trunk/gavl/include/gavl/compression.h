@@ -119,21 +119,19 @@ typedef enum
   
 typedef struct
   {
-  uint32_t flags; //!< ORed combination of GAVL_COMPRESSION_* flags
+  int flags; //!< ORed combination of GAVL_COMPRESSION_* flags
   gavl_codec_id_t id; //!< Codec ID
   
   uint8_t * global_header; //!< Global header
-  uint32_t global_header_len;   //!< Length of global header
+  uint32_t global_header_len;  //!< Length of global header
   
-  int32_t bitrate;             //!< Needed by some codecs, negative values mean VBR
-  int palette_size;             //!< Size of the embedded palette for image codecs
-  uint32_t pre_skip;            //!< Samples to skip at the start
-
-  uint32_t video_buffer_size;   //!< VBV buffer size for video (in BYTES)
+  int bitrate;             //!< Needed by some codecs, negative values mean VBR
+  int palette_size;            //!< Size of the embedded palette for image codecs
+  int pre_skip;                //!< Samples to skip at the start
   
-  uint32_t max_packet_size;     //!< Maximum packet size or 0 if unknown
-
-  uint32_t max_ref_frames;      //!< Maximum reference frames (if > 2)
+  int video_buffer_size;   //!< VBV buffer size for video (in BYTES)
+  int max_packet_size;     //!< Maximum packet size or 0 if unknown
+  int max_ref_frames;      //!< Maximum reference frames (if > 2)
   
   } gavl_compression_info_t;
 
@@ -446,11 +444,14 @@ GAVL_PUBLIC
 void gavl_packet_save(const gavl_packet_t * p,
                       const char * filename);
 
+#if 0
 GAVL_PUBLIC
 void gavl_compression_info_to_dictionary(const gavl_compression_info_t * info, gavl_dictionary_t * dict);
 
 GAVL_PUBLIC
 void gavl_compression_info_from_dictionary(gavl_compression_info_t * info, const gavl_dictionary_t * dict);
+
+#endif
   
 /**
  *  @}

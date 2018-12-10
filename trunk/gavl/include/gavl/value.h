@@ -22,6 +22,8 @@
 #ifndef GAVL_VALUE_H_INCLUDED
 #define GAVL_VALUE_H_INCLUDED
 
+#include <gavl/utils.h>
+
 typedef enum
   {
     GAVL_TYPE_UNDEFINED   = 0,
@@ -240,6 +242,16 @@ const gavl_dictionary_t *  gavl_dictionary_get_dictionary(const gavl_dictionary_
 
 GAVL_PUBLIC
 gavl_dictionary_t *  gavl_dictionary_get_dictionary_nc(gavl_dictionary_t * d, const char * name);
+
+GAVL_PUBLIC
+gavl_buffer_t * gavl_dictionary_get_binary_nc(gavl_dictionary_t * d, const char * name);
+
+GAVL_PUBLIC
+const gavl_buffer_t * gavl_dictionary_get_binary(const gavl_dictionary_t * d, const char * name);
+
+GAVL_PUBLIC
+void gavl_dictionary_set_binary(const gavl_dictionary_t * d, const char * name, const uint8_t * buf, int len);
+
 
 /* For compatibility with old heap API */
 
@@ -491,13 +503,13 @@ GAVL_PUBLIC
 gavl_dictionary_t * gavl_value_set_dictionary(gavl_value_t * v);
 
 GAVL_PUBLIC
-gavl_buffer_t * gavl_value_set_buffer(gavl_value_t * v);
+gavl_buffer_t * gavl_value_set_binary(gavl_value_t * v);
 
 GAVL_PUBLIC
-const gavl_buffer_t * gavl_value_get_buffer(const gavl_value_t * v);
+const gavl_buffer_t * gavl_value_get_binary(const gavl_value_t * v);
 
 GAVL_PUBLIC
-gavl_buffer_t * gavl_value_get_buffer_nc(gavl_value_t * v);
+gavl_buffer_t * gavl_value_get_binary_nc(gavl_value_t * v);
 
 GAVL_PUBLIC
 void gavl_value_set_dictionary_nocopy(gavl_value_t * v, gavl_dictionary_t * val);

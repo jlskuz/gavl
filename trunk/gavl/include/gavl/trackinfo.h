@@ -22,6 +22,8 @@
 #ifndef GAVL_TRACKINFO_H_INCLUDED
 #define GAVL_TRACKINFO_H_INCLUDED
 
+#include <gavl/compression.h>
+
 /*
  *  Standardized info structures for media content.
  *  
@@ -236,6 +238,22 @@ const gavl_video_format_t * gavl_stream_get_video_format(const gavl_dictionary_t
 GAVL_PUBLIC
 const gavl_dictionary_t * gavl_stream_get_metadata(const gavl_dictionary_t*);
 
+/* Compression info */
+
+GAVL_PUBLIC
+int gavl_stream_get_compression_info(const gavl_dictionary_t*, gavl_compression_info_t * ret);
+
+GAVL_PUBLIC
+int gavl_track_get_audio_compression_info(const gavl_dictionary_t*, int idx, gavl_compression_info_t * ret);
+
+GAVL_PUBLIC
+int gavl_track_get_video_compression_info(const gavl_dictionary_t*, int idx, gavl_compression_info_t * ret);
+
+GAVL_PUBLIC
+int gavl_track_get_overlay_compression_info(const gavl_dictionary_t*, int idx, gavl_compression_info_t * ret);
+
+GAVL_PUBLIC
+void gavl_stream_set_compression_info(gavl_dictionary_t*, const gavl_compression_info_t * ret);
 
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_track_get_metadata_nc(gavl_dictionary_t*);

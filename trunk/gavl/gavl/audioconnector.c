@@ -342,7 +342,7 @@ void gavl_audio_connector_start(gavl_audio_connector_t * c)
   for(i = 0; i < c->num_sinks; i++)
     {
     s = c->sinks + i;
-    if((c->fmt->samples_per_frame != c->fmt->samples_per_frame) ||
+    if((c->fmt->samples_per_frame != s->fmt->samples_per_frame) ||
        gavl_audio_converter_init(cnv, c->fmt, s->fmt))
       {
       s->src = gavl_audio_source_create(read_func, s, GAVL_SOURCE_SRC_ALLOC, c->fmt);

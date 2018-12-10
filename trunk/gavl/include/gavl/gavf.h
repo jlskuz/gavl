@@ -354,6 +354,11 @@ typedef struct
 GAVL_PUBLIC
 void gavf_stream_header_dump(const gavf_stream_header_t * h);
 
+GAVL_PUBLIC
+void gavf_stream_header_to_dict(const gavf_stream_header_t * src, gavl_dictionary_t * dst);
+
+GAVL_PUBLIC
+void gavf_stream_header_from_dict(gavf_stream_header_t * src, const gavl_dictionary_t * dst);
 
 typedef struct
   {

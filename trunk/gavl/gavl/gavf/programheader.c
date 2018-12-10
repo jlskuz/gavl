@@ -13,7 +13,7 @@ int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph)
   int ret = 0;
   
   gavl_buffer_init(&buf);
-
+  
   if(!gavf_io_read_buffer(io, &buf))
     goto fail;
   
