@@ -1478,7 +1478,17 @@ void gavl_stream_set_compression_info(gavl_dictionary_t * s, const gavl_compress
   
   if(info->global_header_len > 0)
     {
+    gavl_value_t val;
+    gavl_buffer_t * buf;
+
+    gavl_value_init(&val);
+    buf = gavl_value_set_binary(&val);
     
+    gavl_buffer_alloc(buf, info->global_header_len);
+    memcpy(buf->buf, info->global_header, info->global_header_len);
+    buf->len = info->global_header_len;
+
+    gavl_dictionary_set_nocopy(s, COMPRESSION_INFO_KEY, &val);
     }
   }
 

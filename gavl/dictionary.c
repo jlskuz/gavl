@@ -417,7 +417,7 @@ const char * gavl_dictionary_get_string(const gavl_dictionary_t * d,
                                         const char * name)
   {
   const gavl_value_t * v;
-    if(!(v = gavl_dictionary_get(d, name)) ||
+  if(!(v = gavl_dictionary_get(d, name)) ||
      (v->type != GAVL_TYPE_STRING))
     return NULL;
   return v->v.str;
@@ -768,4 +768,61 @@ void gavl_dictionary_destroy(gavl_dictionary_t * d)
   {
   gavl_dictionary_free(d);
   free(d);
+  }
+
+void gavl_dictionary_set_audio_format(gavl_dictionary_t * d, const char * name,
+                                      const gavl_audio_format_t * f)
+  {
+  gavl_audio_format_t * fmt;
+  gavl_value_t val;
+  gavl_value_init(&val);
+  
+  fmt = gavl_value_set_audio_format(&val);
+  gavl_audio_format_copy(fmt, f);
+  gavl_dictionary_set_nocopy(d, name, &val);
+  }
+
+void gavl_dictionary_set_video_format(gavl_dictionary_t * d, const char * name,
+                                      const gavl_video_format_t * f)
+  {
+  gavl_video_format_t * fmt;
+  gavl_value_t val;
+  gavl_value_init(&val);
+
+  fmt = gavl_value_set_video_format(&val);
+  gavl_video_format_copy(fmt, f);
+  gavl_dictionary_set_nocopy(d, name, &val);
+  }
+
+const gavl_audio_format_t * gavl_dictionary_get_audio_format(const gavl_dictionary_t * d, const char * name)
+  {
+  const gavl_value_t * v;
+  if(!(v = gavl_dictionary_get(d, name)))
+    return NULL;
+  return gavl_value_get_audio_format(v);
+  }
+
+const gavl_video_format_t * gavl_dictionary_get_video_format(const gavl_dictionary_t * d, const char * name)
+  {
+  const gavl_value_t * v;
+  if(!(v = gavl_dictionary_get(d, name)))
+    return NULL;
+  return gavl_value_get_video_format(v);
+  }
+
+gavl_audio_format_t * gavl_dictionary_get_audio_format_nc(gavl_dictionary_t * d, const char * name)
+  {
+  gavl_value_t * v;
+  if(!(v = gavl_dictionary_get_nc(d, name)))
+    return NULL;
+  return gavl_value_get_audio_format_nc(v);
+  }
+
+gavl_video_format_t * gavl_dictionary_get_video_format_nc(gavl_dictionary_t * d, const char * name)
+  {
+  gavl_value_t * v;
+  if(!(v = gavl_dictionary_get_nc(d, name)))
+    return NULL;
+  return gavl_value_get_video_format_nc(v);
+  
   }

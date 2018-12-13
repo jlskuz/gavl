@@ -1,27 +1,71 @@
 #include <gavfprivate.h>
 #include <gavl/metatags.h>
+#include <gavl/trackinfo.h>
 
 #define KEY_TYPE "typ"
 
 
-
+  
 void gavf_stream_header_to_dict(const gavf_stream_header_t * src, gavl_dictionary_t * dst)
   {
   gavl_dictionary_set_int(dst, KEY_TYPE, src->type);
   gavl_dictionary_set_int(dst, GAVL_META_ID, src->id);
+
+  gavl_dictionary_set_dictionary(dst, GAVL_META_METADATA, &src->m);
+  
+  switch(src->type)
+    {
+    case GAVF_STREAM_AUDIO:
+      gavl_stream_set_compression_info(dst, &src->ci);
+      gavl_dictionary_set_audio_format(dst, GAVL_META_STREAM_FORMAT, &src->format.audio);
+      break;
+    case GAVF_STREAM_VIDEO:
+    case GAVF_STREAM_OVERLAY:
+      gavl_stream_set_compression_info(dst, &src->ci);
+      gavl_dictionary_set_video_format(dst, GAVL_META_STREAM_FORMAT, &src->format.video);
+      break;
+    case GAVF_STREAM_TEXT:
+      break;
+    case GAVF_STREAM_MSG:
+    case GAVF_STREAM_NONE:
+      break;
+    }
   
   }
 
-void gavf_stream_header_from_dict(gavf_stream_header_t * src, const gavl_dictionary_t * dst)
+void gavf_stream_header_from_dict(gavf_stream_header_t * dst, const gavl_dictionary_t * src)
   {
   int type;
   int id;
 
-  gavl_dictionary_get_int(dst, KEY_TYPE, &type);
-  gavl_dictionary_get_int(dst, GAVL_META_ID, &id);
+  gavl_dictionary_get_int(src, KEY_TYPE, &type);
+  gavl_dictionary_get_int(src, GAVL_META_ID, &id);
   
-  src->type = type;
-  src->id = id;
+  dst->type = type;
+  dst->id = id;
+
+  switch(dst->type)
+    {
+    case GAVF_STREAM_AUDIO:
+      gavl_stream_get_compression_info(src, &dst->ci);
+
+      gavl_audio_format_copy(&dst->format.audio,
+                             gavl_dictionary_get_audio_format(src, GAVL_META_STREAM_FORMAT));
+      break;
+    case GAVF_STREAM_VIDEO:
+    case GAVF_STREAM_OVERLAY:
+      gavl_stream_get_compression_info(src, &dst->ci);
+      gavl_video_format_copy(&dst->format.video,
+                             gavl_dictionary_get_video_format(src, GAVL_META_STREAM_FORMAT));
+      break;
+    case GAVF_STREAM_TEXT:
+      /* TODO */
+      break;
+    case GAVF_STREAM_MSG:
+    case GAVF_STREAM_NONE:
+      break;
+    }
+
   }
 
 
