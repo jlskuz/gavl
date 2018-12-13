@@ -284,10 +284,10 @@ typedef struct
   {
   int32_t size_min;
   int32_t size_max;
-  int64_t  duration_min;
-  int64_t  duration_max;
-  int64_t  pts_start;
-  int64_t  pts_end;
+  int64_t duration_min;
+  int64_t duration_max;
+  int64_t pts_start;
+  int64_t pts_end;
 
   int64_t total_bytes;   // For average bitrate 
   int64_t total_packets; // For average framerate

@@ -252,6 +252,26 @@ const gavl_buffer_t * gavl_dictionary_get_binary(const gavl_dictionary_t * d, co
 GAVL_PUBLIC
 void gavl_dictionary_set_binary(const gavl_dictionary_t * d, const char * name, const uint8_t * buf, int len);
 
+GAVL_PUBLIC
+void gavl_dictionary_set_audio_format(gavl_dictionary_t * d, const char * name,
+                                      const gavl_audio_format_t * fmt);
+
+GAVL_PUBLIC
+void gavl_dictionary_set_video_format(gavl_dictionary_t * d, const char * name,
+                                      const gavl_video_format_t * fmt);
+
+GAVL_PUBLIC
+const gavl_audio_format_t * gavl_dictionary_get_audio_format(const gavl_dictionary_t * d, const char * name);
+
+GAVL_PUBLIC
+const gavl_video_format_t * gavl_dictionary_get_video_format(const gavl_dictionary_t * d, const char * name);
+
+GAVL_PUBLIC
+gavl_audio_format_t * gavl_dictionary_get_audio_format_nc(gavl_dictionary_t * d, const char * name);
+
+GAVL_PUBLIC
+gavl_video_format_t * gavl_dictionary_get_video_format_nc(gavl_dictionary_t * d, const char * name);
+
 
 /* For compatibility with old heap API */
 
