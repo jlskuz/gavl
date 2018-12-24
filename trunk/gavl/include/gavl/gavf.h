@@ -17,6 +17,61 @@
 
 #include <stdio.h>
 
+/* gavf file structure */
+
+/*
+
+  GAVFPHDR: 8 bytes
+  len:      8 bytes, bytes to follow
+  len bytes header (dictionary)
+  
+  GAVFPKTS: 8 bytes
+  len:      8 bytes, bytes to follow, 0 if unknown
+  len bytes packets
+
+  GAVFFOOT: 8 bytes
+  len:      8 bytes, bytes to follow, 0 if unknown
+  len bytes footer (array of stream stats)
+
+  Optional:
+  GAVFSIDX: 8 bytes
+  len:      8 bytes, bytes to follow, 0 if unknown
+  len bytes sync index
+  
+  Optional:
+  GAVFPIDX: 8 bytes
+  len:      8 bytes, bytes to follow, 0 if unknown
+  len bytes packet index
+
+  GAVFTAIL: 8 bytes
+  len:      8 bytes, file offset of the GAVFFOOT tag
+  
+  Packets are organized as:
+
+  P:        1 byte
+  packet (variable)
+
+  GAVFSYNC: 8 bytes
+  sync_index (variable)
+
+  Padding zero bytes: In front of every 8 character tags there can be up to 7 padding
+  bytes so the tags always start ar 8 byte boundaries. This makes random access and
+  resynching a lot more efficient
+  
+  
+*/
+
+#define GAVF_TAG_PROGRAM_HEADER "GAVFPHDR"
+
+#define GAVF_TAG_PACKETS        "GAVFPKTS"
+
+#define GAVF_TAG_SYNC_HEADER    "GAVFSYNC"
+#define GAVF_TAG_SYNC_INDEX     "GAVFSIDX"
+#define GAVF_TAG_PACKET_INDEX   "GAVFPIDX"
+#define GAVF_TAG_FOOTER         "GAVFFOOT"
+#define GAVF_TAG_TAIL           "GAVFTAIL"
+
+
 typedef struct gavf_s gavf_t;
 typedef struct gavf_options_s gavf_options_t;
 
@@ -112,6 +167,12 @@ int gavf_io_write_uint64f(gavf_io_t * io, uint64_t num);
 
 GAVL_PUBLIC
 int gavf_io_read_uint64f(gavf_io_t * io, uint64_t * num);
+
+GAVL_PUBLIC
+int gavf_io_write_int64f(gavf_io_t * io, int64_t num);
+
+GAVL_PUBLIC
+int gavf_io_read_int64f(gavf_io_t * io, int64_t * num);
 
 GAVL_PUBLIC
 int gavf_io_write_uint64v(gavf_io_t * io, uint64_t num);
@@ -340,11 +401,12 @@ typedef struct
     gavl_audio_format_t audio;
     gavl_video_format_t video; // Video and overlay streams
 
+#if 0    
     struct
       {
       uint32_t timescale;
       } text;
-    
+#endif
     } format;
 
   gavl_dictionary_t m;
@@ -382,9 +444,15 @@ int gavf_program_header_get_duration(const gavf_program_header_t * ph,
                                      gavl_time_t * start_p,
                                      gavl_time_t * duration_p);
 
+// GAVL_PUBLIC
+// void gavl_program_header_to_track(const gavf_program_header_t * ph,
+//                                  gavl_dictionary_t * track);
+
 GAVL_PUBLIC
-void gavl_program_header_to_track(const gavf_program_header_t * ph,
-                                  gavl_dictionary_t * track);
+void gavf_program_header_to_dictionary(const gavf_program_header_t * src, gavl_dictionary_t * dst);
+
+GAVL_PUBLIC
+void gavf_program_header_from_dictionary(gavf_program_header_t * src, const gavl_dictionary_t * dst);
 
 
 typedef struct
@@ -655,11 +723,13 @@ int gavl_metadata_from_buffer(const uint8_t * buf, int len, gavl_dictionary_t * 
 GAVL_PUBLIC
 uint8_t * gavl_dictionary_to_buffer(int * len, const gavl_dictionary_t * fmt);
 
+#if 0
 GAVL_PUBLIC
 int gavl_compression_info_from_buffer(const uint8_t * buf, int len, gavl_compression_info_t * fmt);
  
 GAVL_PUBLIC
 uint8_t * gavl_compression_info_to_buffer(int * len, const gavl_compression_info_t * fmt);
+#endif
 
 GAVL_PUBLIC
 uint8_t * gavl_msg_to_buffer(int * len, const gavl_msg_t * msg);
@@ -681,6 +751,7 @@ int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format);
 
 /* Compression info */
 
+#if 0
 GAVL_PUBLIC
 int gavf_read_compression_info(gavf_io_t * io,
                                gavl_compression_info_t * ci);
@@ -688,6 +759,7 @@ int gavf_read_compression_info(gavf_io_t * io,
 GAVL_PUBLIC
 int gavf_write_compression_info(gavf_io_t * io,
                                 const gavl_compression_info_t * ci);
+#endif
 
 /* Metadata */
 

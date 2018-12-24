@@ -186,6 +186,22 @@ int gavf_io_read_uint64f(gavf_io_t * io, uint64_t * num)
   return 1;
   }
 
+int gavf_io_write_int64f(gavf_io_t * io, int64_t num)
+  {
+  uint8_t buf[8];
+  GAVL_64BE_2_PTR(num, buf);
+  return (gavf_io_write_data(io, buf, 8) < 8) ? 0 : 1;
+  }
+
+int gavf_io_read_int64f(gavf_io_t * io, int64_t * num)
+  {
+  uint8_t buf[8];
+  if(gavf_io_read_data(io, buf, 8) < 8)
+    return 0;
+  *num = GAVL_PTR_2_64BE(buf);
+  return 1;
+  }
+
 static int write_uint32f(gavf_io_t * io, uint32_t num)
   {
   uint8_t buf[4];

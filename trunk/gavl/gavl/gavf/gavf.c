@@ -515,7 +515,8 @@ static void gavf_stream_init_video(gavf_t * g, gavf_stream_t * s,
 static void gavf_stream_init_text(gavf_t * g, gavf_stream_t * s,
                                   int num_streams)
   {
-  s->timescale = s->h->format.text.timescale;
+  gavl_dictionary_get_int(&s->h->m, GAVL_META_STREAM_SAMPLE_TIMESCALE, &s->timescale);
+  
   s->packet_flags |=
     (GAVF_PACKET_WRITE_PTS|GAVF_PACKET_WRITE_DURATION);
 
@@ -572,7 +573,11 @@ int gavf_stream_get_timescale(const gavf_stream_header_t * sh)
       return sh->format.video.timescale;
       break;
     case GAVF_STREAM_TEXT:
-      return sh->format.text.timescale;
+      {
+      int ret = 0;
+      gavl_dictionary_get_int(&sh->m, GAVL_META_STREAM_SAMPLE_TIMESCALE, &ret);
+      return ret;
+      }
       break;
     case GAVF_STREAM_NONE:
     case GAVF_STREAM_MSG:

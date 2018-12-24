@@ -7,33 +7,30 @@
 
 int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph)
   {
+  int64_t len = 0;
   gavl_buffer_t buf;
   gavf_io_t bufio;
-  int i;
   int ret = 0;
+  gavl_dictionary_t dict;
   
   gavl_buffer_init(&buf);
+  gavl_dictionary_init(&dict);
   
-  if(!gavf_io_read_buffer(io, &buf))
+  if(!gavf_io_read_int64f(io, &len))
+    goto fail;
+
+  gavl_buffer_alloc(&buf, len);
+  
+  if((buf.len = gavf_io_read_data(io, buf.buf, len)) < len)
     goto fail;
   
   gavf_io_init_buf_read(&bufio, &buf);
-
-  if(!gavf_io_read_uint32v(&bufio, &ph->num_streams))
+  
+  if(!gavl_dictionary_read(&bufio, &dict))
     goto fail;
 
-  ph->streams = calloc(ph->num_streams, sizeof(*ph->streams));
-
-  for(i = 0; i < ph->num_streams; i++)
-    {
-    if(!gavf_stream_header_read(&bufio, &ph->streams[i]))
-      goto fail;
-    }
-
-  /* Read metadata */
-  if(!gavl_dictionary_read(&bufio, &ph->m))
-    goto fail;
-
+  gavf_program_header_from_dictionary(ph, &dict);
+  
   gavf_footer_init(ph);
   
   if(!gavf_io_cb(io, GAVF_IO_CB_PROGRAM_HEADER_END, ph))
@@ -50,11 +47,14 @@ int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph)
 int gavf_program_header_write(gavf_io_t * io,
                               const gavf_program_header_t * ph)
   {
-  int i;
   gavl_buffer_t buf;
   gavf_io_t bufio;
   int ret = 0;
 
+  gavl_dictionary_t dict;
+  gavl_dictionary_init(&dict);
+  
+  
   if(!gavf_io_cb(io, GAVF_IO_CB_PROGRAM_HEADER_START, ph))
     goto fail;
   
@@ -64,22 +64,16 @@ int gavf_program_header_write(gavf_io_t * io,
   gavl_buffer_init(&buf);
   gavf_io_init_buf_write(&bufio, &buf);
 
-  if(!gavf_io_write_uint32v(&bufio, ph->num_streams))
-    goto fail;
-  
-  for(i = 0; i < ph->num_streams; i++)
-    {
-    if(!gavf_stream_header_write(&bufio, &ph->streams[i]))
-      goto fail;
-    }
+  gavf_program_header_to_dictionary(ph, &dict);
   
   /* Write metadata */
-  if(!gavl_dictionary_write(&bufio, &ph->m))
+  if(!gavl_dictionary_write(&bufio, &dict))
     goto fail;
-  
-  if(!gavf_io_write_buffer(io, &buf) ||
-     !gavf_io_flush(io))
-    goto fail;
+
+  /* size */
+  gavf_io_write_int64f(io, buf.len);
+  gavf_io_write_data(io, buf.buf, buf.len);
+  gavf_io_flush(io);
   
   if(!gavf_io_cb(io, GAVF_IO_CB_PROGRAM_HEADER_END, ph))
     goto fail;
@@ -88,6 +82,7 @@ int gavf_program_header_write(gavf_io_t * io,
   fail:
   
   gavl_buffer_free(&buf);
+  gavl_dictionary_free(&dict);
   
   return ret;
   }
@@ -175,7 +170,7 @@ int gavf_program_header_add_text_stream(gavf_program_header_t * ph,
   {
   gavf_stream_header_t * h = add_stream(ph, m);
   h->type = GAVF_STREAM_TEXT;
-  h->format.text.timescale = timescale;
+  gavl_dictionary_set_int(&h->m, GAVL_META_STREAM_SAMPLE_TIMESCALE, timescale);
   return ph->num_streams-1;
   }
 
@@ -342,13 +337,12 @@ int gavf_program_header_get_duration(const gavf_program_header_t * ph,
   return 1;
   }
 
-void gavl_program_header_to_track(const gavf_program_header_t * ph,
-                                  gavl_dictionary_t * track)
+void gavf_program_header_to_dictionary(const gavf_program_header_t * ph,
+                                       gavl_dictionary_t * track)
   {
   gavl_dictionary_t * m_dst;
   gavl_dictionary_t * stream;
   int i;
-  int ts;
 
   m_dst = gavl_dictionary_get_dictionary_create(track, GAVL_META_METADATA);
   gavl_dictionary_copy(m_dst, &ph->m);
@@ -356,40 +350,19 @@ void gavl_program_header_to_track(const gavf_program_header_t * ph,
   for(i = 0; i < ph->num_streams; i++)
     {
     stream = NULL;
-    ts = 0;
-    
     switch(ph->streams[i].type)
       {
       case GAVF_STREAM_AUDIO:
-        {
-        gavl_audio_format_t * fmt;
         stream = gavl_track_append_audio_stream(track);
-        fmt = gavl_stream_get_audio_format_nc(stream);
-        gavl_audio_format_copy(fmt, &ph->streams[i].format.audio);
-        ts = fmt->samplerate;
-        }
         break;
       case GAVF_STREAM_VIDEO:
-        {
-        gavl_video_format_t * fmt;
         stream = gavl_track_append_video_stream(track);
-        fmt = gavl_stream_get_video_format_nc(stream);
-        gavl_video_format_copy(fmt, &ph->streams[i].format.video);
-        ts = fmt->timescale;
-        }
         break;
       case GAVF_STREAM_TEXT:
         stream = gavl_track_append_text_stream(track);
-        ts = ph->streams[i].format.text.timescale;
         break;
       case GAVF_STREAM_OVERLAY:
-        {
-        gavl_video_format_t * fmt;
         stream = gavl_track_append_overlay_stream(track);
-        fmt = gavl_stream_get_video_format_nc(stream);
-        gavl_video_format_copy(fmt, &ph->streams[i].format.video);
-        ts = fmt->timescale;
-        }
         break;
       case GAVF_STREAM_MSG:
         stream = gavl_track_append_msg_stream(track);
@@ -397,19 +370,52 @@ void gavl_program_header_to_track(const gavf_program_header_t * ph,
       case GAVF_STREAM_NONE:
         break;
       }
-
     if(!stream)
       continue;
+    gavf_stream_header_to_dict(&ph->streams[i], stream);
+    }
+  }
 
-    m_dst = gavl_stream_get_metadata_nc(stream);
-    gavl_dictionary_copy(m_dst, &ph->streams[i].m);
+void gavf_program_header_from_dictionary(gavf_program_header_t * ph,
+                                         const gavl_dictionary_t * track)
+  {
+  int num, i;
+  gavf_stream_header_t * sh;
+  const gavl_dictionary_t * dict_src;
 
-    if(ts)
-      {
-      gavl_dictionary_set_int(m_dst, GAVL_META_STREAM_PACKET_TIMESCALE, ts);
-      gavl_dictionary_set_int(m_dst, GAVL_META_STREAM_SAMPLE_TIMESCALE, ts);
-      }
-    
+  if((dict_src = gavl_dictionary_get_dictionary(track, GAVL_META_METADATA)))
+    gavl_dictionary_copy(&ph->m, dict_src);
+
+  num = gavl_track_get_num_audio_streams(track);
+  for(i = 0; i < num; i++)
+    {
+    sh = add_stream(ph, NULL);
+    dict_src = gavl_track_get_audio_stream(track, i);
+    gavf_stream_header_from_dict(sh, dict_src);
+    }
+
+  num = gavl_track_get_num_video_streams(track);
+  for(i = 0; i < num; i++)
+    {
+    sh = add_stream(ph, NULL);
+    dict_src = gavl_track_get_video_stream(track, i);
+    gavf_stream_header_from_dict(sh, dict_src);
+    }
+
+  num = gavl_track_get_num_text_streams(track);
+  for(i = 0; i < num; i++)
+    {
+    sh = add_stream(ph, NULL);
+    dict_src = gavl_track_get_text_stream(track, i);
+    gavf_stream_header_from_dict(sh, dict_src);
+    }
+  
+  num = gavl_track_get_num_overlay_streams(track);
+  for(i = 0; i < num; i++)
+    {
+    sh = add_stream(ph, NULL);
+    dict_src = gavl_track_get_overlay_stream(track, i);
+    gavf_stream_header_from_dict(sh, dict_src);
     }
   
   }

@@ -352,7 +352,7 @@ int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format)
   }
 
 /* Compression info */
-
+#if 0
 int gavf_read_compression_info(gavf_io_t * io,
                                gavl_compression_info_t * ci)
   {
@@ -504,77 +504,6 @@ int gavf_write_compression_info(gavf_io_t * io,
       return 0;
     }
   
-  return 1;
-  }
-
-/* Metadata */
-
-#if 0
-int gavl_dictionary_read(gavf_io_t * io, gavl_dictionary_t * m)
-  {
-  int i, j;
-  uint32_t num;
-  if(!gavf_io_read_uint32v(io, &num))
-    return 0;
-
-  m->num_tags = num;
-  m->tags_alloc = num;
-  
-  m->tags = calloc(m->num_tags, sizeof(*m->tags));
-  
-  for(i = 0; i < m->num_tags; i++)
-    {
-    if(!gavf_io_read_string(io, &m->tags[i].key) ||
-       !gavf_io_read_string(io, &m->tags[i].val) ||
-       !gavf_io_read_uint32v(io, &num))
-      return 0;
-
-    if(num > 0)
-      {
-      m->tags[i].val_arr = malloc(num * sizeof(*m->tags[i].val_arr));
-      
-      for(j = 0; j < num; j++)
-        {
-        if(!gavf_io_read_string(io, &m->tags[i].val_arr[j]))
-          return 0;
-        }
-      }
-    m->tags[i].arr_alloc = num;
-    m->tags[i].arr_len = num;
-    }
-  return 1;
-  }
-
-int gavl_dictionary_write(gavf_io_t * io, const gavl_dictionary_t * m)
-  {
-  int i, j;
-  uint32_t num = 0;
-  
-  for(i = 0; i < m->num_tags; i++)
-    {
-    if(m->tags[i].val)
-      num++;
-    }
-  
-  if(!gavf_io_write_uint32v(io, num))
-    return 0;
-  
-  for(i = 0; i < m->num_tags; i++)
-    {
-    if(!m->tags[i].val)
-      continue;
-    
-    if(!gavf_io_write_string(io, m->tags[i].key) ||
-       !gavf_io_write_string(io, m->tags[i].val) ||
-       !gavf_io_write_uint32v(io, m->tags[i].arr_len))
-      return 0;
-
-    for(j = 0; j < m->tags[i].arr_len; j++)
-      {
-      if(!gavf_io_write_string(io, m->tags[i].val_arr[j]))
-        return 0;
-      }
-    }
   return 1;
   }
 #endif
@@ -925,6 +854,7 @@ uint8_t * gavl_dictionary_to_buffer(int * len, const gavl_dictionary_t * fmt)
   return ret;
   }
 
+#if 0
 int gavl_compression_info_from_buffer(const uint8_t * buf, int len, gavl_compression_info_t * fmt)
   {
   int result;
@@ -943,3 +873,4 @@ uint8_t * gavl_compression_info_to_buffer(int * len, const gavl_compression_info
   gavf_io_destroy(io);
   return ret;
   }
+#endif
