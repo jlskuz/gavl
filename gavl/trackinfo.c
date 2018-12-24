@@ -1492,8 +1492,6 @@ void gavl_stream_set_compression_info(gavl_dictionary_t * s, const gavl_compress
     }
   }
 
-
-
 /* 
 void gavl_sort_tracks_by_metadata_long(gavl_dictionary_t * dict,
                                        const char * str)

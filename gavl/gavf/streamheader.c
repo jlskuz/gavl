@@ -3,32 +3,44 @@
 #include <gavl/trackinfo.h>
 
 #define KEY_TYPE "typ"
-
-
   
 void gavf_stream_header_to_dict(const gavf_stream_header_t * src, gavl_dictionary_t * dst)
   {
+  int ts = 0;
+  gavl_dictionary_t * m_dst;
+  
   gavl_dictionary_set_int(dst, KEY_TYPE, src->type);
   gavl_dictionary_set_int(dst, GAVL_META_ID, src->id);
 
   gavl_dictionary_set_dictionary(dst, GAVL_META_METADATA, &src->m);
+  m_dst = gavl_dictionary_get_dictionary_nc(dst, GAVL_META_METADATA);
   
   switch(src->type)
     {
     case GAVF_STREAM_AUDIO:
       gavl_stream_set_compression_info(dst, &src->ci);
       gavl_dictionary_set_audio_format(dst, GAVL_META_STREAM_FORMAT, &src->format.audio);
+      ts = src->format.audio.samplerate;
       break;
     case GAVF_STREAM_VIDEO:
     case GAVF_STREAM_OVERLAY:
       gavl_stream_set_compression_info(dst, &src->ci);
       gavl_dictionary_set_video_format(dst, GAVL_META_STREAM_FORMAT, &src->format.video);
+      ts = src->format.video.timescale;
       break;
     case GAVF_STREAM_TEXT:
       break;
     case GAVF_STREAM_MSG:
+      ts = GAVL_TIME_SCALE;
+      break;
     case GAVF_STREAM_NONE:
       break;
+    }
+  
+  if(ts > 0)
+    {
+    gavl_dictionary_set_int(m_dst, GAVL_META_STREAM_PACKET_TIMESCALE, ts);
+    gavl_dictionary_set_int(m_dst, GAVL_META_STREAM_SAMPLE_TIMESCALE, ts);
     }
   
   }
@@ -37,7 +49,11 @@ void gavf_stream_header_from_dict(gavf_stream_header_t * dst, const gavl_diction
   {
   int type;
   int id;
-
+  const gavl_dictionary_t * m;
+  
+  if((m = gavl_dictionary_get_dictionary(src, GAVL_META_METADATA)))
+    gavl_dictionary_copy(&dst->m, m);
+  
   gavl_dictionary_get_int(src, KEY_TYPE, &type);
   gavl_dictionary_get_int(src, GAVL_META_ID, &id);
   
@@ -48,7 +64,6 @@ void gavf_stream_header_from_dict(gavf_stream_header_t * dst, const gavl_diction
     {
     case GAVF_STREAM_AUDIO:
       gavl_stream_get_compression_info(src, &dst->ci);
-
       gavl_audio_format_copy(&dst->format.audio,
                              gavl_dictionary_get_audio_format(src, GAVL_META_STREAM_FORMAT));
       break;
@@ -59,16 +74,13 @@ void gavf_stream_header_from_dict(gavf_stream_header_t * dst, const gavl_diction
                              gavl_dictionary_get_video_format(src, GAVL_META_STREAM_FORMAT));
       break;
     case GAVF_STREAM_TEXT:
-      /* TODO */
-      break;
     case GAVF_STREAM_MSG:
     case GAVF_STREAM_NONE:
       break;
     }
-
   }
 
-
+#if 0
 int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h)
   {
   if(!gavf_io_read_uint32v(io, &h->type) ||
@@ -92,8 +104,8 @@ int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h)
         return 0;
       break;
     case GAVF_STREAM_TEXT:
-      if(!gavf_io_read_uint32v(io, &h->format.text.timescale))
-        return 0;
+      //      if(!gavf_io_read_uint32v(io, &h->format.text.timescale))
+      //        return 0;
       break;
     case GAVF_STREAM_NONE:
     case GAVF_STREAM_MSG:
@@ -101,6 +113,7 @@ int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h)
     }
   return 1;
   }
+#endif
 
 void gavf_stream_header_apply_footer(gavf_stream_header_t * h)
   {
@@ -131,6 +144,7 @@ void gavf_stream_header_apply_footer(gavf_stream_header_t * h)
     }
   }
 
+#if 0
 int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h)
   {
   if(!gavf_io_write_uint32v(io, h->type) ||
@@ -154,8 +168,8 @@ int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h)
         return 0;
       break;
     case GAVF_STREAM_TEXT:
-      if(!gavf_io_write_uint32v(io, h->format.text.timescale))
-        return 0;
+      //      if(!gavf_io_write_uint32v(io, h->format.text.timescale))
+      //        return 0;
       break;
     case GAVF_STREAM_NONE:
     case GAVF_STREAM_MSG:
@@ -163,6 +177,7 @@ int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h)
     }
   return 1;
   }
+#endif
 
 void gavf_stream_header_free(gavf_stream_header_t * h)
   {
@@ -190,8 +205,6 @@ void gavf_stream_header_dump(const gavf_stream_header_t * h)
       gavl_video_format_dumpi(&h->format.video, 4);
       break;
     case GAVF_STREAM_TEXT:
-      fprintf(stderr, "    Timescale: %d\n", h->format.text.timescale);
-      break;
     case GAVF_STREAM_NONE:
     case GAVF_STREAM_MSG:
       break;

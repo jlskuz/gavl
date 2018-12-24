@@ -122,7 +122,7 @@ void gavf_stream_create_packet_src(gavf_t * g, gavf_stream_t * s)
       break;
     case GAVF_STREAM_TEXT:
       s->psrc = gavl_packet_source_create_text(func, s, flags,
-                                               s->h->format.text.timescale);
+                                               gavf_stream_get_timescale(s->h));
       break;
     case GAVF_STREAM_MSG:
       s->psrc = gavl_packet_source_create(func, s, flags);

@@ -48,9 +48,8 @@ void gavf_io_init_buf_write(gavf_io_t * io, gavl_buffer_t * buf);
 /* Streamheader */
 
 void gavf_stream_header_free(gavf_stream_header_t * h);
-
-int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h);
-int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h);
+// int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h);
+// int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h);
 
 void gavf_stream_header_init_audio(gavf_stream_header_t * h);
 void gavf_stream_header_init_video(gavf_stream_header_t * h);
@@ -252,12 +251,6 @@ int gavf_extension_write(gavf_io_t * io, uint32_t key, uint32_t len,
 #define GAVF_EXT_PK_DST_COORDS       5
 
 /* File index */
-
-#define GAVF_TAG_PROGRAM_HEADER "GAVFPHDR"
-#define GAVF_TAG_SYNC_HEADER    "GAVFSYNC"
-#define GAVF_TAG_SYNC_INDEX     "GAVFSIDX"
-#define GAVF_TAG_PACKET_INDEX   "GAVFPIDX"
-#define GAVF_TAG_FOOTER         "GAVFFOOT"
 
 #define GAVF_TAG_PACKET_HEADER    "P"
 #define GAVF_TAG_PACKET_HEADER_C  'P'
