@@ -7,22 +7,74 @@
 /* Footer structure
  *
  * GAVFFOOT
+ * array of dictionaries
  * stream footer * num_streams
  * GAVFFOOT
  * Relative start position (64 bit)
  */
 
 
+#if 0
+  int32_t size_min;
+  int32_t size_max;
+  int64_t duration_min;
+  int64_t duration_max;
+  int64_t pts_start;
+  int64_t pts_end;
+
+  int64_t total_bytes;   // For average bitrate 
+  int64_t total_packets; // For average framerate
+#endif
+
+#define TAG_SIZE_MIN      "smin"
+#define TAG_SIZE_MAX      "smax"
+#define TAG_DURATION_MIN  "dmin"
+#define TAG_DURATION_MAX  "dmax"
+#define TAG_PTS_START     "tmin"
+#define TAG_PTS_END       "tmax"
+#define TAG_TOTAL_PACKETS "packets"
+#define TAG_TOTAL_BYTES   "bytes"
+#define TAG_STATS         "stats"
+
+static void stats_to_dict(const gavf_stream_stats_t * s, gavl_dictionary_t * dict)
+  {
+  gavl_dictionary_set_int(dict, TAG_SIZE_MIN, s->size_min);
+  gavl_dictionary_set_int(dict, TAG_SIZE_MAX, s->size_max);
+
+  gavl_dictionary_set_long(dict, TAG_DURATION_MIN, s->duration_min);
+  gavl_dictionary_set_long(dict, TAG_DURATION_MAX, s->duration_max);
+
+  gavl_dictionary_set_long(dict, TAG_PTS_START, s->pts_start);
+  gavl_dictionary_set_long(dict, TAG_PTS_END,   s->pts_end);
+
+  gavl_dictionary_set_long(dict, TAG_TOTAL_PACKETS, s->total_packets);
+  gavl_dictionary_set_long(dict, TAG_TOTAL_BYTES,   s->total_bytes);
+  }
+
+static int stats_from_dict(gavf_stream_stats_t * s, const gavl_dictionary_t * dict)
+  {
+  return gavl_dictionary_get_int(dict, TAG_SIZE_MIN, &s->size_min) &&
+    gavl_dictionary_get_int(dict, TAG_SIZE_MAX, &s->size_max)  &&
+    gavl_dictionary_get_long(dict, TAG_DURATION_MIN, &s->duration_min) &&
+    gavl_dictionary_get_long(dict, TAG_DURATION_MAX, &s->duration_max) &&
+    gavl_dictionary_get_long(dict, TAG_PTS_START, &s->pts_start) &&
+    gavl_dictionary_get_long(dict, TAG_PTS_END,   &s->pts_end) &&
+    gavl_dictionary_get_long(dict, TAG_TOTAL_PACKETS, &s->total_packets) &&
+    gavl_dictionary_get_long(dict, TAG_TOTAL_BYTES,   &s->total_bytes);
+  }
+
 int gavf_footer_check(gavf_t * g)
   {
   uint8_t buf[8];
   int64_t last_pos;
-  uint64_t footer_start_pos;
+  int64_t footer_start_pos;
   int i;
   gavf_stream_header_t * s;
-  char sig[8];
   int ret = 0;
+  gavf_chunk_t chunk;
 
+  gavl_dictionary_t foot;
+  const gavl_array_t * stats_arr;
   
   if(!g->io->seek_func)
     return 0;
@@ -34,32 +86,33 @@ int gavf_footer_check(gavf_t * g)
   if((gavf_io_read_data(g->io, buf, 8) < 8))
     goto end;
 
-  if(memcmp(buf, GAVF_TAG_FOOTER, 8))
+  if(memcmp(buf, GAVF_TAG_TAIL, 8))
     goto end;
     
-  if(!gavf_io_read_uint64f(g->io, &footer_start_pos))
+  if(!gavf_io_read_int64f(g->io, &footer_start_pos))
     goto end;
   
   /* Seek to footer start */
   gavf_io_seek(g->io, footer_start_pos, SEEK_SET);
-  if((gavf_io_read_data(g->io, buf, 8) < 8) ||
-     memcmp(buf, GAVF_TAG_FOOTER, 8))
+  gavl_dictionary_init(&foot);
+  
+  if(!gavf_chunk_read_header(g->io, &chunk) ||
+     !gavf_chunk_is(&chunk, GAVF_TAG_FOOTER) ||
+     !gavl_dictionary_read(g->io, &foot) ||
+     !(stats_arr = gavl_dictionary_get_array(&foot, "stats")) ||
+     (g->ph.num_streams != stats_arr->num_entries))
     goto end;
-
+  
   for(i = 0; i < g->ph.num_streams; i++)
     {
+    const gavl_dictionary_t * stats;
+
     s = g->ph.streams + i;
 
-    if(!gavf_io_read_int32v(g->io, &s->stats.size_min) ||
-       !gavf_io_read_int32v(g->io, &s->stats.size_max) ||
-       !gavf_io_read_int64v(g->io, &s->stats.duration_min) ||
-       !gavf_io_read_int64v(g->io, &s->stats.duration_max) ||
-       !gavf_io_read_int64v(g->io, &s->stats.pts_start) ||
-       !gavf_io_read_int64v(g->io, &s->stats.pts_end) ||
-       !gavf_io_read_int64v(g->io, &s->stats.total_bytes) ||
-       !gavf_io_read_int64v(g->io, &s->stats.total_packets))
+    if(!(stats = gavl_value_get_dictionary(&stats_arr->entries[i])) ||
+       !stats_from_dict(&s->stats, stats))
       goto end;
-
+    
     /* Set some useful values from the footer */
     gavf_stream_header_apply_footer(s);
     }
@@ -67,21 +120,23 @@ int gavf_footer_check(gavf_t * g)
   /* Read remaining stuff */
   ret = 1;
 
-  while(1)
+  while(gavf_chunk_read_header(g->io, &chunk))
     {
-    if(gavf_io_read_data(g->io, (uint8_t*)sig, 8) < 8)
-      return 0;
-
-    if(!strncmp(sig, GAVF_TAG_SYNC_INDEX, 8))
+    if(gavf_chunk_is(&chunk, GAVF_TAG_SYNC_INDEX))
       {
       if(gavf_sync_index_read(g->io, &g->si))
         g->opt.flags |= GAVF_OPT_FLAG_SYNC_INDEX;
       }
-    else if(!strncmp(sig, GAVF_TAG_PACKET_INDEX, 8))
+    else if(gavf_chunk_is(&chunk, GAVF_TAG_PACKET_INDEX))
       {
       if(gavf_packet_index_read(g->io, &g->pi))
         g->opt.flags |= GAVF_OPT_FLAG_PACKET_INDEX;
       }
+    else
+      {
+      /* TODO: Skip */
+      }
+    
     }
   
   end:
@@ -94,27 +149,38 @@ int gavf_footer_check(gavf_t * g)
 int gavf_footer_write(gavf_t * g)
   {
   int i;
-  gavf_stream_header_t * s;
+  gavl_dictionary_t foot;
+  gavl_value_t arr_val;
+  gavl_array_t * arr;
+
   
+  gavf_stream_header_t * s;
   uint64_t footer_start_pos = g->io->position;
   if(gavf_io_write_data(g->io, (uint8_t*)GAVF_TAG_FOOTER, 8) < 8)
     return 0;
 
+  gavl_dictionary_init(&foot);
+
+  gavl_value_init(&arr_val);
+
+  arr = gavl_value_set_array(&arr_val);
+  
   for(i = 0; i < g->ph.num_streams; i++)
     {
+    gavl_value_t stats_val;
+    gavl_dictionary_t * stats;
+
     s = g->ph.streams + i;
+    
+    gavl_value_init(&stats_val);
+    stats = gavl_value_set_dictionary(&stats_val);
 
-    if(!gavf_io_write_int32v(g->io, s->stats.size_min) ||
-       !gavf_io_write_int32v(g->io, s->stats.size_max) ||
-       !gavf_io_write_int64v(g->io, s->stats.duration_min) ||
-       !gavf_io_write_int64v(g->io, s->stats.duration_max) ||
-       !gavf_io_write_int64v(g->io, s->stats.pts_start) ||
-       !gavf_io_write_int64v(g->io, s->stats.pts_end) ||
-       !gavf_io_write_int64v(g->io, s->stats.total_bytes) ||
-       !gavf_io_write_int64v(g->io, s->stats.total_packets))
-      return 0;
+    stats_to_dict(&s->stats, stats);
+
+    gavl_array_splice_val_nocopy(arr, -1, 0, &stats_val);
     }
-
+  gavl_dictionary_set_nocopy(&foot, "stats", &arr_val);
+  
   /* Write indices */  
   if(g->opt.flags & GAVF_OPT_FLAG_SYNC_INDEX)
     {

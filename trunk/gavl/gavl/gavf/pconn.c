@@ -111,23 +111,23 @@ void gavf_stream_create_packet_src(gavf_t * g, gavf_stream_t * s)
   
   switch(s->h->type)
     {
-    case GAVF_STREAM_AUDIO:
+    case GAVL_STREAM_AUDIO:
       s->psrc = gavl_packet_source_create_audio(func, s, flags,
                                                 &s->h->ci, &s->h->format.audio);
       break;
-    case GAVF_STREAM_OVERLAY:
-    case GAVF_STREAM_VIDEO:
+    case GAVL_STREAM_OVERLAY:
+    case GAVL_STREAM_VIDEO:
       s->psrc = gavl_packet_source_create_video(func, s, flags,
                                                 &s->h->ci, &s->h->format.video);
       break;
-    case GAVF_STREAM_TEXT:
+    case GAVL_STREAM_TEXT:
       s->psrc = gavl_packet_source_create_text(func, s, flags,
                                                gavf_stream_get_timescale(s->h));
       break;
-    case GAVF_STREAM_MSG:
+    case GAVL_STREAM_MSG:
       s->psrc = gavl_packet_source_create(func, s, flags);
       break;
-    case GAVF_STREAM_NONE:
+    case GAVL_STREAM_NONE:
       break;
     }
   }

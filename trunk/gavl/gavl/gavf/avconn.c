@@ -133,11 +133,11 @@ gavf_get_video_source(gavf_t * g, uint32_t id)
 
   if(!s->vsrc)
     {
-    if(s->h->type == GAVF_STREAM_VIDEO)
+    if(s->h->type == GAVL_STREAM_VIDEO)
       s->vsrc = gavl_video_source_create(read_video_func, s,
                                          GAVL_SOURCE_SRC_ALLOC,
                                          &s->h->format.video);
-    else if(s->h->type == GAVF_STREAM_OVERLAY)
+    else if(s->h->type == GAVL_STREAM_OVERLAY)
       s->vsrc = gavl_video_source_create(read_overlay_func, s,
                                          0, &s->h->format.video);
     }
@@ -268,11 +268,11 @@ gavf_get_video_sink(gavf_t * g, uint32_t id)
 
   if(!s->vsink)
     {
-    if(s->h->type == GAVF_STREAM_VIDEO)
+    if(s->h->type == GAVL_STREAM_VIDEO)
       s->vsink = gavl_video_sink_create(get_video_func,
                                         put_video_func, s,
                                         &s->h->format.video);
-    else if(s->h->type == GAVF_STREAM_OVERLAY)
+    else if(s->h->type == GAVL_STREAM_OVERLAY)
       s->vsink = gavl_video_sink_create(NULL,
                                         put_overlay_func, s,
                                         &s->h->format.video);

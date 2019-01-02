@@ -57,7 +57,6 @@ int gavf_packet_index_write(gavf_io_t * io, const gavf_packet_index_t * idx)
       return 0;
     }
   return 1;
-  
   }
 
 void gavf_packet_index_free(gavf_packet_index_t * idx)

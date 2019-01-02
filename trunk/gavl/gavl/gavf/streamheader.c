@@ -2,14 +2,13 @@
 #include <gavl/metatags.h>
 #include <gavl/trackinfo.h>
 
-#define KEY_TYPE "typ"
   
 void gavf_stream_header_to_dict(const gavf_stream_header_t * src, gavl_dictionary_t * dst)
   {
   int ts = 0;
   gavl_dictionary_t * m_dst;
   
-  gavl_dictionary_set_int(dst, KEY_TYPE, src->type);
+  gavl_dictionary_set_int(dst, GAVL_META_STREAM_TYPE, src->type);
   gavl_dictionary_set_int(dst, GAVL_META_ID, src->id);
 
   gavl_dictionary_set_dictionary(dst, GAVL_META_METADATA, &src->m);
@@ -17,23 +16,23 @@ void gavf_stream_header_to_dict(const gavf_stream_header_t * src, gavl_dictionar
   
   switch(src->type)
     {
-    case GAVF_STREAM_AUDIO:
+    case GAVL_STREAM_AUDIO:
       gavl_stream_set_compression_info(dst, &src->ci);
       gavl_dictionary_set_audio_format(dst, GAVL_META_STREAM_FORMAT, &src->format.audio);
       ts = src->format.audio.samplerate;
       break;
-    case GAVF_STREAM_VIDEO:
-    case GAVF_STREAM_OVERLAY:
+    case GAVL_STREAM_VIDEO:
+    case GAVL_STREAM_OVERLAY:
       gavl_stream_set_compression_info(dst, &src->ci);
       gavl_dictionary_set_video_format(dst, GAVL_META_STREAM_FORMAT, &src->format.video);
       ts = src->format.video.timescale;
       break;
-    case GAVF_STREAM_TEXT:
+    case GAVL_STREAM_TEXT:
       break;
-    case GAVF_STREAM_MSG:
+    case GAVL_STREAM_MSG:
       ts = GAVL_TIME_SCALE;
       break;
-    case GAVF_STREAM_NONE:
+    case GAVL_STREAM_NONE:
       break;
     }
   
@@ -54,7 +53,7 @@ void gavf_stream_header_from_dict(gavf_stream_header_t * dst, const gavl_diction
   if((m = gavl_dictionary_get_dictionary(src, GAVL_META_METADATA)))
     gavl_dictionary_copy(&dst->m, m);
   
-  gavl_dictionary_get_int(src, KEY_TYPE, &type);
+  gavl_dictionary_get_int(src, GAVL_META_STREAM_TYPE, &type);
   gavl_dictionary_get_int(src, GAVL_META_ID, &id);
   
   dst->type = type;
@@ -62,20 +61,20 @@ void gavf_stream_header_from_dict(gavf_stream_header_t * dst, const gavl_diction
 
   switch(dst->type)
     {
-    case GAVF_STREAM_AUDIO:
+    case GAVL_STREAM_AUDIO:
       gavl_stream_get_compression_info(src, &dst->ci);
       gavl_audio_format_copy(&dst->format.audio,
                              gavl_dictionary_get_audio_format(src, GAVL_META_STREAM_FORMAT));
       break;
-    case GAVF_STREAM_VIDEO:
-    case GAVF_STREAM_OVERLAY:
+    case GAVL_STREAM_VIDEO:
+    case GAVL_STREAM_OVERLAY:
       gavl_stream_get_compression_info(src, &dst->ci);
       gavl_video_format_copy(&dst->format.video,
                              gavl_dictionary_get_video_format(src, GAVL_META_STREAM_FORMAT));
       break;
-    case GAVF_STREAM_TEXT:
-    case GAVF_STREAM_MSG:
-    case GAVF_STREAM_NONE:
+    case GAVL_STREAM_TEXT:
+    case GAVL_STREAM_MSG:
+    case GAVL_STREAM_NONE:
       break;
     }
   }
@@ -92,23 +91,23 @@ int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h)
   
   switch(h->type)
     {
-    case GAVF_STREAM_AUDIO:
+    case GAVL_STREAM_AUDIO:
       if(!gavf_read_compression_info(io, &h->ci) ||
          !gavf_read_audio_format(io, &h->format.audio))
         return 0;
       break;
-    case GAVF_STREAM_VIDEO:
-    case GAVF_STREAM_OVERLAY:
+    case GAVL_STREAM_VIDEO:
+    case GAVL_STREAM_OVERLAY:
       if(!gavf_read_compression_info(io, &h->ci) ||
          !gavf_read_video_format(io, &h->format.video))
         return 0;
       break;
-    case GAVF_STREAM_TEXT:
+    case GAVL_STREAM_TEXT:
       //      if(!gavf_io_read_uint32v(io, &h->format.text.timescale))
       //        return 0;
       break;
-    case GAVF_STREAM_NONE:
-    case GAVF_STREAM_MSG:
+    case GAVL_STREAM_NONE:
+    case GAVL_STREAM_MSG:
       break;
     }
   return 1;
@@ -123,23 +122,23 @@ void gavf_stream_header_apply_footer(gavf_stream_header_t * h)
 
   switch(h->type)
     {
-    case GAVF_STREAM_VIDEO:
+    case GAVL_STREAM_VIDEO:
       gavf_stream_stats_apply_video(&h->stats, 
                                     &h->format.video,
                                     &h->ci,
                                     &h->m);
       break;
-    case GAVF_STREAM_OVERLAY:
-    case GAVF_STREAM_TEXT:
+    case GAVL_STREAM_OVERLAY:
+    case GAVL_STREAM_TEXT:
       break;
-    case GAVF_STREAM_AUDIO:
+    case GAVL_STREAM_AUDIO:
       gavf_stream_stats_apply_audio(&h->stats, 
                                      &h->format.audio,
                                      &h->ci,
                                      &h->m);
       break;
-    case GAVF_STREAM_NONE:
-    case GAVF_STREAM_MSG:
+    case GAVL_STREAM_NONE:
+    case GAVL_STREAM_MSG:
       break;
     }
   }
@@ -156,23 +155,23 @@ int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h)
   
   switch(h->type)
     {
-    case GAVF_STREAM_AUDIO:
+    case GAVL_STREAM_AUDIO:
       if(!gavf_write_compression_info(io, &h->ci) ||
          !gavf_write_audio_format(io, &h->format.audio))
         return 0;
       break;
-    case GAVF_STREAM_VIDEO:
-    case GAVF_STREAM_OVERLAY:
+    case GAVL_STREAM_VIDEO:
+    case GAVL_STREAM_OVERLAY:
       if(!gavf_write_compression_info(io, &h->ci) ||
          !gavf_write_video_format(io, &h->format.video))
         return 0;
       break;
-    case GAVF_STREAM_TEXT:
+    case GAVL_STREAM_TEXT:
       //      if(!gavf_io_write_uint32v(io, h->format.text.timescale))
       //        return 0;
       break;
-    case GAVF_STREAM_NONE:
-    case GAVF_STREAM_MSG:
+    case GAVL_STREAM_NONE:
+    case GAVL_STREAM_MSG:
       break;
     }
   return 1;
@@ -193,20 +192,20 @@ void gavf_stream_header_dump(const gavf_stream_header_t * h)
 
   switch(h->type)
     {
-    case GAVF_STREAM_AUDIO:
+    case GAVL_STREAM_AUDIO:
       gavl_compression_info_dumpi(&h->ci, 4);
       fprintf(stderr, "    Format:\n");
       gavl_audio_format_dumpi(&h->format.audio, 4);
       break;
-    case GAVF_STREAM_VIDEO:
-    case GAVF_STREAM_OVERLAY:
+    case GAVL_STREAM_VIDEO:
+    case GAVL_STREAM_OVERLAY:
       gavl_compression_info_dumpi(&h->ci, 4);
       fprintf(stderr, "    Format:\n");
       gavl_video_format_dumpi(&h->format.video, 4);
       break;
-    case GAVF_STREAM_TEXT:
-    case GAVF_STREAM_NONE:
-    case GAVF_STREAM_MSG:
+    case GAVL_STREAM_TEXT:
+    case GAVL_STREAM_NONE:
+    case GAVL_STREAM_MSG:
       break;
     }
   fprintf(stderr, "    Metadata:\n");
