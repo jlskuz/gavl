@@ -201,18 +201,9 @@ static void finalize_track_internal(gavl_dictionary_t * t, finalize_t * f)
   {
   gavl_dictionary_t * m;
   
-  if((f->streams = gavl_dictionary_get_array_nc(t, GAVL_META_AUDIO_STREAMS)))
+  if((f->streams = gavl_dictionary_get_array_nc(t, GAVL_META_STREAMS)))
     gavl_array_foreach(f->streams, finalize_stream, f);
   
-  if((f->streams = gavl_dictionary_get_array_nc(t, GAVL_META_VIDEO_STREAMS)))
-    gavl_array_foreach(f->streams, finalize_stream, f);
-  
-  if((f->streams = gavl_dictionary_get_array_nc(t, GAVL_META_TEXT_STREAMS)))
-    gavl_array_foreach(f->streams, finalize_stream, f);
-  
-  if((f->streams = gavl_dictionary_get_array_nc(t, GAVL_META_OVERLAY_STREAMS)))
-    gavl_array_foreach(f->streams, finalize_stream, f);
-
   if((m = gavl_track_get_metadata_nc(t)))
     gavl_dictionary_set_long(m, GAVL_META_APPROX_DURATION, 0);
   
@@ -301,14 +292,12 @@ static void add_stream_to_timeline(gavl_dictionary_t * edl_stream,
 
 static void add_streams_to_timeline(gavl_dictionary_t * edl_track,
                                     const gavl_dictionary_t * track,
-                                    const char * tag, int64_t edl_duration)
+                                    gavl_stream_type_t type, int64_t edl_duration)
   {
-  int i;
-  gavl_array_t * arr_edl;
-  const gavl_array_t * arr_track;
-
-  gavl_dictionary_t * s_edl;
-  const gavl_dictionary_t * s_track;
+  int i, num;
+  
+  gavl_dictionary_t * s_edl;          // Stream (edl, dst)
+  const gavl_dictionary_t * s_track;  // Stream (track, src)
   const char * location = NULL;
   const gavl_dictionary_t * m;
   gavl_time_t track_duration;
@@ -320,19 +309,16 @@ static void add_streams_to_timeline(gavl_dictionary_t * edl_track,
   
   if(!gavl_dictionary_get_long(m, GAVL_META_APPROX_DURATION, &track_duration))
     return;
-  
-  if(!(arr_edl = gavl_dictionary_get_array_nc(edl_track, tag)) ||
-     !(arr_track = gavl_dictionary_get_array(track, tag)))
-    return;
-  
-  for(i = 0; i < arr_edl->num_entries; i++)
-    {
-    if(i >= arr_track->num_entries)
-      break;
 
-    if(!(s_edl = gavl_value_get_dictionary_nc(&arr_edl->entries[i])) ||
-       !(s_track = gavl_value_get_dictionary(&arr_track->entries[i])))
-      return;
+  num = gavl_track_get_num_streams(edl_track, type);
+  
+  for(i = 0; i < num; i++)
+    {
+    s_edl = gavl_track_get_stream_nc(edl_track, type, i);
+
+    if(!(s_track = gavl_track_get_stream(track, type, i)))
+      break;
+    
     add_stream_to_timeline(s_edl, s_track, i, edl_duration, track_duration, location);
     }
   }
@@ -410,22 +396,8 @@ void gavl_edl_append_track_to_timeline(gavl_dictionary_t * edl_track,
     gavl_dictionary_delete_fields(edl_m, clear_metadata_fields);
     gavl_dictionary_set_long(edl_m, GAVL_META_APPROX_DURATION, 0);
     
-    if((arr = gavl_dictionary_get_array_nc(edl_track, GAVL_META_AUDIO_STREAMS)))
-      {
+    if((arr = gavl_dictionary_get_array_nc(edl_track, GAVL_META_STREAMS)))
       gavl_array_foreach(arr, stream_clear_foreach_func, arr);
-      }
-    if((arr = gavl_dictionary_get_array_nc(edl_track, GAVL_META_VIDEO_STREAMS)))
-      {
-      gavl_array_foreach(arr, stream_clear_foreach_func, arr);
-      }
-    if((arr = gavl_dictionary_get_array_nc(edl_track, GAVL_META_TEXT_STREAMS)))
-      {
-      gavl_array_foreach(arr, stream_clear_foreach_func, arr);
-      }
-    if((arr = gavl_dictionary_get_array_nc(edl_track, GAVL_META_OVERLAY_STREAMS)))
-      {
-      gavl_array_foreach(arr, stream_clear_foreach_func, arr);
-      }
     
     }
 
@@ -433,10 +405,10 @@ void gavl_edl_append_track_to_timeline(gavl_dictionary_t * edl_track,
      !gavl_dictionary_get_long(m, GAVL_META_APPROX_DURATION, &edl_duration))
     return;
   
-  add_streams_to_timeline(edl_track, track, GAVL_META_AUDIO_STREAMS, edl_duration);
-  add_streams_to_timeline(edl_track, track, GAVL_META_VIDEO_STREAMS, edl_duration);
-  add_streams_to_timeline(edl_track, track, GAVL_META_TEXT_STREAMS, edl_duration);
-  add_streams_to_timeline(edl_track, track, GAVL_META_OVERLAY_STREAMS, edl_duration);
+  add_streams_to_timeline(edl_track, track, GAVL_STREAM_AUDIO,   edl_duration);
+  add_streams_to_timeline(edl_track, track, GAVL_STREAM_VIDEO,   edl_duration);
+  add_streams_to_timeline(edl_track, track, GAVL_STREAM_TEXT,    edl_duration);
+  add_streams_to_timeline(edl_track, track, GAVL_STREAM_OVERLAY, edl_duration);
   
   finalize_track_internal(edl_track, &f);
   }

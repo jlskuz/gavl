@@ -14,27 +14,59 @@
 #include <gavl/utils.h>
 #include <gavl/msg.h>
 #include <gavl/value.h>
+#include <gavl/trackinfo.h>
 
 #include <stdio.h>
 
 /* gavf file structure */
 
 /*
-
-  GAVFPHDR: 8 bytes
-  len:      8 bytes, bytes to follow
+  CHUNK("name"):
+  name: 8 characters, starts with "GAVF"
+  len:  64 bit len (or offset) as signed, 0 if unknown
+  
+  Chunks *always* start at 8 byte boundaries. Preceeding bytes (up to 7) are
+  filled with zeros
+  
+  CHUNK("GAVFPHDR")
   len bytes header (dictionary)
   
-  GAVFPKTS: 8 bytes
-  len:      8 bytes, bytes to follow, 0 if unknown
+  CHUNK("GAVFPKTS")
   len bytes packets
 
-  GAVFFOOT: 8 bytes
-  len:      8 bytes, bytes to follow, 0 if unknown
-  len bytes footer (array of stream stats)
+    CHUNK("GAVFSYNC")
+    sync_chunk (variable)
+    
+      P:        1 byte
+      packet (variable)
 
+      P:        1 byte
+      packet (variable)
+
+      [...]
+
+    CHUNK("GAVFSYNC")
+    sync_chunk (variable)
+    
+      P:        1 byte
+      packet (variable)
+
+      P:        1 byte
+      packet (variable)
+
+      [...]
+
+    [...]
+    
+  
+  CHUNK("GAVFFOOT")
+    footer
+      {
+      stats [ { stats } { stats } { stats } { stats } ]
+      }
+   
   Optional:
-  GAVFSIDX: 8 bytes
+  CHUNK("GAVFSIDX") 8 bytes
   len:      8 bytes, bytes to follow, 0 if unknown
   len bytes sync index
   
@@ -42,23 +74,11 @@
   GAVFPIDX: 8 bytes
   len:      8 bytes, bytes to follow, 0 if unknown
   len bytes packet index
-
+   
   GAVFTAIL: 8 bytes
   len:      8 bytes, file offset of the GAVFFOOT tag
-  
-  Packets are organized as:
-
-  P:        1 byte
-  packet (variable)
-
-  GAVFSYNC: 8 bytes
-  sync_index (variable)
-
-  Padding zero bytes: In front of every 8 character tags there can be up to 7 padding
-  bytes so the tags always start ar 8 byte boundaries. This makes random access and
-  resynching a lot more efficient
-  
-  
+ 
+   
 */
 
 #define GAVF_TAG_PROGRAM_HEADER "GAVFPHDR"
@@ -84,7 +104,14 @@ typedef struct gavf_options_s gavf_options_t;
 
 #define GAVF_IO_CB_TYPE_END(t) (!!(t & 0x100))
 
+/* Chunk structure */
 
+typedef struct
+  {
+  char eightcc[9];
+  int64_t start; // gavf_io_position();
+  int64_t len;   // gavf_io_position() - start;
+  } gavf_chunk_t;
 
 /* I/O Structure */
 
@@ -97,6 +124,24 @@ typedef int (*gavf_flush_func)(void * priv);
 typedef int (*gavf_io_cb_func)(void * priv, int type, const void * data);
 
 typedef struct gavl_io_s gavf_io_t;
+
+GAVL_PUBLIC
+int gavf_chunk_read_header(gavf_io_t * io, gavf_chunk_t * head);
+
+GAVL_PUBLIC
+int gavf_chunk_is(const gavf_chunk_t * head, const char * eightcc);
+
+GAVL_PUBLIC
+int gavf_chunk_start(gavf_io_t * io, gavf_chunk_t * head, const char * eightcc);
+
+GAVL_PUBLIC
+int gavf_chunk_finish(gavf_io_t * io, gavf_chunk_t * head, int write_size);
+
+GAVL_PUBLIC
+gavf_io_t * gavf_chunk_start_io(gavf_io_t * io, gavf_chunk_t * head, const char * eightcc);
+
+GAVL_PUBLIC
+int gavf_chunk_finish_io(gavf_io_t * io, gavf_chunk_t * head, gavf_io_t * sub_io);
 
 GAVL_PUBLIC
 gavf_io_t * gavf_io_create(gavf_read_func  r,
@@ -325,21 +370,10 @@ gavl_buffer_t * gavf_io_buf_get(gavf_io_t * io);
 GAVL_PUBLIC
 void gavf_io_buf_reset(gavf_io_t * io);
 
-/* Stream information */
-
-typedef enum
-  {
-    GAVF_STREAM_NONE    = 0,
-    GAVF_STREAM_AUDIO   = 1,
-    GAVF_STREAM_VIDEO   = 2,
-    GAVF_STREAM_TEXT    = 3,
-    GAVF_STREAM_OVERLAY = 4,
-    GAVF_STREAM_MSG     = 5,
-  } gavf_stream_type_t;
 
 /* Return short name */
 GAVL_PUBLIC
-const char * gavf_stream_type_name(gavf_stream_type_t t);
+const char * gavf_stream_type_name(gavl_stream_type_t t);
 
 typedef struct
   {
@@ -391,7 +425,7 @@ void gavf_stream_stats_apply_generic(gavf_stream_stats_t * f,
 
 typedef struct
   {
-  gavf_stream_type_t type;
+  gavl_stream_type_t type;
   uint32_t id;
   
   gavl_compression_info_t ci;

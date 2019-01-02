@@ -31,53 +31,138 @@
 #include <stdio.h>
 #include <ctype.h>
 
+int gavl_track_get_num_streams(const gavl_dictionary_t * d, gavl_stream_type_t type)
+  {
+  int type_from_dict = 0;
+  int ret = 0, i;
+  const gavl_array_t * arr;
+  const gavl_dictionary_t * dict;
+
+  if(!(arr = gavl_dictionary_get_array(d, GAVL_META_STREAMS)))
+    return 0;
+
+  for(i = 0; i < arr->num_entries; i++)
+    {
+    if((dict = gavl_value_get_dictionary_nc(&arr->entries[i])) &&
+       gavl_dictionary_get_int(dict, GAVL_META_STREAM_TYPE, &type_from_dict) &&
+       (type_from_dict == type))
+      ret++;
+    }
+  return ret;
+  }
+
+static int idx_to_position(const gavl_dictionary_t * d, gavl_stream_type_t type, int idx)
+  {
+  int ctr = 0;
+  int i;
+  int type_from_dict = 0;
+  
+  const gavl_array_t * arr;
+  const gavl_dictionary_t * dict;
+  
+  if(!(arr = gavl_dictionary_get_array(d, GAVL_META_STREAMS)) ||
+     (idx < 0) || (idx >= arr->num_entries))
+    return -1;
+
+  for(i = 0; i < arr->num_entries; i++)
+    {
+    if((dict = gavl_value_get_dictionary_nc(&arr->entries[i])) &&
+       gavl_dictionary_get_int(dict, GAVL_META_STREAM_TYPE, &type_from_dict) &&
+       (type_from_dict == type))
+      {
+      if(ctr == idx)
+        return i;
+      ctr++;
+      }
+    }
+  return -1;
+  }
+
 /* */
 
-static gavl_dictionary_t *
-get_stream_nc(gavl_dictionary_t * d, int i, const char * tag)
+gavl_dictionary_t *
+gavl_track_get_stream_nc(gavl_dictionary_t * d, gavl_stream_type_t type, int i)
   {
   gavl_array_t * arr;
   gavl_value_t * val;
+  gavl_dictionary_t * dict;
 
-  if((arr = gavl_dictionary_get_array_nc(d, tag)) &&
-     (val = gavl_array_get_nc(arr, i)))
-    return gavl_value_get_dictionary_nc(val);
+  int idx = 0;
+  int pos = 0;
+  int type_from_dict = 0;
+    
+  if(!(arr = gavl_dictionary_get_array_nc(d, GAVL_META_STREAMS)))
+    return NULL;
 
-  return NULL; 
-  }
-
-static const gavl_dictionary_t *
-get_stream(const gavl_dictionary_t * d, int i, const char * tag)
-  {
-  const gavl_array_t * arr;
-  const gavl_value_t * val;
-
-  if((arr = gavl_dictionary_get_array(d, tag)) &&
-     (val = gavl_array_get(arr, i)))
-    return gavl_value_get_dictionary(val);
+  for(pos = 0; pos < arr->num_entries; pos++)
+    {
+    if((val = gavl_array_get_nc(arr, pos)) &&
+       (dict = gavl_value_get_dictionary_nc(val)) &&
+       gavl_dictionary_get_int(dict, GAVL_META_STREAM_TYPE, &type_from_dict) &&
+       (type_from_dict == type))
+      {
+      if(i == idx)
+        return dict;
+      else
+        idx++;
+      }
+    }
   
   return NULL; 
   }
 
-static const gavl_dictionary_t * get_stream_metadata(const gavl_dictionary_t * d, int i, const char * tag)
+const gavl_dictionary_t *
+gavl_track_get_stream(const gavl_dictionary_t * d, gavl_stream_type_t type, int i)
+  {
+
+  const gavl_array_t * arr;
+  const gavl_value_t * val;
+  const gavl_dictionary_t * dict;
+
+  int idx = 0;
+  int pos = 0;
+  int type_from_dict = 0;
+    
+  if(!(arr = gavl_dictionary_get_array(d, GAVL_META_STREAMS)))
+    return NULL;
+
+  for(pos = 0; pos < arr->num_entries; pos++)
+    {
+    if((val = gavl_array_get(arr, pos)) &&
+       (dict = gavl_value_get_dictionary(val)) &&
+       gavl_dictionary_get_int(dict, GAVL_META_STREAM_TYPE, &type_from_dict) &&
+       (type_from_dict == type))
+      {
+      if(i == idx)
+        return dict;
+      else
+        idx++;
+      }
+    }
+  
+  return NULL; 
+  }
+
+static const gavl_dictionary_t * get_stream_metadata(const gavl_dictionary_t * d, gavl_stream_type_t type, int i)
   {
   const gavl_dictionary_t * s;
 
-  if(!(s = get_stream(d, i, tag)))
+  if(!(s = gavl_track_get_stream(d, type, i)))
     return NULL;
   
   return gavl_dictionary_get_dictionary(s, GAVL_META_METADATA);
   }
 
-static gavl_dictionary_t * get_stream_metadata_nc(gavl_dictionary_t * d, int i, const char * tag)
+static gavl_dictionary_t * get_stream_metadata_nc(gavl_dictionary_t * d, gavl_stream_type_t type, int i)
   {
   gavl_dictionary_t * s;
 
-  if(!(s = get_stream_nc(d, i, tag)))
+  if(!(s = gavl_track_get_stream_nc(d, type, i)))
     return NULL;
   return gavl_dictionary_get_dictionary_nc(s, GAVL_META_METADATA);
   }
 
+#if 0
 static int
 dictionary_get_num_streams(const gavl_dictionary_t * d, const char * tag)
   {
@@ -87,25 +172,29 @@ dictionary_get_num_streams(const gavl_dictionary_t * d, const char * tag)
     return 0;
   return arr->num_entries;
   }
+#endif
 
 static gavl_dictionary_t *
-append_stream(gavl_dictionary_t * d, const char * tag)
+append_stream(gavl_dictionary_t * d, gavl_stream_type_t type)
   {
   gavl_value_t val;
   gavl_array_t * arr;
   gavl_dictionary_t * s;
   gavl_dictionary_t * m;
   
-  if(!(arr = gavl_dictionary_get_array_nc(d, tag)))
+  if(!(arr = gavl_dictionary_get_array_nc(d, GAVL_META_STREAMS)))
     {
     gavl_value_init(&val);
     gavl_value_set_array(&val);
-    gavl_dictionary_set_nocopy(d, tag, &val);
-    arr = gavl_dictionary_get_array_nc(d, tag);
+    gavl_dictionary_set_nocopy(d, GAVL_META_STREAMS, &val);
+    arr = gavl_dictionary_get_array_nc(d, GAVL_META_STREAMS);
     }
-
+  
   gavl_value_init(&val);
   s = gavl_value_set_dictionary(&val);
+
+  gavl_dictionary_set_int(s, GAVL_META_STREAM_TYPE, type);
+  
   m = gavl_dictionary_get_dictionary_create(s, GAVL_META_METADATA);
   gavl_dictionary_set_int(m, GAVL_META_IDX, arr->num_entries);
   gavl_array_splice_val_nocopy(arr, arr->num_entries, 0, &val);
@@ -113,14 +202,20 @@ append_stream(gavl_dictionary_t * d, const char * tag)
   return arr->entries[arr->num_entries-1].v.dictionary;
   }
 
-static void delete_stream(gavl_dictionary_t * d, const char * tag, int idx)
+static int delete_stream(gavl_dictionary_t * d, gavl_stream_type_t type, int idx)
   {
   gavl_array_t * arr;
 
-  if(!(arr = gavl_dictionary_get_array_nc(d, tag)) ||
+  idx = idx_to_position(d, type, idx);
+  if(idx < 0)
+    return 0;
+  
+  if(!(arr = gavl_dictionary_get_array_nc(d, GAVL_META_STREAMS)) ||
      (idx < 0) || (idx >= arr->num_entries))
-    return;
+    return 0;
+  
   gavl_array_splice_val(arr, idx, 1, NULL);
+  return 1;
   }
 
 static void init_stream(gavl_dictionary_t * dict)
@@ -143,34 +238,34 @@ static void init_audio_stream(gavl_dictionary_t * dict)
 
 gavl_dictionary_t * gavl_track_get_audio_stream_nc(gavl_dictionary_t * d, int i)
   {
-  return get_stream_nc(d, i, GAVL_META_AUDIO_STREAMS);
+  return gavl_track_get_stream_nc(d, GAVL_STREAM_AUDIO, i);
   }
 
 const gavl_dictionary_t * gavl_track_get_audio_stream(const gavl_dictionary_t * d, int i)
   {
-  return get_stream(d, i, GAVL_META_AUDIO_STREAMS);
+  return gavl_track_get_stream(d, GAVL_STREAM_AUDIO, i);
   }
 
 int gavl_track_get_num_audio_streams(const gavl_dictionary_t * d)
   {
-  return dictionary_get_num_streams(d, GAVL_META_AUDIO_STREAMS);
+  return gavl_track_get_num_streams(d, GAVL_STREAM_AUDIO);
   }
   
 gavl_dictionary_t * gavl_track_append_audio_stream(gavl_dictionary_t * d)
   {
-  gavl_dictionary_t * s = append_stream(d, GAVL_META_AUDIO_STREAMS);
+  gavl_dictionary_t * s = append_stream(d, GAVL_STREAM_AUDIO);
   init_audio_stream(s);
   return s;
   }
 
 const gavl_dictionary_t * gavl_track_get_audio_metadata(const gavl_dictionary_t * d, int stream)
   {
-  return get_stream_metadata(d, stream, GAVL_META_AUDIO_STREAMS);
+  return get_stream_metadata(d, GAVL_STREAM_AUDIO, stream);
   }
 
 gavl_dictionary_t * gavl_track_get_audio_metadata_nc(gavl_dictionary_t * d, int stream)
   {
-  return get_stream_metadata_nc(d, stream, GAVL_META_AUDIO_STREAMS);
+  return get_stream_metadata_nc(d, GAVL_STREAM_AUDIO, stream);
   }
 
 const gavl_audio_format_t * gavl_track_get_audio_format(const gavl_dictionary_t * d, int stream)
@@ -178,7 +273,7 @@ const gavl_audio_format_t * gavl_track_get_audio_format(const gavl_dictionary_t 
   const gavl_dictionary_t * s;
   const gavl_value_t * val;
     
-  if(!(s = get_stream(d, stream, GAVL_META_AUDIO_STREAMS)) ||
+  if(!(s = gavl_track_get_stream(d, GAVL_STREAM_AUDIO, stream)) ||
      !(val = gavl_dictionary_get(s, GAVL_META_STREAM_FORMAT)))
     return NULL;
   
@@ -190,16 +285,16 @@ gavl_audio_format_t * gavl_track_get_audio_format_nc(gavl_dictionary_t * d, int 
   gavl_dictionary_t * s;
   gavl_value_t * val;
   
-  if(!(s = get_stream_nc(d, stream, GAVL_META_AUDIO_STREAMS)) ||
+  if(!(s = gavl_track_get_stream_nc(d, GAVL_STREAM_AUDIO, stream)) ||
      !(val = gavl_dictionary_get_nc(s, GAVL_META_STREAM_FORMAT)))
     return NULL;
   
   return gavl_value_get_audio_format_nc(val);
   }
 
-void gavl_track_delete_audio_stream(gavl_dictionary_t * d, int stream)
+int gavl_track_delete_audio_stream(gavl_dictionary_t * d, int stream)
   {
-  delete_stream(d, GAVL_META_AUDIO_STREAMS, stream);
+  return delete_stream(d, GAVL_STREAM_AUDIO, stream);
   }
 
 /* Video */
@@ -218,34 +313,34 @@ static void init_video_stream(gavl_dictionary_t * dict)
 
 gavl_dictionary_t * gavl_track_get_video_stream_nc(gavl_dictionary_t * d, int i)
   {
-  return get_stream_nc(d, i, GAVL_META_VIDEO_STREAMS);
+  return gavl_track_get_stream_nc(d, GAVL_STREAM_VIDEO, i);
   }
 
 const gavl_dictionary_t * gavl_track_get_video_stream(const gavl_dictionary_t * d, int i)
   {
-  return get_stream(d, i, GAVL_META_VIDEO_STREAMS);
+  return gavl_track_get_stream(d, GAVL_STREAM_VIDEO, i);
   }
   
 int gavl_track_get_num_video_streams(const gavl_dictionary_t * d)
   {
-  return dictionary_get_num_streams(d, GAVL_META_VIDEO_STREAMS);
+  return gavl_track_get_num_streams(d, GAVL_STREAM_VIDEO);
   }
   
 gavl_dictionary_t * gavl_track_append_video_stream(gavl_dictionary_t * d)
   {
-  gavl_dictionary_t * s = append_stream(d, GAVL_META_VIDEO_STREAMS);
+  gavl_dictionary_t * s = append_stream(d, GAVL_STREAM_VIDEO);
   init_video_stream(s);
   return s;
   }
 
 const gavl_dictionary_t * gavl_track_get_video_metadata(const gavl_dictionary_t * d, int stream)
   {
-  return get_stream_metadata(d, stream, GAVL_META_VIDEO_STREAMS);
+  return get_stream_metadata(d, GAVL_STREAM_VIDEO, stream);
   }
 
 gavl_dictionary_t * gavl_track_get_video_metadata_nc(gavl_dictionary_t * d, int stream)
   {
-  return get_stream_metadata_nc(d, stream, GAVL_META_VIDEO_STREAMS);
+  return get_stream_metadata_nc(d, GAVL_STREAM_VIDEO, stream);
   }
 
 const gavl_video_format_t * gavl_track_get_video_format(const gavl_dictionary_t * d, int stream)
@@ -253,7 +348,7 @@ const gavl_video_format_t * gavl_track_get_video_format(const gavl_dictionary_t 
   const gavl_dictionary_t * s;
   const gavl_value_t * val;
     
-  if(!(s = get_stream(d, stream, GAVL_META_VIDEO_STREAMS)) ||
+  if(!(s = gavl_track_get_stream(d, GAVL_STREAM_VIDEO, stream)) ||
      !(val = gavl_dictionary_get(s, GAVL_META_STREAM_FORMAT)))
     return NULL;
   
@@ -265,19 +360,17 @@ gavl_video_format_t * gavl_track_get_video_format_nc(gavl_dictionary_t * d, int 
   gavl_dictionary_t * s;
   gavl_value_t * val;
   
-  if(!(s = get_stream_nc(d, stream, GAVL_META_VIDEO_STREAMS)) ||
+  if(!(s = gavl_track_get_stream_nc(d, GAVL_STREAM_VIDEO, stream)) ||
      !(val = gavl_dictionary_get_nc(s, GAVL_META_STREAM_FORMAT)))
     return NULL;
   
   return gavl_value_get_video_format_nc(val);
   }
 
-void gavl_track_delete_video_stream(gavl_dictionary_t * d, int stream)
+int gavl_track_delete_video_stream(gavl_dictionary_t * d, int stream)
   {
-  delete_stream(d, GAVL_META_VIDEO_STREAMS, stream);
-
+  return delete_stream(d, GAVL_STREAM_VIDEO, stream);
   }
-
 
 /* Text */
 
@@ -294,43 +387,40 @@ static void init_text_stream(gavl_dictionary_t * dict)
 
 gavl_dictionary_t * gavl_track_get_text_stream_nc(gavl_dictionary_t * d, int i)
   {
-  return get_stream_nc(d, i, GAVL_META_TEXT_STREAMS);
+  return gavl_track_get_stream_nc(d, GAVL_STREAM_TEXT, i);
   }
 
 const gavl_dictionary_t * gavl_track_get_text_stream(const gavl_dictionary_t * d, int i)
   {
-  return get_stream(d, i, GAVL_META_TEXT_STREAMS);
+  return gavl_track_get_stream(d, GAVL_STREAM_TEXT, i);
   }
 
 int gavl_track_get_num_text_streams(const gavl_dictionary_t * d)
   {
-  return dictionary_get_num_streams(d, GAVL_META_TEXT_STREAMS);
-
+  return gavl_track_get_num_streams(d, GAVL_STREAM_TEXT);
   }
   
 gavl_dictionary_t * gavl_track_append_text_stream(gavl_dictionary_t * d)
   {
-  gavl_dictionary_t * s =  append_stream(d, GAVL_META_TEXT_STREAMS);
+  gavl_dictionary_t * s =  append_stream(d, GAVL_STREAM_TEXT);
   init_text_stream(s);
   return s;
   }
 
 const gavl_dictionary_t * gavl_track_get_text_metadata(const gavl_dictionary_t * d, int stream)
   {
-  return get_stream_metadata(d, stream, GAVL_META_TEXT_STREAMS);
+  return get_stream_metadata(d, GAVL_STREAM_TEXT, stream);
   }
 
 gavl_dictionary_t * gavl_track_get_text_metadata_nc(gavl_dictionary_t * d, int stream)
   {
-  return get_stream_metadata_nc(d, stream, GAVL_META_TEXT_STREAMS);
+  return get_stream_metadata_nc(d, GAVL_STREAM_TEXT, stream);
   }
 
-void gavl_track_delete_text_stream(gavl_dictionary_t * d, int stream)
+int gavl_track_delete_text_stream(gavl_dictionary_t * d, int stream)
   {
-  delete_stream(d, GAVL_META_TEXT_STREAMS, stream);
-
+  return delete_stream(d, GAVL_STREAM_TEXT, stream);
   }
-
 
 /* Overlay */
 
@@ -348,34 +438,34 @@ static void init_overlay_stream(gavl_dictionary_t * dict)
 
 gavl_dictionary_t * gavl_track_get_overlay_stream_nc(gavl_dictionary_t * d, int i)
   {
-  return get_stream_nc(d, i, GAVL_META_OVERLAY_STREAMS);
+  return gavl_track_get_stream_nc(d, GAVL_STREAM_OVERLAY, i);
   }
 
 const gavl_dictionary_t * gavl_track_get_overlay_stream(const gavl_dictionary_t * d, int i)
   {
-  return get_stream(d, i, GAVL_META_OVERLAY_STREAMS);
+  return gavl_track_get_stream(d, GAVL_STREAM_OVERLAY, i);
   }
 
 int gavl_track_get_num_overlay_streams(const gavl_dictionary_t * d)
   {
-  return dictionary_get_num_streams(d, GAVL_META_OVERLAY_STREAMS);
+  return gavl_track_get_num_streams(d, GAVL_STREAM_OVERLAY);
   }
   
 gavl_dictionary_t * gavl_track_append_overlay_stream(gavl_dictionary_t * d)
   {
-  gavl_dictionary_t * s =  append_stream(d, GAVL_META_OVERLAY_STREAMS);
+  gavl_dictionary_t * s =  append_stream(d, GAVL_STREAM_OVERLAY);
   init_overlay_stream(s);
   return s;
   }
      
 const gavl_dictionary_t * gavl_track_get_overlay_metadata(const gavl_dictionary_t * d, int stream)
   {
-  return get_stream_metadata(d, stream, GAVL_META_OVERLAY_STREAMS);
+  return get_stream_metadata(d, GAVL_STREAM_OVERLAY, stream);
   }
 
 gavl_dictionary_t * gavl_track_get_overlay_metadata_nc(gavl_dictionary_t * d, int stream)
   {
-  return get_stream_metadata_nc(d, stream, GAVL_META_OVERLAY_STREAMS);
+  return get_stream_metadata_nc(d, GAVL_STREAM_OVERLAY, stream);
   }
 
 const gavl_video_format_t * gavl_track_get_overlay_format(const gavl_dictionary_t * d, int stream)
@@ -383,7 +473,7 @@ const gavl_video_format_t * gavl_track_get_overlay_format(const gavl_dictionary_
   const gavl_dictionary_t * s;
   const gavl_value_t * val;
     
-  if(!(s = get_stream(d, stream, GAVL_META_OVERLAY_STREAMS)) ||
+  if(!(s = gavl_track_get_stream(d, GAVL_STREAM_OVERLAY, stream)) ||
      !(val = gavl_dictionary_get(s, GAVL_META_STREAM_FORMAT)))
     return NULL;
   
@@ -395,19 +485,19 @@ gavl_video_format_t * gavl_track_get_overlay_format_nc(gavl_dictionary_t * d, in
   gavl_dictionary_t * s;
   gavl_value_t * val;
   
-  if(!(s = get_stream_nc(d, stream, GAVL_META_OVERLAY_STREAMS)) ||
+  if(!(s = gavl_track_get_stream_nc(d, GAVL_STREAM_OVERLAY, stream)) ||
      !(val = gavl_dictionary_get_nc(s, GAVL_META_STREAM_FORMAT)))
     return NULL;
   
   return gavl_value_get_video_format_nc(val);
   }
 
-void gavl_track_delete_overlay_stream(gavl_dictionary_t * d, int stream)
+int gavl_track_delete_overlay_stream(gavl_dictionary_t * d, int stream)
   {
-  delete_stream(d, GAVL_META_OVERLAY_STREAMS, stream);
+  return delete_stream(d, GAVL_STREAM_OVERLAY, stream);
   }
 
-/* Text */
+/* Message */
 
 static void init_msg_stream(gavl_dictionary_t * dict)
   {
@@ -422,44 +512,40 @@ static void init_msg_stream(gavl_dictionary_t * dict)
 
 gavl_dictionary_t * gavl_track_get_msg_stream_nc(gavl_dictionary_t * d, int i)
   {
-  return get_stream_nc(d, i, GAVL_META_MSG_STREAMS);
+  return gavl_track_get_stream_nc(d, GAVL_STREAM_MSG, i);
   }
 
 const gavl_dictionary_t * gavl_track_get_msg_stream(const gavl_dictionary_t * d, int i)
   {
-  return get_stream(d, i, GAVL_META_MSG_STREAMS);
+  return gavl_track_get_stream(d, GAVL_STREAM_MSG, i);
   }
 
 int gavl_track_get_num_msg_streams(const gavl_dictionary_t * d)
   {
-  return dictionary_get_num_streams(d, GAVL_META_MSG_STREAMS);
-
+  return gavl_track_get_num_streams(d, GAVL_STREAM_MSG);
   }
-  
+
 gavl_dictionary_t * gavl_track_append_msg_stream(gavl_dictionary_t * d)
   {
-  gavl_dictionary_t * s =  append_stream(d, GAVL_META_MSG_STREAMS);
+  gavl_dictionary_t * s =  append_stream(d, GAVL_STREAM_MSG);
   init_msg_stream(s);
   return s;
   }
 
 const gavl_dictionary_t * gavl_track_get_msg_metadata(const gavl_dictionary_t * d, int stream)
   {
-  return get_stream_metadata(d, stream, GAVL_META_MSG_STREAMS);
+  return get_stream_metadata(d, GAVL_STREAM_MSG, stream);
   }
 
 gavl_dictionary_t * gavl_track_get_msg_metadata_nc(gavl_dictionary_t * d, int stream)
   {
-  return get_stream_metadata_nc(d, stream, GAVL_META_MSG_STREAMS);
+  return get_stream_metadata_nc(d, GAVL_STREAM_MSG, stream);
   }
 
-void gavl_track_delete_msg_stream(gavl_dictionary_t * d, int stream)
+int gavl_track_delete_msg_stream(gavl_dictionary_t * d, int stream)
   {
-  delete_stream(d, GAVL_META_MSG_STREAMS, stream);
-
+  return delete_stream(d, GAVL_STREAM_MSG, stream);
   }
-
-
 
 /* Track */
 
@@ -723,18 +809,9 @@ void gavl_track_compute_duration(gavl_dictionary_t * dict)
   if(gavl_dictionary_get_long(m, GAVL_META_APPROX_DURATION, &dur) && (dur > 0))
     return;
   
-  if((arr = gavl_dictionary_get_array_nc(dict, GAVL_META_AUDIO_STREAMS)))
+  if((arr = gavl_dictionary_get_array_nc(dict, GAVL_META_STREAMS)))
     gavl_array_foreach(arr, get_stream_duration, &dur);
   
-  if((arr = gavl_dictionary_get_array_nc(dict, GAVL_META_VIDEO_STREAMS)))
-    gavl_array_foreach(arr, get_stream_duration, &dur);
-  
-  if((arr = gavl_dictionary_get_array_nc(dict, GAVL_META_TEXT_STREAMS)))
-    gavl_array_foreach(arr, get_stream_duration, &dur);
-  
-  if((arr = gavl_dictionary_get_array_nc(dict, GAVL_META_OVERLAY_STREAMS)))
-    gavl_array_foreach(arr, get_stream_duration, &dur);
-
   if(dur > 0)
     gavl_track_set_duration(dict, dur);
   
@@ -1111,11 +1188,11 @@ void gavl_track_set_num_audio_streams(gavl_dictionary_t * dict, int num)
   int i;
 
   /* Delete previous streams */
-  gavl_dictionary_set(dict, GAVL_META_AUDIO_STREAMS, NULL);
-
+  while(gavl_track_delete_audio_stream(dict, 0))
+    ;
+  
   for(i = 0; i < num; i++)
     gavl_track_append_audio_stream(dict);
- 
   }
 
 void gavl_track_set_num_video_streams(gavl_dictionary_t * dict, int num)
@@ -1123,8 +1200,9 @@ void gavl_track_set_num_video_streams(gavl_dictionary_t * dict, int num)
   int i;
 
   /* Delete previous streams */
-  gavl_dictionary_set(dict, GAVL_META_VIDEO_STREAMS, NULL);
-
+  while(gavl_track_delete_video_stream(dict, 0))
+    ;
+  
   for(i = 0; i < num; i++)
     gavl_track_append_video_stream(dict);
   
@@ -1135,7 +1213,8 @@ void gavl_track_set_num_text_streams(gavl_dictionary_t * dict, int num)
   int i;
 
   /* Delete previous streams */
-  gavl_dictionary_set(dict, GAVL_META_TEXT_STREAMS, NULL);
+  while(gavl_track_delete_text_stream(dict, 0))
+    ;
 
   for(i = 0; i < num; i++)
     gavl_track_append_text_stream(dict);
@@ -1147,7 +1226,8 @@ void gavl_track_set_num_overlay_streams(gavl_dictionary_t * dict, int num)
   int i;
 
   /* Delete previous streams */
-  gavl_dictionary_set(dict, GAVL_META_OVERLAY_STREAMS, NULL);
+  while(gavl_track_delete_overlay_stream(dict, 0))
+    ;
 
   for(i = 0; i < num; i++)
     gavl_track_append_overlay_stream(dict);
@@ -1159,13 +1239,12 @@ void gavl_track_set_num_msg_streams(gavl_dictionary_t * dict, int num)
   int i;
 
   /* Delete previous streams */
-  gavl_dictionary_set(dict, GAVL_META_MSG_STREAMS, NULL);
-
+  while(gavl_track_delete_msg_stream(dict, 0))
+    ;
+  
   for(i = 0; i < num; i++)
     gavl_track_append_msg_stream(dict);
-  
   }
-
 
 int gavl_track_can_seek(const gavl_dictionary_t * track)
   {

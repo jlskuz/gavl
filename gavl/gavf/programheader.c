@@ -47,33 +47,27 @@ int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph)
 int gavf_program_header_write(gavf_io_t * io,
                               const gavf_program_header_t * ph)
   {
-  gavl_buffer_t buf;
-  gavf_io_t bufio;
+  gavf_io_t * bufio;
   int ret = 0;
-
+  gavf_chunk_t chunk;
+  
   gavl_dictionary_t dict;
   gavl_dictionary_init(&dict);
   
-  
   if(!gavf_io_cb(io, GAVF_IO_CB_PROGRAM_HEADER_START, ph))
     goto fail;
-  
-  if(gavf_io_write_data(io, (uint8_t*)GAVF_TAG_PROGRAM_HEADER, 8) < 8)
-    return 0;
-  
-  gavl_buffer_init(&buf);
-  gavf_io_init_buf_write(&bufio, &buf);
 
+  bufio = gavf_chunk_start_io(io, &chunk, GAVF_TAG_PROGRAM_HEADER);
+  
   gavf_program_header_to_dictionary(ph, &dict);
   
   /* Write metadata */
-  if(!gavl_dictionary_write(&bufio, &dict))
+  if(!gavl_dictionary_write(bufio, &dict))
     goto fail;
 
   /* size */
-  gavf_io_write_int64f(io, buf.len);
-  gavf_io_write_data(io, buf.buf, buf.len);
-  gavf_io_flush(io);
+  
+  gavf_chunk_finish_io(io, &chunk, bufio);
   
   if(!gavf_io_cb(io, GAVF_IO_CB_PROGRAM_HEADER_END, ph))
     goto fail;
@@ -81,7 +75,6 @@ int gavf_program_header_write(gavf_io_t * io,
   ret = 1;
   fail:
   
-  gavl_buffer_free(&buf);
   gavl_dictionary_free(&dict);
   
   return ret;
@@ -120,7 +113,7 @@ int gavf_program_header_add_audio_stream(gavf_program_header_t * ph,
   {
   gavf_stream_header_t * h = add_stream(ph, m);
 
-  h->type = GAVF_STREAM_AUDIO;
+  h->type = GAVL_STREAM_AUDIO;
   
   gavl_compression_info_copy(&h->ci, ci);
   gavl_audio_format_copy(&h->format.audio, format);
@@ -133,7 +126,7 @@ int gavf_program_header_add_video_stream(gavf_program_header_t * ph,
                                          const gavl_dictionary_t * m)
   {
   gavf_stream_header_t * h = add_stream(ph, m);
-  h->type = GAVF_STREAM_VIDEO;
+  h->type = GAVL_STREAM_VIDEO;
 
   gavl_compression_info_copy(&h->ci, ci);
   gavl_video_format_copy(&h->format.video, format);
@@ -149,7 +142,7 @@ int gavf_program_header_add_overlay_stream(gavf_program_header_t * ph,
                                            const gavl_dictionary_t * m)
   {
   gavf_stream_header_t * h = add_stream(ph, m);
-  h->type = GAVF_STREAM_OVERLAY;
+  h->type = GAVL_STREAM_OVERLAY;
   
   gavl_compression_info_copy(&h->ci, ci);
   gavl_video_format_copy(&h->format.video, format);
@@ -169,7 +162,7 @@ int gavf_program_header_add_text_stream(gavf_program_header_t * ph,
                                         const gavl_dictionary_t * m)
   {
   gavf_stream_header_t * h = add_stream(ph, m);
-  h->type = GAVF_STREAM_TEXT;
+  h->type = GAVL_STREAM_TEXT;
   gavl_dictionary_set_int(&h->m, GAVL_META_STREAM_SAMPLE_TIMESCALE, timescale);
   return ph->num_streams-1;
   }
@@ -178,7 +171,7 @@ int gavf_program_header_add_msg_stream(gavf_program_header_t * ph,
                                        const gavl_dictionary_t * m)
   {
   gavf_stream_header_t * h = add_stream(ph, m);
-  h->type = GAVF_STREAM_MSG;
+  h->type = GAVL_STREAM_MSG;
   return ph->num_streams-1;
   }
 
@@ -195,54 +188,19 @@ void gavf_program_header_free(gavf_program_header_t * ph)
 
 void gavf_program_header_dump(const gavf_program_header_t * ph)
   {
-  int i, num;
+  int i;
   const gavf_stream_header_t * h;
   
   fprintf(stderr, "Program header\n");
   fprintf(stderr, "  Metadata\n");
   gavl_dictionary_dump(&ph->m, 4); fprintf(stderr, "\n");
 
-  
-  num = gavf_program_header_get_num_streams(ph, GAVF_STREAM_AUDIO);
-  for(i = 0; i < num; i++)
+  for(i = 0; i < ph->num_streams; i++)
     {
-    h = gavf_program_header_get_stream(ph, i, GAVF_STREAM_AUDIO);
-    fprintf(stderr, "  Audio stream %d\n", i+1);
+    h = &ph->streams[i];
+    fprintf(stderr, "  Stream %d\n", i+1);
     gavf_stream_header_dump(h);
     }
-
-  num = gavf_program_header_get_num_streams(ph, GAVF_STREAM_VIDEO);
-  for(i = 0; i < num; i++)
-    {
-    h = gavf_program_header_get_stream(ph, i, GAVF_STREAM_VIDEO);
-    fprintf(stderr, "  Video stream %d\n", i+1);
-    gavf_stream_header_dump(h);
-    }
-
-  num = gavf_program_header_get_num_streams(ph, GAVF_STREAM_TEXT);
-  for(i = 0; i < num; i++)
-    {
-    h = gavf_program_header_get_stream(ph, i, GAVF_STREAM_TEXT);
-    fprintf(stderr, "  Text stream %d\n", i+1);
-    gavf_stream_header_dump(h);
-    }
-
-  num = gavf_program_header_get_num_streams(ph, GAVF_STREAM_OVERLAY);
-  for(i = 0; i < num; i++)
-    {
-    h = gavf_program_header_get_stream(ph, i, GAVF_STREAM_OVERLAY);
-    fprintf(stderr, "  Overlay stream %d\n", i+1);
-    gavf_stream_header_dump(h);
-    }
-
-  num = gavf_program_header_get_num_streams(ph, GAVF_STREAM_MSG);
-  for(i = 0; i < num; i++)
-    {
-    h = gavf_program_header_get_stream(ph, i, GAVF_STREAM_MSG);
-    fprintf(stderr, "  Message stream %d\n", i+1);
-    gavf_stream_header_dump(h);
-    }
-  
   }
 
 int
@@ -352,22 +310,22 @@ void gavf_program_header_to_dictionary(const gavf_program_header_t * ph,
     stream = NULL;
     switch(ph->streams[i].type)
       {
-      case GAVF_STREAM_AUDIO:
+      case GAVL_STREAM_AUDIO:
         stream = gavl_track_append_audio_stream(track);
         break;
-      case GAVF_STREAM_VIDEO:
+      case GAVL_STREAM_VIDEO:
         stream = gavl_track_append_video_stream(track);
         break;
-      case GAVF_STREAM_TEXT:
+      case GAVL_STREAM_TEXT:
         stream = gavl_track_append_text_stream(track);
         break;
-      case GAVF_STREAM_OVERLAY:
+      case GAVL_STREAM_OVERLAY:
         stream = gavl_track_append_overlay_stream(track);
         break;
-      case GAVF_STREAM_MSG:
+      case GAVL_STREAM_MSG:
         stream = gavl_track_append_msg_stream(track);
         break;
-      case GAVF_STREAM_NONE:
+      case GAVL_STREAM_NONE:
         break;
       }
     if(!stream)
@@ -379,43 +337,23 @@ void gavf_program_header_to_dictionary(const gavf_program_header_t * ph,
 void gavf_program_header_from_dictionary(gavf_program_header_t * ph,
                                          const gavl_dictionary_t * track)
   {
-  int num, i;
+  int i;
   gavf_stream_header_t * sh;
   const gavl_dictionary_t * dict_src;
+  const gavl_array_t * arr;
 
   if((dict_src = gavl_dictionary_get_dictionary(track, GAVL_META_METADATA)))
     gavl_dictionary_copy(&ph->m, dict_src);
 
-  num = gavl_track_get_num_audio_streams(track);
-  for(i = 0; i < num; i++)
+  if((arr = gavl_dictionary_get_array(track, GAVL_META_STREAMS)))
     {
-    sh = add_stream(ph, NULL);
-    dict_src = gavl_track_get_audio_stream(track, i);
-    gavf_stream_header_from_dict(sh, dict_src);
+    for(i = 0; i < arr->num_entries; i++)
+      {
+      if((dict_src = gavl_value_get_dictionary(&arr->entries[i])))
+        {
+        sh = add_stream(ph, NULL);
+        gavf_stream_header_from_dict(sh, dict_src);
+        }
+      }
     }
-
-  num = gavl_track_get_num_video_streams(track);
-  for(i = 0; i < num; i++)
-    {
-    sh = add_stream(ph, NULL);
-    dict_src = gavl_track_get_video_stream(track, i);
-    gavf_stream_header_from_dict(sh, dict_src);
-    }
-
-  num = gavl_track_get_num_text_streams(track);
-  for(i = 0; i < num; i++)
-    {
-    sh = add_stream(ph, NULL);
-    dict_src = gavl_track_get_text_stream(track, i);
-    gavf_stream_header_from_dict(sh, dict_src);
-    }
-  
-  num = gavl_track_get_num_overlay_streams(track);
-  for(i = 0; i < num; i++)
-    {
-    sh = add_stream(ph, NULL);
-    dict_src = gavl_track_get_overlay_stream(track, i);
-    gavf_stream_header_from_dict(sh, dict_src);
-    }
-  
   }

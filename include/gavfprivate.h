@@ -330,6 +330,9 @@ struct gavf_s
   gavf_stream_t * streams;
 
   int64_t * sync_pts;
+
+  gavf_chunk_t packets_chunk;
+  gavf_chunk_t sync_chunk;
   
   gavf_options_t opt;
   

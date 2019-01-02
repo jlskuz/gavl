@@ -339,11 +339,13 @@
 #define GAVL_META_STREAM_PACKET_DURATION_MIN "mindur"
 #define GAVL_META_STREAM_PACKET_DURATION_MAX "maxdur"
 
-#define GAVL_META_AUDIO_STREAMS    "astreams"
-#define GAVL_META_VIDEO_STREAMS    "vstreams"
-#define GAVL_META_TEXT_STREAMS     "tstreams"
-#define GAVL_META_OVERLAY_STREAMS  "ostreams"
-#define GAVL_META_MSG_STREAMS      "mstreams"
+#define GAVL_META_STREAMS     "streams"
+#define GAVL_META_STREAM_TYPE "streamtype"
+
+//#define GAVL_META_VIDEO_STREAMS    "vstreams"
+//#define GAVL_META_TEXT_STREAMS     "tstreams"
+//#define GAVL_META_OVERLAY_STREAMS  "ostreams"
+//#define GAVL_META_MSG_STREAMS      "mstreams"
 #define GAVL_META_METADATA         "metadata"
 #define GAVL_META_EDL              "edl"
 #define GAVL_META_TRACKS           GAVL_META_CHILDREN // Array containing single tracks

@@ -10,20 +10,20 @@
 
 static struct
   {
-  gavf_stream_type_t type;
+  gavl_stream_type_t type;
   const char * name;
   }
 stream_types[] =
   {
-    { GAVF_STREAM_AUDIO, "audio" },
-    { GAVF_STREAM_VIDEO, "video" },
-    { GAVF_STREAM_TEXT,  "text"  },
-    { GAVF_STREAM_OVERLAY,  "overlay" },
-    { GAVF_STREAM_MSG,      "msg"  },
+    { GAVL_STREAM_AUDIO, "audio" },
+    { GAVL_STREAM_VIDEO, "video" },
+    { GAVL_STREAM_TEXT,  "text"  },
+    { GAVL_STREAM_OVERLAY,  "overlay" },
+    { GAVL_STREAM_MSG,      "msg"  },
   };
 
 GAVL_PUBLIC
-const char * gavf_stream_type_name(gavf_stream_type_t t)
+const char * gavf_stream_type_name(gavl_stream_type_t t)
   {
   int i;
   for(i = 0; i < sizeof(stream_types)/sizeof(stream_types[0]); i++)
@@ -108,10 +108,13 @@ static int write_sync_header(gavf_t * g, int stream, const gavl_packet_t * p)
     }
 
   /* If that's the first sync header, update file index */
-
   if(!g->first_sync_pos)
+    {
+    /* Write GAVF_TAG_PACKETS tag */
+    
     g->first_sync_pos = g->io->position;
-
+  
+    }
   if(!gavf_io_cb(g->io, GAVF_IO_CB_SYNC_HEADER_START, g->sync_pts))
     return 0;
   /* Write the sync header */
@@ -129,8 +132,8 @@ static int write_sync_header(gavf_t * g, int stream, const gavl_packet_t * p)
     if(!gavf_io_write_int64v(g->io, g->sync_pts[i]))
       return 0;
     }
-  /* Update last sync pts */
 
+  /* Update last sync pts */
   for(i = 0; i < g->ph.num_streams; i++)
     {
     if(g->sync_pts[i] != GAVL_TIME_UNDEFINED)
@@ -171,7 +174,7 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
     }
   else
     {
-    if((s->h->type == GAVF_STREAM_VIDEO) &&
+    if((s->h->type == GAVL_STREAM_VIDEO) &&
        (s->h->ci.flags & GAVL_COMPRESSION_HAS_P_FRAMES) &&
        (p->flags & GAVL_PACKET_KEYFRAME) &&
        s->packets_since_sync)
@@ -347,7 +350,7 @@ gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s)
      *  4. If we have B-frames, output the complete Mini-GOP
      */
     
-    if(ws->h->type == GAVF_STREAM_VIDEO)
+    if(ws->h->type == GAVL_STREAM_VIDEO)
       {
       while(1)
         {
@@ -463,7 +466,7 @@ static void gavf_stream_init_video(gavf_t * g, gavf_stream_t * s,
   s->timescale = s->h->format.video.timescale;
 
   if((s->h->ci.flags & GAVL_COMPRESSION_HAS_B_FRAMES) ||
-     (s->h->type == GAVF_STREAM_OVERLAY))
+     (s->h->type == GAVL_STREAM_OVERLAY))
     s->packet_flags |= GAVF_PACKET_WRITE_PTS;
   
   if(s->h->ci.flags & GAVL_COMPRESSION_HAS_P_FRAMES)
@@ -487,7 +490,7 @@ static void gavf_stream_init_video(gavf_t * g, gavf_stream_t * s,
   if(num_streams > 1)
     {
     if((s->h->format.video.framerate_mode == GAVL_FRAMERATE_STILL) ||
-       (s->h->type == GAVF_STREAM_OVERLAY))
+       (s->h->type == GAVL_STREAM_OVERLAY))
       s->flags |= STREAM_FLAG_DISCONTINUOUS;
     }
   
@@ -565,22 +568,22 @@ int gavf_stream_get_timescale(const gavf_stream_header_t * sh)
   {
   switch(sh->type)
     {
-    case GAVF_STREAM_AUDIO:
+    case GAVL_STREAM_AUDIO:
       return sh->format.audio.samplerate;
       break;
-    case GAVF_STREAM_VIDEO:
-    case GAVF_STREAM_OVERLAY:
+    case GAVL_STREAM_VIDEO:
+    case GAVL_STREAM_OVERLAY:
       return sh->format.video.timescale;
       break;
-    case GAVF_STREAM_TEXT:
+    case GAVL_STREAM_TEXT:
       {
       int ret = 0;
       gavl_dictionary_get_int(&sh->m, GAVL_META_STREAM_SAMPLE_TIMESCALE, &ret);
       return ret;
       }
       break;
-    case GAVF_STREAM_NONE:
-    case GAVF_STREAM_MSG:
+    case GAVL_STREAM_NONE:
+    case GAVL_STREAM_MSG:
       break;
     }
   return 0;
@@ -607,20 +610,20 @@ static void init_streams(gavf_t * g)
     
     switch(g->streams[i].h->type)
       {
-      case GAVF_STREAM_AUDIO:
+      case GAVL_STREAM_AUDIO:
         gavf_stream_init_audio(g, &g->streams[i]);
         break;
-      case GAVF_STREAM_VIDEO:
-      case GAVF_STREAM_OVERLAY:
+      case GAVL_STREAM_VIDEO:
+      case GAVL_STREAM_OVERLAY:
         gavf_stream_init_video(g, &g->streams[i], g->ph.num_streams);
         break;
-      case GAVF_STREAM_TEXT:
+      case GAVL_STREAM_TEXT:
         gavf_stream_init_text(g, &g->streams[i], g->ph.num_streams);
         break;
-      case GAVF_STREAM_MSG:
+      case GAVL_STREAM_MSG:
         gavf_stream_init_msg(g, &g->streams[i], g->ph.num_streams);
         break;
-      case GAVF_STREAM_NONE:
+      case GAVL_STREAM_NONE:
         break;
       }
     g->streams[i].pb =
@@ -1463,5 +1466,131 @@ const gavf_stream_header_t * gavf_get_stream(gavf_t * g, int index,
                                              int type)
   {
   return gavf_program_header_get_stream(&g->ph, index, type);
+  }
+
+int gavf_chunk_is(const gavf_chunk_t * head, const char * eightcc)
+  {
+  if(!strncmp(head->eightcc, eightcc, 8))
+    return 1;
+  else
+    return 0;
+  }
+
+
+static int align_write(gavf_io_t * io)
+  {
+  int rest;
+  int64_t position;
+  uint8_t buf[8] = { 0x00, 0x00, 0x00, 0x00, 
+                     0x00, 0x00, 0x00, 0x00 };
+  
+  position = gavf_io_position(io);
+
+  rest = position % 8;
+  
+  if(rest)
+    {
+    rest = 8 - rest;
+    
+    if(gavf_io_write_data(io, (const uint8_t*)buf, rest) < rest)
+      return 0;
+
+    gavf_io_flush(io);
+    }
+  return 1;
+  }
+
+static int align_read(gavf_io_t * io)
+  {
+  int rest;
+  int64_t position;
+  uint8_t buf[8];
+  
+  position = gavf_io_position(io);
+
+  rest = position % 8;
+  
+  if(rest)
+    {
+    rest = 8 - rest;
+    
+    if(gavf_io_read_data(io, buf, rest) < rest)
+      return 0;
+    }
+  return 1;
+  }
+
+int gavf_chunk_read_header(gavf_io_t * io, gavf_chunk_t * head)
+  {
+  /* Byte align (if not already aligned) */
+  if(!align_read(io))
+    return 0;
+  
+  if((gavf_io_read_data(io, (uint8_t*)head->eightcc, 8) < 8) ||
+     !gavf_io_read_int64f(io, &head->len))
+    return 0;
+  /* Be strcmp friendly */
+  head->eightcc[8] = 0x00;
+  return 1;
+  }
+
+
+int gavf_chunk_start(gavf_io_t * io, gavf_chunk_t * head, const char * eightcc)
+  {
+  align_write(io);
+  
+  head->start = gavf_io_position(io);
+  
+  if((gavf_io_write_data(io, (const uint8_t*)eightcc, 8) < 8) ||
+     !gavf_io_write_int64f(io, 0))
+    return 0;
+  return 1;
+  }
+
+int gavf_chunk_finish(gavf_io_t * io, gavf_chunk_t * head, int write_size)
+  {
+  int64_t position;
+  int64_t size;
+  
+  /* Pad to multiple of 8 */
+
+  position = gavf_io_position(io);
+  
+  if(write_size && gavf_io_can_seek(io))
+    {
+    size = (position - head->start) - 16;
+
+    position = gavf_io_position(io);
+    
+    gavf_io_seek(io, head->start+8, SEEK_SET);
+    gavf_io_write_int64f(io, size);
+    gavf_io_seek(io, position, SEEK_SET);
+    }
+  return 1;
+  }
+
+gavf_io_t * gavf_chunk_start_io(gavf_io_t * io, gavf_chunk_t * head, const char * eightcc)
+  {
+  gavf_io_t * sub_io = gavf_io_create_mem_write();
+  
+  gavf_chunk_start(sub_io, head, eightcc);
+  return sub_io;
+  }
+  
+
+int gavf_chunk_finish_io(gavf_io_t * io, gavf_chunk_t * head, gavf_io_t * sub_io)
+  {
+  int len = 0;
+  uint8_t * ret;
+  
+  gavf_chunk_finish(sub_io, head, 1);
+  ret = gavf_io_mem_get_buf(sub_io, &len);
+  gavf_io_destroy(sub_io);
+  
+  gavf_io_write_data(io, ret, len);
+  gavf_io_flush(io);
+  free(ret);
+
+  return 1;
   }
 
