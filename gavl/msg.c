@@ -784,3 +784,12 @@ void gavl_msg_set_resp_for_req(gavl_msg_t * dst, const gavl_msg_t * src)
   gavl_msg_copy_header_field(dst, src, GAVL_MSG_FUNCTION_TAG);
   
   }
+
+int gavl_msg_send(gavl_msg_t * msg, gavl_handle_msg_func func, void * priv)
+  {
+  if(!func)
+    return 1;
+
+  return func(priv, msg);
+  
+  }

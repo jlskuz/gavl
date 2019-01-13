@@ -16,14 +16,15 @@ struct gavl_io_s
   
   int64_t position;
   int got_error;    // Got write error
-  gavf_io_cb_func cb;
-  void * cb_priv;
-
+  
   /* Informational data */
   char * filename;
   char * mimetype;
   int64_t total_bytes;
 
+  gavl_handle_msg_func msg_callback;
+  void * msg_data;
+  
   };
 
 void gavf_io_init(gavf_io_t * ret,
@@ -36,10 +37,6 @@ void gavf_io_init(gavf_io_t * ret,
 
 
 void gavf_io_skip(gavf_io_t * io, int bytes);
-
-int gavf_io_cb(gavf_io_t * io, int type, const void * data);
-
-
 
 void gavf_io_init_buf_read(gavf_io_t * io, gavl_buffer_t * buf);
 void gavf_io_init_buf_write(gavf_io_t * io, gavl_buffer_t * buf);
@@ -196,9 +193,6 @@ struct gavf_options_s
   {
   uint32_t flags;
   gavl_time_t sync_distance;
-
-  gavl_handle_msg_func msg_cb;
-  void * msg_cb_priv;
   };
 
 /* Extension header */
@@ -328,7 +322,10 @@ struct gavf_s
   int have_pkt_header;
   
   gavf_stream_t * streams;
-
+  
+  gavl_handle_msg_func msg_callback;
+  void * msg_data;
+  
   int64_t * sync_pts;
 
   gavf_chunk_t packets_chunk;

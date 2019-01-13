@@ -12,6 +12,16 @@ int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph)
   gavf_io_t bufio;
   int ret = 0;
   gavl_dictionary_t dict;
+
+  int result;
+  gavl_msg_t msg;
+
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_PROGRAM_HEADER_START, GAVL_MSG_NS_GAVF);
+  result = gavl_msg_send(&msg, io->msg_callback, io->msg_data);
+  gavl_msg_free(&msg);
+  if(!result)
+    goto fail;
   
   gavl_buffer_init(&buf);
   gavl_dictionary_init(&dict);
@@ -33,7 +43,12 @@ int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph)
   
   gavf_footer_init(ph);
   
-  if(!gavf_io_cb(io, GAVF_IO_CB_PROGRAM_HEADER_END, ph))
+
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_PROGRAM_HEADER_END, GAVL_MSG_NS_GAVF);
+  result = gavl_msg_send(&msg, io->msg_callback, io->msg_data);
+  gavl_msg_free(&msg);
+  if(!result)
     goto fail;
   
   ret = 1;
@@ -50,13 +65,19 @@ int gavf_program_header_write(gavf_io_t * io,
   gavf_io_t * bufio;
   int ret = 0;
   gavf_chunk_t chunk;
+  int result;
+  gavl_msg_t msg;
   
   gavl_dictionary_t dict;
   gavl_dictionary_init(&dict);
-  
-  if(!gavf_io_cb(io, GAVF_IO_CB_PROGRAM_HEADER_START, ph))
-    goto fail;
 
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PROGRAM_HEADER_START, GAVL_MSG_NS_GAVF);
+  result = gavl_msg_send(&msg, io->msg_callback, io->msg_data);
+  gavl_msg_free(&msg);
+  if(!result)
+    goto fail;
+  
   bufio = gavf_chunk_start_io(io, &chunk, GAVF_TAG_PROGRAM_HEADER);
   
   gavf_program_header_to_dictionary(ph, &dict);
@@ -69,8 +90,13 @@ int gavf_program_header_write(gavf_io_t * io,
   
   gavf_chunk_finish_io(io, &chunk, bufio);
   
-  if(!gavf_io_cb(io, GAVF_IO_CB_PROGRAM_HEADER_END, ph))
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PROGRAM_HEADER_END, GAVL_MSG_NS_GAVF);
+  result = gavl_msg_send(&msg, io->msg_callback, io->msg_data);
+  gavl_msg_free(&msg);
+  if(!result)
     goto fail;
+
   
   ret = 1;
   fail:

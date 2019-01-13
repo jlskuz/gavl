@@ -95,14 +95,14 @@
 typedef struct gavf_s gavf_t;
 typedef struct gavf_options_s gavf_options_t;
 
-#define GAVF_IO_CB_PROGRAM_HEADER_START 1
-#define GAVF_IO_CB_PROGRAM_HEADER_END   (1|0x100)
-#define GAVF_IO_CB_PACKET_START         2
-#define GAVF_IO_CB_PACKET_END           (2|0x100)
-#define GAVF_IO_CB_SYNC_HEADER_START    4
-#define GAVF_IO_CB_SYNC_HEADER_END      (4|0x100)
+//#define GAVF_IO_CB_PROGRAM_HEADER_START 1
+//#define GAVF_IO_CB_PROGRAM_HEADER_END   (1|0x100)
+//#define GAVF_IO_CB_PACKET_START         2
+//#define GAVF_IO_CB_PACKET_END           (2|0x100)
+//#define GAVF_IO_CB_SYNC_HEADER_START    4
+//#define GAVF_IO_CB_SYNC_HEADER_END      (4|0x100)
 
-#define GAVF_IO_CB_TYPE_END(t) (!!(t & 0x100))
+//#define GAVF_IO_CB_TYPE_END(t) (!!(t & 0x100))
 
 /* Chunk structure */
 
@@ -121,7 +121,7 @@ typedef int64_t (*gavf_seek_func)(void * priv, int64_t pos, int whence);
 typedef void (*gavf_close_func)(void * priv);
 typedef int (*gavf_flush_func)(void * priv);
 
-typedef int (*gavf_io_cb_func)(void * priv, int type, const void * data);
+// typedef int (*gavf_io_cb_func)(void * priv, int type, const void * data);
 
 typedef struct gavl_io_s gavf_io_t;
 
@@ -172,9 +172,11 @@ gavf_io_t * gavf_io_create_mem_read(const uint8_t * ptr, int len);
 GAVL_PUBLIC
 gavf_io_t * gavf_io_create_mem_write();
 
+// GAVL_PUBLIC
+// void gavf_io_set_cb(gavf_io_t * io, gavf_io_cb_func cb, void * cb_priv);
 
 GAVL_PUBLIC
-void gavf_io_set_cb(gavf_io_t * io, gavf_io_cb_func cb, void * cb_priv);
+void gavf_io_set_msg_cb(gavf_io_t * io, gavl_handle_msg_func msg_callback, void * msg_data);
 
 GAVL_PUBLIC
 int gavf_io_got_error(gavf_io_t * io);
@@ -523,10 +525,10 @@ GAVL_PUBLIC
 void gavf_options_set_sync_distance(gavf_options_t *,
                                     gavl_time_t sync_distance);
 
-GAVL_PUBLIC
-void gavf_options_set_msg_callback(gavf_options_t *, 
-                                   gavl_handle_msg_func cb,
-                                   void *cb_priv);
+// GAVL_PUBLIC
+// void gavf_options_set_msg_callback(gavf_options_t *, 
+//                                   gavl_handle_msg_func cb,
+//                                   void *cb_priv);
 
 
 /* General functions */
@@ -823,6 +825,9 @@ int gavf_write_gavl_packet(gavf_io_t * io,
                            const gavl_packet_t * p);
 
 /* Utilify functions for messages */
+
+GAVL_PUBLIC
+void gavf_set_msg_cb(gavf_t * g, gavl_handle_msg_func msg_callback, void * msg_data);
 
 GAVL_PUBLIC
 int gavf_msg_to_packet(const gavl_msg_t * msg,
