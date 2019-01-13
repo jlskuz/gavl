@@ -262,7 +262,32 @@
 /* Source -> receiver: EOF encountered. After this message was sent, one can seek or select another track
    with the Source API */
 
-#define GAVL_MSG_GAVF_MSG_EOF      2
+#define GAVL_MSG_GAVF_EOF   2
+
+/* Emitted by the decoder immediately after a program header was read */
+
+#define GAVL_MSG_GAVF_READ_PROGRAM_HEADER_START     (0x1000|1)
+#define GAVL_MSG_GAVF_READ_PROGRAM_HEADER_END       (0x1000|2)
+
+/* Emitted by the encoder immediately before a program header is written */
+#define GAVL_MSG_GAVF_WRITE_PROGRAM_HEADER_START    (0x1000|3)
+
+/* Emitted by the encoder immediately after a program header is written */
+#define GAVL_MSG_GAVF_WRITE_PROGRAM_HEADER_END      (0x1000|4)
+
+#define GAVL_MSG_GAVF_READ_SYNC_HEADER_START        (0x1000|5)
+#define GAVL_MSG_GAVF_READ_SYNC_HEADER_END          (0x1000|6)
+
+#define GAVL_MSG_GAVF_WRITE_SYNC_HEADER_START       (0x1000|7)
+#define GAVL_MSG_GAVF_WRITE_SYNC_HEADER_END         (0x1000|8)
+
+#define GAVL_MSG_GAVF_READ_PACKET_START             (0x1000|9)
+#define GAVL_MSG_GAVF_READ_PACKET_END               (0x1000|10)
+
+#define GAVL_MSG_GAVF_WRITE_PACKET_START            (0x1000|11)
+
+/* Emitted by the encoder immediately after a packet is written */
+#define GAVL_MSG_GAVF_WRITE_PACKET_END              (0x1000|12)
 
 
 /* Header fields */
@@ -294,6 +319,8 @@ typedef struct gavl_msg_s gavl_msg_t;
 
 typedef int (*gavl_handle_msg_func)(void *, gavl_msg_t *);
 
+GAVL_PUBLIC
+int gavl_msg_send(gavl_msg_t * msg, gavl_handle_msg_func func, void * priv);
 
 /** \brief Create a message
  *  \returns A newly allocated message

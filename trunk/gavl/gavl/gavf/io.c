@@ -746,25 +746,30 @@ int gavf_io_write_buffer(gavf_io_t * io, const gavl_buffer_t * buf)
   return 1;
   }
 
-void gavf_io_set_cb(gavf_io_t * io, gavf_io_cb_func cb, void * cb_priv)
-  {
-  io->cb = cb;
-  io->cb_priv = cb_priv;
-  }
 
+#if 0
 int gavf_io_cb(gavf_io_t * io, int type, const void * data)
   {
   int ret;
-  if(!io->cb)
+  
+  if(!io->msg_callback)
     return 1;
+  
   if(io->got_error)
     return 0;
-  ret = io->cb(io->cb_priv, type, data);
 
+  switch(type)
+    {
+    
+    }
+  
+  //   ret = io->msg_callback(io->msg_callback_data, type, data);
+  
   if(!ret)
     io->got_error = 1;
   return ret;
   }
+#endif
 
 /* */
 
@@ -1104,4 +1109,10 @@ int gavf_packet_to_msg(const gavl_packet_t * src,
   {
   gavl_dictionary_set_long(&msg->header, GAVL_MSG_HEADER_TIMESTAMP, src->pts);
   return gavl_msg_from_buffer(src->data, src->data_len, msg);
+  }
+
+void gavf_io_set_msg_cb(gavf_io_t * io, gavl_handle_msg_func msg_callback, void * msg_data)
+  {
+  io->msg_callback = msg_callback;
+  io->msg_data = msg_data;
   }

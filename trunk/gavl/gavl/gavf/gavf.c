@@ -64,14 +64,26 @@ int gavf_extension_write(gavf_io_t * io, uint32_t key, uint32_t len,
 
 static int write_sync_header(gavf_t * g, int stream, const gavl_packet_t * p)
   {
+  int ret = 0;
+  int result;
   int i;
   gavf_stream_t * s;
+  
+  gavl_value_t sync_pts_val;
+  gavl_value_t sync_pts_arr_val;
+  
+  gavl_array_t * sync_pts_arr;
 
+  gavl_msg_t msg;
+  
+  gavl_value_init(&sync_pts_arr_val);
+
+  sync_pts_arr = gavl_value_set_array(&sync_pts_arr_val);
   
   for(i = 0; i < g->ph.num_streams; i++)
     {
     s = &g->streams[i];
-
+    
     if(i == stream)
       {
       g->sync_pts[i] = p->pts;
@@ -98,6 +110,11 @@ static int write_sync_header(gavf_t * g, int stream, const gavl_packet_t * p)
       g->sync_pts[i] = g->streams[i].next_sync_pts;
       s->packets_since_sync = 0;
       }
+
+    gavl_value_init(&sync_pts_val);
+    gavl_value_set_long(&sync_pts_val, g->sync_pts[i]);
+    
+    gavl_array_splice_val_nocopy(sync_pts_arr, -1, 0, &sync_pts_val);
     }
 
   /* Update sync index */
@@ -115,11 +132,20 @@ static int write_sync_header(gavf_t * g, int stream, const gavl_packet_t * p)
     g->first_sync_pos = g->io->position;
   
     }
-  if(!gavf_io_cb(g->io, GAVF_IO_CB_SYNC_HEADER_START, g->sync_pts))
-    return 0;
+
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_SYNC_HEADER_START, GAVL_MSG_NS_GAVF);
+  gavl_msg_set_arg(&msg, 0, &sync_pts_arr_val);
+
+  result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
+  
+  gavl_msg_free(&msg);
+  
+  if(!result)
+    goto fail;
   /* Write the sync header */
   if(gavf_io_write_data(g->io, (uint8_t*)GAVF_TAG_SYNC_HEADER, 8) < 8)
-    return 0;
+    goto fail;
 #if 0
   fprintf(stderr, "Write sync header\n");
 #endif
@@ -130,7 +156,7 @@ static int write_sync_header(gavf_t * g, int stream, const gavl_packet_t * p)
     fprintf(stderr, "PTS[%d]: %"PRId64"\n", i, g->sync_pts[i]);
 #endif
     if(!gavf_io_write_int64v(g->io, g->sync_pts[i]))
-      return 0;
+      goto fail;
     }
 
   /* Update last sync pts */
@@ -140,16 +166,29 @@ static int write_sync_header(gavf_t * g, int stream, const gavl_packet_t * p)
       g->streams[i].last_sync_pts = g->sync_pts[i];
     }
   if(!gavf_io_flush(g->io))
-    return 0;
+    goto fail;
+
+
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_SYNC_HEADER_END, GAVL_MSG_NS_GAVF);
+  gavl_msg_set_arg_nocopy(&msg, 0, &sync_pts_arr_val);
+  result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
+  gavl_msg_free(&msg);
   
-  if(!gavf_io_cb(g->io, GAVF_IO_CB_SYNC_HEADER_END, g->sync_pts))
-    return 0;
-  return 1;
+  ret = 1;
+  
+  fail:
+
+  gavl_value_free(&sync_pts_arr_val);
+  
+  return ret;
   }
 
 static gavl_sink_status_t
 write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
   {
+  gavl_msg_t msg;
+  int result;
   gavl_time_t pts;
   int write_sync = 0;
   gavf_stream_t * s = &g->streams[stream];
@@ -205,7 +244,12 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
                           p->pts);
     }
 
-  if(!gavf_io_cb(g->io, GAVF_IO_CB_PACKET_START, p))
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PACKET_START, GAVL_MSG_NS_GAVF);
+  result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
+  gavl_msg_free(&msg);
+
+  if(!result)
     return GAVL_SINK_ERROR;
   
   if((gavf_io_write_data(g->io,
@@ -227,7 +271,12 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
   if(!gavf_io_flush(g->io))
     return GAVL_SINK_ERROR;
 
-  if(!gavf_io_cb(g->io, GAVF_IO_CB_PACKET_END, p))
+
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PACKET_END, GAVL_MSG_NS_GAVF);
+  result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
+  gavl_msg_free(&msg);
+  if(!result)
     return GAVL_SINK_ERROR;
   
   return GAVL_SINK_OK;
@@ -681,19 +730,30 @@ static int handle_chunk(gavf_t * g, char * sig)
     {
     if(!gavf_program_header_read(g->io, &g->ph))
       return 0;
-    
+    fprintf(stderr, "Got program header\n");
     init_streams(g);
     }
   else if(!strncmp(sig, GAVF_TAG_SYNC_HEADER, 8))
     {
     g->first_sync_pos = g->io->position;
-    }  
+    }
   return 1;
   }
 
 static int read_sync_header(gavf_t * g)
   {
   int i;
+  int result;
+  gavl_msg_t msg;
+
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_SYNC_HEADER_START, GAVL_MSG_NS_GAVF);
+  result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
+  gavl_msg_free(&msg);
+
+  if(!result)
+    return 0;
+  
   /* Read sync header */
 #if 0
   fprintf(stderr, "Read sync header\n");
@@ -712,8 +772,14 @@ static int read_sync_header(gavf_t * g)
       }
     }
 
-  if(!gavf_io_cb(g->io, GAVF_IO_CB_SYNC_HEADER_END, g->sync_pts))
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_SYNC_HEADER_END, GAVL_MSG_NS_GAVF);
+  gavl_msg_send(&msg, g->msg_callback, g->msg_data);
+  gavl_msg_free(&msg);
+
+  if(!result)
     return 0;
+  
   
   return 1;
   }
@@ -772,7 +838,9 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
   char sig[8];
   
   g->io = io;
-
+  
+  gavf_io_set_msg_cb(g->io, g->msg_callback, g->msg_data);
+  
   g->opt.flags &= ~(GAVF_OPT_FLAG_SYNC_INDEX|
                     GAVF_OPT_FLAG_PACKET_INDEX);
   
@@ -887,8 +955,16 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
           s->skip_func(g, s->h, s->skip_priv);
         else
           {
+          int result;
+          gavl_msg_t msg;
+          
           gavf_packet_skip(g);
-          if(!gavf_io_cb(g->io, GAVF_IO_CB_PACKET_END, NULL))
+
+          gavl_msg_init(&msg);
+          gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_PACKET_END, GAVL_MSG_NS_GAVF);
+          result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
+          
+          if(!result)
             {
 #ifdef DUMP_EOF
             fprintf(stderr, "EOF 3\n");
@@ -1086,6 +1162,9 @@ int gavf_open_write(gavf_t * g, gavf_io_t * io,
   {
   g->io = io;
   g->wr = 1;
+  
+  gavf_io_set_msg_cb(g->io, g->msg_callback, g->msg_data);
+  
   /* Initialize packet buffer */
 
   g->pkt_io = gavf_io_create_buf_write();
@@ -1495,8 +1574,8 @@ static int align_write(gavf_io_t * io)
     if(gavf_io_write_data(io, (const uint8_t*)buf, rest) < rest)
       return 0;
 
-    gavf_io_flush(io);
     }
+  gavf_io_flush(io);
   return 1;
   }
 
@@ -1552,8 +1631,6 @@ int gavf_chunk_finish(gavf_io_t * io, gavf_chunk_t * head, int write_size)
   int64_t position;
   int64_t size;
   
-  /* Pad to multiple of 8 */
-
   position = gavf_io_position(io);
   
   if(write_size && gavf_io_can_seek(io))
@@ -1566,6 +1643,11 @@ int gavf_chunk_finish(gavf_io_t * io, gavf_chunk_t * head, int write_size)
     gavf_io_write_int64f(io, size);
     gavf_io_seek(io, position, SEEK_SET);
     }
+
+  /* Pad to multiple of 8 */
+    
+  align_write(io);
+
   return 1;
   }
 
@@ -1594,3 +1676,8 @@ int gavf_chunk_finish_io(gavf_io_t * io, gavf_chunk_t * head, gavf_io_t * sub_io
   return 1;
   }
 
+void gavf_set_msg_cb(gavf_t * g, gavl_handle_msg_func msg_callback, void * msg_data)
+  {
+  g->msg_callback = msg_callback;
+  g->msg_data = msg_data;
+  }

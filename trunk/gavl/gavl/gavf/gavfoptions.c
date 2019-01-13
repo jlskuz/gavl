@@ -16,13 +16,3 @@ int gavf_options_get_flags(gavf_options_t * opt)
   {
   return opt->flags;
   }
-
-
-void gavf_options_set_msg_callback(gavf_options_t * opt, 
-                                   gavl_handle_msg_func cb,
-                                   void *cb_priv)
-  {
-  opt->msg_cb = cb;
-  opt->msg_cb_priv = cb_priv;
-  }
-
