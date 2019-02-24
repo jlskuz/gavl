@@ -139,14 +139,23 @@
  *  arg1: Scale (int)
  */
 
-#define GAVL_CMD_SRC_SEEK             3
+#define GAVL_CMD_SRC_SEEK              3
 
 /** \brief Set the track we should jump to when this track is over.
  *
  *  arg0: Track (int)
  */
 
-#define GAVL_CMD_SRC_SET_NEXT_TRACK   4
+#define GAVL_CMD_SRC_SET_NEXT_TRACK    4
+
+/*
+   arg0: Stream type (int)
+   arg1: Index       (int)
+   arg2: Action      (int)
+*/
+#define GAVL_CMD_SRC_SET_STREAM_ACTION 5
+
+#define GAVL_CMD_SRC_START             6
 
 /* GUI Events */
 

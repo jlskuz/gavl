@@ -593,10 +593,10 @@ static void gavf_stream_init_text(gavf_t * g, gavf_stream_t * s,
 static void gavf_stream_init_msg(gavf_t * g, gavf_stream_t * s,
                                  int num_streams)
   {
-  s->packet_flags |= (GAVF_PACKET_WRITE_PTS|GAVF_PACKET_WRITE_DURATION);
+  s->packet_flags |= (GAVF_PACKET_WRITE_PTS);
 
-  //  if(num_streams > 1)
-  //    s->flags |= STREAM_FLAG_DISCONTINUOUS;
+  if(num_streams > 1)
+    s->flags |= STREAM_FLAG_DISCONTINUOUS;
   
   if(g->wr)
     {
@@ -632,7 +632,9 @@ int gavf_stream_get_timescale(const gavf_stream_header_t * sh)
       }
       break;
     case GAVL_STREAM_NONE:
+      break;
     case GAVL_STREAM_MSG:
+      return GAVL_TIME_SCALE;
       break;
     }
   return 0;

@@ -142,6 +142,7 @@ typedef struct
  *  using them.
  */
 
+GAVL_PUBLIC
 void gavl_compression_info_init(gavl_compression_info_t * info);
   
 /** \brief Free all dynamically allocated memory of a compression info

@@ -79,41 +79,6 @@ void gavf_stream_header_from_dict(gavf_stream_header_t * dst, const gavl_diction
     }
   }
 
-#if 0
-int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h)
-  {
-  if(!gavf_io_read_uint32v(io, &h->type) ||
-     !gavf_io_read_uint32v(io, &h->id))
-    return 0;
-
-  if(!gavl_dictionary_read(io, &h->m))
-    return 0;
-  
-  switch(h->type)
-    {
-    case GAVL_STREAM_AUDIO:
-      if(!gavf_read_compression_info(io, &h->ci) ||
-         !gavf_read_audio_format(io, &h->format.audio))
-        return 0;
-      break;
-    case GAVL_STREAM_VIDEO:
-    case GAVL_STREAM_OVERLAY:
-      if(!gavf_read_compression_info(io, &h->ci) ||
-         !gavf_read_video_format(io, &h->format.video))
-        return 0;
-      break;
-    case GAVL_STREAM_TEXT:
-      //      if(!gavf_io_read_uint32v(io, &h->format.text.timescale))
-      //        return 0;
-      break;
-    case GAVL_STREAM_NONE:
-    case GAVL_STREAM_MSG:
-      break;
-    }
-  return 1;
-  }
-#endif
-
 void gavf_stream_header_apply_footer(gavf_stream_header_t * h)
   {
   /* Set maximum packet size */

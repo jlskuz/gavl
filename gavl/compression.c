@@ -313,6 +313,7 @@ void gavl_packet_alloc(gavl_packet_t * p, int len)
   {
   if(len + GAVL_PACKET_PADDING > p->data_alloc)
     {
+    fprintf(stderr, "gavl_packet_alloc %d %d\n", len + GAVL_PACKET_PADDING, p->data_alloc);
     p->data_alloc = len + GAVL_PACKET_PADDING + 1024;
     p->data = realloc(p->data, p->data_alloc);
     }
@@ -594,14 +595,4 @@ uint8_t * gavl_extract_xiph_header(uint8_t * global_header,
   
   free(buf);
   return ret;
-  }
-
-void gavl_compression_info_to_dictionary(const gavl_compression_info_t * info, gavl_dictionary_t * dict)
-  {
-
-  }
-
-void gavl_compression_info_from_dictionary(gavl_compression_info_t * info, const gavl_dictionary_t * dict)
-  {
-  
   }
