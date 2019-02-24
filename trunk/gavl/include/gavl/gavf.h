@@ -345,7 +345,6 @@ int gavf_io_write_64_be(gavf_io_t * ctx, uint64_t val);
  *  \returns 1 on success, 0 on error
  */
 
-
 GAVL_PUBLIC
 int gavl_msg_read(gavl_msg_t * ret, gavf_io_t * io);
 

@@ -26,14 +26,16 @@
 
 /* Stream information */
 
+/* Stream types except GAVL_STREAM_NONE can be ORed */
+
 typedef enum
   {
     GAVL_STREAM_NONE    = 0,
-    GAVL_STREAM_AUDIO   = 1,
-    GAVL_STREAM_VIDEO   = 2,
-    GAVL_STREAM_TEXT    = 3,
-    GAVL_STREAM_OVERLAY = 4,
-    GAVL_STREAM_MSG     = 5,
+    GAVL_STREAM_AUDIO   = (1<<0),
+    GAVL_STREAM_VIDEO   = (1<<1),
+    GAVL_STREAM_TEXT    = (1<<2),
+    GAVL_STREAM_OVERLAY = (1<<3),
+    GAVL_STREAM_MSG     = (1<<4),
   } gavl_stream_type_t;
 
 
@@ -51,6 +53,8 @@ const gavl_dictionary_t * gavl_track_get_stream(const gavl_dictionary_t * d, gav
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_track_get_stream_nc(gavl_dictionary_t * d, gavl_stream_type_t type, int idx);
 
+GAVL_PUBLIC
+gavl_dictionary_t * gavl_track_append_stream(gavl_dictionary_t * d, gavl_stream_type_t type);
 
 /* Audio */
 GAVL_PUBLIC
