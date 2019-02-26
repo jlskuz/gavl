@@ -108,41 +108,6 @@ void gavf_stream_header_apply_footer(gavf_stream_header_t * h)
     }
   }
 
-#if 0
-int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h)
-  {
-  if(!gavf_io_write_uint32v(io, h->type) ||
-     !gavf_io_write_uint32v(io, h->id))
-    return 0;
-
-  if(!gavl_dictionary_write(io, &h->m))
-    return 0;
-  
-  switch(h->type)
-    {
-    case GAVL_STREAM_AUDIO:
-      if(!gavf_write_compression_info(io, &h->ci) ||
-         !gavf_write_audio_format(io, &h->format.audio))
-        return 0;
-      break;
-    case GAVL_STREAM_VIDEO:
-    case GAVL_STREAM_OVERLAY:
-      if(!gavf_write_compression_info(io, &h->ci) ||
-         !gavf_write_video_format(io, &h->format.video))
-        return 0;
-      break;
-    case GAVL_STREAM_TEXT:
-      //      if(!gavf_io_write_uint32v(io, h->format.text.timescale))
-      //        return 0;
-      break;
-    case GAVL_STREAM_NONE:
-    case GAVL_STREAM_MSG:
-      break;
-    }
-  return 1;
-  }
-#endif
-
 void gavf_stream_header_free(gavf_stream_header_t * h)
   {
   gavl_compression_info_free(&h->ci);

@@ -342,10 +342,6 @@
 #define GAVL_META_STREAMS     "streams"
 #define GAVL_META_STREAM_TYPE "streamtype"
 
-//#define GAVL_META_VIDEO_STREAMS    "vstreams"
-//#define GAVL_META_TEXT_STREAMS     "tstreams"
-//#define GAVL_META_OVERLAY_STREAMS  "ostreams"
-//#define GAVL_META_MSG_STREAMS      "mstreams"
 #define GAVL_META_METADATA         "metadata"
 #define GAVL_META_EDL              "edl"
 #define GAVL_META_TRACKS           GAVL_META_CHILDREN // Array containing single tracks
@@ -354,10 +350,10 @@
 
 #define GAVL_META_PARTS            "parts" // Parts of a multipart movie
 
-#define GAVL_META_DATA_FORMAT_MSG  "msg"
-#define GAVL_META_DATA_ROLE_EVENTS "evt"
+// #define GAVL_META_DATA_FORMAT_MSG  "msg"
+// #define GAVL_META_DATA_ROLE_EVENTS "evt"
 
-// #define GAVL_META_MSG_TIMESTAMP    "timestamp" // Timestamp of messages embedded into A/V streams
+#define GAVL_META_MSG_TIMESTAMP    "timestamp" // Timestamp of messages embedded into A/V streams
 
 // Address of a (typically) Unix-domain socket to be used as back channel for messages
 #define GAVL_META_MSG_BACK_CHANNEL_ADDRESS "backaddr" 
