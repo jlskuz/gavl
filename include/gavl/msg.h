@@ -65,9 +65,9 @@
 
 /** \brief Global metadata changed
  *
- *  arg0: time (time)
- *  arg1: scale (int)
- *  arg2: Metadata
+ *  header field GAVL_META_MSG_TIMESTAMP: timestamp (in us)
+ *
+ *  arg0: Metadata
  */
 
 #define GAVL_MSG_SRC_METADATA_CHANGED  1
