@@ -207,6 +207,10 @@ int gavl_track_delete_msg_stream(gavl_dictionary_t * d, int stream);
 GAVL_PUBLIC
 void gavl_track_set_num_msg_streams(gavl_dictionary_t * d, int num);
 
+/* Delete stream by absolute index */
+GAVL_PUBLIC
+int gavl_track_delete_stream(gavl_dictionary_t * d, int stream);
+
 /* Tracks */
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_append_track(gavl_dictionary_t*);
