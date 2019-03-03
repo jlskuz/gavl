@@ -205,7 +205,7 @@ append_stream(gavl_dictionary_t * d, gavl_stream_type_t type)
 static int delete_stream(gavl_dictionary_t * d, gavl_stream_type_t type, int idx)
   {
   gavl_array_t * arr;
-
+  
   idx = idx_to_position(d, type, idx);
   if(idx < 0)
     return 0;
