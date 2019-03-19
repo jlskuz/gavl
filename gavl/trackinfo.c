@@ -51,7 +51,7 @@ int gavl_track_get_num_streams(const gavl_dictionary_t * d, gavl_stream_type_t t
   return ret;
   }
 
-static int idx_to_position(const gavl_dictionary_t * d, gavl_stream_type_t type, int idx)
+int gavl_track_get_stream_idx(const gavl_dictionary_t * d, gavl_stream_type_t type, int idx)
   {
   int ctr = 0;
   int i;
@@ -202,20 +202,27 @@ append_stream(gavl_dictionary_t * d, gavl_stream_type_t type)
   return arr->entries[arr->num_entries-1].v.dictionary;
   }
 
-static int delete_stream(gavl_dictionary_t * d, gavl_stream_type_t type, int idx)
+int gavl_track_delete_stream(gavl_dictionary_t * d, int idx)
   {
   gavl_array_t * arr;
-  
-  idx = idx_to_position(d, type, idx);
-  if(idx < 0)
-    return 0;
-  
+
   if(!(arr = gavl_dictionary_get_array_nc(d, GAVL_META_STREAMS)) ||
      (idx < 0) || (idx >= arr->num_entries))
     return 0;
   
   gavl_array_splice_val(arr, idx, 1, NULL);
   return 1;
+
+  }
+
+static int delete_stream(gavl_dictionary_t * d, gavl_stream_type_t type, int idx)
+  {
+  
+  idx = gavl_track_get_stream_idx(d, type, idx);
+  if(idx < 0)
+    return 0;
+
+  return gavl_track_delete_stream(d, idx);
   }
 
 static void init_stream(gavl_dictionary_t * dict)

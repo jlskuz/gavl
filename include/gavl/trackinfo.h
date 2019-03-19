@@ -211,6 +211,9 @@ void gavl_track_set_num_msg_streams(gavl_dictionary_t * d, int num);
 GAVL_PUBLIC
 int gavl_track_delete_stream(gavl_dictionary_t * d, int stream);
 
+GAVL_PUBLIC
+int gavl_track_get_stream_idx(const gavl_dictionary_t * d, gavl_stream_type_t type, int idx);
+
 /* Tracks */
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_append_track(gavl_dictionary_t*);
