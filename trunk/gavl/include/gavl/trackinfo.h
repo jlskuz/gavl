@@ -47,11 +47,26 @@ typedef enum
 GAVL_PUBLIC
 int gavl_track_get_num_streams(const gavl_dictionary_t * d, gavl_stream_type_t type);
 
-GAVL_PUBLIC
-const gavl_dictionary_t * gavl_track_get_stream(const gavl_dictionary_t * d, gavl_stream_type_t type, int idx);
+GAVL_PUBLIC int
+gavl_track_get_num_streams_all(const gavl_dictionary_t * d);
+  
+
+GAVL_PUBLIC const gavl_dictionary_t *
+gavl_track_get_stream_all(const gavl_dictionary_t * d, int idx);
+
+GAVL_PUBLIC gavl_dictionary_t *
+gavl_track_get_stream_all_nc(gavl_dictionary_t * d, int idx);
+
+GAVL_PUBLIC gavl_stream_type_t
+gavl_stream_get_type(gavl_dictionary_t * s);
 
 GAVL_PUBLIC
-gavl_dictionary_t * gavl_track_get_stream_nc(gavl_dictionary_t * d, gavl_stream_type_t type, int idx);
+const gavl_dictionary_t * gavl_track_get_stream(const gavl_dictionary_t * d,
+                                                gavl_stream_type_t type, int idx);
+
+GAVL_PUBLIC
+gavl_dictionary_t * gavl_track_get_stream_nc(gavl_dictionary_t * d,
+                                             gavl_stream_type_t type, int idx);
 
 GAVL_PUBLIC
 gavl_dictionary_t * gavl_track_append_stream(gavl_dictionary_t * d, gavl_stream_type_t type);
