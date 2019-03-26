@@ -226,8 +226,14 @@ void gavl_track_set_num_msg_streams(gavl_dictionary_t * d, int num);
 GAVL_PUBLIC
 int gavl_track_delete_stream(gavl_dictionary_t * d, int stream);
 
+// int gavl_track_get_stream_idx(const gavl_dictionary_t * d, gavl_stream_type_t type, int idx);
+
 GAVL_PUBLIC
-int gavl_track_get_stream_idx(const gavl_dictionary_t * d, gavl_stream_type_t type, int idx);
+int gavl_track_stream_idx_to_abs(const gavl_dictionary_t * d, gavl_stream_type_t type, int idx);
+
+GAVL_PUBLIC
+int gavl_track_stream_idx_to_rel(const gavl_dictionary_t * d, int idx);
+
 
 /* Tracks */
 GAVL_PUBLIC
