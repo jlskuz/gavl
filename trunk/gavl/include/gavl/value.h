@@ -279,6 +279,9 @@ GAVL_PUBLIC
 gavl_dictionary_t *  gavl_dictionary_create();
 
 GAVL_PUBLIC
+gavl_dictionary_t * gavl_dictionary_clone(const gavl_dictionary_t * src);
+
+GAVL_PUBLIC
 void gavl_dictionary_destroy(gavl_dictionary_t *);
 
 
