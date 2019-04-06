@@ -147,15 +147,7 @@
  */
 
 #define GAVL_CMD_SRC_SET_NEXT_TRACK    4
-
-/*
-   arg0: Stream type (int)
-   arg1: Index       (int)
-   arg2: Action      (int)
-*/
-#define GAVL_CMD_SRC_SET_STREAM_ACTION 5
-
-#define GAVL_CMD_SRC_START             6
+#define GAVL_CMD_SRC_START             5
 
 /* GUI Events */
 
