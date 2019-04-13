@@ -711,8 +711,16 @@ int gavf_write_gavl_packet_header(gavf_io_t * io,
   /* PTS */
   if(packet_flags & GAVF_PACKET_WRITE_PTS)
     {
-    if(!gavf_io_write_int64v(io, p->pts - last_sync_pts))
-      return 0;
+    if(p->pts == GAVL_TIME_UNDEFINED)
+      {
+      if(!gavf_io_write_int64v(io, p->pts))
+        return 0;
+      }
+    else
+      {
+      if(!gavf_io_write_int64v(io, p->pts - last_sync_pts))
+        return 0;
+      }
     }
   
   /* Duration */

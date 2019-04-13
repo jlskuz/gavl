@@ -108,6 +108,9 @@ gavl_time_t gavf_packet_buffer_get_min_pts(gavf_packet_buffer_t * b);
 
 void gavf_packet_buffer_destroy(gavf_packet_buffer_t *);
 
+const gavl_packet_t * gavf_packet_buffer_get_last(gavf_packet_buffer_t * b);
+void gavf_packet_buffer_remove_last(gavf_packet_buffer_t * b);
+
 /* Stream */
 
 #define STREAM_FLAG_DISCONTINUOUS (1<<3)

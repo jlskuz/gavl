@@ -31,49 +31,60 @@ read_packet_func_nobuffer(void * priv, gavl_packet_t ** p)
   return GAVL_SOURCE_OK;
   }
 
-static gavl_source_status_t
-read_packet_func_buffer_cont(void * priv, gavl_packet_t ** p)
+gavl_source_status_t gavf_demux_iteration(gavf_t * g)
   {
   gavl_packet_t * read_packet;
   gavf_stream_t * read_stream;
+  
+  /* Read header */
+  if(!g->have_pkt_header && !gavf_packet_read_header(g))
+    {
+    //      fprintf(stderr, "Have no header\n");
+    return GAVL_SOURCE_EOF;
+    }
+  read_stream = gavf_find_stream_by_id(g, g->pkthdr.stream_id);
+  if(!read_stream)
+    {
+    /* Should never happen */
+    return GAVL_SOURCE_EOF;
+    }
+    
+  read_packet = gavf_packet_buffer_get_write(read_stream->pb);
+
+  if(!gavf_read_gavl_packet(g->io, read_stream->packet_duration, read_stream->packet_flags,
+                            read_stream->last_sync_pts, &read_stream->next_pts, read_stream->pts_offset, read_packet))
+    return GAVL_SOURCE_EOF;
+
+  read_packet->id = read_stream->h->id;
+  
+  gavf_packet_buffer_done_write(read_stream->pb);
+  //    fprintf(stderr, "Got packet id: %d\n", read_stream->h->id);
+  //    gavl_packet_dump(read_packet);
+    
+  g->have_pkt_header = 0;
+  
+  return GAVL_SOURCE_OK;
+  }
+
+static gavl_source_status_t
+read_packet_func_buffer_cont(void * priv, gavl_packet_t ** p)
+  {
+  gavl_source_status_t st;
   gavf_stream_t * s = priv;
   gavf_t * g = s->g;
   
   while(!(*p = gavf_packet_buffer_get_read(s->pb)))
     {
-    /* Read header */
-    if(!g->have_pkt_header && !gavf_packet_read_header(g))
-      {
-      //      fprintf(stderr, "Have no header\n");
-      return GAVL_SOURCE_EOF;
-      }
-    read_stream = gavf_find_stream_by_id(g, g->pkthdr.stream_id);
-    if(!read_stream)
-      {
-      /* Should never happen */
-      return GAVL_SOURCE_EOF;
-      }
-    
-    read_packet = gavf_packet_buffer_get_write(read_stream->pb);
-
-    if(!gavf_read_gavl_packet(s->g->io, read_stream->packet_duration, read_stream->packet_flags,
-                              read_stream->last_sync_pts, &read_stream->next_pts, read_stream->pts_offset, read_packet))
-      return GAVL_SOURCE_EOF;
-
-    read_packet->id = read_stream->h->id;
-
-    if(read_stream->g->opt.flags & GAVF_OPT_FLAG_DUMP_PACKETS)
-      {
-      fprintf(stderr, "ID: %d ", read_stream->g->pkthdr.stream_id);
-      gavl_packet_dump(*p);
-      }
-    
-    gavf_packet_buffer_done_write(read_stream->pb);
-    //    fprintf(stderr, "Got packet id: %d\n", read_stream->h->id);
-    //    gavl_packet_dump(read_packet);
-    
-    s->g->have_pkt_header = 0;
+    if((st = gavf_demux_iteration(g)) != GAVL_SOURCE_OK)
+      return st;
     }
+  
+  if(g->opt.flags & GAVF_OPT_FLAG_DUMP_PACKETS)
+    {
+    fprintf(stderr, "ID: %d ", g->pkthdr.stream_id);
+    gavl_packet_dump(*p);
+    }
+  
   return GAVL_SOURCE_OK;
   }
 

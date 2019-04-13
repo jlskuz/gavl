@@ -192,58 +192,53 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
   gavl_time_t pts;
   int write_sync = 0;
   gavf_stream_t * s = &g->streams[stream];
-#if 0
-  fprintf(stderr, "write_packet %d\n", s->h->id);
 
-  if(s->h->id == 5)
+  if(p->pts != GAVL_TIME_UNDEFINED)
     {
-    fprintf(stderr, "write_packet %p\n", p);
-    gavl_packet_dump(p);
-    }
-#endif
-  pts = gavl_time_unscale(s->timescale, p->pts);
+    pts = gavl_time_unscale(s->timescale, p->pts);
   
-  /* Decide whether to write a sync header */
-  if(!g->first_sync_pos)
-    write_sync = 1;
-  else if(g->sync_distance)
-    {
-    if(pts - g->last_sync_time > g->sync_distance)
+    /* Decide whether to write a sync header */
+    if(!g->first_sync_pos)
       write_sync = 1;
-    }
-  else
-    {
-    if((s->h->type == GAVL_STREAM_VIDEO) &&
-       (s->h->ci.flags & GAVL_COMPRESSION_HAS_P_FRAMES) &&
-       (p->flags & GAVL_PACKET_KEYFRAME) &&
-       s->packets_since_sync)
-      write_sync = 1;
-    }
+    else if(g->sync_distance)
+      {
+      if(pts - g->last_sync_time > g->sync_distance)
+        write_sync = 1;
+      }
+    else
+      {
+      if((s->h->type == GAVL_STREAM_VIDEO) &&
+         (s->h->ci.flags & GAVL_COMPRESSION_HAS_P_FRAMES) &&
+         (p->flags & GAVL_PACKET_KEYFRAME) &&
+         s->packets_since_sync)
+        write_sync = 1;
+      }
 
-  if(write_sync)
-    {
-    if(!write_sync_header(g, stream, p))
-      return GAVL_SINK_ERROR;
-    if(g->sync_distance)
-      g->last_sync_time = pts;
+    if(write_sync)
+      {
+      if(!write_sync_header(g, stream, p))
+        return GAVL_SINK_ERROR;
+      if(g->sync_distance)
+        g->last_sync_time = pts;
+      }
+  
+    // If a stream has B-frames, this won't be correct
+    // for the next sync timestamp (it will be taken from the
+    // packet pts in write_sync_header)
+  
+    if(s->next_sync_pts < p->pts + p->duration)
+      s->next_sync_pts = p->pts + p->duration;
+
+    /* Update packet index */
+  
+    if(g->opt.flags & GAVF_OPT_FLAG_PACKET_INDEX)
+      {
+      gavf_packet_index_add(&g->pi,
+                            s->h->id, p->flags, g->io->position,
+                            p->pts);
+      }
     }
   
-  // If a stream has B-frames, this won't be correct
-  // for the next sync timestamp (it will be taken from the
-  // packet pts in write_sync_header)
-  
-  if(s->next_sync_pts < p->pts + p->duration)
-    s->next_sync_pts = p->pts + p->duration;
-
-  /* Update packet index */
-  
-  if(g->opt.flags & GAVF_OPT_FLAG_PACKET_INDEX)
-    {
-    gavf_packet_index_add(&g->pi,
-                          s->h->id, p->flags, g->io->position,
-                          p->pts);
-    }
-
   gavl_msg_init(&msg);
   gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PACKET_START, GAVL_MSG_NS_GAVF);
   result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
@@ -307,13 +302,35 @@ int gavf_write_gavl_packet(gavf_io_t * io, gavf_io_t * hdr_io, int packet_durati
 gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s)
   {
   int i;
-  gavl_packet_t * p;
+  const gavl_packet_t * p;
   int min_index;
   gavl_time_t min_time;
   gavl_time_t test_time;
   gavf_stream_t * ws;
   gavl_sink_status_t st;
 
+  /* Special case for message streams with undefined timestamp: Transmit out of band */
+
+  if(s && (s->h->type == GAVL_STREAM_MSG))
+    {
+    for(i = 0; i < g->ph.num_streams; i++)
+      {
+      if(&g->streams[i] == s)
+        {
+        if((p = gavf_packet_buffer_get_last(s->pb)) &&
+           (p->pts == GAVL_TIME_UNDEFINED))
+          {
+          st = write_packet(g, i, p);
+          gavf_packet_buffer_remove_last(s->pb);
+          
+          if(st != GAVL_SINK_OK)
+            return st;
+          }
+        }
+      }
+    }
+  
+  
   //  fprintf(stderr, "flush_packets\n");
   
   if(!g->first_sync_pos)
