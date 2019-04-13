@@ -104,3 +104,18 @@ void gavf_packet_buffer_destroy(gavf_packet_buffer_t * b)
     free(b->packets);
   free(b);
   }
+
+const gavl_packet_t * gavf_packet_buffer_get_last(gavf_packet_buffer_t * b)
+  {
+  if(!b->num_packets)
+    return NULL;
+  else
+    return b->packets[b->num_packets-1];
+  }
+
+void gavf_packet_buffer_remove_last(gavf_packet_buffer_t * b)
+  {
+  if(b->num_packets)
+    b->num_packets--;
+  }
+
