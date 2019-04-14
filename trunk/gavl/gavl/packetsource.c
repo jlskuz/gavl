@@ -149,7 +149,6 @@ gavl_packet_source_get_audio_format(gavl_packet_source_t * s)
     return NULL;
   }
 
-
 const gavl_video_format_t *
 gavl_packet_source_get_video_format(gavl_packet_source_t * s)
   {

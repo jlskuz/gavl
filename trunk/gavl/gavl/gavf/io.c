@@ -1098,6 +1098,7 @@ int gavl_msg_from_buffer(const uint8_t * buf, int len, gavl_msg_t * msg)
 int gavf_msg_to_packet(const gavl_msg_t * msg,
                        gavl_packet_t * dst)
   {
+  dst->pts = GAVL_TIME_UNDEFINED;  
   gavl_dictionary_get_long(&msg->header, GAVL_MSG_HEADER_TIMESTAMP, &dst->pts);
   gavl_packet_free(dst);
   dst->data = gavl_msg_to_buffer(&dst->data_len, msg);
