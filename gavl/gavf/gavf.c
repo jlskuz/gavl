@@ -22,7 +22,9 @@ stream_types[] =
     { GAVL_STREAM_MSG,      "msg"  },
   };
 
-GAVL_PUBLIC
+static int align_read(gavf_io_t * io);
+
+
 const char * gavf_stream_type_name(gavl_stream_type_t t)
   {
   int i;
@@ -62,7 +64,7 @@ int gavf_extension_write(gavf_io_t * io, uint32_t key, uint32_t len,
 /*
  */
 
-static int write_sync_header(gavf_t * g, int stream, const gavl_packet_t * p)
+static int write_sync_header(gavf_t * g, int stream, int64_t packet_pts)
   {
   int ret = 0;
   int result;
@@ -86,7 +88,7 @@ static int write_sync_header(gavf_t * g, int stream, const gavl_packet_t * p)
     
     if(i == stream)
       {
-      g->sync_pts[i] = p->pts;
+      g->sync_pts[i] = packet_pts;
       s->packets_since_sync = 0;
       }
     else if((stream >= 0) &&
@@ -216,7 +218,7 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
 
     if(write_sync)
       {
-      if(!write_sync_header(g, stream, p))
+      if(!write_sync_header(g, stream, p->pts))
         return GAVL_SINK_ERROR;
       if(g->sync_distance)
         g->last_sync_time = pts;
@@ -329,8 +331,7 @@ gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s)
         }
       }
     }
-  
-  
+    
   //  fprintf(stderr, "flush_packets\n");
   
   if(!g->first_sync_pos)
@@ -610,6 +611,8 @@ static void gavf_stream_init_text(gavf_t * g, gavf_stream_t * s,
 static void gavf_stream_init_msg(gavf_t * g, gavf_stream_t * s,
                                  int num_streams)
   {
+  gavl_dictionary_get_int(&s->h->m, GAVL_META_STREAM_SAMPLE_TIMESCALE, &s->timescale);
+  
   s->packet_flags |= (GAVF_PACKET_WRITE_PTS);
 
   if(num_streams > 1)
@@ -733,6 +736,7 @@ static void gavf_stream_free(gavf_stream_t * s)
   }
 
 
+
 gavf_t * gavf_create()
   {
   gavf_t * ret;
@@ -743,16 +747,16 @@ gavf_t * gavf_create()
 
 /* Read support */
 
-static int handle_chunk(gavf_t * g, char * sig)
+static int handle_chunk(gavf_t * g, uint8_t * sig)
   {
-  if(!strncmp(sig, GAVF_TAG_PROGRAM_HEADER, 8))
+  if(!strncmp((char*)sig, GAVF_TAG_PROGRAM_HEADER, 8))
     {
     if(!gavf_program_header_read(g->io, &g->ph))
       return 0;
     fprintf(stderr, "Got program header\n");
     init_streams(g);
     }
-  else if(!strncmp(sig, GAVF_TAG_SYNC_HEADER, 8))
+  else if(!strncmp((char*)sig, GAVF_TAG_SYNC_HEADER, 8))
     {
     g->first_sync_pos = g->io->position;
     }
@@ -801,6 +805,17 @@ static int read_sync_header(gavf_t * g)
   
   
   return 1;
+  }
+
+void gavf_flush_buffers(gavf_t * g)
+  {
+  int i;
+
+  for(i = 0; i < g->ph.num_streams; i++)
+    {
+    if(g->streams[i].pb)
+      gavf_packet_buffer_clear(g->streams[i].pb);
+    }
   }
 
 static void calc_pts_offset(gavf_t * g)
@@ -854,7 +869,7 @@ static void calc_pts_offset(gavf_t * g)
 int gavf_open_read(gavf_t * g, gavf_io_t * io)
   {
   gavl_time_t duration;
-  char sig[8];
+  uint8_t sig[8];
   
   g->io = io;
   
@@ -867,8 +882,14 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
 
   while(1)
     {
+    if(!align_read(g->io))
+      return 0;
+    
     if(gavf_io_read_data(g->io, (uint8_t*)sig, 8) < 8)
       return 0;
+
+    fprintf(stderr, "Got signature:\n");
+    gavl_hexdump(sig, 8, 8);
     
     if(!handle_chunk(g, sig))
       return 0;
@@ -1120,6 +1141,8 @@ const int64_t * gavf_seek(gavf_t * g, int64_t time, int scale)
   int64_t time_scaled;
   int done = 0;
   
+  gavf_flush_buffers(g);
+  
   if(!(g->opt.flags & GAVF_OPT_FLAG_SYNC_INDEX))
     return NULL;
 
@@ -1274,6 +1297,12 @@ int gavf_start(gavf_t * g)
   
   if(!gavf_program_header_write(g->io, &g->ph))
     return 0;
+
+  if((g->ph.num_streams == 1) && (g->streams[0].h->type == GAVL_STREAM_MSG))
+    {
+    /* Also write the sync header */
+    write_sync_header(g, 0, 0);
+    }
   
   return 1;
   }
@@ -1469,7 +1498,7 @@ void gavf_close(gavf_t * g)
       gavf_flush_packets(g, NULL);
     
       /* Append final sync header */
-      write_sync_header(g, -1, NULL);
+      write_sync_header(g, -1, GAVL_TIME_UNDEFINED);
       }
     
     /* Write footer (might fail silently) */

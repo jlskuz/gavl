@@ -550,6 +550,9 @@ GAVL_PUBLIC
 gavl_source_status_t gavf_demux_iteration(gavf_t * g);
 
 GAVL_PUBLIC
+void gavf_flush_buffers(gavf_t * g);
+
+GAVL_PUBLIC
 gavf_program_header_t * gavf_get_program_header(gavf_t *);
 
 GAVL_PUBLIC

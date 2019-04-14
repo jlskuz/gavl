@@ -182,7 +182,6 @@ int gavf_program_header_add_overlay_stream(gavf_program_header_t * ph,
   return ph->num_streams-1;
   }
 
-
 int gavf_program_header_add_text_stream(gavf_program_header_t * ph,
                                         uint32_t timescale,
                                         const gavl_dictionary_t * m)
@@ -198,6 +197,8 @@ int gavf_program_header_add_msg_stream(gavf_program_header_t * ph,
   {
   gavf_stream_header_t * h = add_stream(ph, m);
   h->type = GAVL_STREAM_MSG;
+  gavl_dictionary_set_int(&h->m, GAVL_META_STREAM_SAMPLE_TIMESCALE, GAVL_TIME_SCALE);
+  gavl_dictionary_set_int(&h->m, GAVL_META_STREAM_PACKET_TIMESCALE, GAVL_TIME_SCALE);
   return ph->num_streams-1;
   }
 

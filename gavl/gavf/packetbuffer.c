@@ -13,6 +13,11 @@ struct gavf_packet_buffer_s
   int timescale;
   };
 
+void gavf_packet_buffer_clear(gavf_packet_buffer_t * b)
+  {
+  b->num_packets = 0;
+  }
+
 gavf_packet_buffer_t * gavf_packet_buffer_create(int timescale)
   {
   gavf_packet_buffer_t * ret = calloc(1, sizeof(*ret));
