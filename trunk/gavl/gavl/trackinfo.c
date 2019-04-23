@@ -1590,7 +1590,7 @@ int gavl_stream_get_compression_info(const gavl_dictionary_t * s,
   GET_INT(COMPRESSION_INFO_KEY_MAX_PACKET_SIZE, max_packet_size);
   GET_INT(COMPRESSION_INFO_KEY_MAX_REF_FRAMES, max_ref_frames);
 
-  if((buf = gavl_dictionary_get_binary(s, COMPRESSION_INFO_KEY_HEAD)) &&
+  if((buf = gavl_dictionary_get_binary(cmp, COMPRESSION_INFO_KEY_HEAD)) &&
      (buf->len > 0))
     {
     ret->global_header = malloc(buf->len);
@@ -1652,7 +1652,7 @@ void gavl_stream_set_compression_info(gavl_dictionary_t * s, const gavl_compress
     memcpy(buf->buf, info->global_header, info->global_header_len);
     buf->len = info->global_header_len;
 
-    gavl_dictionary_set_nocopy(s, COMPRESSION_INFO_KEY, &val);
+    gavl_dictionary_set_nocopy(cmp, COMPRESSION_INFO_KEY_HEAD, &val);
     }
   }
 
