@@ -405,7 +405,7 @@
 
 /* Root Containers */
 #define GAVL_META_MEDIA_CLASS_ROOT               "container.root" 
-#define GAVL_META_MEDIA_CLASS_ROOT_MUSICALBUMS   "container.root.musicalbums" 
+#define GAVL_META_MEDIA_CLASS_ROOT_MUSICALBUMS   "container.root.musicalbums"
 #define GAVL_META_MEDIA_CLASS_ROOT_SONGS         "container.root.songs" 
 #define GAVL_META_MEDIA_CLASS_ROOT_PLAYLISTS     "container.root.playlists" 
 #define GAVL_META_MEDIA_CLASS_ROOT_MOVIES        "container.root.movies"
