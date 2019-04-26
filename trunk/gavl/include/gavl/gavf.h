@@ -23,7 +23,7 @@
 /*
   CHUNK("name"):
   name: 8 characters, starts with "GAVF"
-  len:  64 bit len (or offset) as signed, 0 if unknown
+  len:  64 bit len (or offset in case of GAVFTAIL) as signed, 0 if unknown
   
   Chunks *always* start at 8 byte boundaries. Preceeding bytes (up to 7) are
   filled with zeros
@@ -76,9 +76,9 @@
   len bytes packet index
    
   GAVFTAIL: 8 bytes
-  len:      8 bytes, file offset of the GAVFFOOT tag
- 
-   
+  offset:   8 bytes, file offset of the GAVFFOOT tag
+  size:     8 bytes, byte position after the last byte of these 8 bytes
+  
 */
 
 #define GAVF_TAG_PROGRAM_HEADER "GAVFPHDR"
@@ -423,12 +423,11 @@ void gavf_stream_stats_apply_generic(gavf_stream_stats_t * f,
                                      gavl_compression_info_t * ci,
                                      gavl_dictionary_t * m);
 
-
+#if 0
 typedef struct
   {
   gavl_stream_type_t type;
   uint32_t id;
-  
   gavl_compression_info_t ci;
 
   union
@@ -489,6 +488,7 @@ void gavf_program_header_to_dictionary(const gavf_program_header_t * src, gavl_d
 GAVL_PUBLIC
 void gavf_program_header_from_dictionary(gavf_program_header_t * src, const gavl_dictionary_t * dst);
 
+#endif
 
 typedef struct
   {
@@ -496,7 +496,6 @@ typedef struct
   } gavf_packet_header_t;
 
 typedef void (*gavf_stream_skip_func)(gavf_t * gavf,
-                                      const gavf_stream_header_t * h,
                                       void * priv);
 
 /* Options */
@@ -547,10 +546,21 @@ GAVL_PUBLIC
 int gavf_open_read(gavf_t * g, gavf_io_t * io);
 
 GAVL_PUBLIC
+gavl_dictionary_t * gavf_get_media_info_nc(gavf_t * g);
+
+GAVL_PUBLIC
+const gavl_dictionary_t * gavf_get_media_info(const gavf_t * g);
+
+GAVL_PUBLIC
+int gavf_select_track(gavf_t * g, int track);
+
+GAVL_PUBLIC
 gavl_source_status_t gavf_demux_iteration(gavf_t * g);
 
 GAVL_PUBLIC
 void gavf_flush_buffers(gavf_t * g);
+
+#if 0
 
 GAVL_PUBLIC
 gavf_program_header_t * gavf_get_program_header(gavf_t *);
@@ -560,6 +570,8 @@ int gavf_get_num_streams(gavf_t *, int type);
 
 GAVL_PUBLIC
 const gavf_stream_header_t * gavf_get_stream(gavf_t *, int index, int type);
+
+#endif
 
 GAVL_PUBLIC
 const gavf_packet_header_t * gavf_packet_read_header(gavf_t * gavf);
@@ -674,7 +686,7 @@ int gavf_add_msg_stream(gavf_t * g,
                         const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
-void gavf_add_streams(gavf_t * g, const gavf_program_header_t * ph);
+void gavf_add_streams(gavf_t * g, const gavl_dictionary_t * track);
 
 /* Call this after adding all streams and before writing the first packet */
 GAVL_PUBLIC

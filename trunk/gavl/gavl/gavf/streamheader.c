@@ -84,7 +84,7 @@ void gavf_stream_header_apply_footer(gavf_stream_header_t * h)
   /* Set maximum packet size */
   if(!h->ci.max_packet_size)
     h->ci.max_packet_size = h->stats.size_max;
-
+  
   switch(h->type)
     {
     case GAVL_STREAM_VIDEO:
