@@ -232,6 +232,19 @@ gavl_track_get_stream_all_nc(gavl_dictionary_t * d, int idx)
   return gavl_value_get_dictionary_nc(&arr->entries[idx]);
   }
 
+gavl_dictionary_t *
+gavl_track_get_stream_by_id_nc(gavl_dictionary_t * d, int id)
+  {
+
+  }
+
+const gavl_dictionary_t *
+gavl_track_get_stream_by_id(const gavl_dictionary_t * d, int id)
+  {
+
+  }
+
+
 static gavl_dictionary_t *
 append_stream(gavl_dictionary_t * d, gavl_stream_type_t type)
   {

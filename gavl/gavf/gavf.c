@@ -803,7 +803,6 @@ static int read_sync_header(gavf_t * g)
   if(!result)
     return 0;
   
-  
   return 1;
   }
 
@@ -866,6 +865,120 @@ static void calc_pts_offset(gavf_t * g)
     }
   }
 
+gavl_dictionary_t * gavf_get_media_info_nc(gavf_t * g)
+  {
+  return &g->mi;
+  }
+
+const gavl_dictionary_t * gavf_get_media_info(const gavf_t * g)
+  {
+  return &g->mi;
+  }
+
+int gavf_select_track(gavf_t * g, int track)
+  {
+  /* TODO Recreate demuxer */
+  if(!g->cur = gavl_get_track_nc(g->mi, track))
+    return 0;
+  
+  }
+
+int gavf_open_read(gavf_t * g, gavf_io_t * io)
+  {
+  g->io = io;
+  
+  gavf_io_set_msg_cb(g->io, g->msg_callback, g->msg_data);
+
+  /* Look for file end */
+
+  
+  
+  if(gavf_io_can_seek(g->io))
+    {
+    int64_t footer_pos;
+    int64_t header_pos;
+
+    int64_t pos;
+    int64_t total_bytes;
+    gavf_chunk_t head;
+      
+    /* Read tail */
+    
+    gavf_io_seek(g->io, -8*3, SEEK_END);
+
+    while(1)
+      {
+      gavl_dictionary_t track;
+      gavl_dictionary_t * footer;
+      
+      if(!gavf_chunk_read_header(g->io, &head) ||
+         strcmp(head.eightcc, GAVF_TAG_TAIL) ||
+         !gavf_io_read_int64f(io, &total_byes))
+        return 0;
+
+      header_pos = gavf_io_position(io) - total_bytes;
+      footer_pos = gavf_io_position(io) - head.len;
+
+      if(header_pos && !g->multifile)
+        {
+        g->multifile = 1;
+        }
+      
+      /* Read track header */
+
+      gavf_io_seek(g->io, header_pos, SEEK_SET);
+
+      if(!gavf_chunk_read_header(g->io, &head) ||
+         strcmp(head.eightcc, GAVF_TAG_PROGRAM_HEADER))
+        return 0;
+
+      
+      
+      /* Read track footer */
+
+      gavf_io_seek(g->io, fóoter_pos, SEEK_SET);
+      
+      if(!gavf_chunk_read_header(g->io, &head) ||
+         strcmp(head.eightcc, GAVF_TAG_PROGRAM_HEADER))
+        return 0;
+      
+      gavl_track_splice_children_nocopy(&track, 0, 0, &track);
+      
+      /* Go back */
+      if(!header_pos)
+        break;
+      
+      gavf_io_seek(g->io, header_pos-8*3, SEEK_SET);
+      
+      
+      }
+    
+    }
+  else /* Streaming mode */
+    {
+    g->first_sync_pos = -1;
+    
+    while(1)
+      {
+      if(!align_read(g->io))
+        return 0;
+    
+      if(gavf_io_read_data(g->io, (uint8_t*)sig, 8) < 8)
+        return 0;
+
+      fprintf(stderr, "Got signature:\n");
+      gavl_hexdump(sig, 8, 8);
+      
+      if(!handle_chunk(g, sig))
+        return 0;
+      
+      if(g->first_sync_pos > 0)
+        break;
+      }
+    }
+  
+  }
+
 int gavf_open_read(gavf_t * g, gavf_io_t * io)
   {
   gavl_time_t duration;
@@ -921,7 +1034,7 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
 
   if(!(g->opt.flags & GAVF_OPT_FLAG_ORIG_PTS))
     calc_pts_offset(g);
-
+  
   if(gavf_program_header_get_duration(&g->ph, NULL, &duration))
     gavl_dictionary_set_long(&g->ph.m, GAVL_META_APPROX_DURATION, duration);
   
@@ -1660,7 +1773,6 @@ int gavf_chunk_read_header(gavf_io_t * io, gavf_chunk_t * head)
   head->eightcc[8] = 0x00;
   return 1;
   }
-
 
 int gavf_chunk_start(gavf_io_t * io, gavf_chunk_t * head, const char * eightcc)
   {

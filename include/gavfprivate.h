@@ -44,6 +44,7 @@ void gavf_io_init_buf_write(gavf_io_t * io, gavl_buffer_t * buf);
 
 /* Streamheader */
 
+#if 0
 void gavf_stream_header_free(gavf_stream_header_t * h);
 // int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h);
 // int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h);
@@ -89,7 +90,7 @@ gavf_program_header_get_num_streams(const gavf_program_header_t * ph,
 const gavf_stream_header_t *
 gavf_program_header_get_stream(const gavf_program_header_t * ph,
                                int index, int type);
-
+#endif
 
 /* Packetbuffer */
 
@@ -120,8 +121,10 @@ void gavf_packet_buffer_clear(gavf_packet_buffer_t * b);
 
 typedef struct
   {
-  gavf_stream_header_t * h;
+  
 
+  gavl_dictionary_t * h;
+  
   /* Secondary variables */
   int flags;
 
@@ -166,6 +169,14 @@ typedef struct
   
   gavf_stream_skip_func skip_func;
   void * skip_priv;
+
+  gavf_stream_stats_t stats;
+  
+  gavl_audio_format_t * afmt;
+  gavl_video_format_t * vfmt;
+
+  uint32_t id;
+  gavl_stream_type_t type;
   
   } gavf_stream_t;
 
@@ -177,7 +188,7 @@ gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s);
 
 gavf_stream_t * gavf_find_stream_by_id(gavf_t * g, uint32_t id);
 
-int gavf_stream_get_timescale(const gavf_stream_header_t * sh);
+// int gavf_stream_get_timescale(const gavf_stream_header_t * sh);
 
 /* Packet */
 
@@ -319,7 +330,11 @@ typedef enum
 struct gavf_s
   {
   gavf_io_t * io;
-  gavf_program_header_t ph;
+  
+  gavl_dictionary_t * cur;
+  
+  gavl_dictionary_t mi;
+  
   gavf_sync_index_t     si;
   gavf_packet_index_t   pi;
 
@@ -357,10 +372,11 @@ struct gavf_s
   encoding_mode_t final_encoding_mode;
 
   int msg_id;
+
+  int multifile;
   };
 
 /* Footer */
 
 int gavf_footer_check(gavf_t * g);
-void gavf_footer_init(gavf_program_header_t * ph);
 int gavf_footer_write(gavf_t * g);
