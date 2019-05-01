@@ -137,6 +137,7 @@ scale_context.c \
 scale_kernels.c \
 scale_table.c \
 ssim.c \
+stats.c \
 time.c \
 timecode.c \
 timer.c \

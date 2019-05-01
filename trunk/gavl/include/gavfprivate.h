@@ -121,9 +121,8 @@ void gavf_packet_buffer_clear(gavf_packet_buffer_t * b);
 
 typedef struct
   {
-  
-
   gavl_dictionary_t * h;
+  gavl_dictionary_t * m;
   
   /* Secondary variables */
   int flags;
@@ -143,7 +142,9 @@ typedef struct
 
   // PTS Offset (to make all PTSes start near zero)
   int64_t pts_offset;
-    
+
+  int64_t sync_pts;
+  
   int packets_since_sync;
   
   gavf_packet_buffer_t * pb;
@@ -170,12 +171,13 @@ typedef struct
   gavf_stream_skip_func skip_func;
   void * skip_priv;
 
-  gavf_stream_stats_t stats;
+  gavl_stream_stats_t stats;
   
   gavl_audio_format_t * afmt;
   gavl_video_format_t * vfmt;
-
-  uint32_t id;
+  gavl_compression_info_t ci;
+  
+  int id;
   gavl_stream_type_t type;
   
   } gavf_stream_t;
@@ -308,15 +310,12 @@ typedef struct
 
 void gavf_sync_index_init(gavf_sync_index_t * idx, int num_streams);
 
-
-void gavf_sync_index_add(gavf_sync_index_t * idx,
-                         uint64_t pos, int64_t * pts);
+void gavf_sync_index_add(gavf_t * g, uint64_t pos);
 
 int gavf_sync_index_read(gavf_io_t * io, gavf_sync_index_t * idx);
 int gavf_sync_index_write(gavf_io_t * io, const gavf_sync_index_t * idx);
 void gavf_sync_index_free(gavf_sync_index_t * idx);
 void gavf_sync_index_dump(const gavf_sync_index_t * idx);
-
 
 /* Global gavf structure */
 
@@ -327,8 +326,22 @@ typedef enum
     ENC_INTERLEAVE
   } encoding_mode_t;
 
+#define GAVF_FLAG_MULTITRACK      (1<<0)
+#define GAVF_FLAG_HAVE_PKT_HEADER (1<<1)
+#define GAVF_FLAG_WRITE           (1<<2)
+#define GAVF_FLAG_EOF             (1<<3)
+#define GAVF_FLAG_STREAMING       (1<<4)
+
+#define GAVF_SET_FLAG(g, f)    g->flags |= f
+#define GAVF_CLEAR_FLAG(g, f) (g->flags &= ~f)
+#define GAVF_HAS_FLAG(g, f)   (g->flags & f)
+
+
 struct gavf_s
   {
+  int flags;
+  
+
   gavf_io_t * io;
   
   gavl_dictionary_t * cur;
@@ -339,14 +352,12 @@ struct gavf_s
   gavf_packet_index_t   pi;
 
   gavf_packet_header_t  pkthdr;
-  int have_pkt_header;
   
   gavf_stream_t * streams;
+  int num_streams;
   
   gavl_handle_msg_func msg_callback;
   void * msg_data;
-  
-  int64_t * sync_pts;
 
   gavf_chunk_t packets_chunk;
   gavf_chunk_t sync_chunk;
@@ -357,8 +368,6 @@ struct gavf_s
   
   uint64_t first_sync_pos;
   
-  int wr;
-  int eof;
   
   gavl_packet_t write_pkt;
   gavl_video_frame_t * write_vframe;
@@ -371,12 +380,10 @@ struct gavf_s
   encoding_mode_t encoding_mode;
   encoding_mode_t final_encoding_mode;
 
-  int msg_id;
-
-  int multifile;
   };
 
 /* Footer */
 
 int gavf_footer_check(gavf_t * g);
 int gavf_footer_write(gavf_t * g);
+void gavf_footer_init(gavf_t * g);
