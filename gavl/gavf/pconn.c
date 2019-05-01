@@ -7,18 +7,18 @@ read_packet_func_nobuffer(void * priv, gavl_packet_t ** p)
   {
   gavf_stream_t * s = priv;
 
-  if(!s->g->have_pkt_header && !gavf_packet_read_header(s->g))
+  if(!GAVF_HAS_FLAG(s->g, GAVF_FLAG_HAVE_PKT_HEADER) && !gavf_packet_read_header(s->g))
     return GAVL_SOURCE_EOF;
 
-  if(s->g->pkthdr.stream_id != s->h->id)
+  if(s->g->pkthdr.stream_id != s->id)
     return GAVL_SOURCE_AGAIN;
-  
-  s->g->have_pkt_header = 0;
+
+  GAVF_CLEAR_FLAG(s->g, GAVF_FLAG_HAVE_PKT_HEADER);
   
   if(!gavf_read_gavl_packet(s->g->io, s->packet_duration, s->packet_flags, s->last_sync_pts, &s->next_pts, s->pts_offset, *p))
     return GAVL_SOURCE_EOF;
 
-  (*p)->id = s->h->id;
+  (*p)->id = s->id;
 
   if(s->g->opt.flags & GAVF_OPT_FLAG_DUMP_PACKETS)
     {
@@ -37,7 +37,7 @@ gavl_source_status_t gavf_demux_iteration(gavf_t * g)
   gavf_stream_t * read_stream;
   
   /* Read header */
-  if(!g->have_pkt_header && !gavf_packet_read_header(g))
+  if(!GAVF_HAS_FLAG(g, GAVF_FLAG_HAVE_PKT_HEADER) && !gavf_packet_read_header(g))
     {
     //      fprintf(stderr, "Have no header\n");
     return GAVL_SOURCE_EOF;
@@ -55,13 +55,14 @@ gavl_source_status_t gavf_demux_iteration(gavf_t * g)
                             read_stream->last_sync_pts, &read_stream->next_pts, read_stream->pts_offset, read_packet))
     return GAVL_SOURCE_EOF;
 
-  read_packet->id = read_stream->h->id;
+  read_packet->id = read_stream->id;
   
   gavf_packet_buffer_done_write(read_stream->pb);
   //    fprintf(stderr, "Got packet id: %d\n", read_stream->h->id);
   //    gavl_packet_dump(read_packet);
     
-  g->have_pkt_header = 0;
+
+  GAVF_CLEAR_FLAG(g, GAVF_FLAG_HAVE_PKT_HEADER);
   
   return GAVL_SOURCE_OK;
   }
@@ -95,7 +96,7 @@ read_packet_func_buffer_discont(void * priv, gavl_packet_t ** p)
 
   if((*p = gavf_packet_buffer_get_read(s->pb)))
     return GAVL_SOURCE_OK;
-  else if(s->g->eof)
+  else if(GAVF_HAS_FLAG(s->g, GAVF_FLAG_EOF))
     return GAVL_SOURCE_EOF;
   else
     return GAVL_SOURCE_AGAIN;
@@ -120,20 +121,20 @@ void gavf_stream_create_packet_src(gavf_t * g, gavf_stream_t * s)
       func = read_packet_func_buffer_cont;
     }
   
-  switch(s->h->type)
+  switch(s->type)
     {
     case GAVL_STREAM_AUDIO:
       s->psrc = gavl_packet_source_create_audio(func, s, flags,
-                                                &s->h->ci, &s->h->format.audio);
+                                                &s->ci, s->afmt);
       break;
     case GAVL_STREAM_OVERLAY:
     case GAVL_STREAM_VIDEO:
       s->psrc = gavl_packet_source_create_video(func, s, flags,
-                                                &s->h->ci, &s->h->format.video);
+                                                &s->ci, s->vfmt);
       break;
     case GAVL_STREAM_TEXT:
       s->psrc = gavl_packet_source_create_text(func, s, flags,
-                                               gavf_stream_get_timescale(s->h));
+                                               gavl_stream_get_sample_timescale(s->h));
       break;
     case GAVL_STREAM_MSG:
       s->psrc = gavl_packet_source_create(func, s, flags);
@@ -150,7 +151,7 @@ put_packet_func(void * priv, gavl_packet_t * p)
   {
   gavf_stream_t * s = priv;
   gavf_packet_buffer_done_write(s->pb);
-  p->id = s->h->id;
+  p->id = s->id;
   
   /* Update footer */
 #if 0
@@ -158,10 +159,10 @@ put_packet_func(void * priv, gavl_packet_t * p)
   gavl_packet_dump(p);
 #endif
   /* Fist packet */
-  if(s->h->stats.pts_start == GAVL_TIME_UNDEFINED)
+  if(s->stats.pts_start == GAVL_TIME_UNDEFINED)
     s->next_sync_pts = p->pts;
   
-  gavf_stream_stats_update(&s->h->stats, p);
+  gavl_stream_stats_update(&s->stats, p);
   
   return gavf_flush_packets(s->g, s);
   

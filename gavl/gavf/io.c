@@ -1117,3 +1117,87 @@ void gavf_io_set_msg_cb(gavf_io_t * io, gavl_handle_msg_func msg_callback, void 
   io->msg_callback = msg_callback;
   io->msg_data = msg_data;
   }
+
+/* Sub I/O */
+
+typedef struct
+  {
+  gavf_io_t * io;
+  int64_t offset;
+  int64_t size;
+  int64_t pos;
+  } sub_io_t;
+
+static int read_sub(void * priv, uint8_t * data, int len)
+  {
+  int ret;
+  sub_io_t * s = priv;
+
+  if(len > s->size - s->pos)
+    len = s->size - s->pos;
+
+  if(len < 0)
+    return 0;
+  
+  ret = gavf_io_read_data(s->io, data, len);
+  s->pos += ret;
+
+  return ret;
+  }
+
+static int64_t seek_sub(void * priv, int64_t pos, int whence)
+  {
+  sub_io_t * s = priv;
+
+  switch(whence)
+    {
+    case SEEK_SET:
+      s->pos = pos;
+      break;
+    case SEEK_END:
+      s->pos = s->size - pos;
+      break;
+    case SEEK_CUR:
+      s->pos += pos;
+      break;
+    }
+
+  if(s->pos < 0)
+    s->pos = 0;
+  if(s->pos > s->size)
+    s->pos = s->size;
+
+  s->pos = gavf_io_seek(s->io, s->offset + s->pos, SEEK_SET);
+  
+  s->pos -= s->offset;
+  
+  return s->pos;
+  }
+
+static void close_sub(void * priv)
+  {
+  free(priv);
+  }
+
+gavf_io_t * gavf_io_get_sub(gavf_io_t * io, int64_t offset, int64_t len)
+  {
+  gavf_io_t * ret;
+  sub_io_t * s = calloc(1, sizeof(*s));
+
+  s->offset = offset;
+  s->size = len;
+  s->io = io;
+  gavf_io_seek(s->io, s->offset, SEEK_SET);
+  
+  ret = gavf_io_create(read_sub,
+                       NULL,
+                       seek_sub,
+                       close_sub,
+                       NULL,
+                       s);
+
+  
+  
+  return ret;
+  }
+

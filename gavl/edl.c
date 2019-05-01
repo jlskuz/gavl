@@ -166,7 +166,7 @@ static void finalize_stream(void * priv,
   //  gavl_array_t * arr;
   gavl_dictionary_t * seg;
 
-  gavf_stream_stats_t stats;
+  gavl_stream_stats_t stats;
 
   finalize_t * finalize = priv;
   
@@ -177,7 +177,7 @@ static void finalize_stream(void * priv,
 
   gavl_array_foreach(finalize->segments, finalize_segment, finalize);
   
-  gavf_stream_stats_init(&stats);
+  gavl_stream_stats_init(&stats);
   
   if(!(v = gavl_array_get_nc(finalize->segments, 0)) ||
      !(seg = gavl_value_get_dictionary_nc(v)) ||
@@ -193,7 +193,7 @@ static void finalize_stream(void * priv,
   
   stats.pts_end = dst_time + dst_duration;
 
-  gavf_stream_stats_apply_generic(&stats, NULL, gavl_stream_get_metadata_nc(finalize->stream));
+  gavl_stream_stats_apply_generic(&stats, NULL, gavl_stream_get_metadata_nc(finalize->stream));
   
   }
 
@@ -260,9 +260,8 @@ static void add_stream_to_timeline(gavl_dictionary_t * edl_stream,
   
   gavl_dictionary_get_int(m_track, GAVL_META_STREAM_SAMPLE_TIMESCALE, &timescale_track);
   gavl_dictionary_get_int(m_edl, GAVL_META_STREAM_SAMPLE_TIMESCALE, &timescale_edl);
-  
-  if(!gavl_dictionary_get_long(m_track, GAVL_META_STREAM_PTS_START, &pts_start) ||
-     !gavl_dictionary_get_long(m_track, GAVL_META_STREAM_PTS_END, &pts_end))
+
+  if(!gavl_stream_get_pts_range(stream, &pts_start, &pts_end))
     {
     pts_start = 0;
     pts_end = gavl_time_scale(timescale_track, track_duration);
@@ -334,11 +333,6 @@ static const char * clear_metadata_fields[] =
 static const char * clear_stream_metadata_fields[] =
   {
     GAVL_META_LABEL,
-    GAVL_META_STREAM_RAWSIZE,
-    GAVL_META_STREAM_PACKET_SIZE_MIN,
-    GAVL_META_STREAM_PACKET_SIZE_MAX,
-    GAVL_META_STREAM_PACKET_DURATION_MIN,
-    GAVL_META_STREAM_PACKET_DURATION_MAX,
     GAVL_META_STREAM_PACKET_TIMESCALE,
     GAVL_META_FORMAT,
     GAVL_META_BITRATE,
@@ -357,9 +351,6 @@ static void stream_clear_foreach_func(void * priv, int idx, const gavl_value_t *
   if((s = gavl_value_get_dictionary_nc(&arr->entries[idx])) &&
      (sm = gavl_stream_get_metadata_nc(s)))
     {
-    gavl_dictionary_set_long(sm, GAVL_META_STREAM_PTS_START, 0);
-    gavl_dictionary_set_long(sm, GAVL_META_STREAM_PTS_END, 0);
-    gavl_dictionary_set_long(sm, GAVL_META_STREAM_DURATION, 0);
     gavl_dictionary_delete_fields(sm, clear_stream_metadata_fields);
     }
   

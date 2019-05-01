@@ -61,6 +61,25 @@ GAVL_PUBLIC gavl_stream_type_t
 gavl_stream_get_type(gavl_dictionary_t * s);
 
 GAVL_PUBLIC
+int gavl_stream_get_sample_timescale(gavl_dictionary_t * s);
+
+
+GAVL_PUBLIC int
+gavl_stream_get_id(const gavl_dictionary_t * s, int * id);
+
+GAVL_PUBLIC int
+gavl_stream_set_id(gavl_dictionary_t * s, int id);
+
+GAVL_PUBLIC int
+gavl_stream_get_pts_range(const gavl_dictionary_t * s, int64_t * start, int64_t * end);
+
+GAVL_PUBLIC gavl_dictionary_t *
+gavl_track_find_stream_by_id_nc(gavl_dictionary_t * d, int id);
+
+GAVL_PUBLIC const gavl_dictionary_t *
+gavl_track_find_stream_by_id(const gavl_dictionary_t * d, int id);
+
+GAVL_PUBLIC
 const gavl_dictionary_t * gavl_track_get_stream(const gavl_dictionary_t * d,
                                                 gavl_stream_type_t type, int idx);
 

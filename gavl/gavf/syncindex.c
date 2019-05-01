@@ -10,18 +10,24 @@ void gavf_sync_index_init(gavf_sync_index_t * idx, int num_streams)
     idx->num_streams * sizeof(int64_t);
   }
 
-void gavf_sync_index_add(gavf_sync_index_t * idx,
-                         uint64_t pos, int64_t * pts)
+void gavf_sync_index_add(gavf_t * g, uint64_t pos)
   {
+  int i;
+  gavf_sync_index_t * idx = &g->si;
+  
   if(idx->num_entries >= idx->entries_alloc)
     {
     idx->entries_alloc += 1024;
     idx->entries = realloc(idx->entries,
                            idx->entries_alloc * sizeof(*idx->entries));
     }
+
   idx->entries[idx->num_entries].pos = pos;
   idx->entries[idx->num_entries].pts = malloc(idx->pts_len);
-  memcpy(idx->entries[idx->num_entries].pts, pts, idx->pts_len);
+  
+  for(i = 0; i < g->num_streams; i++)
+    idx->entries[idx->num_entries].pts[i] = g->streams[i].sync_pts;
+  
   idx->num_entries++;
   }
 

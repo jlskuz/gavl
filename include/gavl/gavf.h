@@ -75,9 +75,9 @@
   len:      8 bytes, bytes to follow, 0 if unknown
   len bytes packet index
    
-  GAVFTAIL: 8 bytes
-  offset:   8 bytes, file offset of the GAVFFOOT tag
-  size:     8 bytes, byte position after the last byte of these 8 bytes
+  GAVFTAIL:      8 bytes
+  footer_offset: 8 bytes, file offset of the GAVFFOOT tag
+  size:          8 bytes, byte position after the last byte of these 8 bytes
   
 */
 
@@ -162,6 +162,10 @@ int gavf_io_flush(gavf_io_t *);
 
 GAVL_PUBLIC
 gavf_io_t * gavf_io_create_file(FILE * f, int wr, int can_seek, int close);
+
+GAVL_PUBLIC
+gavf_io_t * gavf_io_get_sub(gavf_io_t * io, int64_t offset, int64_t len);
+
 
 GAVL_PUBLIC
 uint8_t * gavf_io_mem_get_buf(gavf_io_t * io, int * len);
@@ -376,53 +380,6 @@ void gavf_io_buf_reset(gavf_io_t * io);
 GAVL_PUBLIC
 const char * gavf_stream_type_name(gavl_stream_type_t t);
 
-typedef struct
-  {
-  int32_t size_min;
-  int32_t size_max;
-  int64_t duration_min;
-  int64_t duration_max;
-  int64_t pts_start;
-  int64_t pts_end;
-
-  int64_t total_bytes;   // For average bitrate 
-  int64_t total_packets; // For average framerate
-  
-  } gavf_stream_stats_t;
-
-GAVL_PUBLIC
-void gavf_stream_stats_init(gavf_stream_stats_t*);
-
-GAVL_PUBLIC
-void gavf_stream_stats_update(gavf_stream_stats_t*,const gavl_packet_t*p);
-
-GAVL_PUBLIC
-void gavf_stream_stats_update_params(gavf_stream_stats_t * f,
-                                     int64_t pts, int64_t duration, int data_len,
-                                     int flags);
-
-
-GAVL_PUBLIC
-void gavf_stream_stats_apply_audio(gavf_stream_stats_t * f, 
-                                   const gavl_audio_format_t * fmt,
-                                   gavl_compression_info_t * ci,
-                                   gavl_dictionary_t * m);
-
-GAVL_PUBLIC
-void gavf_stream_stats_apply_video(gavf_stream_stats_t * f, 
-                                   gavl_video_format_t * fmt,
-                                   gavl_compression_info_t * ci,
-                                   gavl_dictionary_t * m);
-
-GAVL_PUBLIC
-void gavf_stream_stats_apply_subtitle(gavf_stream_stats_t * f, 
-                                      gavl_dictionary_t * m);
-
-GAVL_PUBLIC
-void gavf_stream_stats_apply_generic(gavf_stream_stats_t * f,
-                                     gavl_compression_info_t * ci,
-                                     gavl_dictionary_t * m);
-
 #if 0
 typedef struct
   {
@@ -550,6 +507,12 @@ gavl_dictionary_t * gavf_get_media_info_nc(gavf_t * g);
 
 GAVL_PUBLIC
 const gavl_dictionary_t * gavf_get_media_info(const gavf_t * g);
+
+GAVL_PUBLIC
+gavl_dictionary_t * gavf_get_current_track_nc(gavf_t * g);
+
+GAVL_PUBLIC
+const gavl_dictionary_t * gavf_get_current_track(const gavf_t * g);
 
 GAVL_PUBLIC
 int gavf_select_track(gavf_t * g, int track);

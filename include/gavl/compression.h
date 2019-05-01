@@ -445,6 +445,62 @@ GAVL_PUBLIC
 void gavl_packet_save(const gavl_packet_t * p,
                       const char * filename);
 
+
+typedef struct
+  {
+  int32_t size_min;
+  int32_t size_max;
+  int64_t duration_min;
+  int64_t duration_max;
+  int64_t pts_start;
+  int64_t pts_end;
+
+  int64_t total_bytes;   // For average bitrate 
+  int64_t total_packets; // For average framerate
+  
+  } gavl_stream_stats_t;
+
+GAVL_PUBLIC
+void gavl_stream_stats_init(gavl_stream_stats_t*);
+
+GAVL_PUBLIC
+void gavl_stream_stats_update(gavl_stream_stats_t*,const gavl_packet_t*p);
+
+GAVL_PUBLIC
+void gavl_stream_stats_update_params(gavl_stream_stats_t * f,
+                                     int64_t pts, int64_t duration, int data_len,
+                                     int flags);
+
+
+GAVL_PUBLIC
+void gavl_stream_stats_apply_audio(gavl_stream_stats_t * f, 
+                                   const gavl_audio_format_t * fmt,
+                                   gavl_compression_info_t * ci,
+                                   gavl_dictionary_t * m);
+
+GAVL_PUBLIC
+void gavl_stream_stats_apply_video(gavl_stream_stats_t * f, 
+                                   gavl_video_format_t * fmt,
+                                   gavl_compression_info_t * ci,
+                                   gavl_dictionary_t * m);
+
+GAVL_PUBLIC
+void gavl_stream_stats_apply_subtitle(gavl_stream_stats_t * f, 
+                                      gavl_dictionary_t * m);
+
+GAVL_PUBLIC
+void gavl_stream_stats_apply_generic(gavl_stream_stats_t * f,
+                                     gavl_compression_info_t * ci,
+                                     gavl_dictionary_t * m);
+
+
+GAVL_PUBLIC
+int gavl_stream_get_stats(const gavl_dictionary_t * s, gavl_stream_stats_t * stats);
+
+GAVL_PUBLIC
+void gavl_stream_set_stats(gavl_dictionary_t * s, const gavl_stream_stats_t * stats);
+
+  
 #if 0
 GAVL_PUBLIC
 void gavl_compression_info_to_dictionary(const gavl_compression_info_t * info, gavl_dictionary_t * dict);

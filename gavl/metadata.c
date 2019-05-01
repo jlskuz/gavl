@@ -162,9 +162,15 @@ static const char * compression_fields[] =
 const char * implicit_fields[] =
   {
     GAVL_META_URI,
-    GAVL_META_BIG_ENDIAN,
     GAVL_META_AVG_BITRATE,
     GAVL_META_AVG_FRAMERATE,
+    GAVL_META_WIDTH,
+    GAVL_META_HEIGHT,
+    GAVL_META_FORMAT,
+    GAVL_META_AUDIO_CODEC,
+    GAVL_META_VIDEO_CODEC,
+    GAVL_META_AUDIO_SAMPLERATE,
+    GAVL_META_AUDIO_CHANNELS,
     NULL,
   };
 

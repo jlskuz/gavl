@@ -39,6 +39,7 @@ static int64_t seek_file(void * priv, int64_t pos, int whence)
 
 static int flush_file(void * priv)
   {
+
   if(!fflush((FILE*)priv))
     return 1;
   //  fprintf(stderr, "flush failed\n");
