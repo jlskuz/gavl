@@ -722,8 +722,6 @@ static void init_streams(gavf_t * g)
     g->streams[i].type = gavl_stream_get_type(g->streams[i].h);
     g->streams[i].g = g;
     
-    g->streams[i].id = gavl_stream_get_id(g->streams[i].h);
-        
     if(!gavl_stream_get_id(g->streams[i].h, &g->streams[i].id))
       {
       
@@ -1860,7 +1858,7 @@ gavf_stream_t * gavf_find_stream_by_id(gavf_t * g, uint32_t id)
   return NULL;
   }
 
-gavf_stream_t * gavf_find_stream_by_idx(gavf_t * g, gavf_stream_type_t type, int idx)
+gavf_stream_t * gavf_find_stream_by_idx(gavf_t * g, gavl_stream_type_t type, int idx)
   {
   int i;
   int cnt = 0;
