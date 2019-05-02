@@ -212,7 +212,7 @@ gavl_track_get_stream_all(const gavl_dictionary_t * d, int idx)
   }
 
 gavl_stream_type_t
-gavl_stream_get_type(gavl_dictionary_t * s)
+gavl_stream_get_type(const gavl_dictionary_t * s)
   {
   int ret = GAVL_STREAM_NONE;
   gavl_dictionary_get_int(s, GAVL_META_STREAM_TYPE, &ret);
@@ -1783,7 +1783,7 @@ void gavl_stream_set_compression_info(gavl_dictionary_t * s, const gavl_compress
     }
   }
 
-int gavl_stream_get_sample_timescale(gavl_dictionary_t * s)
+int gavl_stream_get_sample_timescale(const gavl_dictionary_t * s)
   {
   gavl_stream_type_t t;
                          

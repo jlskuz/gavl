@@ -58,10 +58,10 @@ GAVL_PUBLIC gavl_dictionary_t *
 gavl_track_get_stream_all_nc(gavl_dictionary_t * d, int idx);
 
 GAVL_PUBLIC gavl_stream_type_t
-gavl_stream_get_type(gavl_dictionary_t * s);
+gavl_stream_get_type(const gavl_dictionary_t * s);
 
 GAVL_PUBLIC
-int gavl_stream_get_sample_timescale(gavl_dictionary_t * s);
+int gavl_stream_get_sample_timescale(const gavl_dictionary_t * s);
 
 
 GAVL_PUBLIC int
