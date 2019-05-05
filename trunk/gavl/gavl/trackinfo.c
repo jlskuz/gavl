@@ -225,10 +225,10 @@ gavl_stream_get_id(const gavl_dictionary_t * s, int * id)
   return gavl_dictionary_get_int(s, GAVL_META_STREAM_ID, id);
   }
 
-int
+void
 gavl_stream_set_id(gavl_dictionary_t * s, int id)
   {
-  return gavl_dictionary_set_int(s, GAVL_META_STREAM_ID, id);
+  gavl_dictionary_set_int(s, GAVL_META_STREAM_ID, id);
   }
 
 gavl_dictionary_t *
@@ -311,8 +311,11 @@ append_stream(gavl_dictionary_t * d, gavl_stream_type_t type)
   
   m = gavl_dictionary_get_dictionary_create(s, GAVL_META_METADATA);
   gavl_dictionary_set_int(m, GAVL_META_IDX, arr->num_entries);
+  
   gavl_array_splice_val_nocopy(arr, arr->num_entries, 0, &val);
 
+  gavl_stream_set_id(s, arr->num_entries);
+  
   return arr->entries[arr->num_entries-1].v.dictionary;
   }
 
