@@ -326,11 +326,7 @@ typedef enum
     ENC_INTERLEAVE
   } encoding_mode_t;
 
-#define GAVF_FLAG_MULTITRACK      (1<<0)
-#define GAVF_FLAG_HAVE_PKT_HEADER (1<<1)
-#define GAVF_FLAG_WRITE           (1<<2)
-#define GAVF_FLAG_EOF             (1<<3)
-#define GAVF_FLAG_STREAMING       (1<<4)
+
 
 #define GAVF_SET_FLAG(g, f)    g->flags |= f
 #define GAVF_CLEAR_FLAG(g, f) (g->flags &= ~f)

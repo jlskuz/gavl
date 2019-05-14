@@ -910,7 +910,8 @@ const gavl_dictionary_t * gavf_get_media_info(const gavf_t * g)
 
 int gavf_select_track(gavf_t * g, int track)
   {
-  /* TODO Recreate demuxer */
+  free_track(g);
+  
   if(!(g->cur = gavl_get_track_nc(&g->mi, track)))
     return 0;
 
@@ -1858,6 +1859,7 @@ gavf_stream_t * gavf_find_stream_by_id(gavf_t * g, uint32_t id)
   return NULL;
   }
 
+#if 0
 gavf_stream_t * gavf_find_stream_by_idx(gavf_t * g, gavl_stream_type_t type, int idx)
   {
   int i;
@@ -1876,7 +1878,6 @@ gavf_stream_t * gavf_find_stream_by_idx(gavf_t * g, gavl_stream_type_t type, int
   return NULL;
   }
 
-#if 0
 int gavf_get_num_streams(gavf_t * g, int type)
   {
   return gavf_program_header_get_num_streams(&g->ph, type);
@@ -2033,4 +2034,10 @@ gavl_dictionary_t * gavf_get_current_track_nc(gavf_t * g)
 const gavl_dictionary_t * gavf_get_current_track(const gavf_t * g)
   {
   return g->cur;
+  }
+
+int gavf_get_flags(gavf_t * g)
+  {
+  return g->flags;
+  
   }

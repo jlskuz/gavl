@@ -37,7 +37,8 @@ gavl_source_status_t gavf_demux_iteration(gavf_t * g)
   gavf_stream_t * read_stream;
   
   /* Read header */
-  if(!GAVF_HAS_FLAG(g, GAVF_FLAG_HAVE_PKT_HEADER) && !gavf_packet_read_header(g))
+  if(!GAVF_HAS_FLAG(g, GAVF_FLAG_HAVE_PKT_HEADER) &&
+     !gavf_packet_read_header(g))
     {
     //      fprintf(stderr, "Have no header\n");
     return GAVL_SOURCE_EOF;

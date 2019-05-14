@@ -18,6 +18,16 @@
 
 #include <stdio.h>
 
+/* Stream properties */
+#define GAVF_FLAG_MULTITRACK      (1<<0)
+#define GAVF_FLAG_HAVE_PKT_HEADER (1<<1)
+#define GAVF_FLAG_WRITE           (1<<2)
+#define GAVF_FLAG_EOF             (1<<3)
+
+/* No seek support */
+#define GAVF_FLAG_STREAMING       (1<<4)
+
+
 /* gavf file structure */
 
 /*
@@ -496,6 +506,9 @@ void gavf_close(gavf_t *);
 
 GAVL_PUBLIC
 gavf_options_t * gavf_get_options(gavf_t *);
+
+GAVL_PUBLIC
+int gavf_get_flags(gavf_t *);
 
 /* Read support */
 

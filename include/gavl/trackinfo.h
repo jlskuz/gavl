@@ -67,7 +67,7 @@ int gavl_stream_get_sample_timescale(const gavl_dictionary_t * s);
 GAVL_PUBLIC int
 gavl_stream_get_id(const gavl_dictionary_t * s, int * id);
 
-GAVL_PUBLIC int
+GAVL_PUBLIC void
 gavl_stream_set_id(gavl_dictionary_t * s, int id);
 
 GAVL_PUBLIC int
