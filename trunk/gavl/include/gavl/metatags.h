@@ -330,6 +330,10 @@
 #define GAVL_META_STREAM_FORMAT    "fmt"
 #define GAVL_META_STREAM_PACKET_TIMESCALE "pscale"
 #define GAVL_META_STREAM_SAMPLE_TIMESCALE "sscale"
+
+/* Set to the absolute stream index offset by one by default
+   but can be changed to anything */
+
 #define GAVL_META_STREAM_ID               "streamid"
 
 #define GAVL_META_STREAM_STATS "stats"
