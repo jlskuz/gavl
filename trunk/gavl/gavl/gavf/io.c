@@ -1167,9 +1167,8 @@ static int64_t seek_sub(void * priv, int64_t pos, int whence)
   if(s->pos > s->size)
     s->pos = s->size;
 
-  s->pos = gavf_io_seek(s->io, s->offset + s->pos, SEEK_SET);
+  s->pos = gavf_io_seek(s->io, s->offset + s->pos, SEEK_SET) - s->offset;
   
-  s->pos -= s->offset;
   
   return s->pos;
   }
