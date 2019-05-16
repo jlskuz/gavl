@@ -1561,6 +1561,10 @@ static int program_header_write(gavf_io_t * io,
   gavf_chunk_t chunk;
   int result;
   gavl_msg_t msg;
+
+  fprintf(stderr, "Writing program header:\n");
+  gavl_dictionary_dump(dict, 2);
+    
   
   gavl_msg_init(&msg);
   gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PROGRAM_HEADER_START, GAVL_MSG_NS_GAVF);
