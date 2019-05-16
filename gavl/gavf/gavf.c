@@ -922,6 +922,8 @@ int gavf_select_track(gavf_t * g, int track)
   if(!GAVF_HAS_FLAG(g, GAVF_FLAG_STREAMING))
     {
     /* Read indices */
+
+    
     }
 
   return 1;
@@ -932,7 +934,10 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
   gavl_buffer_t buf;
   gavf_io_t bufio;
   gavf_chunk_t head;
-  
+
+  gavl_dictionary_t * track;
+  gavl_value_t track_val;
+    
   g->io = io;
   
   gavf_io_set_msg_cb(g->io, g->msg_callback, g->msg_data);
@@ -1036,6 +1041,7 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
     
     while(1)
       {
+      
       if(!align_read(g->io))
         goto fail;
       
@@ -1045,12 +1051,42 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
       fprintf(stderr, "Got signature:\n");
       gavl_hexdump((uint8_t*)head.eightcc, 8, 8);
 
-      if(strcmp(head.eightcc, GAVF_TAG_PROGRAM_HEADER))
-        goto fail;
+      if(!strcmp(head.eightcc, GAVF_TAG_PROGRAM_HEADER))
+        {
+        gavl_value_init(&track_val);
+        track = gavl_value_set_dictionary(&track_val);
 
+        gavl_buffer_alloc(&buf, head.len);
+        if((buf.len = gavf_io_read_data(io, buf.buf, head.len)) < head.len)
+          goto fail;
       
+        gavf_io_init_buf_read(&bufio, &buf);
       
-      if(g->first_sync_pos > 0)
+        if(!gavl_dictionary_read(&bufio, track))
+          goto fail;
+
+        gavl_track_splice_children_nocopy(&g->mi, 0, 0, &track_val);
+        break;
+        }
+      
+      else if(!strcmp(head.eightcc, GAVF_TAG_MULTI_HEADER))
+        {
+        gavl_dictionary_reset(&g->mi);
+
+        gavl_buffer_alloc(&buf, head.len);
+        if((buf.len = gavf_io_read_data(io, buf.buf, head.len)) < head.len)
+          goto fail;
+      
+        gavf_io_init_buf_read(&bufio, &buf);
+      
+        if(!gavl_dictionary_read(&bufio, &g->mi))
+          goto fail;
+        break;
+        }
+      
+      goto fail;
+      
+      //      if(g->first_sync_pos > 0)
         break;
       }
     }

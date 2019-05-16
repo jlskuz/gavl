@@ -20,12 +20,13 @@
 
 /* Stream properties */
 #define GAVF_FLAG_MULTITRACK      (1<<0)
-#define GAVF_FLAG_HAVE_PKT_HEADER (1<<1)
-#define GAVF_FLAG_WRITE           (1<<2)
-#define GAVF_FLAG_EOF             (1<<3)
+#define GAVF_FLAG_MULTI_HEADER    (1<<1)
+#define GAVF_FLAG_HAVE_PKT_HEADER (1<<2)
+#define GAVF_FLAG_WRITE           (1<<3)
+#define GAVF_FLAG_EOF             (1<<4)
 
 /* No seek support */
-#define GAVF_FLAG_STREAMING       (1<<4)
+#define GAVF_FLAG_STREAMING       (1<<5)
 
 
 /* gavf file structure */
@@ -37,7 +38,9 @@
   
   Chunks *always* start at 8 byte boundaries. Preceeding bytes (up to 7) are
   filled with zeros
-  
+
+  Single track:
+    
   CHUNK("GAVFPHDR")
   len bytes header (dictionary)
   
@@ -88,10 +91,19 @@
   GAVFTAIL:      8 bytes
   footer_offset: 8 bytes, file offset of the GAVFFOOT tag
   size:          8 bytes, byte position after the last byte of these 8 bytes
+
+
+  Multiple tracks (common header):
+  
+  CHUNK("GAVFMHDR")
+  len bytes header (dictionary with multple tracks)
+  
+
   
 */
 
 #define GAVF_TAG_PROGRAM_HEADER "GAVFPHDR"
+#define GAVF_TAG_MULTI_HEADER   "GAVFMHDR"
 
 #define GAVF_TAG_PACKETS        "GAVFPKTS"
 
