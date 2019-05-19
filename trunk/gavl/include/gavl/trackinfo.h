@@ -227,7 +227,7 @@ GAVL_PUBLIC
 int gavl_track_get_num_msg_streams(const gavl_dictionary_t * d);
   
 GAVL_PUBLIC
-gavl_dictionary_t * gavl_track_append_msg_stream(gavl_dictionary_t * d);
+gavl_dictionary_t * gavl_track_append_msg_stream(gavl_dictionary_t * d, int id);
 
 GAVL_PUBLIC
 const gavl_dictionary_t * gavl_track_get_msg_metadata(const gavl_dictionary_t * d, int stream);
@@ -238,8 +238,6 @@ gavl_dictionary_t * gavl_track_get_msg_metadata_nc(gavl_dictionary_t * d, int st
 GAVL_PUBLIC
 int gavl_track_delete_msg_stream(gavl_dictionary_t * d, int stream);
 
-GAVL_PUBLIC
-void gavl_track_set_num_msg_streams(gavl_dictionary_t * d, int num);
 
 /* Delete stream by absolute index */
 GAVL_PUBLIC

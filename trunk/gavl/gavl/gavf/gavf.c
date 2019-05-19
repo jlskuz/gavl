@@ -929,10 +929,53 @@ int gavf_select_track(gavf_t * g, int track)
   return 1;
   }
 
+static int read_program_header(gavf_t * g,
+                               gavl_dictionary_t * ret,
+                               gavf_chunk_t * head,
+                               gavl_buffer_t * buf)
+  {
+  int result = 0;
+  gavf_io_t bufio;
+
+  gavl_msg_t msg;
+  
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_PROGRAM_HEADER_START, GAVL_MSG_NS_GAVF);
+
+  if(!gavl_msg_send(&msg, g->msg_callback, g->msg_data))
+    goto fail;
+  
+  gavl_msg_free(&msg);
+  gavl_msg_init(&msg);
+  
+  gavl_buffer_alloc(buf, head->len);
+
+  if((buf->len = gavf_io_read_data(g->io, buf->buf, head->len)) < head->len)
+    goto fail;
+  
+  gavf_io_init_buf_read(&bufio, buf);
+  
+  if(!gavl_dictionary_read(&bufio, ret))
+    goto fail;
+
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_PROGRAM_HEADER_END, GAVL_MSG_NS_GAVF);
+
+  if(!gavl_msg_send(&msg, g->msg_callback, g->msg_data))
+    goto fail;
+
+  
+  result = 1;
+  fail:
+  
+  gavl_msg_free(&msg);
+  
+  return result;
+  }
+
 int gavf_open_read(gavf_t * g, gavf_io_t * io)
   {
-  gavl_buffer_t buf;
   gavf_io_t bufio;
+  gavl_buffer_t buf;
   gavf_chunk_t head;
 
   gavl_dictionary_t * track;
@@ -958,7 +1001,6 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
     gavl_value_t track_val;
     
     gavl_dictionary_init(&foot);
-
     
     /* Read tail */
     
@@ -966,9 +1008,6 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
 
     while(1)
       {
-      gavl_value_init(&track_val);
-      track = gavl_value_set_dictionary(&track_val);
-      
       if(!gavf_chunk_read_header(g->io, &head) ||
          strcmp(head.eightcc, GAVF_TAG_TAIL) ||
          !gavf_io_read_int64f(io, &total_bytes))
@@ -984,19 +1023,19 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
       
       gavf_io_seek(g->io, header_pos, SEEK_SET);
 
-      if(!gavf_chunk_read_header(g->io, &head) ||
-         strcmp(head.eightcc, GAVF_TAG_PROGRAM_HEADER))
+      if(!gavf_chunk_read_header(g->io, &head))
         goto fail;
-      
-      gavl_buffer_alloc(&buf, head.len);
 
-      if((buf.len = gavf_io_read_data(io, buf.buf, head.len)) < head.len)
-        goto fail;
       
-      gavf_io_init_buf_read(&bufio, &buf);
-      
-      if(!gavl_dictionary_read(&bufio, track))
-        goto fail;
+      if(!strcmp(head.eightcc, GAVF_TAG_PROGRAM_HEADER))
+        {
+        gavl_value_init(&track_val);
+        track = gavl_value_set_dictionary(&track_val);
+        
+        if(!read_program_header(g, track, &head, &buf))
+          goto fail;
+        
+        }
       
       /* Read track footer */
 
@@ -1018,8 +1057,6 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
 
       /* Apply footer */
       gavl_dictionary_merge2(track, &foot);
-
-      
       
       gavl_track_splice_children_nocopy(&g->mi, 0, 0, &track_val);
       
@@ -1564,7 +1601,6 @@ static int program_header_write(gavf_io_t * io,
 
   fprintf(stderr, "Writing program header:\n");
   gavl_dictionary_dump(dict, 2);
-    
   
   gavl_msg_init(&msg);
   gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PROGRAM_HEADER_START, GAVL_MSG_NS_GAVF);

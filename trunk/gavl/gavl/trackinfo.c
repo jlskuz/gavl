@@ -289,7 +289,7 @@ gavl_track_find_stream_by_id(const gavl_dictionary_t * d, int id)
   }
 
 static gavl_dictionary_t *
-append_stream(gavl_dictionary_t * d, gavl_stream_type_t type)
+append_stream_common(gavl_dictionary_t * d, gavl_stream_type_t type)
   {
   gavl_value_t val;
   gavl_array_t * arr;
@@ -313,10 +313,15 @@ append_stream(gavl_dictionary_t * d, gavl_stream_type_t type)
   gavl_dictionary_set_int(m, GAVL_META_IDX, arr->num_entries);
   
   gavl_array_splice_val_nocopy(arr, arr->num_entries, 0, &val);
+  return s;
+  }
 
-  gavl_stream_set_id(s, arr->num_entries);
-  
-  return arr->entries[arr->num_entries-1].v.dictionary;
+static gavl_dictionary_t *
+append_stream(gavl_dictionary_t * d, gavl_stream_type_t type)
+  {
+  gavl_dictionary_t * s = append_stream_common(d, type);
+  gavl_stream_set_id(s, gavl_track_get_num_streams_all(d) + GAVL_META_STREAM_ID_MEDIA_START);
+  return s;
   }
 
 int gavl_track_delete_stream(gavl_dictionary_t * d, int idx)
@@ -419,8 +424,6 @@ gavl_dictionary_t * gavl_track_append_stream(gavl_dictionary_t * d, gavl_stream_
       init_overlay_stream(s);
       break;
     case GAVL_STREAM_MSG:
-      init_msg_stream(s);
-      break;
     case GAVL_STREAM_NONE:
       break;
     }
@@ -667,8 +670,17 @@ int gavl_track_get_num_msg_streams(const gavl_dictionary_t * d)
   return gavl_track_get_num_streams(d, GAVL_STREAM_MSG);
   }
 
-gavl_dictionary_t * gavl_track_append_msg_stream(gavl_dictionary_t * d)
+gavl_dictionary_t * gavl_track_append_msg_stream(gavl_dictionary_t * d, int id)
   {
+  gavl_dictionary_t * s;
+
+  if((s = gavl_track_find_stream_by_id_nc(d, id)))
+    return s;
+  
+  s = append_stream_common(d, GAVL_STREAM_MSG);
+  init_msg_stream(s);
+  gavl_stream_set_id(s, id);
+  
   return gavl_track_append_stream(d, GAVL_STREAM_MSG);
   }
 
@@ -1444,18 +1456,6 @@ void gavl_track_set_num_overlay_streams(gavl_dictionary_t * dict, int num)
   for(i = 0; i < num; i++)
     gavl_track_append_overlay_stream(dict);
   
-  }
-
-void gavl_track_set_num_msg_streams(gavl_dictionary_t * dict, int num)
-  {
-  int i;
-
-  /* Delete previous streams */
-  while(gavl_track_delete_msg_stream(dict, 0))
-    ;
-  
-  for(i = 0; i < num; i++)
-    gavl_track_append_msg_stream(dict);
   }
 
 int gavl_track_can_seek(const gavl_dictionary_t * track)
