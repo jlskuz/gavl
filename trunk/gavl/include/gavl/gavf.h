@@ -647,31 +647,30 @@ int gavf_open_write(gavf_t * g, gavf_io_t * io,
  */
 
 GAVL_PUBLIC
-int gavf_add_audio_stream(gavf_t * g,
+int gavf_append_audio_stream(gavf_t * g,
                           const gavl_compression_info_t * ci,
                           const gavl_audio_format_t * format,
                           const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
-int gavf_add_video_stream(gavf_t * g,
+int gavf_append_video_stream(gavf_t * g,
                           const gavl_compression_info_t * ci,
                           const gavl_video_format_t * format,
                           const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
-int gavf_add_text_stream(gavf_t * g,
+int gavf_append_text_stream(gavf_t * g,
                          uint32_t timescale,
                          const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
-int gavf_add_overlay_stream(gavf_t * g,
+int gavf_append_overlay_stream(gavf_t * g,
                             const gavl_compression_info_t * ci,
                             const gavl_video_format_t * format,
                             const gavl_dictionary_t * m);
 
 GAVL_PUBLIC
-int gavf_add_msg_stream(gavf_t * g,
-                        const gavl_dictionary_t * m);
+void gavf_add_msg_stream(gavf_t * g, int id);
 
 GAVL_PUBLIC
 void gavf_add_streams(gavf_t * g, const gavl_dictionary_t * track);
