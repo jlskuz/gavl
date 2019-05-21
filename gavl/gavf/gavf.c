@@ -152,6 +152,10 @@ static int write_sync_header(gavf_t * g, int stream, int64_t packet_pts)
   if(!g->first_sync_pos)
     {
     /* Write GAVF_TAG_PACKETS tag */
+
+    gavf_chunk_start(g->io, &g->packets_chunk, GAVF_TAG_PACKETS);
+    
+    
     
     g->first_sync_pos = g->io->position;
   
@@ -910,14 +914,53 @@ const gavl_dictionary_t * gavf_get_media_info(const gavf_t * g)
 
 int gavf_select_track(gavf_t * g, int track)
   {
+  gavf_chunk_t head;
+  int ret = 0;
   free_track(g);
-  
+  g->num_streams = gavl_track_get_num_streams_all(g->cur);
+
+  init_streams(g);
+
   if(!(g->cur = gavl_get_track_nc(&g->mi, track)))
     return 0;
-
-  g->num_streams = gavl_track_get_num_streams_all(g->cur);
   
-  init_streams(g);
+  if(GAVF_HAS_FLAG(g, GAVF_FLAG_STREAMING) &&
+     !GAVF_HAS_FLAG(g, GAVF_FLAG_MULTI_HEADER))
+    {
+    /* Seek until the first sync header */
+
+    while(1)
+      {
+      if(!align_read(g->io))
+        goto fail;
+      
+      if(!gavf_chunk_read_header(g->io, &head))
+        goto fail;
+      
+      fprintf(stderr, "Got signature:\n");
+      gavl_hexdump((uint8_t*)head.eightcc, 8, 8);
+
+      if(!strcmp(head.eightcc, GAVF_TAG_PACKETS))
+        break;
+      }
+
+    if(!align_read(g->io))
+      goto fail;
+
+    if(gavf_io_read_data(g->io, (uint8_t*)head.eightcc, 8) < 8)
+      goto fail;
+    
+    fprintf(stderr, "Got signature:\n");
+    gavl_hexdump((uint8_t*)head.eightcc, 8, 8);
+    
+    if(strncmp(head.eightcc, GAVF_TAG_SYNC_HEADER, 8))
+      goto fail;
+
+    if(!read_sync_header(g))
+      goto fail;
+    }
+  
+  
 
   if(!GAVF_HAS_FLAG(g, GAVF_FLAG_STREAMING))
     {
@@ -926,7 +969,10 @@ int gavf_select_track(gavf_t * g, int track)
     
     }
 
-  return 1;
+  ret = 1;
+  
+  fail:
+  return ret;
   }
 
 static int read_program_header(gavf_t * g,
@@ -975,6 +1021,7 @@ static int read_program_header(gavf_t * g,
 
 int gavf_open_read(gavf_t * g, gavf_io_t * io)
   {
+  int ret = 0;
   gavf_io_t bufio;
   gavl_buffer_t buf;
   gavf_chunk_t head;
@@ -1122,12 +1169,14 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
         break;
       }
     }
+
+  ret = 1;
   
   fail:
 
   gavl_buffer_free(&buf);
   
-  return 1;
+  return ret;
   }
 
 #if 0
@@ -2037,6 +2086,8 @@ int gavf_chunk_start(gavf_io_t * io, gavf_chunk_t * head, const char * eightcc)
   align_write(io);
   
   head->start = gavf_io_position(io);
+
+  memcpy(head->eightcc, eightcc, 8);
   
   if((gavf_io_write_data(io, (const uint8_t*)eightcc, 8) < 8) ||
      !gavf_io_write_int64f(io, 0))

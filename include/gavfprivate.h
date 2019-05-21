@@ -42,56 +42,6 @@ void gavf_io_init_buf_read(gavf_io_t * io, gavl_buffer_t * buf);
 void gavf_io_init_buf_write(gavf_io_t * io, gavl_buffer_t * buf);
 
 
-/* Streamheader */
-
-#if 0
-void gavf_stream_header_free(gavf_stream_header_t * h);
-// int gavf_stream_header_read(gavf_io_t * io, gavf_stream_header_t * h);
-// int gavf_stream_header_write(gavf_io_t * io, const gavf_stream_header_t * h);
-
-void gavf_stream_header_init_audio(gavf_stream_header_t * h);
-void gavf_stream_header_init_video(gavf_stream_header_t * h);
-void gavf_stream_header_init_text(gavf_stream_header_t * h);
-void gavf_stream_header_apply_footer(gavf_stream_header_t * h);
-
-/* Program header */
-
-int gavf_program_header_add_audio_stream(gavf_program_header_t * ph,
-                                         const gavl_compression_info_t * ci,
-                                         const gavl_audio_format_t * format,
-                                         const gavl_dictionary_t * m);
-
-int gavf_program_header_add_video_stream(gavf_program_header_t * ph,
-                                         const gavl_compression_info_t * ci,
-                                         const gavl_video_format_t * format,
-                                         const gavl_dictionary_t * m);
-
-int gavf_program_header_add_overlay_stream(gavf_program_header_t * ph,
-                                           const gavl_compression_info_t * ci,
-                                           const gavl_video_format_t * format,
-                                           const gavl_dictionary_t * m);
-
-int gavf_program_header_add_text_stream(gavf_program_header_t * ph,
-                                        uint32_t timescale,
-                                        const gavl_dictionary_t * m);
-
-int gavf_program_header_add_msg_stream(gavf_program_header_t * ph,
-                                       const gavl_dictionary_t * m);
-
-
-int gavf_program_header_read(gavf_io_t * io, gavf_program_header_t * ph);
-int gavf_program_header_write(gavf_io_t * io,
-                              const gavf_program_header_t * ph);
-
-int
-gavf_program_header_get_num_streams(const gavf_program_header_t * ph,
-                                    int type);
-
-const gavf_stream_header_t *
-gavf_program_header_get_stream(const gavf_program_header_t * ph,
-                               int index, int type);
-#endif
-
 /* Packetbuffer */
 
 typedef struct gavf_packet_buffer_s gavf_packet_buffer_t;
@@ -376,6 +326,7 @@ struct gavf_s
   encoding_mode_t encoding_mode;
   encoding_mode_t final_encoding_mode;
 
+  
   };
 
 /* Footer */
