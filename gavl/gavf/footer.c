@@ -120,8 +120,13 @@ int gavf_footer_write(gavf_t * g)
   gavl_dictionary_t foot;
   gavl_value_t arr_val;
   gavl_array_t * arr;
-  
   uint64_t footer_start_pos = g->io->position;
+
+  gavf_chunk_t footer;
+  gavf_chunk_t tail;
+  
+  gavf_chunk_start(g->io, &footer, GAVF_TAG_FOOTER);
+  
   if(gavf_io_write_data(g->io, (uint8_t*)GAVF_TAG_FOOTER, 8) < 8)
     return 0;
 
@@ -160,10 +165,12 @@ int gavf_footer_write(gavf_t * g)
     if(!gavf_packet_index_write(g->io, &g->pi))
       return 0;
     }
+
+  gavf_chunk_finish(g->io, &footer, 1);
   
   /* Write final tag */
-  if((gavf_io_write_data(g->io, (uint8_t*)GAVF_TAG_FOOTER, 8) < 8) ||
-     !gavf_io_write_uint64f(g->io, footer_start_pos))
+  if((gavf_io_write_data(g->io, (uint8_t*)GAVF_TAG_TAIL, 8) < 8) ||
+     !gavf_io_write_uint64f(g->io, footer.start))
     return 0;
 
   if(!gavf_io_write_uint64f(g->io, gavf_io_position(g->io) + 8))
