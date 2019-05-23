@@ -917,12 +917,13 @@ int gavf_select_track(gavf_t * g, int track)
   gavf_chunk_t head;
   int ret = 0;
   free_track(g);
-  g->num_streams = gavl_track_get_num_streams_all(g->cur);
-
-  init_streams(g);
 
   if(!(g->cur = gavl_get_track_nc(&g->mi, track)))
     return 0;
+
+  g->num_streams = gavl_track_get_num_streams_all(g->cur);
+
+  init_streams(g);
   
   if(GAVF_HAS_FLAG(g, GAVF_FLAG_STREAMING) &&
      !GAVF_HAS_FLAG(g, GAVF_FLAG_MULTI_HEADER))
@@ -1060,7 +1061,7 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
          strcmp(head.eightcc, GAVF_TAG_TAIL) ||
          !gavf_io_read_int64f(io, &total_bytes))
         return 0;
-
+      
       header_pos = gavf_io_position(io) - total_bytes;
       footer_pos = gavf_io_position(io) - head.len;
 
