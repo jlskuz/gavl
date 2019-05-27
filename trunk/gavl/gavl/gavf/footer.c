@@ -123,31 +123,35 @@ int gavf_footer_write(gavf_t * g)
   uint64_t footer_start_pos = g->io->position;
 
   gavf_chunk_t footer;
-  gavf_chunk_t tail;
+  //  gavf_chunk_t tail;
   
   gavf_chunk_start(g->io, &footer, GAVF_TAG_FOOTER);
   
-  if(gavf_io_write_data(g->io, (uint8_t*)GAVF_TAG_FOOTER, 8) < 8)
-    return 0;
-
   gavl_dictionary_init(&foot);
 
   gavl_value_init(&arr_val);
-
   arr = gavl_value_set_array(&arr_val);
   
   for(i = 0; i < g->num_streams; i++)
     {
     gavl_value_t stream_val;
     gavl_dictionary_t * stream;
-
-
+    
     gavl_value_init(&stream_val);
     stream = gavl_value_set_dictionary(&stream_val);
     gavl_stream_set_stats(stream, &g->streams[i].stats);
     gavl_array_splice_val_nocopy(arr, -1, 0, &stream_val);
     }
+
   gavl_dictionary_set_nocopy(&foot, GAVL_META_STREAMS, &arr_val);
+  
+  fprintf(stderr, "Writing footer\n");
+  gavl_dictionary_dump(&foot, 2);
+  
+  gavl_dictionary_write(g->io, &foot);
+  gavl_dictionary_free(&foot);
+
+#if 0
   
   /* Write indices */  
   if(g->opt.flags & GAVF_OPT_FLAG_SYNC_INDEX)
@@ -166,6 +170,8 @@ int gavf_footer_write(gavf_t * g)
       return 0;
     }
 
+#endif
+  
   gavf_chunk_finish(g->io, &footer, 1);
   
   /* Write final tag */
