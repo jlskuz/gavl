@@ -271,10 +271,10 @@
 #define GAVL_MSG_GAVF_READ_PROGRAM_HEADER_END       (0x1000|2)
 
 /* Emitted by the encoder immediately before a program header is written */
-#define GAVL_MSG_GAVF_WRITE_PROGRAM_HEADER_START    (0x1000|3)
+#define GAVL_MSG_GAVF_WRITE_HEADER_START            (0x1000|3)
 
 /* Emitted by the encoder immediately after a program header is written */
-#define GAVL_MSG_GAVF_WRITE_PROGRAM_HEADER_END      (0x1000|4)
+#define GAVL_MSG_GAVF_WRITE_HEADER_END              (0x1000|4)
 
 #define GAVL_MSG_GAVF_READ_SYNC_HEADER_START        (0x1000|5)
 #define GAVL_MSG_GAVF_READ_SYNC_HEADER_END          (0x1000|6)

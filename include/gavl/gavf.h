@@ -102,8 +102,7 @@
   
 */
 
-#define GAVF_TAG_PROGRAM_HEADER "GAVFPHDR"
-#define GAVF_TAG_MULTI_HEADER   "GAVFMHDR"
+#define GAVF_TAG_HEADER         "GAVFHEAD"
 
 #define GAVF_TAG_PACKETS        "GAVFPKTS"
 
