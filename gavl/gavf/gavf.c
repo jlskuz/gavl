@@ -1095,8 +1095,10 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
 
       gavl_buffer_alloc(&buf, head.len);
 
-      if((buf.len = gavf_io_read_data(io, buf.buf, head.len)) < head.len)
+      if((buf.len = gavf_io_read_data(g->io, buf.buf, head.len)) < head.len)
         goto fail;
+
+      buf.pos = 0;
       
       gavf_io_init_buf_read(&bufio, &buf);
       
@@ -1537,6 +1539,9 @@ int gavf_append_audio_stream(gavf_t * g,
   gavl_audio_format_t * fmt;
   gavl_dictionary_t * s = gavl_track_append_stream(g->cur, GAVL_STREAM_AUDIO);
 
+  fprintf(stderr, "gavf_append_audio_stream\n");
+  gavl_dictionary_dump(m, 2);
+  
   fmt = gavl_dictionary_get_audio_format_nc(s, GAVL_META_STREAM_FORMAT);
   gavl_audio_format_copy(fmt, format);
 
