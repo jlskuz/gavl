@@ -49,7 +49,7 @@ void gavl_array_dump(const gavl_array_t * a, int indent)
     else
       gavl_diprintf(0, "\n");
     }
-  gavl_diprintf(indent, "]");
+  gavl_diprintf(indent, "]\n");
   }
 
 
