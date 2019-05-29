@@ -254,7 +254,10 @@ int gavl_track_stream_idx_to_rel(const gavl_dictionary_t * d, int idx);
 
 /* Tracks */
 GAVL_PUBLIC
-gavl_dictionary_t * gavl_append_track(gavl_dictionary_t*);
+gavl_dictionary_t * gavl_append_track(gavl_dictionary_t*, const gavl_dictionary_t * t);
+
+GAVL_PUBLIC
+gavl_dictionary_t * gavl_prepend_track(gavl_dictionary_t*, const gavl_dictionary_t * t);
 
 GAVL_PUBLIC
 const gavl_dictionary_t * gavl_get_track(const gavl_dictionary_t*, int idx);

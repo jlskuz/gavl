@@ -189,3 +189,4 @@ void gavl_stream_stats_apply_subtitle(gavl_stream_stats_t * f,
   {
   gavl_stream_stats_apply_generic(f, NULL, m);
   }
+

@@ -26,102 +26,13 @@
   int64_t total_packets; // For average framerate
 #endif
 
-
-#if 0
-
-int gavf_footer_check(gavf_t * g)
-  {
-  uint8_t buf[8];
-  int64_t last_pos;
-  int64_t footer_start_pos;
-  int i;
-  gavf_stream_header_t * s;
-  int ret = 0;
-  gavf_chunk_t chunk;
-
-  gavl_dictionary_t foot;
-  const gavl_array_t * stats_arr;
-  
-  if(!g->io->seek_func)
-    return 0;
-  
-  last_pos = g->io->position;
-
-  /* Read last 16 bytes */
-  gavf_io_seek(g->io, -16, SEEK_END);
-  if((gavf_io_read_data(g->io, buf, 8) < 8))
-    goto end;
-
-  if(memcmp(buf, GAVF_TAG_TAIL, 8))
-    goto end;
-    
-  if(!gavf_io_read_int64f(g->io, &footer_start_pos))
-    goto end;
-  
-  /* Seek to footer start */
-  gavf_io_seek(g->io, footer_start_pos, SEEK_SET);
-  gavl_dictionary_init(&foot);
-  
-  if(!gavf_chunk_read_header(g->io, &chunk) ||
-     !gavf_chunk_is(&chunk, GAVF_TAG_FOOTER) ||
-     !gavl_dictionary_read(g->io, &foot) ||
-     !(stats_arr = gavl_dictionary_get_array(&foot, "stats")) ||
-     (g->ph.num_streams != stats_arr->num_entries))
-    goto end;
-  
-  for(i = 0; i < g->ph.num_streams; i++)
-    {
-    const gavl_dictionary_t * stats;
-
-    s = g->ph.streams + i;
-
-    if(!(stats = gavl_value_get_dictionary(&stats_arr->entries[i])) ||
-       !stats_from_dict(&s->stats, stats))
-      goto end;
-    
-    /* Set some useful values from the footer */
-    gavf_stream_header_apply_footer(s);
-    }
-
-  /* Read remaining stuff */
-  ret = 1;
-
-  while(gavf_chunk_read_header(g->io, &chunk))
-    {
-    if(gavf_chunk_is(&chunk, GAVF_TAG_SYNC_INDEX))
-      {
-      if(gavf_sync_index_read(g->io, &g->si))
-        g->opt.flags |= GAVF_OPT_FLAG_SYNC_INDEX;
-      }
-    else if(gavf_chunk_is(&chunk, GAVF_TAG_PACKET_INDEX))
-      {
-      if(gavf_packet_index_read(g->io, &g->pi))
-        g->opt.flags |= GAVF_OPT_FLAG_PACKET_INDEX;
-      }
-    else
-      {
-      /* TODO: Skip */
-      }
-    
-    }
-  
-  end:
-    
-  gavf_io_seek(g->io, last_pos, SEEK_SET);
-  return ret;
-    
-  }
-
-#endif
-
 int gavf_footer_write(gavf_t * g)
   {
   int i;
   gavl_dictionary_t foot;
   gavl_value_t arr_val;
   gavl_array_t * arr;
-  uint64_t footer_start_pos = g->io->position;
-
+  
   gavf_chunk_t footer;
   //  gavf_chunk_t tail;
   
