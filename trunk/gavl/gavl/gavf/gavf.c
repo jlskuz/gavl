@@ -1028,7 +1028,8 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
   gavf_io_t bufio;
   gavl_buffer_t buf;
   gavf_chunk_t head;
-
+  gavl_dictionary_t mi;
+  
     
   g->io = io;
   
@@ -1040,6 +1041,7 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
   
   if(gavf_io_can_seek(g->io))
     {
+    int num_tracks;
     int64_t footer_pos;
     int64_t header_pos;
 
@@ -1047,8 +1049,7 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
 
     gavl_dictionary_t * track;
     gavl_dictionary_t foot;
-    gavl_value_t track_val;
-    
+
     gavl_dictionary_init(&foot);
     
     /* Read tail */
@@ -1078,12 +1079,24 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
       
       if(!strcmp(head.eightcc, GAVF_TAG_HEADER))
         {
-        gavl_value_init(&track_val);
-        track = gavl_value_set_dictionary(&track_val);
-        
-        if(!read_header(g, &head, &buf, track))
+        gavl_dictionary_init(&mi);
+        if(!read_header(g, &head, &buf, &mi))
           goto fail;
         }
+      else
+        goto fail;
+
+      num_tracks = gavl_get_num_tracks(&mi);
+      
+      /* Extract track */
+      if(num_tracks > 1)
+        {
+        /* Multitrack header: Need to switch track by external means */
+        }
+      else if(num_tracks == 1)
+        track = gavl_get_track_nc(&mi, 0);
+      else
+        goto fail;
       
       /* Read track footer */
 
@@ -1092,7 +1105,7 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
       if(!gavf_chunk_read_header(g->io, &head) ||
          strcmp(head.eightcc, GAVF_TAG_FOOTER))
         return 0;
-
+      
       gavl_buffer_alloc(&buf, head.len);
 
       if((buf.len = gavf_io_read_data(g->io, buf.buf, head.len)) < head.len)
@@ -1111,7 +1124,10 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
       /* Apply footer */
       gavl_dictionary_merge2(track, &foot);
       
-      gavl_track_splice_children_nocopy(&g->mi, 0, 0, &track_val);
+      fprintf(stderr, "Merged footer\n");
+      gavl_dictionary_dump(track, 2);
+      
+      gavl_prepend_track(&g->mi, track);
       
       /* Go back */
       if(!header_pos)
@@ -1522,7 +1538,7 @@ int gavf_open_write(gavf_t * g, gavf_io_t * io,
 
   /* Initialize track */
 
-  g->cur = gavl_append_track(&g->mi);
+  g->cur = gavl_append_track(&g->mi, NULL);
   
   if(m)
     gavl_dictionary_copy(gavl_track_get_metadata_nc(g->cur), m);
@@ -1531,9 +1547,9 @@ int gavf_open_write(gavf_t * g, gavf_io_t * io,
   }
 
 int gavf_append_audio_stream(gavf_t * g,
-                          const gavl_compression_info_t * ci,
-                          const gavl_audio_format_t * format,
-                          const gavl_dictionary_t * m)
+                             const gavl_compression_info_t * ci,
+                             const gavl_audio_format_t * format,
+                             const gavl_dictionary_t * m)
   {
   int ret = 0;
   gavl_audio_format_t * fmt;
@@ -1556,9 +1572,9 @@ int gavf_append_audio_stream(gavf_t * g,
 
 
 int gavf_append_video_stream(gavf_t * g,
-                          const gavl_compression_info_t * ci,
-                          const gavl_video_format_t * format,
-                          const gavl_dictionary_t * m)
+                             const gavl_compression_info_t * ci,
+                             const gavl_video_format_t * format,
+                             const gavl_dictionary_t * m)
   {
   int ret = 0;
   gavl_video_format_t * fmt;

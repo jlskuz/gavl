@@ -680,8 +680,7 @@ gavl_dictionary_t * gavl_track_append_msg_stream(gavl_dictionary_t * d, int id)
   s = append_stream_common(d, GAVL_STREAM_MSG);
   init_msg_stream(s);
   gavl_stream_set_id(s, id);
-  
-  return gavl_track_append_stream(d, GAVL_STREAM_MSG);
+  return s;
   }
 
 const gavl_dictionary_t * gavl_track_get_msg_metadata(const gavl_dictionary_t * d, int stream)
@@ -701,11 +700,9 @@ int gavl_track_delete_msg_stream(gavl_dictionary_t * d, int stream)
 
 /* Track */
 
-static void track_init(gavl_dictionary_t * track, int idx)
+static void track_init(gavl_dictionary_t * track)
   {
-  gavl_dictionary_t * m;
-  m = gavl_dictionary_get_dictionary_create(track, GAVL_META_METADATA);
-  gavl_dictionary_set_int(m, GAVL_META_IDX, idx);
+  gavl_dictionary_get_dictionary_create(track, GAVL_META_METADATA);
   }
 
 gavl_array_t * gavl_get_tracks_nc(gavl_dictionary_t * dict)
@@ -718,23 +715,46 @@ const gavl_array_t * gavl_get_tracks(const gavl_dictionary_t * dict)
   return gavl_dictionary_get_array(dict, GAVL_META_TRACKS);
   }
 
-gavl_dictionary_t * gavl_append_track(gavl_dictionary_t * dict)
+gavl_dictionary_t * gavl_append_track(gavl_dictionary_t * dict, const gavl_dictionary_t * t)
   {
-  int num;
   gavl_dictionary_t * new_track;
   gavl_value_t val;
   gavl_array_t * arr = gavl_get_tracks_nc(dict);
-
-  num = arr->num_entries;
   
   gavl_value_init(&val);
   new_track = gavl_value_set_dictionary(&val);
+
+  if(t)
+    gavl_dictionary_copy(new_track, t);
+  else
+    track_init(new_track);
   
-  track_init(new_track, num);
   gavl_array_push_nocopy(arr, &val);
   gavl_track_update_children(dict);
-  return arr->entries[num].v.dictionary;
+  return arr->entries[arr->num_entries-1].v.dictionary;
   }
+
+gavl_dictionary_t * gavl_prepend_track(gavl_dictionary_t * dict, const gavl_dictionary_t * t)
+  {
+  gavl_dictionary_t * new_track;
+  gavl_value_t val;
+  gavl_array_t * arr = gavl_get_tracks_nc(dict);
+  
+  gavl_value_init(&val);
+  new_track = gavl_value_set_dictionary(&val);
+
+  if(t)
+    gavl_dictionary_copy(new_track, t);
+  else
+    track_init(new_track);
+  
+  gavl_array_unshift_nocopy(arr, &val);
+  //  gavl_array_push_nocopy(arr, &val);
+  
+  gavl_track_update_children(dict);
+  return arr->entries[0].v.dictionary;
+  }
+
 
 const gavl_dictionary_t * gavl_get_track(const gavl_dictionary_t * dict, int idx)
   {
