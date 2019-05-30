@@ -51,6 +51,31 @@ int gavl_track_get_num_streams(const gavl_dictionary_t * d, gavl_stream_type_t t
   return ret;
   }
 
+void gavl_track_delete_implicit_fields(gavl_dictionary_t * track)
+  {
+  int i, num;
+  
+  gavl_dictionary_t * m;
+  gavl_dictionary_t * s;
+  gavl_array_t * arr;
+
+  m = gavl_track_get_metadata_nc(track);
+  gavl_metadata_delete_implicit_fields(m);
+  
+  if((arr = gavl_dictionary_get_array_nc(track, GAVL_META_STREAMS)))
+    {
+    for(i = 0; i < arr->num_entries; i++)
+      {
+      if((s = gavl_value_get_dictionary_nc(&arr->entries[i])))
+        {
+        gavl_dictionary_set(s, GAVL_META_STREAM_STATS, NULL);
+        m = gavl_stream_get_metadata_nc(s);
+        gavl_metadata_delete_implicit_fields(m);
+        }
+      }
+    }
+  }
+
 int gavl_track_stream_idx_to_abs(const gavl_dictionary_t * d, gavl_stream_type_t type, int idx)
   {
   int ctr = 0;
@@ -970,7 +995,6 @@ static void get_stream_duration(void * priv,
   if(test_duration > *t)
     *t = test_duration;
   }
-
 
 void gavl_track_compute_duration(gavl_dictionary_t * dict)
   {
