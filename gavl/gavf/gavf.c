@@ -1122,7 +1122,12 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
       gavl_dictionary_dump(&foot, 2);
       
       /* Apply footer */
-      gavl_dictionary_merge2(track, &foot);
+
+      gavl_track_apply_footer(track, &foot);
+
+      gavl_track_finalize(track);
+
+      // gavl_dictionary_merge2(track, &foot);
       
       fprintf(stderr, "Merged footer\n");
       gavl_dictionary_dump(track, 2);
@@ -1711,10 +1716,10 @@ int gavf_start(gavf_t * g)
     else
       g->final_encoding_mode = ENC_SYNCHRONOUS;
     }
+  
+  gavl_track_delete_implicit_fields(g->cur);
 
   m = gavl_track_get_metadata_nc(g->cur);
-  
-  gavl_metadata_delete_implicit_fields(m);
   gavl_dictionary_set_string(m, GAVL_META_SOFTWARE, PACKAGE"-"VERSION);
   
   if(g->opt.flags & GAVF_OPT_FLAG_DUMP_HEADERS)

@@ -190,3 +190,31 @@ void gavl_stream_stats_apply_subtitle(gavl_stream_stats_t * f,
   gavl_stream_stats_apply_generic(f, NULL, m);
   }
 
+void gavl_track_apply_footer(gavl_dictionary_t * track,
+                             const gavl_dictionary_t * footer)
+  {
+  int i;
+  int num_streams;
+
+  gavl_dictionary_t * header_stream;
+  const gavl_dictionary_t * footer_stream;
+  
+  num_streams = gavl_track_get_num_streams_all(track);
+
+  if(gavl_track_get_num_streams_all(footer) != num_streams)
+    {
+    fprintf(stderr, "gavl_track_apply_footer: Stream counts don't match\n");
+    return;
+    }
+
+  for(i = 0; i < num_streams; i++)
+    {
+    header_stream = gavl_track_get_stream_all_nc(track, i);
+    footer_stream = gavl_track_get_stream_all(footer, i);
+
+    /* This just adds the stats member to the header */
+    gavl_dictionary_merge2(header_stream, footer_stream);
+    }
+  
+  }
+                             

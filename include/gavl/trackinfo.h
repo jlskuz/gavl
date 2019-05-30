@@ -272,6 +272,13 @@ GAVL_PUBLIC
 int gavl_get_num_tracks_loaded(const gavl_dictionary_t * dict,
                                int * total);
 
+GAVL_PUBLIC
+void gavl_track_apply_footer(gavl_dictionary_t * track,
+                             const gavl_dictionary_t * footer);
+
+GAVL_PUBLIC
+void gavl_track_delete_implicit_fields(gavl_dictionary_t * track);
+
 
 GAVL_PUBLIC
 void gavl_delete_track(gavl_dictionary_t*, int idx);
