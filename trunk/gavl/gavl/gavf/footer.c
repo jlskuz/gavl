@@ -62,7 +62,7 @@ int gavf_footer_write(gavf_t * g)
   gavl_dictionary_write(g->io, &foot);
   gavl_dictionary_free(&foot);
 
-#if 0
+#if 1
   
   /* Write indices */  
   if(g->opt.flags & GAVF_OPT_FLAG_SYNC_INDEX)
