@@ -26,7 +26,6 @@ static int align_read(gavf_io_t * io);
 
 static void gavf_stream_free(gavf_stream_t * s);
 
-
 static void free_track(gavf_t * g)
   {
   int i;
