@@ -461,9 +461,6 @@
 // Track is current in a GUI
 // #define GAVL_META_GUI_CURRENT        "GUICurrent"
 
-
-
-
 /**
  * @}
  */

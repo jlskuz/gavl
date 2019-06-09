@@ -1342,6 +1342,9 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
     }
   
   m = gavl_track_get_metadata_nc(dict);
+
+  //  fprintf(stderr, "gavl_track_finalize %s\n",
+  //          gavl_dictionary_get_string(m, GAVL_META_MEDIA_CLASS));
   
   gavl_dictionary_get_src(m, GAVL_META_SRC, 0,
                           NULL, &location);

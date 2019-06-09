@@ -28,7 +28,6 @@
 /* No seek support */
 #define GAVF_FLAG_STREAMING       (1<<5)
 
-
 /* gavf file structure */
 
 /*
