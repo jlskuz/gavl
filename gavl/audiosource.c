@@ -318,6 +318,7 @@ read_frame_internal(void * sp, gavl_audio_frame_t ** frame, int num_samples)
   
   while(samples_read < num_samples)
     {
+    
     /* Read new frame if neccesary */
     if(!s->frame || !s->frame->valid_samples)
       {
@@ -328,6 +329,7 @@ read_frame_internal(void * sp, gavl_audio_frame_t ** frame, int num_samples)
         if((*frame && !(s->src_flags & GAVL_SOURCE_SRC_ALLOC)) ||
            (!(*frame) && (s->src_flags & GAVL_SOURCE_SRC_ALLOC)))
           {
+
           ret = do_read(s, frame);
           if(ret == GAVL_SOURCE_OK)
             {
@@ -340,7 +342,7 @@ read_frame_internal(void * sp, gavl_audio_frame_t ** frame, int num_samples)
       if(s->flags & FLAG_DO_CONVERT)
         {
         gavl_audio_frame_t * in_frame;
-      
+
         if(s->src_flags & GAVL_SOURCE_SRC_ALLOC)
           in_frame = NULL;
         else
@@ -376,13 +378,15 @@ read_frame_internal(void * sp, gavl_audio_frame_t ** frame, int num_samples)
           ret = do_read(s, &s->frame);
           if(ret != GAVL_SOURCE_OK)
             break;
-          
+
           if(!process_input(s, s->frame))
             continue;
+
           eat_all = 1;
           }
         else
           {
+
           check_out_frame(s);
           ret = do_read(s, &s->out_frame);
           if(ret != GAVL_SOURCE_OK)
@@ -404,6 +408,7 @@ read_frame_internal(void * sp, gavl_audio_frame_t ** frame, int num_samples)
       }
     
     /* Copy samples */
+
     
     samples_copied =
       gavl_audio_frame_copy(&s->dst_format,

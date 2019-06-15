@@ -313,7 +313,7 @@ void gavl_packet_alloc(gavl_packet_t * p, int len)
   {
   if(len + GAVL_PACKET_PADDING > p->data_alloc)
     {
-    fprintf(stderr, "gavl_packet_alloc %d %d\n", len + GAVL_PACKET_PADDING, p->data_alloc);
+    //    fprintf(stderr, "gavl_packet_alloc %d %d\n", len + GAVL_PACKET_PADDING, p->data_alloc);
     p->data_alloc = len + GAVL_PACKET_PADDING + 1024;
     p->data = realloc(p->data, p->data_alloc);
     }
