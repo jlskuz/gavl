@@ -1029,7 +1029,6 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
   gavf_chunk_t head;
   gavl_dictionary_t mi;
   
-    
   g->io = io;
   
   gavf_io_set_msg_cb(g->io, g->msg_callback, g->msg_data);
@@ -1049,6 +1048,8 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
     gavl_dictionary_t * track;
     gavl_dictionary_t foot;
 
+    fprintf(stderr, "gavf [read]: Non streaming mode\n");
+    
     gavl_dictionary_init(&foot);
     
     /* Read tail */
@@ -1091,6 +1092,7 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
       if(num_tracks > 1)
         {
         /* Multitrack header: Need to switch track by external means */
+        track = gavl_get_track_nc(&mi, 0);
         }
       else if(num_tracks == 1)
         track = gavl_get_track_nc(&mi, 0);
@@ -1146,6 +1148,8 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
   else /* Streaming mode */
     {
     GAVF_SET_FLAG(g, GAVF_FLAG_STREAMING);
+
+    fprintf(stderr, "gavf [read]: Streamig mode\n");
     
     g->first_sync_pos = -1;
     
@@ -1559,8 +1563,8 @@ int gavf_append_audio_stream(gavf_t * g,
   gavl_audio_format_t * fmt;
   gavl_dictionary_t * s = gavl_track_append_stream(g->cur, GAVL_STREAM_AUDIO);
 
-  fprintf(stderr, "gavf_append_audio_stream\n");
-  gavl_dictionary_dump(m, 2);
+  //  fprintf(stderr, "gavf_append_audio_stream\n");
+  //  gavl_dictionary_dump(m, 2);
   
   fmt = gavl_dictionary_get_audio_format_nc(s, GAVL_META_STREAM_FORMAT);
   gavl_audio_format_copy(fmt, format);
