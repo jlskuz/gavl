@@ -122,7 +122,7 @@
  *  arg1: Password (string)
  */
 
-#define GAVL_CMD_SRC_AUTHENTICATE     1
+#define GAVL_CMD_SRC_AUTHENTICATE     101
 
 /** \brief Multitrack support
  *
@@ -131,7 +131,7 @@
  *  Calling this is only allowed right after GAVL_MSG_SRC_EOF was received
  */
 
-#define GAVL_CMD_SRC_SELECT_TRACK     2
+#define GAVL_CMD_SRC_SELECT_TRACK     102
 
 /** \brief Seek support
  *
@@ -139,15 +139,15 @@
  *  arg1: Scale (int)
  */
 
-#define GAVL_CMD_SRC_SEEK              3
+#define GAVL_CMD_SRC_SEEK              103
 
 /** \brief Set the track we should jump to when this track is over.
  *
  *  arg0: Track (int)
  */
 
-#define GAVL_CMD_SRC_SET_NEXT_TRACK    4
-#define GAVL_CMD_SRC_START             5
+#define GAVL_CMD_SRC_SET_NEXT_TRACK    104
+#define GAVL_CMD_SRC_START             105
 
 /* GUI Events */
 
