@@ -1077,7 +1077,13 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
       if(!gavf_chunk_read_header(g->io, &head))
         goto fail;
       
-      if(!strcmp(head.eightcc, GAVF_TAG_HEADER))
+      if(!strcmp(head.eightcc, GAVF_TAG_PROGRAM_HEADER))
+        {
+        gavl_dictionary_init(&mi);
+        if(!read_header(g, &head, &buf, &mi))
+          goto fail;
+        }
+      else if(!strcmp(head.eightcc, GAVF_TAG_MULTI_HEADER))
         {
         gavl_dictionary_init(&mi);
         if(!read_header(g, &head, &buf, &mi))
@@ -1165,7 +1171,13 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
       fprintf(stderr, "Got signature:\n");
       gavl_hexdump((uint8_t*)head.eightcc, 8, 8);
 
-      if(!strcmp(head.eightcc, GAVF_TAG_HEADER))
+      if(!strcmp(head.eightcc, GAVF_TAG_PROGRAM_HEADER))
+        {
+        if(!read_header(g, &head, &buf, &g->mi))
+          goto fail;
+        break;
+        }
+      else if(!strcmp(head.eightcc, GAVF_TAG_MULTI_HEADER))
         {
         if(!read_header(g, &head, &buf, &g->mi))
           goto fail;
@@ -1648,9 +1660,7 @@ void gavf_add_streams(gavf_t * g, const gavl_dictionary_t * ph)
   gavl_dictionary_copy(g->cur, ph);
   }
 
-
-static int program_header_write(gavf_io_t * io,
-                                const gavl_dictionary_t * dict)
+int gavf_program_header_write(gavf_t * g, const gavl_dictionary_t * dict)
   {
   gavf_io_t * bufio;
   int ret = 0;
@@ -1658,6 +1668,8 @@ static int program_header_write(gavf_io_t * io,
   int result;
   gavl_msg_t msg;
 
+  gavf_io_t * io = g->io;
+  
   //  fprintf(stderr, "Writing program header:\n");
   //  gavl_dictionary_dump(dict, 2);
   
@@ -1668,7 +1680,7 @@ static int program_header_write(gavf_io_t * io,
   if(!result)
     goto fail;
   
-  bufio = gavf_chunk_start_io(io, &chunk, GAVF_TAG_HEADER);
+  bufio = gavf_chunk_start_io(io, &chunk, GAVF_TAG_PROGRAM_HEADER);
   
   /* Write metadata */
   if(!gavl_dictionary_write(bufio, dict))
@@ -1730,7 +1742,7 @@ int gavf_start(gavf_t * g)
     gavl_dprintf("Writing program header\n");
     gavl_dictionary_dump(&g->mi, 2);
     }
-  if(!program_header_write(g->io, &g->mi))
+  if(!gavf_program_header_write(g, &g->mi))
     return 0;
 
   if((g->num_streams == 1) && (g->streams[0].type == GAVL_STREAM_MSG))

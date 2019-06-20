@@ -38,6 +38,9 @@
   Chunks *always* start at 8 byte boundaries. Preceeding bytes (up to 7) are
   filled with zeros
 
+  CHUNK("GAVFMHDR")
+  Multi program header (dictionary)
+  
   Single track:
     
   CHUNK("GAVFPHDR")
@@ -101,7 +104,8 @@
   
 */
 
-#define GAVF_TAG_HEADER         "GAVFHEAD"
+#define GAVF_TAG_MULTI_HEADER   "GAVFMHDR"
+#define GAVF_TAG_PROGRAM_HEADER "GAVFPHDR"
 
 #define GAVF_TAG_PACKETS        "GAVFPKTS"
 
@@ -162,6 +166,8 @@ gavf_io_t * gavf_chunk_start_io(gavf_io_t * io, gavf_chunk_t * head, const char 
 
 GAVL_PUBLIC
 int gavf_chunk_finish_io(gavf_io_t * io, gavf_chunk_t * head, gavf_io_t * sub_io);
+
+
 
 GAVL_PUBLIC
 gavf_io_t * gavf_io_create(gavf_read_func  r,
@@ -400,72 +406,8 @@ void gavf_io_buf_reset(gavf_io_t * io);
 GAVL_PUBLIC
 const char * gavf_stream_type_name(gavl_stream_type_t t);
 
-#if 0
-typedef struct
-  {
-  gavl_stream_type_t type;
-  uint32_t id;
-  gavl_compression_info_t ci;
-
-  union
-    {
-    gavl_audio_format_t audio;
-    gavl_video_format_t video; // Video and overlay streams
-
-#if 0    
-    struct
-      {
-      uint32_t timescale;
-      } text;
-#endif
-    } format;
-
-  gavl_dictionary_t m;
-  gavf_stream_stats_t stats;
-  } gavf_stream_header_t;
-
 GAVL_PUBLIC
-void gavf_stream_header_dump(const gavf_stream_header_t * h);
-
-GAVL_PUBLIC
-void gavf_stream_header_to_dict(const gavf_stream_header_t * src, gavl_dictionary_t * dst);
-
-GAVL_PUBLIC
-void gavf_stream_header_from_dict(gavf_stream_header_t * src, const gavl_dictionary_t * dst);
-
-typedef struct
-  {
-  uint32_t num_streams;
-  gavf_stream_header_t * streams;
-  gavl_dictionary_t m;
-  } gavf_program_header_t;
-
-GAVL_PUBLIC
-void gavf_program_header_dump(const gavf_program_header_t * ph);
-
-GAVL_PUBLIC
-void gavf_program_header_copy(gavf_program_header_t * dst,
-                              const gavf_program_header_t * src);
-
-GAVL_PUBLIC
-void gavf_program_header_free(gavf_program_header_t * ph);
-
-GAVL_PUBLIC
-int gavf_program_header_get_duration(const gavf_program_header_t * ph,
-                                     gavl_time_t * start_p,
-                                     gavl_time_t * duration_p);
-
-// GAVL_PUBLIC
-// void gavl_program_header_to_track(const gavf_program_header_t * ph,
-//                                  gavl_dictionary_t * track);
-
-GAVL_PUBLIC
-void gavf_program_header_to_dictionary(const gavf_program_header_t * src, gavl_dictionary_t * dst);
-
-GAVL_PUBLIC
-void gavf_program_header_from_dictionary(gavf_program_header_t * src, const gavl_dictionary_t * dst);
-
-#endif
+int gavf_program_header_write(gavf_t * g, const gavl_dictionary_t * dict);
 
 typedef struct
   {
