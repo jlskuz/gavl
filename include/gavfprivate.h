@@ -25,6 +25,7 @@ struct gavl_io_s
   gavl_handle_msg_func msg_callback;
   void * msg_data;
   
+  gavl_buffer_t get_buf;
   };
 
 void gavf_io_init(gavf_io_t * ret,
@@ -334,3 +335,5 @@ struct gavf_s
 int gavf_footer_check(gavf_t * g);
 int gavf_footer_write(gavf_t * g);
 void gavf_footer_init(gavf_t * g);
+
+int gavf_program_header_write(gavf_t * g, const gavl_dictionary_t * dict);

@@ -1083,12 +1083,6 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
         if(!read_header(g, &head, &buf, &mi))
           goto fail;
         }
-      else if(!strcmp(head.eightcc, GAVF_TAG_MULTI_HEADER))
-        {
-        gavl_dictionary_init(&mi);
-        if(!read_header(g, &head, &buf, &mi))
-          goto fail;
-        }
       else
         goto fail;
 
@@ -1177,13 +1171,6 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
           goto fail;
         break;
         }
-      else if(!strcmp(head.eightcc, GAVF_TAG_MULTI_HEADER))
-        {
-        if(!read_header(g, &head, &buf, &g->mi))
-          goto fail;
-        break;
-        }
-      
       goto fail;
       
       //      if(g->first_sync_pos > 0)
@@ -1613,8 +1600,8 @@ int gavf_append_video_stream(gavf_t * g,
   }
 
 int gavf_append_text_stream(gavf_t * g,
-                         uint32_t timescale,
-                         const gavl_dictionary_t * m)
+                            uint32_t timescale,
+                            const gavl_dictionary_t * m)
   {
   int ret = 0;
   gavl_dictionary_t * m_dst;
