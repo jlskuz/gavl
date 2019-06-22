@@ -31,18 +31,17 @@
 /* gavf file structure */
 
 /*
+
+  The gavf layer works only on track level. Track switching must be
+  hanbled by a wrapper (e.g. bgplug in libgmerlin)
+  
   CHUNK("name"):
   name: 8 characters, starts with "GAVF"
   len:  64 bit len (or offset in case of GAVFTAIL) as signed, 0 if unknown
   
   Chunks *always* start at 8 byte boundaries. Preceeding bytes (up to 7) are
   filled with zeros
-
-  CHUNK("GAVFMHDR")
-  Multi program header (dictionary)
   
-  Single track:
-    
   CHUNK("GAVFPHDR")
   len bytes header (dictionary)
   
@@ -93,18 +92,11 @@
   GAVFTAIL:      8 bytes
   footer_offset: 8 bytes, file offset of the GAVFFOOT tag
   size:          8 bytes, byte position after the last byte of these 8 bytes
-
-
-  Multiple tracks (common header):
-  
-  CHUNK("GAVFMHDR")
-  len bytes header (dictionary with multple tracks)
   
 
   
 */
 
-#define GAVF_TAG_MULTI_HEADER   "GAVFMHDR"
 #define GAVF_TAG_PROGRAM_HEADER "GAVFPHDR"
 
 #define GAVF_TAG_PACKETS        "GAVFPKTS"
@@ -216,6 +208,10 @@ int gavf_io_can_seek(gavf_io_t * io);
 
 GAVL_PUBLIC
 int gavf_io_read_data(gavf_io_t * io, uint8_t * buf, int len);
+
+/* Get data but don't remove from input */
+GAVL_PUBLIC
+int gavf_io_get_data(gavf_io_t * io, uint8_t * buf, int len);
 
 GAVL_PUBLIC
 int gavf_io_write_data(gavf_io_t * io, const uint8_t * buf, int len);
@@ -401,13 +397,13 @@ gavl_buffer_t * gavf_io_buf_get(gavf_io_t * io);
 GAVL_PUBLIC
 void gavf_io_buf_reset(gavf_io_t * io);
 
+GAVL_PUBLIC
+void gavl_buffer_flush(gavl_buffer_t * buf, int len);
 
 /* Return short name */
 GAVL_PUBLIC
 const char * gavf_stream_type_name(gavl_stream_type_t t);
 
-GAVL_PUBLIC
-int gavf_program_header_write(gavf_t * g, const gavl_dictionary_t * dict);
 
 typedef struct
   {

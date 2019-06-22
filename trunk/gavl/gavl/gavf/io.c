@@ -52,7 +52,6 @@ gavf_io_t * gavf_io_create(gavf_read_func  r,
   return ret;
   }
 
-
 void gavf_io_destroy(gavf_io_t * io)
   {
   if(io->flush_func)
@@ -63,6 +62,7 @@ void gavf_io_destroy(gavf_io_t * io)
     free(io->filename);
   if(io->mimetype)
     free(io->mimetype);
+  gavl_buffer_free(&io->get_buf);
   free(io);
   }
 
@@ -116,14 +116,63 @@ int64_t gavf_io_position(gavf_io_t * io)
 
 int gavf_io_read_data(gavf_io_t * io, uint8_t * buf, int len)
   {
+  int ret = 0;
+  int result;
+  int num_get = 0;
+
+  if(!io->read_func)
+    return 0;
+
+  if(io->get_buf.len > 0)
+    {
+    num_get = io->get_buf.len > len ? len : io->get_buf.len;
+    memcpy(buf, io->get_buf.buf, num_get);
+
+    buf += num_get;
+    len -= num_get;
+    io->position += num_get;
+    ret = num_get;
+    }
+
+  if(len > 0)
+    {
+    result = io->read_func(io->priv, buf, len);
+    
+    if(result > 0)
+      {
+      io->position += result;
+      ret += result;
+      }
+    }
+  return ret;
+  }
+
+int gavf_io_get_data(gavf_io_t * io, uint8_t * buf, int len)
+  {
   int ret;
   if(!io->read_func)
     return 0;
-  ret = io->read_func(io->priv, buf, len);
-  if(ret > 0)
-    io->position += ret;
-  return ret;
+
+  if(io->get_buf.len < len)
+    {
+    gavl_buffer_alloc(&io->get_buf, len);
+
+    ret = io->read_func(io->priv, io->get_buf.buf + io->get_buf.len, len - io->get_buf.len);
+
+    if(ret > 0)
+      io->get_buf.len += ret;
+    else
+      return ret;
+    }
+
+  /* Unlikely */
+  if(len > io->get_buf.len)
+    len = io->get_buf.len;
+  
+  memcpy(buf, io->get_buf.buf, len);
+  return len;
   }
+
 
 int gavf_io_write_data(gavf_io_t * io, const uint8_t * buf, int len)
   {

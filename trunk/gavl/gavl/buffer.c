@@ -93,3 +93,16 @@ void gavl_buffer_append(gavl_buffer_t * dst, const gavl_buffer_t * src)
   memcpy(dst->buf + dst->len, src->buf, src->len);
   dst->len += src->len;
   }
+
+void gavl_buffer_flush(gavl_buffer_t * buf, int len)
+  {
+  if(len < 0)
+    return;
+  
+  if(len > buf->len)
+    len = buf->len;
+  
+  if(buf->len > len)
+    memmove(buf->buf, buf->buf + len, buf->len - len);
+  buf->len -= len;
+  }
