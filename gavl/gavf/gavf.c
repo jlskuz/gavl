@@ -338,7 +338,7 @@ gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s)
 
   /* Special case for message streams with undefined timestamp: Transmit out of band */
 
-  if(s && (s->type == GAVL_STREAM_MSG))
+  if((g->first_sync_pos > 0) && s && (s->type == GAVL_STREAM_MSG))
     {
     for(i = 0; i < g->num_streams; i++)
       {
@@ -369,20 +369,23 @@ gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s)
       }
     }
 
-  /* Flush discontinuous streams */
-  for(i = 0; i < g->num_streams; i++)
+  if(g->first_sync_pos > 0)
     {
-    ws = &g->streams[i];
-    if(ws->flags & STREAM_FLAG_DISCONTINUOUS)
+    /* Flush discontinuous streams */
+    for(i = 0; i < g->num_streams; i++)
       {
-      while((p = gavf_packet_buffer_get_read(ws->pb)))
+      ws = &g->streams[i];
+      if(ws->flags & STREAM_FLAG_DISCONTINUOUS)
         {
-        if((st = write_packet(g, i, p)) != GAVL_SINK_OK)
-          return st;
+        while((p = gavf_packet_buffer_get_read(ws->pb)))
+          {
+          if((st = write_packet(g, i, p)) != GAVL_SINK_OK)
+            return st;
+          }
         }
       }
     }
-  
+    
   /* Flush as many packets as possible */
   while(1)
     {
@@ -1335,6 +1338,17 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
         }
       else
         {
+        /* Demuxer level message */
+        if(g->pkthdr.stream_id == GAVL_META_STREAM_ID_MSG_DEMUXER)
+          {
+          
+          }
+#if 0
+        else if(g->pkthdr.stream_id == GAVL_META_STREAM_ID_MSG_PROGRAM)
+          {
+          fprintf(stderr, "Got program level message\n");
+          }
+#endif   
         GAVF_SET_FLAG(g, GAVF_FLAG_HAVE_PKT_HEADER);
         return &g->pkthdr;
         }
