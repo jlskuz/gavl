@@ -43,13 +43,14 @@ gavl_source_status_t gavf_demux_iteration(gavf_t * g)
     //      fprintf(stderr, "Have no header\n");
     return GAVL_SOURCE_EOF;
     }
+
   read_stream = gavf_find_stream_by_id(g, g->pkthdr.stream_id);
   if(!read_stream)
     {
     /* Should never happen */
     return GAVL_SOURCE_EOF;
     }
-    
+  
   read_packet = gavf_packet_buffer_get_write(read_stream->pb);
 
   if(!gavf_read_gavl_packet(g->io, read_stream->packet_duration, read_stream->packet_flags,
