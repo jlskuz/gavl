@@ -207,7 +207,9 @@ static void finalize_track_internal(gavl_dictionary_t * t, finalize_t * f)
   if((m = gavl_track_get_metadata_nc(t)))
     gavl_dictionary_set_long(m, GAVL_META_APPROX_DURATION, 0);
   
-  gavl_track_compute_duration(t);
+  gavl_track_finalize(t);
+  
+  //  gavl_track_compute_duration(t);
   }
 
 static void finalize_track(void * priv, int idx, const gavl_value_t * v_c)

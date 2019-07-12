@@ -1235,9 +1235,11 @@ static void finalize_stream(void * data, int idx, const gavl_value_t * val)
     case GAVL_STREAM_AUDIO:
       {
       const gavl_audio_format_t * fmt = gavl_stream_get_audio_format(s);
-      gavl_dictionary_set_int(m, GAVL_META_STREAM_SAMPLE_TIMESCALE,
-                              fmt->samplerate);
 
+      if(fmt->samplerate)
+        gavl_dictionary_set_int(m, GAVL_META_STREAM_SAMPLE_TIMESCALE,
+                                fmt->samplerate);
+      
       if(have_stats)
         gavl_stream_stats_apply_audio(&stats, fmt, (have_ci ? &ci : NULL), m);
       }
@@ -1245,8 +1247,10 @@ static void finalize_stream(void * data, int idx, const gavl_value_t * val)
     case GAVL_STREAM_VIDEO:
       {
       gavl_video_format_t * fmt = gavl_stream_get_video_format_nc(s);
-      gavl_dictionary_set_int(m, GAVL_META_STREAM_SAMPLE_TIMESCALE,
-                              fmt->timescale);
+
+      if(fmt->timescale)
+        gavl_dictionary_set_int(m, GAVL_META_STREAM_SAMPLE_TIMESCALE,
+                                fmt->timescale);
       if(have_stats)
         gavl_stream_stats_apply_video(&stats, fmt, (have_ci ? &ci : NULL), m);
       }
