@@ -375,13 +375,14 @@ gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s)
     for(i = 0; i < g->num_streams; i++)
       {
       ws = &g->streams[i];
-      if(ws->flags & STREAM_FLAG_DISCONTINUOUS)
+      if(!(ws->flags & STREAM_FLAG_DISCONTINUOUS))
+        continue;
+      
+      while((p = gavf_packet_buffer_get_read(ws->pb)))
         {
-        while((p = gavf_packet_buffer_get_read(ws->pb)))
-          {
-          if((st = write_packet(g, i, p)) != GAVL_SINK_OK)
-            return st;
-          }
+        fprintf(stderr, "flush_discontinuous\n");
+        if((st = write_packet(g, i, p)) != GAVL_SINK_OK)
+          return st;
         }
       }
     }
@@ -1343,10 +1344,10 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
           {
           
           }
-#if 0
+#if 1
         else if(g->pkthdr.stream_id == GAVL_META_STREAM_ID_MSG_PROGRAM)
           {
-          fprintf(stderr, "Got program level message\n");
+          fprintf(stderr, "gavf: Got program level message\n");
           }
 #endif   
         GAVF_SET_FLAG(g, GAVF_FLAG_HAVE_PKT_HEADER);
