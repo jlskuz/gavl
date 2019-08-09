@@ -184,6 +184,7 @@ hq/libgavl_hq.la \
 libgdither/libgdither.la \
 libsamplerate/libsamplerate.la \
 @LIBGAVL_LIBS@ \
+-lpthread \
 -lm
 
 EXTRA_DIST=Makefile.am.in

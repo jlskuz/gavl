@@ -164,6 +164,16 @@ gavl_video_source_create(gavl_video_source_func_t func,
                          void * priv, int src_flags,
                          const gavl_video_format_t * src_format);
 
+GAVL_PUBLIC
+void gavl_video_source_set_eof(gavl_video_source_t * src, int eof);
+
+GAVL_PUBLIC
+int gavl_video_source_get_eof(gavl_video_source_t * src);
+
+GAVL_PUBLIC
+void gavl_video_source_drain(gavl_video_source_t * s);
+
+  
 /** \brief Create a video source from another source
  *  \param func Function to get the frames from
  *  \param priv Client data to pass to func
@@ -317,6 +327,16 @@ gavl_audio_source_create(gavl_audio_source_func_t func,
                          void * priv, int src_flags,
                          const gavl_audio_format_t * src_format);
 
+GAVL_PUBLIC
+void gavl_audio_source_set_eof(gavl_audio_source_t * src, int eof);
+
+GAVL_PUBLIC
+int gavl_audio_source_get_eof(gavl_audio_source_t * src);
+
+GAVL_PUBLIC
+void gavl_audio_source_drain(gavl_audio_source_t * s);
+  
+  
 /** \brief Create an audio source from another source
  *  \param func Function to get the frames from
  *  \param priv Client data to pass to func
@@ -496,6 +516,15 @@ GAVL_PUBLIC
 gavl_packet_source_t *
 gavl_packet_source_create(gavl_packet_source_func_t func,
                           void * priv, int src_flags);
+
+GAVL_PUBLIC
+void gavl_packet_source_set_eof(gavl_packet_source_t * src, int eof);
+
+GAVL_PUBLIC
+int gavl_packet_source_get_eof(gavl_packet_source_t * src);
+
+GAVL_PUBLIC
+void gavl_packet_source_drain(gavl_packet_source_t * src);
 
   
 /** \brief Create an audio packet source

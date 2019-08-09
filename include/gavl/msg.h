@@ -100,13 +100,19 @@
 /** \brief Resync
  *
  *  Sent after seeking. Must be the last packet before the new
- *  sync header. Scale is taken from the seek command.
+ *  sync header for GAVF streams. Scale is taken from the seek command.
+ *
+ *  This can be sent asynchronously to update the timestamps e.g. after packet loss.
+ *
+ *  After this event was sent, all sources are set to EOF to interrupt the playback.
+ *  The caller then adjusts the time accordingly and calls bg_media_source_set_eof with
+ *  zero argument to clear the EOF state of the source.
  *
  *  arg0: Time  (long)
  *  arg1: Scale (int)
  */
 
-#define GAVL_MSG_SRC_RESYNC           5
+#define GAVL_MSG_SRC_RESYNC_1           5
 
 /** \brief End of file
  *
@@ -127,6 +133,10 @@
 /** \brief Multitrack support
  *
  *  arg0: Track (int)
+ *  arg1: Async (int)
+ *
+ *  Argument 1 decides, if the operation is expected in
+ *  synchronous mode or not
  *
  *  Calling this is only allowed right after GAVL_MSG_SRC_EOF was received
  */
@@ -137,16 +147,17 @@
  *
  *  arg0: Time  (long)
  *  arg1: Scale (int)
+ *  arg2: Async (int)
+ *
+ *  Argument 2 decides, if the seek operation is expected in
+ *  synchronout mode or not
  */
 
 #define GAVL_CMD_SRC_SEEK              103
 
-/** \brief Set the track we should jump to when this track is over.
- *
- *  arg0: Track (int)
+/** \brief Start the source
  */
 
-#define GAVL_CMD_SRC_SET_NEXT_TRACK    104
 #define GAVL_CMD_SRC_START             105
 
 /* GUI Events */

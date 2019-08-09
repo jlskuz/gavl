@@ -290,6 +290,12 @@ GAVL_PUBLIC
 int gavl_track_can_pause(const gavl_dictionary_t * track);
 
 GAVL_PUBLIC
+int gavl_track_is_async(const gavl_dictionary_t * track);
+
+GAVL_PUBLIC
+int gavl_track_set_async(gavl_dictionary_t * track, int async);
+
+GAVL_PUBLIC
 void gavl_track_splice_children(gavl_dictionary_t * dict, int idx, int del,
                                 const gavl_value_t * val);
 
