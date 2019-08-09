@@ -294,6 +294,13 @@
 #define GAVL_META_CAN_SEEK   "CanSeek"
 #define GAVL_META_CAN_PAUSE  "CanPause"
 
+/*
+ *  Several commands are expected in asynchronous mode.
+ *  Details are specified in libgmerlin
+ */
+   
+#define GAVL_META_ASYNC      "Async"
+
 #define GAVL_META_AVG_BITRATE    "AVGBitrate"   // Float, kbps
 #define GAVL_META_AVG_FRAMERATE  "AVGFramerate" // Float
 
@@ -336,10 +343,9 @@
 
 #define GAVL_META_STREAM_ID               "streamid"
 
-#define GAVL_META_STREAM_ID_MSG_DEMUXER   1
-#define GAVL_META_STREAM_ID_MSG_PROGRAM   2
-#define GAVL_META_STREAM_ID_MEDIA_START  10
-
+#define GAVL_META_STREAM_ID_MSG_DEMUXER   -1
+#define GAVL_META_STREAM_ID_MSG_PROGRAM   -2
+#define GAVL_META_STREAM_ID_MEDIA_START    1
 
 #define GAVL_META_STREAM_STATS "stats"
 

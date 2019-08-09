@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>
 
 #include <gavl/connectors.h>
 
@@ -48,6 +49,9 @@ struct gavl_packet_source_s
   gavl_connector_lock_func_t unlock_func;
   void * lock_priv;
   gavl_connector_free_func_t free_func;
+
+  pthread_mutex_t eof_mutex;
+  int eof;
   };
 
 gavl_packet_source_t *
@@ -59,6 +63,7 @@ gavl_packet_source_create(gavl_packet_source_func_t func,
   ret->func = func;
   ret->priv = priv;
   ret->src_flags = src_flags;
+  pthread_mutex_init(&ret->eof_mutex, NULL);
   return ret;
   }
 
@@ -178,6 +183,9 @@ gavl_packet_source_read_packet(void*sp, gavl_packet_t ** p)
   
   gavl_packet_source_t * s = sp;
 
+  if(gavl_packet_source_get_eof(s))
+    return GAVL_SOURCE_EOF;
+  
   gavl_packet_reset(&s->p);
 
   /* Decide source */
@@ -219,6 +227,16 @@ gavl_packet_source_read_packet(void*sp, gavl_packet_t ** p)
   return GAVL_SOURCE_OK;
   }
 
+void gavl_packet_source_drain(gavl_packet_source_t * s)
+  {
+  gavl_source_status_t st;
+
+  gavl_packet_t * p = NULL;
+  while((st = gavl_packet_source_read_packet(s, &p)) == GAVL_SOURCE_OK)
+    p = NULL;
+  }
+
+
 void
 gavl_packet_source_set_free_func(gavl_packet_source_t * src,
                                  gavl_connector_free_func_t free_func)
@@ -235,5 +253,24 @@ gavl_packet_source_destroy(gavl_packet_source_t * s)
   if(s->priv && s->free_func)
     s->free_func(s->priv);
 
+  pthread_mutex_destroy(&s->eof_mutex);
+
+  
   free(s);
+  }
+
+void gavl_packet_source_set_eof(gavl_packet_source_t * src, int eof)
+  {
+  pthread_mutex_lock(&src->eof_mutex);
+  src->eof = eof;
+  pthread_mutex_unlock(&src->eof_mutex);
+  }
+
+int gavl_packet_source_get_eof(gavl_packet_source_t * src)
+  {
+  int ret;
+  pthread_mutex_lock(&src->eof_mutex);
+  ret = src->eof;
+  pthread_mutex_unlock(&src->eof_mutex);
+  return ret;
   }

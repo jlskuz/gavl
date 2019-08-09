@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>
 
 #include <gavl/connectors.h>
 
@@ -73,7 +74,9 @@ struct gavl_audio_source_s
   gavl_audio_source_t * prev;
 
   gavl_connector_free_func_t free_func;
- 
+
+  pthread_mutex_t eof_mutex;
+  int eof;
   };
 
 gavl_audio_source_t *
@@ -89,6 +92,7 @@ gavl_audio_source_create(gavl_audio_source_func_t func,
   ret->src_flags = src_flags;
   gavl_audio_format_copy(&ret->src_format, src_format);
   ret->cnv = gavl_audio_converter_create();
+  pthread_mutex_init(&ret->eof_mutex, NULL);
   return ret;
   }
 
@@ -185,6 +189,8 @@ void gavl_audio_source_destroy(gavl_audio_source_t * s)
 
   if(s->priv && s->free_func)
     s->free_func(s->priv);
+
+  pthread_mutex_destroy(&s->eof_mutex);
 
   free(s);
   }
@@ -463,11 +469,23 @@ gavl_source_status_t
 gavl_audio_source_read_frame(void * sp, gavl_audio_frame_t ** frame)
   {
   gavl_audio_source_t * s = sp;
+
+  if(gavl_audio_source_get_eof(s))
+    return GAVL_SOURCE_EOF;
+
   if(!(s->flags & FLAG_DST_SET))
     gavl_audio_source_set_dst(s, 0, NULL);
   return read_frame_internal(s, frame, s->dst_format.samples_per_frame);
   }
 
+void gavl_audio_source_drain(gavl_audio_source_t * s)
+  {
+  gavl_source_status_t st;
+
+  gavl_audio_frame_t * fr = NULL;
+  while((st = gavl_audio_source_read_frame(s, &fr)) == GAVL_SOURCE_OK)
+    fr = NULL;
+  }
 
 /* For cases where it's not immediately known, how many samples will be
    processed */
@@ -490,4 +508,20 @@ gavl_audio_source_skip_src(gavl_audio_source_t * s, int num_samples)
   {
   s->skip_samples += num_samples;
   s->flags &= ~FLAG_PASSTHROUGH;
+  }
+
+void gavl_audio_source_set_eof(gavl_audio_source_t * src, int eof)
+  {
+  pthread_mutex_lock(&src->eof_mutex);
+  src->eof = eof;
+  pthread_mutex_unlock(&src->eof_mutex);
+  }
+
+int gavl_audio_source_get_eof(gavl_audio_source_t * src)
+  {
+  int ret;
+  pthread_mutex_lock(&src->eof_mutex);
+  ret = src->eof;
+  pthread_mutex_unlock(&src->eof_mutex);
+  return ret;
   }

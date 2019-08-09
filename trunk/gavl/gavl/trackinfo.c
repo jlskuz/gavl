@@ -53,7 +53,7 @@ int gavl_track_get_num_streams(const gavl_dictionary_t * d, gavl_stream_type_t t
 
 void gavl_track_delete_implicit_fields(gavl_dictionary_t * track)
   {
-  int i, num;
+  int i;
   
   gavl_dictionary_t * m;
   gavl_dictionary_t * s;
@@ -1535,6 +1535,36 @@ int gavl_track_can_pause(const gavl_dictionary_t * track)
   return 1;
   
   }
+
+int gavl_track_is_async(const gavl_dictionary_t * track)
+  {
+  int val = 0;
+  const gavl_dictionary_t * m;
+
+  if(!(m = gavl_track_get_metadata(track)) ||
+     !gavl_dictionary_get_int(m, GAVL_META_ASYNC, &val) ||
+     !val)
+    return 0;
+
+  return 1;
+  
+  }
+
+int gavl_track_set_async(gavl_dictionary_t * track, int async)
+  {
+  gavl_dictionary_t * m;
+  
+  if(!(m = gavl_track_get_metadata_nc(track)))
+    return 0;
+
+  if(async)
+    gavl_dictionary_set_int(m, GAVL_META_ASYNC, async);
+  else
+    gavl_dictionary_set(m, GAVL_META_ASYNC, NULL);
+  
+  return 1;
+  }
+
 
 #define META_GUI "gui"
 
