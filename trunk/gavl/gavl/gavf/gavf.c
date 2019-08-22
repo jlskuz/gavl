@@ -211,6 +211,8 @@ static int write_sync_header(gavf_t * g, int stream, int64_t packet_pts)
   return ret;
   }
 
+static gavl_sink_status_t do_write_packet(gavf_t * g, 
+
 static gavl_sink_status_t
 write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
   {
@@ -218,9 +220,14 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
   int result;
   gavl_time_t pts;
   int write_sync = 0;
-  gavf_stream_t * s = &g->streams[stream];
-
-  if(p->pts != GAVL_TIME_UNDEFINED)
+  gavf_stream_t * s;
+  
+  if(stream >= 0)
+    s = &g->streams[stream];
+  else
+    s = NULL;
+  
+  if(s && (p->pts != GAVL_TIME_UNDEFINED))
     {
     pts = gavl_time_unscale(s->timescale, p->pts);
   
@@ -1476,6 +1483,32 @@ const int64_t * gavf_end_pts(gavf_t * gavf)
   else
     return NULL;
   }
+
+void gavf_write_resync(gavf_t * g, int64_t time, int scale, int discard)
+  {
+  gavl_msg_t msg;
+
+  if(discard)
+    {
+    gavf_flush_buffers(g);
+    }
+  else
+    {
+    /* Flush packets if any */
+    gavf_flush_packets(g, NULL);
+
+    /* Force new sync header to be written */
+    g->first_sync_pos = 0;
+    }
+
+  gavl_msg_init(&msg);
+  gavl_msg_init_id_ns(&msg, GAVL_MSG_SRC_RESYNC, GAVL_MSG_NS_SRC);
+  gavl_msg_set_arg_long(&msg, 0, time);
+  gavl_msg_set_arg_int(&msg, 1, scale);
+  gavl_msg_set_arg_int(&msg, 2, discard);
+  
+  }
+
 
 /* Seek to a specific time. Return the sync timestamps of
    all streams at the current position */
