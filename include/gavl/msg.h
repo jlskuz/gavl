@@ -110,9 +110,10 @@
  *
  *  arg0: Time  (long)
  *  arg1: Scale (int)
+ *  arg2: Flush (int)
  */
 
-#define GAVL_MSG_SRC_RESYNC_1           5
+#define GAVL_MSG_SRC_RESYNC           5
 
 /** \brief End of file
  *
@@ -274,7 +275,11 @@
 /* Source -> receiver: EOF encountered. After this message was sent, one can seek or select another track
    with the Source API */
 
-#define GAVL_MSG_GAVF_EOF   2
+/* Arg 0: New time */
+/* Arg 1: scale    */
+/* Arg 2: discard packets (1 or 0) */
+
+#define GAVL_MSG_GAVF_RESYNC       2
 
 /* Emitted by the decoder immediately after a program header was read */
 
