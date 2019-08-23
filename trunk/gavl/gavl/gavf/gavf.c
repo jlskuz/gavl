@@ -211,13 +211,52 @@ static int write_sync_header(gavf_t * g, int stream, int64_t packet_pts)
   return ret;
   }
 
-static gavl_sink_status_t do_write_packet(gavf_t * g, 
+static gavl_sink_status_t do_write_packet(gavf_t * g, int32_t stream_id, int packet_flags,
+                                          int64_t last_sync_pts,
+                                          int64_t default_duration, const gavl_packet_t * p)
+  {
+  int result;
+  gavl_msg_t msg;
+  
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PACKET_START, GAVL_MSG_NS_GAVF);
+  result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
+  gavl_msg_free(&msg);
+
+  if(!result)
+    return GAVL_SINK_ERROR;
+  
+  if((gavf_io_write_data(g->io,
+                         (const uint8_t*)GAVF_TAG_PACKET_HEADER, 1) < 1) ||
+     (!gavf_io_write_int32v(g->io, stream_id)))
+    return GAVL_SINK_ERROR;
+
+  if(!gavf_write_gavl_packet(g->io, g->pkt_io, default_duration, packet_flags, last_sync_pts, p))
+    return GAVL_SINK_ERROR;
+
+  if(g->opt.flags & GAVF_OPT_FLAG_DUMP_PACKETS)
+    {
+    fprintf(stderr, "ID: %d ", stream_id);
+    gavl_packet_dump(p);
+    }
+  
+
+  if(!gavf_io_flush(g->io))
+    return GAVL_SINK_ERROR;
+  
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PACKET_END, GAVL_MSG_NS_GAVF);
+  result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
+  gavl_msg_free(&msg);
+  
+  return GAVL_SINK_OK;
+  }
+                                     
+                                          
 
 static gavl_sink_status_t
 write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
   {
-  gavl_msg_t msg;
-  int result;
   gavl_time_t pts;
   int write_sync = 0;
   gavf_stream_t * s;
@@ -272,6 +311,12 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
                             p->pts);
       }
     }
+
+  if(do_write_packet(g, s->id, s->packet_flags, s->last_sync_pts,
+                     s->packet_duration, p) != GAVL_SINK_OK)
+    return GAVL_SINK_ERROR;
+
+#if 0
   
   gavl_msg_init(&msg);
   gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PACKET_START, GAVL_MSG_NS_GAVF);
@@ -295,19 +340,18 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
     gavl_packet_dump(p);
     }
   
-  s->packets_since_sync++;
 
   if(!gavf_io_flush(g->io))
     return GAVL_SINK_ERROR;
-
-
+  
   gavl_msg_init(&msg);
   gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PACKET_END, GAVL_MSG_NS_GAVF);
   result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
   gavl_msg_free(&msg);
-  if(!result)
-    return GAVL_SINK_ERROR;
+
+#endif
   
+  s->packets_since_sync++;
   return GAVL_SINK_OK;
   }
 
@@ -1310,7 +1354,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
       {
       gavf_stream_t * s;
       /* Got new packet */
-      if(!gavf_io_read_uint32v(g->io, &g->pkthdr.stream_id))
+      if(!gavf_io_read_int32v(g->io, &g->pkthdr.stream_id))
         {
 #ifdef DUMP_EOF
         fprintf(stderr, "EOF 2\n");
@@ -1349,9 +1393,56 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
         /* Demuxer level message */
         if(g->pkthdr.stream_id == GAVL_META_STREAM_ID_MSG_DEMUXER)
           {
+          gavl_packet_t p;
+          gavl_msg_t msg;
           
+          gavl_packet_init(&p);
+          gavl_msg_init(&msg);
+          
+          if(!gavf_read_gavl_packet(g->io,
+                                    0, // int default_duration,
+                                    0, // int packet_flags,
+                                    0, // int64_t last_sync_pts,
+                                    NULL, // int64_t * next_pts,
+                                    0, // int64_t pts_offset,
+                                    &p))
+            
+            goto got_eof;
+
+          if(!gavf_packet_to_msg(&p, &msg))
+            goto got_eof;
+          
+          fprintf(stderr, "Got demuxer message\n");
+          gavl_msg_dump(&msg, 2);
+
+          switch(msg.NS)
+            {
+            case GAVL_MSG_NS_SRC:
+
+              switch(msg.ID)
+                {
+                case GAVL_MSG_SRC_RESYNC:
+                  {
+                  int64_t t = 0;
+                  int scale = 0;
+                  int discard = 0;
+                  int discont = 0;
+                  
+                  gavl_msg_get_src_resync(&msg, &t, &scale, &discard, &discont);
+                  fprintf(stderr, "RESYNC: %"PRId64" %d %d %d\n", t, scale, discard, discont);
+                  }
+                  break;
+                }
+              break;
+              
+            }
+          
+          gavl_msg_free(&msg);
+          gavl_packet_free(&p);
+          
+          goto got_eof;
           }
-#if 1
+#if 0
         else if(g->pkthdr.stream_id == GAVL_META_STREAM_ID_MSG_PROGRAM)
           {
           fprintf(stderr, "gavf: Got program level message\n");
@@ -1484,7 +1575,20 @@ const int64_t * gavf_end_pts(gavf_t * gavf)
     return NULL;
   }
 
-void gavf_write_resync(gavf_t * g, int64_t time, int scale, int discard)
+static gavl_sink_status_t write_demuxer_message(gavf_t * g, const gavl_msg_t * msg)
+  {
+  gavl_sink_status_t st;
+
+  gavl_packet_t p;
+  gavl_packet_init(&p);
+
+  gavf_msg_to_packet(msg, &p);
+  st = do_write_packet(g, GAVL_META_STREAM_ID_MSG_DEMUXER, 0, 0, 0, &p);
+  gavl_packet_free(&p);
+  return st;
+  }
+
+void gavf_write_resync(gavf_t * g, int64_t time, int scale, int discard, int discont)
   {
   gavl_msg_t msg;
 
@@ -1502,11 +1606,10 @@ void gavf_write_resync(gavf_t * g, int64_t time, int scale, int discard)
     }
 
   gavl_msg_init(&msg);
-  gavl_msg_init_id_ns(&msg, GAVL_MSG_SRC_RESYNC, GAVL_MSG_NS_SRC);
-  gavl_msg_set_arg_long(&msg, 0, time);
-  gavl_msg_set_arg_int(&msg, 1, scale);
-  gavl_msg_set_arg_int(&msg, 2, discard);
   
+  gavl_msg_set_src_resync(&msg, time, scale, discard, discont);
+  write_demuxer_message(g, &msg);
+  gavl_msg_free(&msg);
   }
 
 
@@ -2030,7 +2133,7 @@ void gavf_stream_set_skip(gavf_t * g, uint32_t id,
     }
   }
 
-gavf_stream_t * gavf_find_stream_by_id(gavf_t * g, uint32_t id)
+gavf_stream_t * gavf_find_stream_by_id(gavf_t * g, int32_t id)
   {
   int i;
   for(i = 0; i < g->num_streams; i++)

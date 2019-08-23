@@ -235,16 +235,14 @@ int gavl_msg_get_arg_int(const gavl_msg_t * msg, int arg)
   return msg->args[arg].v.i;
   }
 
-
-
-gavl_time_t gavl_msg_get_arg_time(gavl_msg_t * msg, int arg)
+gavl_time_t gavl_msg_get_arg_time(const gavl_msg_t * msg, int arg)
   {
   if(!check_arg(arg))
     return 0;
   return msg->args[arg].v.l;
   }
 
-double gavl_msg_get_arg_float(gavl_msg_t * msg, int arg)
+double gavl_msg_get_arg_float(const gavl_msg_t * msg, int arg)
   {
   if(!check_arg(arg))
     return 0.0;
@@ -792,4 +790,26 @@ int gavl_msg_send(gavl_msg_t * msg, gavl_handle_msg_func func, void * priv)
 
   return func(priv, msg);
   
+  }
+
+void gavl_msg_set_src_resync(gavl_msg_t * dst, int64_t t, int scale, int discard, int discont)
+  {
+  gavl_msg_set_id_ns(dst, GAVL_MSG_SRC_RESYNC, GAVL_MSG_NS_SRC);
+            
+  gavl_msg_set_arg_time(dst, 0, t);
+  gavl_msg_set_arg_int(dst, 1, scale);
+  gavl_msg_set_arg_int(dst, 2, discard);
+  gavl_msg_set_arg_int(dst, 3, discont);
+  }
+
+void gavl_msg_get_src_resync(const gavl_msg_t * src, int64_t * t, int * scale, int * discard, int * discont)
+  {
+  if(t)
+    *t = gavl_msg_get_arg_time(src, 0);
+  if(scale)
+    *scale = gavl_msg_get_arg_int(src, 1);
+  if(discard)
+    *discard = gavl_msg_get_arg_int(src, 2);
+  if(discont)
+    *discont = gavl_msg_get_arg_int(src, 3);
   }

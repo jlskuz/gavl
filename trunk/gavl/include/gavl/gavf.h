@@ -407,7 +407,7 @@ const char * gavf_stream_type_name(gavl_stream_type_t t);
 
 typedef struct
   {
-  uint32_t stream_id;
+  int32_t stream_id;
   } gavf_packet_header_t;
 
 typedef void (*gavf_stream_skip_func)(gavf_t * gavf,
@@ -457,6 +457,9 @@ gavf_options_t * gavf_get_options(gavf_t *);
 
 GAVL_PUBLIC
 int gavf_get_flags(gavf_t *);
+
+GAVL_PUBLIC
+void gavf_write_resync(gavf_t * g, int64_t time, int scale, int discard, int discont);
 
 /* Read support */
 

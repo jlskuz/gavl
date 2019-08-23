@@ -139,7 +139,7 @@ void gavf_stream_create_packet_sink(gavf_t * g, gavf_stream_t * s);
 
 gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s);
 
-gavf_stream_t * gavf_find_stream_by_id(gavf_t * g, uint32_t id);
+gavf_stream_t * gavf_find_stream_by_id(gavf_t * g, int32_t id);
 
 // int gavf_stream_get_timescale(const gavf_stream_header_t * sh);
 
