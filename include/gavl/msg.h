@@ -110,7 +110,11 @@
  *
  *  arg0: Time  (long)
  *  arg1: Scale (int)
- *  arg2: Flush (int)
+ *  arg2: Discard (int)
+ *  arg3: Discont (int)
+ *
+ *  Discard means to throw away all packets *before* this message
+ *  Discont means to reset the decoders *after* this message
  */
 
 #define GAVL_MSG_SRC_RESYNC           5
@@ -467,7 +471,7 @@ void gavl_msg_set_arg_time(gavl_msg_t * msg, int arg, gavl_time_t value);
  */
 
 GAVL_PUBLIC
-gavl_time_t gavl_msg_get_arg_time(gavl_msg_t * msg, int arg);
+gavl_time_t gavl_msg_get_arg_time(const gavl_msg_t * msg, int arg);
 
 /** \brief Set a string argument
  *  \param msg A message
@@ -518,7 +522,7 @@ void gavl_msg_set_arg_float(gavl_msg_t * msg, int arg, double value);
  */
 
 GAVL_PUBLIC
-double gavl_msg_get_arg_float(gavl_msg_t * msg, int arg);
+double gavl_msg_get_arg_float(const gavl_msg_t * msg, int arg);
 
 /** \brief Set an RGB color argument
  *  \param msg A message
@@ -777,6 +781,13 @@ void gavl_msg_set_last(gavl_msg_t * msg, int last);
 
 GAVL_PUBLIC 
 void gavl_msg_set_resp_for_req(gavl_msg_t * dst, const gavl_msg_t * src);
+
+GAVL_PUBLIC
+void gavl_msg_set_src_resync(gavl_msg_t * dst, int64_t t, int scale, int discard, int discont);
+
+GAVL_PUBLIC
+void gavl_msg_get_src_resync(const gavl_msg_t * src, int64_t * t, int * scale, int * discard, int * discont);
+
 
 
 #endif // GAVL_MSG_H_INCLUDED

@@ -550,8 +550,10 @@ int gavf_read_gavl_packet(gavf_io_t * io,
       goto fail;
     p->pts += last_sync_pts;
     }
-  else
+  else if(next_pts)
     p->pts = *next_pts;
+  else
+    p->pts = GAVL_TIME_UNDEFINED;
   
   /* Duration */
   if(packet_flags & GAVF_PACKET_WRITE_DURATION)
@@ -643,8 +645,9 @@ int gavf_read_gavl_packet(gavf_io_t * io,
   /* p->duration can be 0 for the first packet in a vorbis stream */
   
   /* Set pts */
-  *next_pts += p->duration;
-
+  if(next_pts)
+    *next_pts += p->duration;
+  
   /* Add offset */
   p->pts += pts_offset;
 
