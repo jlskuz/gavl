@@ -152,7 +152,6 @@
  *
  *  arg0: Time  (long)
  *  arg1: Scale (int)
- *  arg2: Async (int)
  *
  *  Argument 2 decides, if the seek operation is expected in
  *  synchronout mode or not
@@ -282,6 +281,7 @@
 /* Arg 0: New time */
 /* Arg 1: scale    */
 /* Arg 2: discard packets (1 or 0) */
+/* Arg 3: stream is discontinuous (1 or 0) */
 
 #define GAVL_MSG_GAVF_RESYNC       2
 
@@ -309,6 +309,9 @@
 
 /* Emitted by the encoder immediately after a packet is written */
 #define GAVL_MSG_GAVF_WRITE_PACKET_END              (0x1000|12)
+
+/* Emitted from within the demuxer loop */
+#define GAVL_MSG_GAVF_GOT_EOF                       (0x1000|13)
 
 
 /* Header fields */
