@@ -260,6 +260,8 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
   gavl_time_t pts;
   int write_sync = 0;
   gavf_stream_t * s;
+
+  fprintf(stderr, "Write packet\n");
   
   if(stream >= 0)
     s = &g->streams[stream];
@@ -1327,6 +1329,9 @@ int gavf_reset(gavf_t * g)
 
 const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
   {
+  int result;
+  gavl_msg_t msg;
+  
   char c[8];
 
 #ifdef DUMP_EOF
@@ -1350,6 +1355,20 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
 #endif
       goto got_eof;
       }
+    /* Check if we need to realign the data */
+    if(c[0] == 0x00)
+      {
+      align_read(g->io);
+      
+      if(!gavf_io_read_data(g->io, (uint8_t*)c, 1))
+        {
+#ifdef DUMP_EOF
+        fprintf(stderr, "EOF 16\n");
+#endif
+        goto got_eof;
+        }
+      }
+    
     if(c[0] == GAVF_TAG_PACKET_HEADER_C)
       {
       gavf_stream_t * s;
@@ -1430,6 +1449,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
                   
                   gavl_msg_get_src_resync(&msg, &t, &scale, &discard, &discont);
                   fprintf(stderr, "RESYNC: %"PRId64" %d %d %d\n", t, scale, discard, discont);
+                  gavl_msg_send(&msg, g->msg_callback, g->msg_data);
                   }
                   break;
                 }
@@ -1486,6 +1506,19 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
 
   GAVF_SET_FLAG(g, GAVF_FLAG_EOF);
 
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_GOT_EOF, GAVL_MSG_NS_GAVF);
+  result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
+  gavl_msg_free(&msg);
+
+  /* Check of EOF got clered */
+  
+  if(result && !GAVF_HAS_FLAG(g, GAVF_FLAG_EOF))
+    {
+    /* Try again */
+    return gavf_packet_read_header(g);
+    }
+  
   return NULL;
   }
 
@@ -1610,6 +1643,7 @@ void gavf_write_resync(gavf_t * g, int64_t time, int scale, int discard, int dis
   gavl_msg_set_src_resync(&msg, time, scale, discard, discont);
   write_demuxer_message(g, &msg);
   gavl_msg_free(&msg);
+  g->first_sync_pos = 0;
   }
 
 
@@ -2327,4 +2361,9 @@ int gavf_get_flags(gavf_t * g)
   {
   return g->flags;
   
+  }
+
+void gavf_clear_eof(gavf_t * g)
+  {
+  GAVF_CLEAR_FLAG(g, GAVF_FLAG_EOF);
   }

@@ -466,6 +466,10 @@ void gavf_write_resync(gavf_t * g, int64_t time, int scale, int discard, int dis
 GAVL_PUBLIC
 int gavf_open_read(gavf_t * g, gavf_io_t * io);
 
+/* Clear the EOF flag of the demuxer */
+GAVL_PUBLIC
+void gavf_clear_eof(gavf_t * g);
+
 GAVL_PUBLIC
 gavl_dictionary_t * gavf_get_media_info_nc(gavf_t * g);
 
