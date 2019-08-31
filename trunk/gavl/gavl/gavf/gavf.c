@@ -6,7 +6,7 @@
 #include <gavfprivate.h>
 #include <metatags.h>
 
-// #define DUMP_EOF
+#define DUMP_EOF
 
 static struct
   {
@@ -118,7 +118,7 @@ static int write_sync_header(gavf_t * g, int stream, int64_t packet_pts)
       {
       gavl_packet_t * p;
       p = gavf_packet_buffer_peek_read(s->pb);
-      if(!p && !(p->flags & GAVL_PACKET_KEYFRAME))
+      if(!p || !(p->flags & GAVL_PACKET_KEYFRAME))
         s->sync_pts = GAVL_TIME_UNDEFINED;
       else
         s->sync_pts = p->pts;
@@ -153,8 +153,6 @@ static int write_sync_header(gavf_t * g, int stream, int64_t packet_pts)
     /* Write GAVF_TAG_PACKETS tag */
 
     gavf_chunk_start(g->io, &g->packets_chunk, GAVF_TAG_PACKETS);
-    
-    
     
     g->first_sync_pos = g->io->position;
   
@@ -261,7 +259,7 @@ write_packet(gavf_t * g, int stream, const gavl_packet_t * p)
   int write_sync = 0;
   gavf_stream_t * s;
 
-  fprintf(stderr, "Write packet\n");
+  //  fprintf(stderr, "Write packet\n");
   
   if(stream >= 0)
     s = &g->streams[stream];
@@ -1335,7 +1333,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
   char c[8];
 
 #ifdef DUMP_EOF
-  fprintf(stderr, "gavf_packet_read_header\n");
+  //  fprintf(stderr, "gavf_packet_read_header\n");
 #endif
   
   if(GAVF_HAS_FLAG(g, GAVF_FLAG_EOF))
@@ -1363,7 +1361,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
       if(!gavf_io_read_data(g->io, (uint8_t*)c, 1))
         {
 #ifdef DUMP_EOF
-        fprintf(stderr, "EOF 16\n");
+        fprintf(stderr, "EOF 3\n");
 #endif
         goto got_eof;
         }
@@ -1376,7 +1374,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
       if(!gavf_io_read_int32v(g->io, &g->pkthdr.stream_id))
         {
 #ifdef DUMP_EOF
-        fprintf(stderr, "EOF 2\n");
+        fprintf(stderr, "EOF 4\n");
 #endif
         goto got_eof;
         }
@@ -1401,7 +1399,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
           if(!result)
             {
 #ifdef DUMP_EOF
-            fprintf(stderr, "EOF 3\n");
+            fprintf(stderr, "EOF 5\n");
 #endif
             goto got_eof;
             }
@@ -1425,12 +1423,21 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
                                     NULL, // int64_t * next_pts,
                                     0, // int64_t pts_offset,
                                     &p))
-            
-            goto got_eof;
+            {
+#ifdef DUMP_EOF
+            fprintf(stderr, "EOF 6\n");
+#endif
 
-          if(!gavf_packet_to_msg(&p, &msg))
             goto got_eof;
-          
+            }
+          if(!gavf_packet_to_msg(&p, &msg))
+            {
+#ifdef DUMP_EOF
+            fprintf(stderr, "EOF 7\n");
+#endif
+            goto got_eof;
+            }
+            
           fprintf(stderr, "Got demuxer message\n");
           gavl_msg_dump(&msg, 2);
 
@@ -1459,6 +1466,10 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
           
           gavl_msg_free(&msg);
           gavl_packet_free(&p);
+
+#ifdef DUMP_EOF
+          fprintf(stderr, "EOF 8\n");
+#endif
           
           goto got_eof;
           }
@@ -1477,7 +1488,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
       if(gavf_io_read_data(g->io, (uint8_t*)&c[1], 7) < 7)
         {
 #ifdef DUMP_EOF
-        fprintf(stderr, "EOF 6\n");
+        fprintf(stderr, "EOF 9\n");
 #endif
         goto got_eof;
         }
@@ -1487,21 +1498,27 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
         if(!read_sync_header(g))
           {
 #ifdef DUMP_EOF
-          fprintf(stderr, "EOF 7\n");
+          fprintf(stderr, "EOF 10\n");
 #endif
           goto got_eof;
           }
         }
+      else if(!strncmp(c, GAVF_TAG_PACKETS, 8))
+        gavf_io_skip(g->io, 8); // Skip size
       else
         {
 #ifdef DUMP_EOF
-       fprintf(stderr, "EOF 8 %8s\n", c);
+        fprintf(stderr, "EOF 11 %8s\n", c);
 #endif
         goto got_eof;
         }
       }
     }
-  
+
+#ifdef DUMP_EOF
+  fprintf(stderr, "EOF 12\n");
+#endif
+    
   got_eof:
 
   GAVF_SET_FLAG(g, GAVF_FLAG_EOF);
