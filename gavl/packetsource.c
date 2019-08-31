@@ -52,6 +52,7 @@ struct gavl_packet_source_s
 
   pthread_mutex_t eof_mutex;
   int eof;
+  int have_lock;
   };
 
 gavl_packet_source_t *
@@ -236,6 +237,12 @@ void gavl_packet_source_drain(gavl_packet_source_t * s)
     p = NULL;
   }
 
+void gavl_packet_source_drain_nolock(gavl_packet_source_t * s)
+  {
+  s->have_lock = 1;
+  gavl_packet_source_drain(s);
+  s->have_lock = 0;
+  }
 
 void
 gavl_packet_source_set_free_func(gavl_packet_source_t * src,

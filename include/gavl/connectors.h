@@ -173,6 +173,9 @@ int gavl_video_source_get_eof(gavl_video_source_t * src);
 GAVL_PUBLIC
 void gavl_video_source_drain(gavl_video_source_t * s);
 
+GAVL_PUBLIC
+void gavl_video_source_drain_nolock(gavl_video_source_t * s);
+
   
 /** \brief Create a video source from another source
  *  \param func Function to get the frames from
@@ -335,7 +338,9 @@ int gavl_audio_source_get_eof(gavl_audio_source_t * src);
 
 GAVL_PUBLIC
 void gavl_audio_source_drain(gavl_audio_source_t * s);
-  
+
+GAVL_PUBLIC
+void gavl_audio_source_drain_nolock(gavl_audio_source_t * s);
   
 /** \brief Create an audio source from another source
  *  \param func Function to get the frames from
@@ -526,6 +531,8 @@ int gavl_packet_source_get_eof(gavl_packet_source_t * src);
 GAVL_PUBLIC
 void gavl_packet_source_drain(gavl_packet_source_t * src);
 
+GAVL_PUBLIC
+void gavl_packet_source_drain_nolock(gavl_packet_source_t * src);
   
 /** \brief Create an audio packet source
  *  \param func Callback for reading one frame

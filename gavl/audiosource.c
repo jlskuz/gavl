@@ -77,6 +77,8 @@ struct gavl_audio_source_s
 
   pthread_mutex_t eof_mutex;
   int eof;
+  
+  int have_lock;
   };
 
 gavl_audio_source_t *
@@ -295,12 +297,12 @@ static gavl_source_status_t do_read(gavl_audio_source_t * s,
                                     gavl_audio_frame_t ** frame)
   {
   gavl_source_status_t ret;
-  if(s->lock_func)
+  if(s->lock_func && !s->have_lock)
     s->lock_func(s->lock_priv);
 
   ret = s->func(s->priv, frame);
   
-  if(s->unlock_func)
+  if(s->unlock_func && !s->have_lock)
     s->unlock_func(s->lock_priv);
 
   //  if(frame && *frame)
@@ -485,6 +487,13 @@ void gavl_audio_source_drain(gavl_audio_source_t * s)
   gavl_audio_frame_t * fr = NULL;
   while((st = gavl_audio_source_read_frame(s, &fr)) == GAVL_SOURCE_OK)
     fr = NULL;
+  }
+
+void gavl_audio_source_drain_nolock(gavl_audio_source_t * s)
+  {
+  s->have_lock = 1;
+  gavl_audio_source_drain(s);
+  s->have_lock = 0;
   }
 
 /* For cases where it's not immediately known, how many samples will be
