@@ -869,15 +869,15 @@ static int read_sync_header(gavf_t * g)
     return 0;
   
   /* Read sync header */
-#if 0
+#if 1
   fprintf(stderr, "Read sync header\n");
 #endif
   for(i = 0; i < g->num_streams; i++)
     {
     if(!gavf_io_read_int64v(g->io, &g->streams[i].sync_pts))
       return 0;
-#if 0
-    fprintf(stderr, "PTS[%d]: %ld\n", i, g->sync_pts[i]);
+#if 1
+    fprintf(stderr, "PTS[%d]: %ld\n", i, g->streams[i].sync_pts);
 #endif
     if(g->streams[i].sync_pts != GAVL_TIME_UNDEFINED)
       {
@@ -1599,7 +1599,7 @@ int gavf_packet_read_packet(gavf_t * g, gavl_packet_t * p)
 
   if(g->opt.flags & GAVF_OPT_FLAG_DUMP_PACKETS)
     {
-    fprintf(stderr, "ID: %d ", g->pkthdr.stream_id);
+    fprintf(stderr, "ID: %d ", p->id);
     gavl_packet_dump(p);
     }
 
