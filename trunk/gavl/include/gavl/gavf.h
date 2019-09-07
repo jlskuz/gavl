@@ -410,8 +410,7 @@ typedef struct
   int32_t stream_id;
   } gavf_packet_header_t;
 
-typedef void (*gavf_stream_skip_func)(gavf_t * gavf,
-                                      void * priv);
+typedef void (*gavf_packet_unref_func)(gavl_packet_t * p, void * priv);
 
 /* Options */
 
@@ -508,9 +507,13 @@ GAVL_PUBLIC
 const gavf_packet_header_t * gavf_packet_read_header(gavf_t * gavf);
 
 /* Mark this stream as skipable. */
+
 GAVL_PUBLIC
-void gavf_stream_set_skip(gavf_t * gavf, uint32_t id,
-                          gavf_stream_skip_func func, void * priv);
+void gavf_stream_set_skip(gavf_t * g, uint32_t id);
+
+GAVL_PUBLIC
+void gavf_stream_set_unref(gavf_t * gavf, uint32_t id,
+                           gavf_packet_unref_func func, void * priv);
 
 GAVL_PUBLIC
 void gavf_packet_skip(gavf_t * gavf);
