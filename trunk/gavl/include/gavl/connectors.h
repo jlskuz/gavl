@@ -462,7 +462,13 @@ gavl_audio_source_read_frame(void*s, gavl_audio_frame_t ** frame);
   
 GAVL_PUBLIC
 void 
-gavl_audio_source_skip_src(gavl_audio_source_t * s, int num_samples);
+gavl_audio_source_skip(gavl_audio_source_t * s, int num_samples);
+
+  
+GAVL_PUBLIC
+void 
+gavl_audio_source_skip_to(gavl_audio_source_t * s,
+                          int64_t t, int scale);
   
 /** \brief Read audio samples
  *  \param s An audio source 
