@@ -1521,7 +1521,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
       else
         {
 #ifdef DUMP_EOF
-        fprintf(stderr, "EOF 11 %c%c%c%cs%c%c%c%c\n",
+        fprintf(stderr, "EOF 11 %c%c%c%c%c%c%c%c\n",
                 c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7]);
 #endif
         goto got_eof;
