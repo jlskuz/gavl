@@ -66,6 +66,7 @@ struct gavl_audio_source_s
   int flags;
 
   int skip_samples;
+  int64_t skip_time;
   
   gavl_connector_lock_func_t lock_func;
   gavl_connector_lock_func_t unlock_func;
@@ -95,6 +96,9 @@ gavl_audio_source_create(gavl_audio_source_func_t func,
   gavl_audio_format_copy(&ret->src_format, src_format);
   ret->cnv = gavl_audio_converter_create();
   pthread_mutex_init(&ret->eof_mutex, NULL);
+
+  ret->skip_time = GAVL_TIME_UNDEFINED;
+  
   return ret;
   }
 
@@ -265,6 +269,18 @@ static int process_input(gavl_audio_source_t * s, gavl_audio_frame_t * f)
                                     s->dst_format.samplerate,
                                     f->timestamp);
 
+  if(s->skip_time != GAVL_TIME_UNDEFINED)
+    {
+    s->skip_samples = s->skip_time - f->timestamp;
+
+    if(s->skip_samples < 0)
+      {
+      fprintf(stderr, "audio_source: Cannot skip backwards\n");
+      s->skip_samples = 0;
+      }
+    s->skip_time = GAVL_TIME_UNDEFINED;
+    }
+  
   if(s->skip_samples)
     {
     int skipped = gavl_audio_frame_skip(&s->src_format,
@@ -513,9 +529,17 @@ int gavl_audio_source_read_samples(void * sp, gavl_audio_frame_t * frame,
   }
 
 void 
-gavl_audio_source_skip_src(gavl_audio_source_t * s, int num_samples)
+gavl_audio_source_skip(gavl_audio_source_t * s, int num_samples)
   {
   s->skip_samples += num_samples;
+  s->flags &= ~FLAG_PASSTHROUGH;
+  }
+
+void 
+gavl_audio_source_skip_to(gavl_audio_source_t * s,
+                          int64_t t, int scale)
+  {
+  s->skip_time = gavl_time_rescale(scale, s->dst_format.samplerate, t);
   s->flags &= ~FLAG_PASSTHROUGH;
   }
 
