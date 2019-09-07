@@ -11,10 +11,29 @@ struct gavf_packet_buffer_s
   int num_packets;
   int packets_alloc;
   int timescale;
+
+  gavf_packet_unref_func unref_func;
+  void *                 unref_data;
   };
+
+void gavf_packet_buffer_set_unref_func(gavf_packet_buffer_t * b,
+                                       gavf_packet_unref_func unref_func,
+                                       void *                 unref_data)
+  {
+  b->unref_func = unref_func;
+  b->unref_data = unref_data;
+  }
 
 void gavf_packet_buffer_clear(gavf_packet_buffer_t * b)
   {
+  int i;
+
+  if(b->unref_func)
+    {
+    for(i = 0; i < b->num_packets; i++)
+      b->unref_func(b->packets[i], b->unref_data);
+    }
+  
   b->num_packets = 0;
   }
 
@@ -54,10 +73,6 @@ gavl_packet_t * gavf_packet_buffer_get_read(gavf_packet_buffer_t * b)
   if(!b->num_packets)
     return NULL;
   ret = b->packets[0];
-
-  //  Zero size packets are allowed for Theora
-  //  if(ret->data_len == 0)
-  //    return NULL;
   
   b->num_packets--;
   if(b->num_packets)

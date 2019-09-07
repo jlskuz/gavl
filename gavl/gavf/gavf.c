@@ -869,14 +869,14 @@ static int read_sync_header(gavf_t * g)
     return 0;
   
   /* Read sync header */
-#if 1
+#if 0
   fprintf(stderr, "Read sync header\n");
 #endif
   for(i = 0; i < g->num_streams; i++)
     {
     if(!gavf_io_read_int64v(g->io, &g->streams[i].sync_pts))
       return 0;
-#if 1
+#if 0
     fprintf(stderr, "PTS[%d]: %ld\n", i, g->streams[i].sync_pts);
 #endif
     if(g->streams[i].sync_pts != GAVL_TIME_UNDEFINED)
@@ -1383,27 +1383,40 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
       if((s = gavf_find_stream_by_id(g, g->pkthdr.stream_id)) &&
          (s->flags & STREAM_FLAG_SKIP))
         {
-        if(s->skip_func)
-          s->skip_func(g, s->skip_priv);
-        else
+        int result;
+        gavl_msg_t msg;
+        
+        if(s->unref_func)
           {
-          int result;
-          gavl_msg_t msg;
-          
-          gavf_packet_skip(g);
-
-          gavl_msg_init(&msg);
-          gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_PACKET_END, GAVL_MSG_NS_GAVF);
-          result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
-          
-          if(!result)
+          if(!gavf_packet_read_packet(g, &g->skip_pkt))
             {
 #ifdef DUMP_EOF
-            fprintf(stderr, "EOF 5\n");
+            fprintf(stderr, "EOF 4\n");
 #endif
             goto got_eof;
             }
+          s->unref_func(&g->skip_pkt, s->unref_priv);
+          
+          // if(s->skip_func)
+          //   s->skip_func(g, s->skip_priv);
           }
+        else
+          {
+          gavf_packet_skip(g);
+          }
+
+        gavl_msg_init(&msg);
+        gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_PACKET_END, GAVL_MSG_NS_GAVF);
+        result = gavl_msg_send(&msg, g->msg_callback, g->msg_data);
+        
+        if(!result)
+          {
+#ifdef DUMP_EOF
+          fprintf(stderr, "EOF 5\n");
+#endif
+          goto got_eof;
+          }
+        
         }
       else
         {
@@ -1508,7 +1521,8 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
       else
         {
 #ifdef DUMP_EOF
-        fprintf(stderr, "EOF 11 %8s\n", c);
+        fprintf(stderr, "EOF 11 %c%c%c%cs%c%c%c%c\n",
+                c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7]);
 #endif
         goto got_eof;
         }
@@ -1650,11 +1664,10 @@ void gavf_write_resync(gavf_t * g, int64_t time, int scale, int discard, int dis
     {
     /* Flush packets if any */
     gavf_flush_packets(g, NULL);
-
-    /* Force new sync header to be written */
-    g->first_sync_pos = 0;
     }
 
+  gavf_footer_init(g);
+  
   gavl_msg_init(&msg);
   
   gavl_msg_set_src_resync(&msg, time, scale, discard, discont);
@@ -2146,7 +2159,7 @@ void gavf_close(gavf_t * g)
   
   gavl_dictionary_free(&g->mi);
   
-  gavl_packet_free(&g->write_pkt);
+  gavl_packet_free(&g->skip_pkt);
 
   if(g->pkt_io)
     gavf_io_destroy(g->pkt_io);
@@ -2172,15 +2185,24 @@ gavf_get_packet_source(gavf_t * g, uint32_t id)
   return s->psrc;
   }
 
-void gavf_stream_set_skip(gavf_t * g, uint32_t id,
-                          gavf_stream_skip_func func, void * priv)
+void gavf_stream_set_skip(gavf_t * g, uint32_t id)
+  {
+  gavf_stream_t * s;
+  if((s = gavf_find_stream_by_id(g, id)))
+    s->flags |= STREAM_FLAG_SKIP;
+  }
+  
+void gavf_stream_set_unref(gavf_t * g, uint32_t id,
+                           gavf_packet_unref_func func, void * priv)
   {
   gavf_stream_t * s;
   if((s = gavf_find_stream_by_id(g, id)))
     {
-    s->flags |= STREAM_FLAG_SKIP;
-    s->skip_func = func;
-    s->skip_priv = priv;
+    s->unref_func = func;
+    s->unref_priv = priv;
+    
+    if(s->pb)
+      gavf_packet_buffer_set_unref_func(s->pb, func, priv);
     }
   }
 
@@ -2194,38 +2216,6 @@ gavf_stream_t * gavf_find_stream_by_id(gavf_t * g, int32_t id)
     }
   return NULL;
   }
-
-#if 0
-gavf_stream_t * gavf_find_stream_by_idx(gavf_t * g, gavl_stream_type_t type, int idx)
-  {
-  int i;
-  int cnt = 0;
-  
-  for(i = 0; i < g->num_streams; i++)
-    {
-    if(g->streams[i].type == type)
-      {
-      if(cnt == idx)
-        return &g->streams[i];
-      else
-        cnt++;
-      }
-    }
-  return NULL;
-  }
-
-int gavf_get_num_streams(gavf_t * g, int type)
-  {
-  return gavf_program_header_get_num_streams(&g->ph, type);
-  }
-
-const gavf_stream_header_t * gavf_get_stream(gavf_t * g, int index,
-                                             int type)
-  {
-  return gavf_program_header_get_stream(&g->ph, index, type);
-  }
-
-#endif
 
 
 int gavf_chunk_is(const gavf_chunk_t * head, const char * eightcc)

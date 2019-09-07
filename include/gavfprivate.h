@@ -49,6 +49,11 @@ typedef struct gavf_packet_buffer_s gavf_packet_buffer_t;
 
 gavf_packet_buffer_t * gavf_packet_buffer_create(int timescale);
 
+
+void gavf_packet_buffer_set_unref_func(gavf_packet_buffer_t * b,
+                                       gavf_packet_unref_func unref_func,
+                                       void *                 unref_data);
+
 gavl_packet_t * gavf_packet_buffer_get_write(gavf_packet_buffer_t *);
 void gavf_packet_buffer_done_write(gavf_packet_buffer_t * b);
 
@@ -119,8 +124,8 @@ typedef struct
 
   gavl_dsp_context_t * dsp; // For swapping endianess
   
-  gavf_stream_skip_func skip_func;
-  void * skip_priv;
+  gavf_packet_unref_func unref_func;
+  void * unref_priv;
 
   gavl_stream_stats_t stats;
   
@@ -315,8 +320,9 @@ struct gavf_s
   
   uint64_t first_sync_pos;
   
+  //  gavl_packet_t write_pkt;
+  gavl_packet_t skip_pkt;
   
-  gavl_packet_t write_pkt;
   gavl_video_frame_t * write_vframe;
   gavl_audio_frame_t * write_aframe;
 
