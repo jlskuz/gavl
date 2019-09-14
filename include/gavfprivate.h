@@ -247,6 +247,8 @@ int gavf_packet_index_write(gavf_io_t * io, const gavf_packet_index_t * idx);
 void gavf_packet_index_free(gavf_packet_index_t * idx);
 void gavf_packet_index_dump(gavf_packet_index_t * idx);
 
+void gavf_io_cleanup(gavf_io_t * io);
+
 typedef struct
   {
   uint64_t num_entries;

@@ -70,21 +70,26 @@ int gavf_read_audio_format(gavf_io_t * io, gavl_audio_format_t * format)
 
 int gavf_write_audio_format(gavf_io_t * io, const gavl_audio_format_t * format)
   {
+  int ret = 0;
+
   int num_extensions;
   uint8_t data[MAX_EXT_SIZE_AF];
   gavl_buffer_t buf;
   gavf_io_t bufio;
   int i;
+
+  gavl_buffer_init_static(&buf, data, MAX_EXT_SIZE_AF);
+  gavf_io_init_buf_write(&bufio, &buf);
   
   /* Write common stuff */
   if(!gavf_io_write_uint32v(io, format->samplerate) ||
      !gavf_io_write_uint32v(io, format->num_channels))
-    return 0;
+    goto fail;
   
   for(i = 0; i < format->num_channels; i++)
     {
     if(!gavf_io_write_uint32v(io, format->channel_locations[i]))
-      return 0;
+      goto fail;
     }
 
   /* Count extensions */
@@ -107,13 +112,13 @@ int gavf_write_audio_format(gavf_io_t * io, const gavl_audio_format_t * format)
   
   /* Write extensions */
   if(!gavf_io_write_uint32v(io, num_extensions))
-    return 0;
-
+    goto fail;
+  
   if(!num_extensions)
-    return 1;
-
-  gavl_buffer_init_static(&buf, data, MAX_EXT_SIZE_AF);
-  gavf_io_init_buf_write(&bufio, &buf);
+    {
+    ret = 1;
+    goto fail;
+    }
   
   if(format->samples_per_frame != 0)
     {
@@ -121,7 +126,7 @@ int gavf_write_audio_format(gavf_io_t * io, const gavl_audio_format_t * format)
     if(!gavf_io_write_uint32v(&bufio, format->samples_per_frame) ||
        !gavf_extension_write(io, GAVF_EXT_AF_SAMPLESPERFRAME,
                             buf.len, buf.buf))
-      return 0;
+      goto fail;
     }
   if(format->interleave_mode != GAVL_INTERLEAVE_NONE)
     {
@@ -129,7 +134,7 @@ int gavf_write_audio_format(gavf_io_t * io, const gavl_audio_format_t * format)
     if(!gavf_io_write_uint32v(&bufio, format->interleave_mode) ||
        !gavf_extension_write(io, GAVF_EXT_AF_INTERLEAVE,
                             buf.len, buf.buf))
-      return 0;
+      goto fail;
     }
   if(format->sample_format != GAVL_SAMPLE_NONE)
     {
@@ -137,7 +142,7 @@ int gavf_write_audio_format(gavf_io_t * io, const gavl_audio_format_t * format)
     if(!gavf_io_write_uint32v(&bufio, format->sample_format) ||
        !gavf_extension_write(io, GAVF_EXT_AF_SAMPLEFORMAT,
                             buf.len, buf.buf))
-      return 0;
+      goto fail;
     }
   if(format->center_level != 0.0)
     {
@@ -145,7 +150,7 @@ int gavf_write_audio_format(gavf_io_t * io, const gavl_audio_format_t * format)
     if(!gavf_io_write_float(&bufio, format->center_level) ||
        !gavf_extension_write(io, GAVF_EXT_AF_CENTER_LEVEL,
                             buf.len, buf.buf))
-      return 0;
+      goto fail;
     }
   if(format->rear_level != 0.0)
     {
@@ -153,11 +158,14 @@ int gavf_write_audio_format(gavf_io_t * io, const gavl_audio_format_t * format)
     if(!gavf_io_write_float(&bufio, format->rear_level) ||
        !gavf_extension_write(io, GAVF_EXT_AF_REAR_LEVEL,
                             buf.len, buf.buf))
-      return 0;
+      goto fail;
     }
+
+  ret = 1;
+  fail:
   
-  
-  return 1;
+  gavf_io_cleanup(&bufio);
+  return ret;
   }
 
 int gavf_read_video_format(gavf_io_t * io, gavl_video_format_t * format)
@@ -238,24 +246,28 @@ int gavf_read_video_format(gavf_io_t * io, gavl_video_format_t * format)
 
 int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format)
   {
+  int ret = 0;
   int num_extensions;
   uint8_t data[MAX_EXT_SIZE_VF];
   gavl_buffer_t buf;
   gavf_io_t bufio;
 
+  gavl_buffer_init_static(&buf, data, MAX_EXT_SIZE_VF);
+  gavf_io_init_buf_write(&bufio, &buf);
+  
   /* Write mandatory stuff */
   if(!gavf_io_write_uint32v(io, format->image_width) ||
      !gavf_io_write_uint32v(io, format->image_height) ||
      !gavf_io_write_int32v(io, format->framerate_mode) ||
      !gavf_io_write_uint32v(io, format->timescale))
-    return 0;
-
+    goto fail;
+    	
   if(format->framerate_mode != GAVL_FRAMERATE_STILL)
     {
     if(!gavf_io_write_uint32v(io, format->frame_duration))
-      return 0;
+      goto fail;
     }
-
+  
   /* Count extensions */
   num_extensions = 0;
 
@@ -282,21 +294,21 @@ int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format)
   /* Write extensions */
 
   if(!gavf_io_write_uint32v(io, num_extensions))
-    return 0;
-
+    goto fail;
+    
   if(!num_extensions)
-    return 1;
-
-  gavl_buffer_init_static(&buf, data, MAX_EXT_SIZE_VF);
-  gavf_io_init_buf_write(&bufio, &buf);
-
+    {
+    ret = 1;
+    goto fail;
+    }
+  
   if(format->pixelformat != GAVL_PIXELFORMAT_NONE)
     {
     gavf_io_buf_reset(&bufio);
     if(!gavf_io_write_uint32v(&bufio, format->pixelformat) ||
        !gavf_extension_write(io, GAVF_EXT_VF_PIXELFORMAT,
                             buf.len, buf.buf))
-      return 0;
+      goto fail;
     }
   
   if(format->pixel_width != format->pixel_height)
@@ -306,7 +318,7 @@ int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format)
        !gavf_io_write_uint32v(&bufio, format->pixel_height) ||
        !gavf_extension_write(io, GAVF_EXT_VF_PIXEL_ASPECT,
                             buf.len, buf.buf))
-      return 0;
+      goto fail;
     }
   
   if(format->interlace_mode != GAVL_INTERLACE_NONE)
@@ -315,7 +327,8 @@ int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format)
     if(!gavf_io_write_int32v(&bufio, format->interlace_mode) ||
        !gavf_extension_write(io, GAVF_EXT_VF_INTERLACE,
                              buf.len, buf.buf))
-      return 0;
+      goto fail;
+
     }
 
   if((format->image_width != format->frame_width) ||
@@ -326,7 +339,8 @@ int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format)
        !gavf_io_write_uint32v(&bufio, format->frame_height) ||
        !gavf_extension_write(io, GAVF_EXT_VF_FRAME_SIZE,
                              buf.len, buf.buf))
-      return 0;
+      goto fail;
+
     }
 
   if(format->timecode_format.int_framerate)
@@ -335,7 +349,8 @@ int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format)
     if(!gavf_io_write_uint32v(&bufio, format->timecode_format.int_framerate) ||
        !gavf_extension_write(io, GAVF_EXT_VF_TC_RATE,
                              buf.len, buf.buf))
-      return 0;
+      goto fail;
+
     
     if(format->timecode_format.flags)
       {
@@ -343,170 +358,17 @@ int gavf_write_video_format(gavf_io_t * io, const gavl_video_format_t * format)
       if(!gavf_io_write_uint32v(&bufio, format->timecode_format.flags) ||
          !gavf_extension_write(io, GAVF_EXT_VF_TC_FLAGS,
                                buf.len, buf.buf))
-        return 0;
+        goto fail;
       }
     }
 
+  ret = 1;
+  fail:
   
-  return 1;
+  gavf_io_cleanup(&bufio);
+  
+  return ret;
   }
-
-/* Compression info */
-#if 0
-int gavf_read_compression_info(gavf_io_t * io,
-                               gavl_compression_info_t * ci)
-  {
-  int i;
-  uint32_t num_extensions;
-  
-  gavl_extension_header_t eh;
-
-  /* Read mandatory stuff */
-  if(!gavf_io_read_uint32v(io, &ci->flags) ||
-     !gavf_io_read_uint32v(io, &ci->id))
-    return 0;
-
-  /* Read extensions */
-  if(!gavf_io_read_uint32v(io, &num_extensions))
-    return 0;
-  
-  for(i = 0; i < num_extensions; i++)
-    {
-    if(!gavf_extension_header_read(io, &eh))
-      return 0;
-    switch(eh.key)
-      {
-      case GAVF_EXT_CI_GLOBAL_HEADER:
-        ci->global_header_len = eh.len;
-        ci->global_header = malloc(ci->global_header_len);
-        if(gavf_io_read_data(io, ci->global_header,
-                             ci->global_header_len) < ci->global_header_len)
-          return 0;
-        break;
-      case GAVF_EXT_CI_BITRATE:
-        if(!gavf_io_read_int32v(io, &ci->bitrate))
-          return 0;
-        break;
-      case GAVF_EXT_CI_PRE_SKIP:
-        if(!gavf_io_read_uint32v(io, &ci->pre_skip))
-          return 0;
-        break;
-      case GAVF_EXT_CI_MAX_PACKET_SIZE:
-        if(!gavf_io_read_uint32v(io, &ci->max_packet_size))
-          return 0;
-        break;
-      case GAVF_EXT_CI_VIDEO_BUFFER_SIZE:
-        if(!gavf_io_read_uint32v(io, &ci->video_buffer_size))
-          return 0;
-        break;
-      case GAVF_EXT_CI_MAX_REF_FRAMES:
-        if(!gavf_io_read_uint32v(io, &ci->max_ref_frames))
-          return 0;
-        break;
-      }
-    }
-  
-  
-  return 1;
-  }
-
-int gavf_write_compression_info(gavf_io_t * io,
-                                const gavl_compression_info_t * ci)
-  {
-  uint32_t num_extensions;
-  uint8_t data[MAX_EXT_SIZE_CI];
-  gavl_buffer_t buf;
-  gavf_io_t bufio;
-  
-  /* Write mandatory stuff */
-  if(!gavf_io_write_uint32v(io, ci->flags) ||
-     !gavf_io_write_uint32v(io, ci->id))
-    return 0;
-  
-  /* Count extensions */
-  num_extensions = 0;
-
-  if(ci->global_header_len)
-    num_extensions++;
-
-  if(ci->bitrate)
-    num_extensions++;
-
-  if(ci->pre_skip)
-    num_extensions++;
-
-  if(ci->max_packet_size && (ci->id != GAVL_CODEC_ID_NONE))
-    num_extensions++;
-
-  if(ci->video_buffer_size)
-    num_extensions++;
-  if(ci->max_ref_frames > 2)
-    num_extensions++;
-  
-  /* Write extensions */
-  if(!gavf_io_write_uint32v(io, num_extensions))
-    return 0;
-
-  if(!num_extensions)
-    return 1;
-
-  gavl_buffer_init_static(&buf, data, MAX_EXT_SIZE_CI);
-  gavf_io_init_buf_write(&bufio, &buf);
-  
-  if(ci->global_header_len)
-    {
-    if(!gavf_extension_write(io, GAVF_EXT_CI_GLOBAL_HEADER,
-                             ci->global_header_len,
-                             ci->global_header))
-      return 0;
-    }
-
-  if(ci->bitrate)
-    {
-    gavf_io_buf_reset(&bufio);
-    if(!gavf_io_write_int32v(&bufio, ci->bitrate) ||
-       !gavf_extension_write(io, GAVF_EXT_CI_BITRATE,
-                             buf.len, buf.buf))
-      return 0;
-    }
-  if(ci->pre_skip)
-    {
-    gavf_io_buf_reset(&bufio);
-    if(!gavf_io_write_uint32v(&bufio, ci->pre_skip) ||
-       !gavf_extension_write(io, GAVF_EXT_CI_PRE_SKIP,
-                             buf.len, buf.buf))
-      return 0;
-    }
-
-  if(ci->max_packet_size && (ci->id != GAVL_CODEC_ID_NONE))
-    {
-    gavf_io_buf_reset(&bufio);
-    if(!gavf_io_write_uint32v(&bufio, ci->max_packet_size) ||
-       !gavf_extension_write(io, GAVF_EXT_CI_MAX_PACKET_SIZE,
-                             buf.len, buf.buf))
-      return 0;
-    }
-
-  if(ci->video_buffer_size)
-    {
-    gavf_io_buf_reset(&bufio);
-    if(!gavf_io_write_uint32v(&bufio, ci->video_buffer_size) ||
-       !gavf_extension_write(io, GAVF_EXT_CI_VIDEO_BUFFER_SIZE,
-                             buf.len, buf.buf))
-      return 0;
-    }
-  if(ci->max_ref_frames > 2)
-    {
-    gavf_io_buf_reset(&bufio);
-    if(!gavf_io_write_uint32v(&bufio, ci->max_ref_frames) ||
-       !gavf_extension_write(io, GAVF_EXT_CI_MAX_REF_FRAMES,
-                             buf.len, buf.buf))
-      return 0;
-    }
-  
-  return 1;
-  }
-#endif
 
 /* Packet */
 

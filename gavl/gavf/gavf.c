@@ -1030,28 +1030,18 @@ int gavf_select_track(gavf_t * g, int track)
   return ret;
   }
 
-static int read_header(gavf_t * g,
-                       gavf_chunk_t * head,
-                       gavl_buffer_t * buf,
-                       gavl_dictionary_t * ret)
+static int read_dictionary(gavf_io_t * io,
+                           gavf_chunk_t * head,
+                           gavl_buffer_t * buf,
+                           gavl_dictionary_t * ret)
   {
   int result = 0;
   gavf_io_t bufio;
+  memset(&bufio, 0, sizeof(bufio));
 
-  gavl_msg_t msg;
-  
-  gavl_msg_init(&msg);
-  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_PROGRAM_HEADER_START, GAVL_MSG_NS_GAVF);
-
-  if(!gavl_msg_send(&msg, g->msg_callback, g->msg_data))
-    goto fail;
-  
-  gavl_msg_free(&msg);
-  gavl_msg_init(&msg);
-  
   gavl_buffer_alloc(buf, head->len);
 
-  if((buf->len = gavf_io_read_data(g->io, buf->buf, head->len)) < head->len)
+  if((buf->len = gavf_io_read_data(io, buf->buf, head->len)) < head->len)
     goto fail;
   
   gavf_io_init_buf_read(&bufio, buf);
@@ -1060,8 +1050,53 @@ static int read_header(gavf_t * g,
 
   if(!gavl_dictionary_read(&bufio, ret))
     goto fail;
+
+  result = 1;
   
-  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_PROGRAM_HEADER_END, GAVL_MSG_NS_GAVF);
+  fail:
+  
+  
+  gavf_io_cleanup(&bufio);
+
+  return result;
+  }
+
+int gavf_read_dictionary(gavf_io_t * io,
+                         gavf_chunk_t * head,
+                         gavl_dictionary_t * ret)
+  {
+  int result;
+  gavl_buffer_t buf;
+  gavl_buffer_init(&buf);
+  result = read_dictionary(io, head, &buf, ret);
+  gavl_buffer_free(&buf);
+  return result;
+  }
+
+static int read_header(gavf_t * g,
+                       gavf_chunk_t * head,
+                       gavl_buffer_t * buf,
+                       gavl_dictionary_t * ret)
+  {
+  int result = 0;
+  gavl_msg_t msg;
+
+  
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_PROGRAM_HEADER_START,
+                     GAVL_MSG_NS_GAVF);
+
+  if(!gavl_msg_send(&msg, g->msg_callback, g->msg_data))
+    goto fail;
+  
+  gavl_msg_free(&msg);
+
+  if(!read_dictionary(g->io, head, buf, ret))
+    goto fail;
+  
+  gavl_msg_init(&msg);
+  gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_READ_PROGRAM_HEADER_END,
+                     GAVL_MSG_NS_GAVF);
   gavl_msg_set_arg_dictionary(&msg, 0, ret);
   
   if(!gavl_msg_send(&msg, g->msg_callback, g->msg_data))
@@ -1070,6 +1105,7 @@ static int read_header(gavf_t * g,
   
   result = 1;
   fail:
+
   
   gavl_msg_free(&msg);
   
