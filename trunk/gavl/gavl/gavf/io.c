@@ -52,7 +52,7 @@ gavf_io_t * gavf_io_create(gavf_read_func  r,
   return ret;
   }
 
-void gavf_io_destroy(gavf_io_t * io)
+void gavf_io_cleanup(gavf_io_t * io)
   {
   if(io->flush_func)
     io->flush_func(io->priv);
@@ -63,6 +63,11 @@ void gavf_io_destroy(gavf_io_t * io)
   if(io->mimetype)
     free(io->mimetype);
   gavl_buffer_free(&io->get_buf);
+  }
+
+void gavf_io_destroy(gavf_io_t * io)
+  {
+  gavf_io_cleanup(io);
   free(io);
   }
 
