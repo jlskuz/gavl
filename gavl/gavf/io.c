@@ -133,10 +133,16 @@ int gavf_io_read_data(gavf_io_t * io, uint8_t * buf, int len)
     num_get = io->get_buf.len > len ? len : io->get_buf.len;
     memcpy(buf, io->get_buf.buf, num_get);
 
+    if(io->get_buf.len > num_get)
+      memmove(io->get_buf.buf, io->get_buf.buf + num_get, io->get_buf.len - num_get);
+    
+    io->get_buf.len -= num_get;
+    
     buf += num_get;
     len -= num_get;
     io->position += num_get;
     ret = num_get;
+    
     }
 
   if(len > 0)
@@ -1187,9 +1193,9 @@ static int read_sub(void * priv, uint8_t * data, int len)
   int ret;
   sub_io_t * s = priv;
 
-  if(len > s->size - s->pos)
+  if((s->size > 0) && (len > s->size - s->pos))
     len = s->size - s->pos;
-
+  
   if(len < 0)
     return 0;
   
@@ -1220,10 +1226,8 @@ static int64_t seek_sub(void * priv, int64_t pos, int whence)
     s->pos = 0;
   if(s->pos > s->size)
     s->pos = s->size;
-
+  
   s->pos = gavf_io_seek(s->io, s->offset + s->pos, SEEK_SET) - s->offset;
-  
-  
   return s->pos;
   }
 
@@ -1232,25 +1236,72 @@ static void close_sub(void * priv)
   free(priv);
   }
 
-gavf_io_t * gavf_io_get_sub(gavf_io_t * io, int64_t offset, int64_t len)
+gavf_io_t * gavf_io_create_sub_read(gavf_io_t * io, int64_t offset, int64_t len)
   {
+  int64_t (*seek_func)(void * priv, int64_t pos, int whence);
+  
   gavf_io_t * ret;
   sub_io_t * s = calloc(1, sizeof(*s));
 
   s->offset = offset;
   s->size = len;
   s->io = io;
-  gavf_io_seek(s->io, s->offset, SEEK_SET);
+
   
+  if(gavf_io_can_seek(io))
+    {
+    gavf_io_seek(s->io, s->offset, SEEK_SET);
+    seek_func = seek_sub;
+    }
+  else
+    seek_func = NULL;
+
   ret = gavf_io_create(read_sub,
                        NULL,
-                       seek_sub,
+                       seek_func,
                        close_sub,
                        NULL,
                        s);
-
-  
   
   return ret;
   }
 
+static int write_sub(void * priv, const uint8_t * data, int len)
+  {
+  int ret;
+  sub_io_t * s = priv;
+  ret = gavf_io_write_data(s->io, data, len);
+  s->pos += ret;
+  return ret;
+  }
+
+static int flush_sub(void * priv)
+  {
+  sub_io_t * s = priv;
+  return gavf_io_flush(s->io);
+  }
+
+gavf_io_t * gavf_io_create_sub_write(gavf_io_t * io)
+  {
+  int64_t (*seek_func)(void * priv, int64_t pos, int whence);
+  
+  gavf_io_t * ret;
+  sub_io_t * s = calloc(1, sizeof(*s));
+
+  s->offset = io->position;
+  s->size = 0;
+  s->io = io;
+  
+  if(gavf_io_can_seek(io))
+    seek_func = seek_sub;
+  else
+    seek_func = NULL;
+
+  ret = gavf_io_create(NULL,
+                       write_sub,
+                       seek_func,
+                       close_sub,
+                       flush_sub,
+                       s);
+  return ret;
+  }

@@ -65,7 +65,7 @@ int main(int argc, char ** argv)
   
   /* Cleanup */
 
-  gavf_close(dec);
+  gavf_close(dec, 0);
   gavl_packet_free(&p);
   return 0;
   }
