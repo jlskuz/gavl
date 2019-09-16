@@ -72,7 +72,11 @@
 
     [...]
     
-  
+
+  CHUNK("GAVFPEND")
+  len:      8 bytes, 0 
+
+    
   CHUNK("GAVFFOOT")
     footer
       {
@@ -98,6 +102,7 @@
 */
 
 #define GAVF_TAG_PROGRAM_HEADER "GAVFPHDR"
+#define GAVF_TAG_PROGRAM_END    "GAVFPEND"
 
 #define GAVF_TAG_PACKETS        "GAVFPKTS"
 
@@ -142,6 +147,12 @@ typedef int (*gavf_flush_func)(void * priv);
 typedef struct gavl_io_s gavf_io_t;
 
 GAVL_PUBLIC
+int gavf_read_dictionary(gavf_io_t * io,
+                         gavf_chunk_t * head,
+                         gavl_dictionary_t * ret);
+
+
+GAVL_PUBLIC
 int gavf_chunk_read_header(gavf_io_t * io, gavf_chunk_t * head);
 
 GAVL_PUBLIC
@@ -158,8 +169,6 @@ gavf_io_t * gavf_chunk_start_io(gavf_io_t * io, gavf_chunk_t * head, const char 
 
 GAVL_PUBLIC
 int gavf_chunk_finish_io(gavf_io_t * io, gavf_chunk_t * head, gavf_io_t * sub_io);
-
-
 
 GAVL_PUBLIC
 gavf_io_t * gavf_io_create(gavf_read_func  r,
@@ -182,8 +191,11 @@ GAVL_PUBLIC
 gavf_io_t * gavf_io_create_file(FILE * f, int wr, int can_seek, int close);
 
 GAVL_PUBLIC
-gavf_io_t * gavf_io_get_sub(gavf_io_t * io, int64_t offset, int64_t len);
+gavf_io_t * gavf_io_create_sub_read(gavf_io_t * io, int64_t offset, int64_t len);
 
+/* Data is appended to the current position */
+GAVL_PUBLIC
+gavf_io_t * gavf_io_create_sub_write(gavf_io_t * io);
 
 GAVL_PUBLIC
 uint8_t * gavf_io_mem_get_buf(gavf_io_t * io, int * len);
@@ -449,7 +461,7 @@ GAVL_PUBLIC
 gavf_t * gavf_create();
 
 GAVL_PUBLIC
-void gavf_close(gavf_t *);
+void gavf_close(gavf_t *, int discard);
 
 GAVL_PUBLIC
 gavf_options_t * gavf_get_options(gavf_t *);
@@ -488,7 +500,7 @@ GAVL_PUBLIC
 gavl_source_status_t gavf_demux_iteration(gavf_t * g);
 
 GAVL_PUBLIC
-void gavf_flush_buffers(gavf_t * g);
+void gavf_clear_buffers(gavf_t * g);
 
 #if 0
 
@@ -786,6 +798,9 @@ int gavf_msg_to_packet(const gavl_msg_t * msg,
 GAVL_PUBLIC
 int gavf_packet_to_msg(const gavl_packet_t * src,
                        gavl_msg_t * msg);
+
+GAVL_PUBLIC
+void gavf_options_copy(gavf_options_t * dst, const gavf_options_t * src);
 
 
 

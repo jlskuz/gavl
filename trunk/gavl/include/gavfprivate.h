@@ -344,4 +344,4 @@ int gavf_footer_check(gavf_t * g);
 int gavf_footer_write(gavf_t * g);
 void gavf_footer_init(gavf_t * g);
 
-int gavf_program_header_write(gavf_t * g, const gavl_dictionary_t * dict);
+int gavf_program_header_write(gavf_t * g);
