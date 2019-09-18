@@ -449,6 +449,12 @@ GAVL_PUBLIC
 void gavf_options_set_sync_distance(gavf_options_t *,
                                     gavl_time_t sync_distance);
 
+GAVL_PUBLIC
+gavf_options_t * gavf_options_create();
+
+GAVL_PUBLIC
+void gavf_options_destroy(gavf_options_t *);
+
 // GAVL_PUBLIC
 // void gavf_options_set_msg_callback(gavf_options_t *, 
 //                                   gavl_handle_msg_func cb,
@@ -465,6 +471,9 @@ void gavf_close(gavf_t *, int discard);
 
 GAVL_PUBLIC
 gavf_options_t * gavf_get_options(gavf_t *);
+
+GAVL_PUBLIC
+void gavf_set_options(gavf_t *, const gavf_options_t *);
 
 GAVL_PUBLIC
 int gavf_get_flags(gavf_t *);

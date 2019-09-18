@@ -61,6 +61,12 @@ gavf_options_t * gavf_get_options(gavf_t * g)
   return &g->opt;
   }
 
+void gavf_set_options(gavf_t * g, const gavf_options_t * opt)
+  {
+  gavf_options_copy(&g->opt, opt);
+  }
+
+
 /* Extensions */
 
 int gavf_extension_header_read(gavf_io_t * io, gavl_extension_header_t * eh)
