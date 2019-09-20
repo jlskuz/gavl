@@ -179,6 +179,13 @@ gavf_io_t * gavf_io_create(gavf_read_func  r,
                            void * data);
 
 GAVL_PUBLIC
+int gavf_io_align_write(gavf_io_t * io);
+
+GAVL_PUBLIC
+int gavf_io_align_read(gavf_io_t * io);
+
+
+GAVL_PUBLIC
 void * gavf_io_get_priv(gavf_io_t * io);
 
 GAVL_PUBLIC

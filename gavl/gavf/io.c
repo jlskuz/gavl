@@ -1305,3 +1305,46 @@ gavf_io_t * gavf_io_create_sub_write(gavf_io_t * io)
                        s);
   return ret;
   }
+
+int gavf_io_align_write(gavf_io_t * io)
+  {
+  int rest;
+  int64_t position;
+  uint8_t buf[8] = { 0x00, 0x00, 0x00, 0x00, 
+                     0x00, 0x00, 0x00, 0x00 };
+  
+  position = gavf_io_position(io);
+
+  rest = position % 8;
+  
+  if(rest)
+    {
+    rest = 8 - rest;
+    
+    if(gavf_io_write_data(io, (const uint8_t*)buf, rest) < rest)
+      return 0;
+
+    }
+  gavf_io_flush(io);
+  return 1;
+  }
+
+int gavf_io_align_read(gavf_io_t * io)
+  {
+  int rest;
+  int64_t position;
+  uint8_t buf[8];
+  
+  position = gavf_io_position(io);
+
+  rest = position % 8;
+  
+  if(rest)
+    {
+    rest = 8 - rest;
+    
+    if(gavf_io_read_data(io, buf, rest) < rest)
+      return 0;
+    }
+  return 1;
+  }

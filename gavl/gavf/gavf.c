@@ -22,7 +22,8 @@ stream_types[] =
     { GAVL_STREAM_MSG,      "msg"  },
   };
 
-static int align_read(gavf_io_t * io);
+// static int align_read(gavf_io_t * io);
+// static int align_write(gavf_io_t * io);
 
 static void gavf_stream_free(gavf_stream_t * s);
 
@@ -992,7 +993,7 @@ int gavf_select_track(gavf_t * g, int track)
 
     while(1)
       {
-      if(!align_read(g->io))
+      if(!gavf_io_align_read(g->io))
         goto fail;
       
       if(!gavf_chunk_read_header(g->io, &head))
@@ -1005,7 +1006,7 @@ int gavf_select_track(gavf_t * g, int track)
         break;
       }
 
-    if(!align_read(g->io))
+    if(!gavf_io_align_read(g->io))
       goto fail;
 
     if(gavf_io_read_data(g->io, (uint8_t*)head.eightcc, 8) < 8)
@@ -1259,7 +1260,7 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
     while(1)
       {
       
-      if(!align_read(g->io))
+      if(!gavf_io_align_read(g->io))
         goto fail;
       
       if(!gavf_chunk_read_header(g->io, &head))
@@ -1339,7 +1340,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
     /* Check if we need to realign the data */
     if(c[0] == 0x00)
       {
-      align_read(g->io);
+      gavf_io_align_read(g->io);
       
       if(!gavf_io_read_data(g->io, (uint8_t*)c, 1))
         {
@@ -2226,53 +2227,10 @@ int gavf_chunk_is(const gavf_chunk_t * head, const char * eightcc)
   }
 
 
-static int align_write(gavf_io_t * io)
-  {
-  int rest;
-  int64_t position;
-  uint8_t buf[8] = { 0x00, 0x00, 0x00, 0x00, 
-                     0x00, 0x00, 0x00, 0x00 };
-  
-  position = gavf_io_position(io);
-
-  rest = position % 8;
-  
-  if(rest)
-    {
-    rest = 8 - rest;
-    
-    if(gavf_io_write_data(io, (const uint8_t*)buf, rest) < rest)
-      return 0;
-
-    }
-  gavf_io_flush(io);
-  return 1;
-  }
-
-static int align_read(gavf_io_t * io)
-  {
-  int rest;
-  int64_t position;
-  uint8_t buf[8];
-  
-  position = gavf_io_position(io);
-
-  rest = position % 8;
-  
-  if(rest)
-    {
-    rest = 8 - rest;
-    
-    if(gavf_io_read_data(io, buf, rest) < rest)
-      return 0;
-    }
-  return 1;
-  }
-
 int gavf_chunk_read_header(gavf_io_t * io, gavf_chunk_t * head)
   {
   /* Byte align (if not already aligned) */
-  if(!align_read(io))
+  if(!gavf_io_align_read(io))
     return 0;
   
   if((gavf_io_read_data(io, (uint8_t*)head->eightcc, 8) < 8) ||
@@ -2285,7 +2243,7 @@ int gavf_chunk_read_header(gavf_io_t * io, gavf_chunk_t * head)
 
 int gavf_chunk_start(gavf_io_t * io, gavf_chunk_t * head, const char * eightcc)
   {
-  align_write(io);
+  gavf_io_align_write(io);
   
   head->start = gavf_io_position(io);
 
@@ -2317,7 +2275,7 @@ int gavf_chunk_finish(gavf_io_t * io, gavf_chunk_t * head, int write_size)
 
   /* Pad to multiple of 8 */
     
-  align_write(io);
+  gavf_io_align_write(io);
 
   return 1;
   }
