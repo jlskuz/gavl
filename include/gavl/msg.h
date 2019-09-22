@@ -138,7 +138,6 @@
 /** \brief Multitrack support
  *
  *  arg0: Track (int)
- *  arg1: Async (int)
  *
  *  Argument 1 decides, if the operation is expected in
  *  synchronous mode or not

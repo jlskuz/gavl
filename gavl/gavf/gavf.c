@@ -1502,10 +1502,17 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
         }
       else if(!strncmp(c, GAVF_TAG_PACKETS, 8))
         gavf_io_skip(g->io, 8); // Skip size
+      else if(!strncmp(c, GAVF_TAG_PROGRAM_END, 8))
+        {
+        gavf_io_skip(g->io, 8); // Skip size
+        fprintf(stderr, "EOF 11 %c%c%c%c%c%c%c%c\n",
+                c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7]);
+        goto got_eof;
+        }
       else
         {
 #ifdef DUMP_EOF
-        fprintf(stderr, "EOF 11 %c%c%c%c%c%c%c%c\n",
+        fprintf(stderr, "EOF 12 %c%c%c%c%c%c%c%c\n",
                 c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7]);
 #endif
         goto got_eof;
@@ -1514,7 +1521,7 @@ const gavf_packet_header_t * gavf_packet_read_header(gavf_t * g)
     }
 
 #ifdef DUMP_EOF
-  fprintf(stderr, "EOF 12\n");
+  fprintf(stderr, "EOF 13\n");
 #endif
     
   got_eof:
