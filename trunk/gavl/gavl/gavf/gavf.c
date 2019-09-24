@@ -223,7 +223,7 @@ static gavl_sink_status_t do_write_packet(gavf_t * g, int32_t stream_id, int pac
   int result;
   gavl_msg_t msg;
 
-  fprintf(stderr, "do_write_packet\n");
+  //  fprintf(stderr, "do_write_packet\n");
   
   gavl_msg_init(&msg);
   gavl_msg_set_id_ns(&msg, GAVL_MSG_GAVF_WRITE_PACKET_START, GAVL_MSG_NS_GAVF);
@@ -395,12 +395,12 @@ gavl_sink_status_t gavf_flush_packets(gavf_t * g, gavf_stream_t * s)
   gavl_time_t test_time;
   gavf_stream_t * ws;
   gavl_sink_status_t st;
-
+#if 0
   if(s)
     fprintf(stderr, "gavf_flush_packets %d %"PRId64"\n", s->id, g->first_sync_pos);
   else
     fprintf(stderr, "gavf_flush_packets NULL %"PRId64"\n", g->first_sync_pos);
-    
+#endif
   /* Special case for message streams with undefined timestamp: Transmit out of band */
 
   if((g->first_sync_pos > 0) && s && (s->type == GAVL_STREAM_MSG))
