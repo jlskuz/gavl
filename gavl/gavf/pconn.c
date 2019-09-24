@@ -156,7 +156,7 @@ put_packet_func(void * priv, gavl_packet_t * p)
   p->id = s->id;
   
   /* Update footer */
-#if 1
+#if 0
   fprintf(stderr, "put packet %d\n", s->id);
   gavl_packet_dump(p);
 #endif
