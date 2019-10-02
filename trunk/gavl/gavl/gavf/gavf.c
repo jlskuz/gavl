@@ -185,7 +185,7 @@ static int write_sync_header(gavf_t * g, int stream, int64_t packet_pts)
   for(i = 0; i < num; i++)
     {
 #if 0
-    fprintf(stderr, "PTS[%d]: %"PRId64"\n", i, g->sync_pts[i]);
+    fprintf(stderr, "PTS[%d]: %"PRId64"\n", i, g->streams[i].sync_pts);
 #endif
     if(!gavf_io_write_int64v(g->io, g->streams[i].sync_pts))
       goto fail;
@@ -922,6 +922,7 @@ void gavf_clear_buffers(gavf_t * g)
     }
   }
 
+#if 0
 static void calc_pts_offset(gavf_t * g)
   {
   gavl_time_t min_time= GAVL_TIME_UNDEFINED;
@@ -969,6 +970,7 @@ static void calc_pts_offset(gavf_t * g)
 #endif
     }
   }
+#endif
 
 gavl_dictionary_t * gavf_get_media_info_nc(gavf_t * g)
   {
