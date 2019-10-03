@@ -60,12 +60,13 @@
 #define GAVL_KEY_DOWN       15 //!< Down
 #define GAVL_KEY_PAGE_UP    16 //!< Page Up
 #define GAVL_KEY_PAGE_DOWN  17 //!< Page Down
-#define GAVL_KEY_HOME       18 //!< Page Down
-#define GAVL_KEY_PLUS       19 //!< Plus
-#define GAVL_KEY_MINUS      20 //!< Minus
-#define GAVL_KEY_TAB        21 //!< Tab
-#define GAVL_KEY_ESCAPE     22 //!< Esc
-#define GAVL_KEY_MENU       23 //!< Menu key
+#define GAVL_KEY_HOME       18 //!< Home
+#define GAVL_KEY_END        19 //!< End
+#define GAVL_KEY_PLUS       20 //!< Plus
+#define GAVL_KEY_MINUS      21 //!< Minus
+#define GAVL_KEY_TAB        22 //!< Tab
+#define GAVL_KEY_ESCAPE     23 //!< Esc
+#define GAVL_KEY_MENU       24 //!< Menu key
 
 #define GAVL_KEY_QUESTION   24 //!< ?
 #define GAVL_KEY_EXCLAM     25 //!< !
