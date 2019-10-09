@@ -207,6 +207,17 @@
 
 #define GAVL_MSG_GUI_BUTTON_RELEASE  4  // Mouse button was released
 
+/** \brief Doubleclick
+ *
+ *  arg0: Button  (1..5)
+ *  arg1: Mask (see keycodes.h)
+ *  arg2: x (int, in screen pixels)
+ *  arg3: y (int, in screen pixels)
+ *  arg4: pos (position, 0..1, relative to Video viewport)
+ */
+
+#define GAVL_MSG_GUI_BUTTON_DOUBLECLICK  5  // Mouse button was released
+
 /** \brief Motion callback
  *
  *  arg0: Mask (see keycodes.h)
@@ -215,14 +226,14 @@
  *  arg3: pos (position, 0..1, relative to Video viewport)
  */
 
-#define GAVL_MSG_GUI_MOUSE_MOTION    5  // Mouse was moved
+#define GAVL_MSG_GUI_MOUSE_MOTION    6  // Mouse was moved
 
 /** \brief Accelerator
  *
  *  arg0: id (int)
  */
 
-#define GAVL_MSG_GUI_ACCEL         6  // Accelerator was triggered
+#define GAVL_MSG_GUI_ACCEL           7  // Accelerator was triggered
 
 /** \brief Window coordinates changed
  *
@@ -232,19 +243,19 @@
  *  arg3: h (int)
  */
 
-#define GAVL_MSG_GUI_WINDOW_COORDS 7  // Window coordinates changed
+#define GAVL_MSG_GUI_WINDOW_COORDS   8  // Window coordinates changed
 
 /** \brief Window coordinates changed
  *
  *  arg0: direction (int)
  */
 
-#define GAVL_MSG_GUI_SWIPE         8  // Swipe (touch screen)
+#define GAVL_MSG_GUI_SWIPE           9  // Swipe (touch screen)
 
-#define GAVL_MSG_GUI_SWIPE_UP      1
-#define GAVL_MSG_GUI_SWIPE_DOWN    2
-#define GAVL_MSG_GUI_SWIPE_LEFT    3
-#define GAVL_MSG_GUI_SWIPE_RIGHT   4
+#define GAVL_MSG_GUI_SWIPE_UP        1
+#define GAVL_MSG_GUI_SWIPE_DOWN      2
+#define GAVL_MSG_GUI_SWIPE_LEFT      3
+#define GAVL_MSG_GUI_SWIPE_RIGHT     4
 
 /* Commands */
 
@@ -256,16 +267,6 @@
  */
 
 #define GAVL_CMD_GUI_SET_WINDOW_TITLE 100
-
-/** \brief Accelerator
- *
- *  arg0: time (time)
- *  arg1: scale (int)
- *  arg2: id (int)
- */
-
-#define GAVL_MSG_GUI_ACCEL         6  // Accelerator was triggered
-
 
 // GAVL_MSG_NS_GAVF
 /* These messages control the low-level packet flow in order to allow
