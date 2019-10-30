@@ -429,11 +429,8 @@ void gavl_msg_free(gavl_msg_t * m)
     gavl_value_free(&m->args[i]);
   
   gavl_dictionary_reset(&m->header);
-  
-  memset(m->args, 0, GAVL_MSG_MAX_ARGS * sizeof(m->args[0]));
-  m->num_args = 0;
+  memset(m, 0, sizeof(*m));
   m->ID = -1;
-  m->ID = 0;
   }
 
 void gavl_msg_destroy(gavl_msg_t * m)
