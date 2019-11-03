@@ -291,8 +291,9 @@
 #define GAVL_META_POSTER_URL     "PosterURL"
 #define GAVL_META_ICON           "Icon"
 
-#define GAVL_META_CAN_SEEK   "CanSeek"
-#define GAVL_META_CAN_PAUSE  "CanPause"
+#define GAVL_META_CAN_SEEK        "CanSeek"
+#define GAVL_META_CAN_PAUSE       "CanPause"
+#define GAVL_META_SAMPLE_ACCURATE "SampleAccurate"
 
 /*
  *  Several commands are expected in asynchronous mode.
