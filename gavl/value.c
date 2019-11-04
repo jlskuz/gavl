@@ -930,7 +930,7 @@ char * gavl_value_join_arr(const gavl_value_t * val, const char * glue)
     idx = 0;
     for(i = 0; i < arr->num_entries; i++)
       {
-      if(arr->entries[i].type != GAVL_TYPE_STRING)
+      if((arr->entries[i].type != GAVL_TYPE_STRING) || !arr->entries[i].v.str)
         continue;
       
       if(idx)
