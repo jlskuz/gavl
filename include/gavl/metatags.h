@@ -320,7 +320,9 @@
 #define GAVL_META_X      "x"
 #define GAVL_META_Y      "y"
 
-#define GAVL_META_NUM_CHILDREN       "NumChildren" // Number of children for container items
+#define GAVL_META_NUM_CHILDREN            "NumChildren" // Number of children for container items
+#define GAVL_META_NUM_ITEM_CHILDREN       "NumItemChildren" // Number of children for container items
+#define GAVL_META_NUM_CONTAINER_CHILDREN  "NumContainerChildren" // Number of children for container items
 
 #define GAVL_META_CHILDREN           "children" // Generic name for children of an element, which must be an array
 
