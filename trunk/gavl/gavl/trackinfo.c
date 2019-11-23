@@ -1927,3 +1927,51 @@ gavl_stream_get_pts_range(const gavl_dictionary_t * s, int64_t * start, int64_t 
   *end = stats.pts_end;
   return 1;
   }
+
+int gavl_track_get_num_children(const gavl_dictionary_t * track)
+  {
+  int ret = 0;
+  const gavl_dictionary_t * m;
+  if(!(m = gavl_track_get_metadata(track)) ||
+     gavl_dictionary_get_int(m, GAVL_META_NUM_CHILDREN, &ret))
+    return 0;
+  return ret;
+  }
+
+
+int gavl_track_get_num_item_children(const gavl_dictionary_t * track)
+  {
+  int ret = 0;
+  const gavl_dictionary_t * m;
+  if(!(m = gavl_track_get_metadata(track)) ||
+     gavl_dictionary_get_int(m, GAVL_META_NUM_ITEM_CHILDREN, &ret))
+    return 0;
+  return ret;
+  }
+
+int gavl_track_get_num_container_children(const gavl_dictionary_t * track)
+  {
+  int ret = 0;
+  const gavl_dictionary_t * m;
+  if(!(m = gavl_track_get_metadata(track)) ||
+     gavl_dictionary_get_int(m, GAVL_META_NUM_CONTAINER_CHILDREN, &ret))
+    return 0;
+  return ret;
+  }
+
+void gavl_track_set_num_children(gavl_dictionary_t * track,
+                                 int num_container_children,
+                                 int num_item_children)
+  {
+  gavl_dictionary_t * m;
+
+  if(!(m = gavl_track_get_metadata_nc(track)))
+    return;
+
+  gavl_dictionary_set_int(m, GAVL_META_NUM_CONTAINER_CHILDREN, num_container_children);
+  gavl_dictionary_set_int(m, GAVL_META_NUM_ITEM_CHILDREN,      num_item_children);
+
+  gavl_dictionary_set_int(m, GAVL_META_NUM_CHILDREN,
+                          num_container_children + num_item_children);
+  
+  }

@@ -403,5 +403,20 @@ void gavl_track_set_id(gavl_dictionary_t * dict, const char * id);
 GAVL_PUBLIC
 void gavl_sort_tracks_by_label(gavl_array_t * children);
 
+GAVL_PUBLIC
+int gavl_track_get_num_children(const gavl_dictionary_t * track);
+
+GAVL_PUBLIC
+int gavl_track_get_num_item_children(const gavl_dictionary_t * track);
+
+GAVL_PUBLIC
+int gavl_track_get_num_container_children(const gavl_dictionary_t * track);
+
+GAVL_PUBLIC
+void gavl_track_set_num_children(gavl_dictionary_t * track,
+                                 int num_container_children,
+                                 int num_item_children);
+                               
+
 
 #endif // GAVL_TRACKINFO_H_INCLUDED
