@@ -47,6 +47,9 @@
 #define GAVL_META_ID          "ID"
 #define GAVL_META_UUID        "UUID"
 
+/* Object is locked for access */
+#define GAVL_META_LOCKED      "Locked"
+
 #define GAVL_META_PARENT_ID   "ParentID" // Obsolete, can obtain from  ID
 #define GAVL_META_NEXT_ID     "NextID"
 #define GAVL_META_PREVIOUS_ID "PreviousID"

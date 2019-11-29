@@ -1648,6 +1648,31 @@ const char * gavl_track_get_id(const gavl_dictionary_t * dict)
     return NULL;
   }
 
+void gavl_track_set_lock(gavl_dictionary_t * track,
+                         int lock)
+  {
+  gavl_dictionary_t * m;
+  m = gavl_track_get_metadata_nc(track);
+
+  if(lock)
+    gavl_dictionary_set_int(m, GAVL_META_LOCKED, 1);
+  else
+    gavl_dictionary_set(m, GAVL_META_LOCKED, NULL);
+  }
+
+int gavl_track_is_locked(const gavl_dictionary_t * track)
+  {
+  int locked = 0;
+  const gavl_dictionary_t * m;
+  
+  if((m = gavl_track_get_metadata(track)) &&
+     (gavl_dictionary_get_int(m, GAVL_META_LOCKED, &locked)))
+    return locked;
+  else
+    return 0;
+  }
+ 
+
 void gavl_track_set_id_nocopy(gavl_dictionary_t * dict, char * id)
   {
   gavl_dictionary_t * m = gavl_dictionary_get_dictionary_create(dict, GAVL_META_METADATA);

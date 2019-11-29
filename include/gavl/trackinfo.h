@@ -416,7 +416,12 @@ GAVL_PUBLIC
 void gavl_track_set_num_children(gavl_dictionary_t * track,
                                  int num_container_children,
                                  int num_item_children);
-                               
 
+GAVL_PUBLIC
+void gavl_track_set_lock(gavl_dictionary_t * track,
+                         int lock);
+
+GAVL_PUBLIC
+int gavl_track_is_locked(const gavl_dictionary_t * track);
 
 #endif // GAVL_TRACKINFO_H_INCLUDED
