@@ -1619,13 +1619,15 @@ void gavl_track_copy_gui_state(gavl_dictionary_t * dst, const gavl_dictionary_t 
 void gavl_track_update_children(gavl_dictionary_t * dict)
   {
   int i;
+  const char * klass;
   gavl_dictionary_t * m;
   gavl_dictionary_t * track;
   gavl_array_t * arr;
+  int num_items = 0;
+  int num_containers = 0;
+  
   arr = gavl_get_tracks_nc(dict);
   m = gavl_dictionary_get_dictionary_create(dict, GAVL_META_METADATA);
-
-  gavl_dictionary_set_int(m, GAVL_META_NUM_CHILDREN, arr->num_entries);
 
   for(i = 0; i < arr->num_entries; i++)
     {
@@ -1634,8 +1636,24 @@ void gavl_track_update_children(gavl_dictionary_t * dict)
 
     if((track = gavl_get_track_nc(dict, i)) &&
        (m = gavl_dictionary_get_dictionary_create(track, GAVL_META_METADATA)))
+      {
       gavl_dictionary_set_int(m, GAVL_META_IDX, i);
+      
+      if((klass = gavl_dictionary_get_string(m, GAVL_META_MEDIA_CLASS)))
+        {
+        if(gavl_string_starts_with(klass, "item"))
+          num_items++;
+        else if(gavl_string_starts_with(klass, "item"))
+          num_containers++;
+        }
+      }
     }
+  
+  if(num_items + num_containers == arr->num_entries)
+    gavl_track_set_num_children(dict, num_containers, num_items);
+  else // Fallback
+    gavl_dictionary_set_int(m, GAVL_META_NUM_CHILDREN, arr->num_entries);
+  
   }
 
 const char * gavl_track_get_id(const gavl_dictionary_t * dict)
@@ -1654,10 +1672,10 @@ void gavl_track_set_lock(gavl_dictionary_t * track,
   gavl_dictionary_t * m;
   m = gavl_track_get_metadata_nc(track);
 
-  if(lock)
-    gavl_dictionary_set_int(m, GAVL_META_LOCKED, 1);
-  else
-    gavl_dictionary_set(m, GAVL_META_LOCKED, NULL);
+  //  if(lock)
+  gavl_dictionary_set_int(m, GAVL_META_LOCKED, lock);
+  //  else
+  //    gavl_dictionary_set(m, GAVL_META_LOCKED, NULL);
   }
 
 int gavl_track_is_locked(const gavl_dictionary_t * track)
