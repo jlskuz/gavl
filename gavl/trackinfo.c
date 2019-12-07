@@ -1629,6 +1629,9 @@ void gavl_track_update_children(gavl_dictionary_t * dict)
   arr = gavl_get_tracks_nc(dict);
   m = gavl_dictionary_get_dictionary_create(dict, GAVL_META_METADATA);
 
+  //  fprintf(stderr, "gavl_track_update_children %p\n", dict);
+  //  gavl_dictionary_dump(dict, 2);
+  
   for(i = 0; i < arr->num_entries; i++)
     {
     //    if(!())
@@ -1643,7 +1646,7 @@ void gavl_track_update_children(gavl_dictionary_t * dict)
         {
         if(gavl_string_starts_with(klass, "item"))
           num_items++;
-        else if(gavl_string_starts_with(klass, "item"))
+        else if(gavl_string_starts_with(klass, "container"))
           num_containers++;
         }
       }
@@ -1652,7 +1655,7 @@ void gavl_track_update_children(gavl_dictionary_t * dict)
   if(num_items + num_containers == arr->num_entries)
     gavl_track_set_num_children(dict, num_containers, num_items);
   else // Fallback
-    gavl_dictionary_set_int(m, GAVL_META_NUM_CHILDREN, arr->num_entries);
+    gavl_track_set_num_children(dict, arr->num_entries, arr->num_entries);
   
   }
 
