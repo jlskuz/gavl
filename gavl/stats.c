@@ -35,6 +35,16 @@ static int stats_from_dict(gavl_stream_stats_t * s, const gavl_dictionary_t * di
     gavl_dictionary_get_long(dict, GAVL_META_STREAM_STATS_NUM_BYTES,   &s->total_bytes);
   }
 
+void gavl_stream_stats_dump(const gavl_stream_stats_t * stats, int indent)
+  {
+  gavl_dictionary_t dict;
+  gavl_dictionary_init(&dict);
+  stats_to_dict(stats, &dict);
+  gavl_diprintf(indent, "Stats\n");
+  gavl_dictionary_dump(&dict, indent + 2);
+  gavl_dictionary_free(&dict);
+  }
+
 int gavl_stream_get_stats(const gavl_dictionary_t * s, gavl_stream_stats_t * stats)
   {
   const gavl_dictionary_t * stats_dict;
