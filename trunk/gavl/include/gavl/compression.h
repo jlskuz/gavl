@@ -464,6 +464,9 @@ GAVL_PUBLIC
 void gavl_stream_stats_init(gavl_stream_stats_t*);
 
 GAVL_PUBLIC
+void gavl_stream_stats_dump(const gavl_stream_stats_t*, int indent);
+  
+GAVL_PUBLIC
 void gavl_stream_stats_update(gavl_stream_stats_t*,const gavl_packet_t*p);
 
 GAVL_PUBLIC
