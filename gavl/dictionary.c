@@ -28,6 +28,10 @@
 #include <gavl/utils.h>
 #include <gavl/value.h>
 
+#include <gavl/metatags.h>
+
+// #define WATCH_MEMBER GAVL_META_NUM_CHILDREN
+
 /* Dictionary */
 
 void gavl_dictionary_init(gavl_dictionary_t * d)
@@ -94,6 +98,21 @@ dict_set(gavl_dictionary_t * d, const char * name, const gavl_value_t * val,
   {
   int idx;
   gavl_dict_entry_t * e;
+
+#ifdef WATCH_MEMBER
+  if(!strcmp(name, WATCH_MEMBER))
+    {
+    if(!val)
+      gavl_dprintf("Dictionary member %s cleared\n", WATCH_MEMBER);
+    else
+      {
+      gavl_dprintf("Member %s of dictionary %s set, new value:\n", WATCH_MEMBER, gavl_dictionary_get_string(d, GAVL_META_LABEL));
+      gavl_value_dump(val, 2);
+      gavl_dprintf("\n");
+      }
+    }
+
+#endif  
 
   /* Value is NULL: Delete entry */
   if(!val)
