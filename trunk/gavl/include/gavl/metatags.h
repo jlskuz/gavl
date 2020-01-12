@@ -406,9 +406,14 @@
 #define GAVL_META_MEDIA_CLASS_AUDIO_BROADCAST     "item.audio.broadcast"
 #define GAVL_META_MEDIA_CLASS_VIDEO_BROADCAST     "item.video.broadcast"
 #define GAVL_META_MEDIA_CLASS_IMAGE               "item.image"
-#define GAVL_META_MEDIA_CLASS_FILE                "item.file"     // non-media file
-#define GAVL_META_MEDIA_CLASS_LOCATION            "item.location" // Location, which needs to be specified further
 
+// non-media file: This is given to filesystem objects, which contain no media
+#define GAVL_META_MEDIA_CLASS_FILE                "item.file"     
+
+// Location, which needs to be specified further: This is given to urls in redirector (e.g. m3u) files.
+// Loading can be delayed
+
+#define GAVL_META_MEDIA_CLASS_LOCATION            "item.location"
 
 /* Container values */
 #define GAVL_META_MEDIA_CLASS_CONTAINER           "container"       // Generic
