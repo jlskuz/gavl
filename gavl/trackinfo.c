@@ -1333,7 +1333,7 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
   int num_audio_streams;
   int num_video_streams;
   char * basename = NULL;
-
+  
   const char * location = NULL;
   const char * pos1;
   const char * pos2;
@@ -1345,10 +1345,22 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
     gavl_array_foreach(arr, finalize_stream, dict);
     }
   
-  m = gavl_track_get_metadata_nc(dict);
-
+  if(!(m = gavl_track_get_metadata_nc(dict)))
+    return;
+  
   //  fprintf(stderr, "gavl_track_finalize %s\n",
   //          gavl_dictionary_get_string(m, GAVL_META_MEDIA_CLASS));
+
+  num_audio_streams = gavl_track_get_num_audio_streams(dict);
+  num_video_streams = gavl_track_get_num_video_streams(dict);
+
+  if(!num_audio_streams && !num_video_streams && (location = gavl_dictionary_get_string(m, GAVL_META_REFURL)))
+    {
+    gavl_dictionary_set_string(m, GAVL_META_MEDIA_CLASS, GAVL_META_MEDIA_CLASS_LOCATION);
+    if(!gavl_dictionary_get_string(m, GAVL_META_LABEL))
+      gavl_dictionary_set_string(m, GAVL_META_LABEL, location);
+    return;
+    }
   
   gavl_dictionary_get_src(m, GAVL_META_SRC, 0,
                           NULL, &location);
@@ -1359,8 +1371,6 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
     basename = gavl_strndup(pos1+1, pos2);
     }
   
-  num_audio_streams = gavl_track_get_num_audio_streams(dict);
-  num_video_streams = gavl_track_get_num_video_streams(dict);
   
   /* Figure out the media type */
   if((num_audio_streams == 1) && !num_video_streams)
