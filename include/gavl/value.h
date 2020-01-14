@@ -612,6 +612,9 @@ GAVL_PUBLIC
 void gavl_string_array_add(gavl_array_t * arr, const char * str);
 
 GAVL_PUBLIC
+void gavl_string_array_insert_at(gavl_array_t * arr, int idx, const char * str);
+
+GAVL_PUBLIC
 void gavl_string_array_add_nocopy(gavl_array_t * arr, char * str);
 
 GAVL_PUBLIC
