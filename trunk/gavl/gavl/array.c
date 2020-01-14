@@ -353,6 +353,15 @@ void gavl_string_array_add(gavl_array_t * arr, const char * str)
   gavl_array_splice_val_nocopy(arr, -1, 0, &val);
   }
 
+void gavl_string_array_insert_at(gavl_array_t * arr, int idx, const char * str)
+  {
+  gavl_value_t val;
+  
+  gavl_value_init(&val);
+  gavl_value_set_string(&val, str);
+  gavl_array_splice_val_nocopy(arr, idx, 0, &val);
+  }
+
 void gavl_string_array_add_nocopy(gavl_array_t * arr, char * str)
   {
   gavl_value_t val;
