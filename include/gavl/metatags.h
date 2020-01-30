@@ -292,7 +292,8 @@
 
 #define GAVL_META_WALLPAPER_URL  "WallpaperURL"
 #define GAVL_META_POSTER_URL     "PosterURL"
-#define GAVL_META_ICON           "Icon"
+#define GAVL_META_ICON_URL       "IconURL"
+#define GAVL_META_ICON_NAME      "IconName"
 
 #define GAVL_META_CAN_SEEK        "CanSeek"
 #define GAVL_META_CAN_PAUSE       "CanPause"
