@@ -238,7 +238,6 @@ gavl_dictionary_t * gavl_track_get_msg_metadata_nc(gavl_dictionary_t * d, int st
 GAVL_PUBLIC
 int gavl_track_delete_msg_stream(gavl_dictionary_t * d, int stream);
 
-
 /* Delete stream by absolute index */
 GAVL_PUBLIC
 int gavl_track_delete_stream(gavl_dictionary_t * d, int stream);

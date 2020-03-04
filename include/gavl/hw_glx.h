@@ -27,8 +27,20 @@
  * external api header.
  */
 
+/* Structure returned by gavl_hw_get_native_handle */
 
-GAVL_PUBLIC gavl_hw_context_t * gavl_hw_ctx_create_vaapi_x11(Display * dpy);
+#include <GL/glx.h>
 
-GAVL_PUBLIC Display * gavl_hw_ctx_vaapi_x11_get_display(gavl_hw_context_t *);
-GAVL_PUBLIC VADisplay gavl_hw_ctx_vaapi_x11_get_va_display(gavl_hw_context_t *);
+typedef struct
+  {
+  Display * dpy;
+  GLXFBConfig * fbcfg;
+  
+  } gavl_hw_vaapi_x11_t;
+
+GAVL_PUBLIC gavl_hw_context_t * gavl_hw_ctx_create_glx(Display * dpy, int * attrs);
+
+GAVL_PUBLIC Display * gavl_hw_ctx_glx_get_display(gavl_hw_context_t *);
+GAVL_PUBLIC GLXFBConfig gavl_hw_ctx_glx_get_fbconfig(gavl_hw_context_t * ctx);
+GAVL_PUBLIC GLXContext gavl_hw_ctx_glx_get_ctx(gavl_hw_context_t * ctx); 
+
