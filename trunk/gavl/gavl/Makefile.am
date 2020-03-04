@@ -54,6 +54,7 @@ hw_libva_sources = hw_vaapi.c
 hw_libva_cflags = @LIBVA_CFLAGS@
 hw_libva_libs   = @LIBVA_LIBS@
 else
+hw_libva_sources = 
 hw_libva_cflags =
 hw_libva_libs   =
 endif
@@ -68,7 +69,18 @@ hw_libva_x11_cflags =
 hw_libva_x11_libs   =
 endif
 
-AM_CFLAGS = @LIBGAVL_CFLAGS@ $(hw_libva_cflags) $(hw_libva_x11_cflags) 
+if HAVE_GLX
+hw_glx_sources = hw_glx.c
+hw_glx_cflags = @GL_CFLAGS@ @GLX_CFLAGS@
+hw_glx_libs = @GL_LIBS@ @GLX_LIBS@
+else
+hw_glx_sources = 
+hw_glx_cflags = 
+hw_glx_libs = 
+endif
+
+
+AM_CFLAGS = @LIBGAVL_CFLAGS@ $(hw_libva_cflags) $(hw_libva_x11_cflags) $(hw_glx_cflags)
 
 
 SUBDIRS = \
@@ -90,6 +102,7 @@ lib_LTLIBRARIES= libgavl.la
 libgavl_la_SOURCES = \
 $(hw_libva_sources) \
 $(hw_libva_x11_sources) \
+$(hw_glx_sources) \
 absdiff.c \
 arith128.c \
 array.c \
@@ -184,6 +197,9 @@ hq/libgavl_hq.la \
 libgdither/libgdither.la \
 libsamplerate/libsamplerate.la \
 @LIBGAVL_LIBS@ \
+$(hw_libva_x11_libs) \
+$(hw_libva_libs) \
+$(hw_glx_libs) \
 -lpthread \
 -lm
 

@@ -94,6 +94,7 @@ void gavl_buffer_append(gavl_buffer_t * dst, const gavl_buffer_t * src)
   dst->len += src->len;
   }
 
+#if 0
 void gavl_buffer_flush(gavl_buffer_t * buf, int len)
   {
   if(len < 0)
@@ -106,3 +107,4 @@ void gavl_buffer_flush(gavl_buffer_t * buf, int len)
     memmove(buf->buf, buf->buf + len, buf->len - len);
   buf->len -= len;
   }
+#endif

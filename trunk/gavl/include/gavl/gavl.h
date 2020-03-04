@@ -2388,7 +2388,7 @@ struct gavl_video_format_s
     
   uint32_t pixel_width;/*!< Relative width of a pixel (pixel aspect ratio is pixel_width/pixel_height) */
   uint32_t pixel_height;/*!< Relative height of a pixel (pixel aspect ratio is pixel_width/pixel_height) */
-    
+  
   gavl_pixelformat_t pixelformat;/*!< Pixelformat */
 
   uint32_t frame_duration;/*!< Duration of a frame in timescale tics. Meaningful only if framerate_mode is

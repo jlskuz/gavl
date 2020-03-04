@@ -31,8 +31,8 @@
 
 typedef enum
   {
-    GAVL_HW_NONE = 0, // Frames in RAM
-    GAVL_HW_GLX,
+    GAVL_HW_NONE = 0,  // Frames in RAM
+    GAVL_HW_GLX,       // GLX Texture, also with a GLX pixmap to use as render target
     GAVL_HW_VAAPI_X11,
   } gavl_hw_type_t;
 
@@ -44,9 +44,6 @@ GAVL_PUBLIC void gavl_hw_supported(gavl_hw_type_t type);
 GAVL_PUBLIC const char * gavl_hw_type_to_string(gavl_hw_type_t type);
 
 GAVL_PUBLIC void gavl_hw_ctx_destroy(gavl_hw_context_t * ctx);
-
-/* Return type is one of the structs in the backend specific headers */
-GAVL_PUBLIC void * gavl_hw_ctx_get_native_handle(gavl_hw_context_t * ctx);
 
 GAVL_PUBLIC const gavl_pixelformat_t *
 gavl_hw_ctx_get_image_formats(gavl_hw_context_t * ctx);
