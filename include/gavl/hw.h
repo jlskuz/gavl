@@ -45,10 +45,12 @@ GAVL_PUBLIC const char * gavl_hw_type_to_string(gavl_hw_type_t type);
 
 GAVL_PUBLIC void gavl_hw_ctx_destroy(gavl_hw_context_t * ctx);
 
-GAVL_PUBLIC const gavl_pixelformat_t *
+/* Returned array must be free()d */
+GAVL_PUBLIC gavl_pixelformat_t *
 gavl_hw_ctx_get_image_formats(gavl_hw_context_t * ctx);
 
-GAVL_PUBLIC const gavl_pixelformat_t *
+/* Returned array must be free()d */
+GAVL_PUBLIC gavl_pixelformat_t *
 gavl_hw_ctx_get_overlay_formats(gavl_hw_context_t * ctx);
 
 GAVL_PUBLIC gavl_hw_type_t gavl_hw_ctx_get_type(gavl_hw_context_t * ctx);

@@ -48,22 +48,38 @@ void gavl_hw_ctx_destroy(gavl_hw_context_t * ctx)
   free(ctx);
   }
 
-const gavl_pixelformat_t *
+static gavl_pixelformat_t * copy_pfmt_arr(const gavl_pixelformat_t * pfmts)
+  {
+  int num = 0;
+  gavl_pixelformat_t * ret;
+  
+  while(pfmts[num] != GAVL_PIXELFORMAT_NONE)
+    num++;
+
+  ret = malloc((num+1)*sizeof(*ret));
+
+  num = 0;
+
+  while(pfmts[num] != GAVL_PIXELFORMAT_NONE)
+    {
+    ret[num] = pfmts[num];
+    num++;
+    }
+  ret[num] = GAVL_PIXELFORMAT_NONE;
+  return ret;
+  }
+
+
+gavl_pixelformat_t *
 gavl_hw_ctx_get_image_formats(gavl_hw_context_t * ctx)
   {
-  return ctx->image_formats;
+  return copy_pfmt_arr(ctx->image_formats);
   }
 
-const gavl_pixelformat_t *
+gavl_pixelformat_t *
 gavl_hw_ctx_get_overlay_formats(gavl_hw_context_t * ctx)
   {
-  return ctx->overlay_formats;
-  }
-
-
-void * gavl_hw_ctx_get_native_handle(gavl_hw_context_t * ctx)
-  {
-  return ctx->native;
+  return copy_pfmt_arr(ctx->overlay_formats);
   }
 
 void gavl_hw_video_format_adjust(gavl_hw_context_t * ctx,
@@ -99,6 +115,7 @@ gavl_video_frame_t * gavl_hw_video_frame_create_hw(gavl_hw_context_t * ctx,
     ret = ctx->funcs->video_frame_create_hw(ctx, fmt);
   else
     ret = gavl_video_frame_create(fmt);
+  ret->hwctx = ctx;
   return ret;
   }
 

@@ -38,9 +38,11 @@ typedef struct
   
   } gavl_hw_vaapi_x11_t;
 
-GAVL_PUBLIC gavl_hw_context_t * gavl_hw_ctx_create_glx(Display * dpy, int * attrs);
+GAVL_PUBLIC gavl_hw_context_t * gavl_hw_ctx_create_glx(Display * dpy, const int * attrs);
 
 GAVL_PUBLIC Display * gavl_hw_ctx_glx_get_display(gavl_hw_context_t *);
 GAVL_PUBLIC GLXFBConfig gavl_hw_ctx_glx_get_fbconfig(gavl_hw_context_t * ctx);
 GAVL_PUBLIC GLXContext gavl_hw_ctx_glx_get_ctx(gavl_hw_context_t * ctx); 
 
+GAVL_PUBLIC void gavl_hw_glx_set_current(gavl_hw_context_t * ctx, GLXDrawable drawable);
+GAVL_PUBLIC void gavl_hw_glx_unset_current(gavl_hw_context_t * ctx);
