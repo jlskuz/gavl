@@ -9,7 +9,7 @@ gavltime.h \
 gavl_version.h \
 gavldsp.h \
 hw.h \
-hw_vaapi.h \
+hw_glx.h \
 hw_vaapi_x11.h \
 keycodes.h \
 numptr.h \
