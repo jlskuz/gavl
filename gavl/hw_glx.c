@@ -76,6 +76,8 @@ typedef struct
   Display * display;
 
   Window win;
+  GLXWindow glx_win;
+  
   } glx_t;
 
 static void destroy_native_glx(void * native)
@@ -88,6 +90,9 @@ static void destroy_native_glx(void * native)
   if(priv->ctx)
     glXDestroyContext(priv->display, priv->ctx);
 
+  if(priv->glx_win != None)
+    glXDestroyWindow(priv->display, priv->glx_win);
+  
   if(priv->win != None)
     XDestroyWindow(priv->display, priv->win);
   
@@ -308,6 +313,7 @@ gavl_hw_context_t * gavl_hw_ctx_create_glx(Display * dpy, const int * attrs)
     glXCreateNewContext(priv->display, priv->fbcfg[0], GLX_RGBA_TYPE, NULL, True);
 
   priv->win = None;
+  priv->glx_win = None;
   
   return gavl_hw_context_create_internal(priv, &funcs, GAVL_HW_GLX);
   
@@ -355,20 +361,21 @@ void gavl_hw_glx_set_current(gavl_hw_context_t * ctx, GLXDrawable drawable)
       
       p->win = XCreateWindow(p->display, DefaultRootWindow(p->display), 0, 0, 10, 10, 0, vi->depth, InputOutput,
                              vi->visual, CWEventMask, &swa);
-      
+
+      p->glx_win = glXCreateWindow(p->display, p->fbcfg[0], p->win, NULL);
       
       XFree(vi);
       }
     
-    glXMakeCurrent(p->display, p->win, p->ctx);
+    glXMakeContextCurrent(p->display, p->glx_win, p->glx_win, p->ctx);
     }
   else
-    glXMakeCurrent(p->display, drawable, p->ctx);
+    glXMakeContextCurrent(p->display, drawable, drawable, p->ctx);
   
   }
 
 void gavl_hw_glx_unset_current(gavl_hw_context_t * ctx)
   {
   glx_t * p = ctx->native;
-  glXMakeCurrent(p->display, None, NULL);
+  glXMakeContextCurrent(p->display, None, None, NULL);
   }

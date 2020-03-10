@@ -65,7 +65,7 @@ GAVL_PUBLIC void gavl_hw_overlay_format_adjust(gavl_hw_context_t * ctx,
 
 /* Create a video frame. The frame will be a reference for a hardware surface */
 GAVL_PUBLIC gavl_video_frame_t * gavl_hw_video_frame_create_hw(gavl_hw_context_t * ctx,
-                                                   gavl_video_format_t * fmt);
+                                                               gavl_video_format_t * fmt);
 
 /* Create a video frame. The frame will have data available for CPU access but is
  suitable for transfer to a hardware surface */
