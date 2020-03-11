@@ -20,6 +20,7 @@
  * *****************************************************************/
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <X11/Xlib.h>
@@ -38,8 +39,8 @@ static const struct
   }
 pixelformats[] =
   {
-    { GAVL_RGB_24,     GL_RGB,  GL_BYTE },
-    { GAVL_RGBA_32,    GL_RGBA, GL_BYTE },
+    { GAVL_RGB_24,     GL_RGB,  GL_UNSIGNED_BYTE },
+    { GAVL_RGBA_32,    GL_RGBA, GL_UNSIGNED_BYTE },
     { GAVL_RGB_48,     GL_RGB,  GL_SHORT },
     { GAVL_RGBA_64,    GL_RGBA, GL_SHORT },
     { GAVL_RGB_FLOAT,  GL_RGB,  GL_FLOAT },
@@ -116,6 +117,7 @@ static gavl_pixelformat_t * get_image_formats_glx(gavl_hw_context_t * ctx)
     ret[idx] = pixelformats[idx].fmt;
     if(pixelformats[idx].fmt == GAVL_PIXELFORMAT_NONE)
       break;
+    idx++;
     }
   
   return ret;
@@ -167,9 +169,12 @@ static gavl_video_frame_t * video_frame_create_hw_glx(gavl_hw_context_t * ctx,
   GLuint * tex;
   gavl_video_frame_t * ret;
   GLenum type = 0, format = 0;
-
+  
   if(!get_gl_format(fmt->pixelformat, &format, &type))
     return 0;
+
+  fprintf(stderr, "video_frame_create_hw_glx\n");
+  gavl_video_format_dump(fmt);
   
   ret = gavl_video_frame_create(NULL);
 
@@ -197,7 +202,7 @@ static gavl_video_frame_t * video_frame_create_hw_glx(gavl_hw_context_t * ctx,
   
   gavl_hw_glx_unset_current(ctx);
   
-  return NULL;
+  return ret;
   }
 
 static void video_frame_destroy_glx(gavl_video_frame_t * f)
