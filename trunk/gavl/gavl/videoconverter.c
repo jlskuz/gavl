@@ -230,8 +230,8 @@ int gavl_video_converter_reinit(gavl_video_converter_t * cnv)
   
   // #ifdef DEBUG
 #if 0
-  //  fprintf(stderr, "Initializing video converter, quality: %d, Flags: 0x%08x\n",
-  //          cnv->options.quality, cnv->options.accel_flags);
+  fprintf(stderr, "Initializing video converter, quality: %d, Flags: 0x%08x\n",
+          cnv->options.quality, cnv->options.accel_flags);
   gavl_video_format_dump(input_format);
   gavl_video_format_dump(output_format);
 
