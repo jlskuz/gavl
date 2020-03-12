@@ -218,6 +218,7 @@ static void video_frame_destroy_glx(gavl_video_frame_t * f)
     free(tex);
     
     }
+  f->hwctx = NULL;
   gavl_video_frame_destroy(f);
   return;
   }
