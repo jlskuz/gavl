@@ -353,6 +353,8 @@ void gavl_hw_glx_set_current(gavl_hw_context_t * ctx, GLXDrawable drawable)
   {
   glx_t * p = ctx->native;
 
+  //  fprintf(stderr, "gavl_hw_glx_set_current %p %d\n", ctx, drawable);
+  
   if(drawable == None)
     {
 
@@ -383,5 +385,8 @@ void gavl_hw_glx_set_current(gavl_hw_context_t * ctx, GLXDrawable drawable)
 void gavl_hw_glx_unset_current(gavl_hw_context_t * ctx)
   {
   glx_t * p = ctx->native;
+
+  //  fprintf(stderr, "gavl_hw_glx_unset %p\n", ctx);
+
   glXMakeContextCurrent(p->display, None, None, NULL);
   }
