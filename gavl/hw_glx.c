@@ -78,6 +78,8 @@ typedef struct
 
   Window win;
   GLXWindow glx_win;
+
+  Colormap cmap;
   
   } glx_t;
 
@@ -96,6 +98,9 @@ static void destroy_native_glx(void * native)
   
   if(priv->win != None)
     XDestroyWindow(priv->display, priv->win);
+
+  if(priv->cmap != None)
+    XFreeColormap(priv->display, priv->cmap);
   
   if(priv->private_display)
     XCloseDisplay(priv->private_display);
@@ -254,7 +259,7 @@ static int video_frame_to_hw_glx(const gavl_video_format_t * fmt,
   {
   GLuint * tex;
   GLenum type = 0, format = 0;
-
+  
   get_gl_format(fmt->pixelformat, &format, &type);
   
   gavl_hw_glx_set_current(dst->hwctx, None);
@@ -320,6 +325,7 @@ gavl_hw_context_t * gavl_hw_ctx_create_glx(Display * dpy, const int * attrs)
 
   priv->win = None;
   priv->glx_win = None;
+  priv->cmap = None;
   
   return gavl_hw_context_create_internal(priv, &funcs, GAVL_HW_GLX);
   
@@ -353,26 +359,34 @@ void gavl_hw_glx_set_current(gavl_hw_context_t * ctx, GLXDrawable drawable)
   {
   glx_t * p = ctx->native;
 
-  //  fprintf(stderr, "gavl_hw_glx_set_current %p %d\n", ctx, drawable);
+  //  fprintf(stderr, "gavl_hw_glx_set_current %p %ld\n", ctx, drawable);
   
   if(drawable == None)
     {
 
     if(p->win == None)
       {
+      Window root;
       XSetWindowAttributes swa;
-
+      
       XVisualInfo * vi = glXGetVisualFromFBConfig(p->display, p->fbcfg[0]);
 
-      memset(&swa, 0, sizeof(swa));
-      swa.event_mask = ExposureMask;
+      root = DefaultRootWindow(p->display);
       
-      p->win = XCreateWindow(p->display, DefaultRootWindow(p->display), 0, 0, 10, 10, 0, vi->depth, InputOutput,
-                             vi->visual, CWEventMask, &swa);
+      p->cmap = XCreateColormap(p->display, root, vi->visual, AllocNone);
+      
+      memset(&swa, 0, sizeof(swa));
+
+      swa.event_mask = ExposureMask;
+      swa.colormap = p->cmap;
+      
+      p->win = XCreateWindow(p->display, root, 0, 0, 10, 10, 0, vi->depth, InputOutput,
+                             vi->visual, CWEventMask|CWColormap, &swa);
 
       p->glx_win = glXCreateWindow(p->display, p->fbcfg[0], p->win, NULL);
       
       XFree(vi);
+      XSync(p->display, False);
       }
     
     glXMakeContextCurrent(p->display, p->glx_win, p->glx_win, p->ctx);
