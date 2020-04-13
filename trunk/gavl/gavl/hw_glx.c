@@ -178,8 +178,8 @@ static gavl_video_frame_t * video_frame_create_hw_glx(gavl_hw_context_t * ctx,
   if(!get_gl_format(fmt->pixelformat, &format, &type))
     return 0;
 
-  fprintf(stderr, "video_frame_create_hw_glx\n");
-  gavl_video_format_dump(fmt);
+  //  fprintf(stderr, "video_frame_create_hw_glx\n");
+  //  gavl_video_format_dump(fmt);
   
   ret = gavl_video_frame_create(NULL);
 
