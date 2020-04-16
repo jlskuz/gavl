@@ -507,7 +507,7 @@ gavl_dictionary_get_image_max_proto(const gavl_dictionary_t * m,
     if(!gavl_dictionary_get_int(dict, GAVL_META_HEIGHT, &val_h))
       val_h = -1;
 
-#if 0    
+#if 0
     fprintf(stderr, "Testing image:\n");
     gavl_dictionary_dump(dict, 2);
     fprintf(stderr, "\n");
