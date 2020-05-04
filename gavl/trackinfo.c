@@ -1220,6 +1220,8 @@ static void finalize_stream(void * data, int idx, const gavl_value_t * val)
   if(!s)
     return;
 
+  gavl_compression_info_init(&ci);
+ 
   if(gavl_stream_get_stats(s, &stats))
     have_stats = 1;
 
@@ -1270,6 +1272,8 @@ static void finalize_stream(void * data, int idx, const gavl_value_t * val)
     case GAVL_STREAM_NONE:
       break;
     }
+
+  gavl_compression_info_free(&ci);
   
   }
 
