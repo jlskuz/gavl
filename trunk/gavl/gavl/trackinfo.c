@@ -1993,7 +1993,7 @@ int gavl_track_get_num_children(const gavl_dictionary_t * track)
   int ret = 0;
   const gavl_dictionary_t * m;
   if(!(m = gavl_track_get_metadata(track)) ||
-     gavl_dictionary_get_int(m, GAVL_META_NUM_CHILDREN, &ret))
+     !gavl_dictionary_get_int(m, GAVL_META_NUM_CHILDREN, &ret))
     return 0;
   return ret;
   }
