@@ -423,4 +423,19 @@ void gavl_track_set_lock(gavl_dictionary_t * track,
 GAVL_PUBLIC
 int gavl_track_is_locked(const gavl_dictionary_t * track);
 
+GAVL_PUBLIC
+const char * gavl_get_country_label(const char * iso);
+
+GAVL_PUBLIC
+void gavl_track_set_countries(gavl_dictionary_t * track);
+
+GAVL_PUBLIC
+const char * gavl_get_country_code_2_from_label(const char * label);
+
+GAVL_PUBLIC
+const char * gavl_get_country_code_3_from_label(const char * label);
+
+
+/* */
+
 #endif // GAVL_TRACKINFO_H_INCLUDED

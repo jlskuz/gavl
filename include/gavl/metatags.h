@@ -250,10 +250,20 @@
 
 #define GAVL_META_DIRECTOR         "Director"
 
-/** \brief Production country. Can be array for multiple entries
+/** \brief Country. Can be array for multiple entries
  */
 
 #define GAVL_META_COUNTRY          "Country"
+
+/** \brief Country (). Can be array for multiple entries
+ */
+
+// ISO 3166-1 alpha-3
+#define GAVL_META_COUNTRY_CODE_3   "CountryCode3"
+
+// ISO 3166-1 alpha-2
+#define GAVL_META_COUNTRY_CODE_2   "CountryCode2"
+
 
 /** \brief Movie plot.
  */
