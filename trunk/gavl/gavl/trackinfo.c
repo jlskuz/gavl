@@ -26,6 +26,9 @@
 #include <gavl/utils.h>
 #include <gavl/trackinfo.h>
 
+#include <countrycodes.h>
+
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -2033,5 +2036,200 @@ void gavl_track_set_num_children(gavl_dictionary_t * track,
 
   gavl_dictionary_set_int(m, GAVL_META_NUM_CHILDREN,
                           num_container_children + num_item_children);
+  
+  }
+
+const char * gavl_get_country_label(const char * iso)
+  {
+  int i = 0;
+  
+  if(strlen(iso) == 2)
+    {
+    while(gavl_countries[i].label)
+      {
+      if(!strcmp(iso, gavl_countries[i].code_alpha_2))
+        return gavl_countries[i].label;
+      i++;
+      }
+    }
+  else if(strlen(iso) == 3)
+    {
+    while(gavl_countries[i].label)
+      {
+      if(!strcmp(iso, gavl_countries[i].code_alpha_3))
+        return gavl_countries[i].label;
+      i++;
+      }
+    }
+
+  return iso;
+  }
+
+const char * gavl_get_country_code_2_from_label(const char * label)
+  {
+  int i = 0;
+  
+  while(gavl_countries[i].label)
+    {
+    if(!strcmp(label, gavl_countries[i].label))
+      {
+      return gavl_countries[i].code_alpha_2;
+      }
+    i++;
+    }
+  
+  return NULL;
+  }
+
+const char * gavl_get_country_code_3_from_label(const char * label)
+  {
+  int i = 0;
+  
+  while(gavl_countries[i].label)
+    {
+    if(!strcmp(label, gavl_countries[i].label))
+      {
+      return gavl_countries[i].code_alpha_3;
+      }
+    i++;
+    }
+  
+  return NULL;
+  
+  }
+
+
+void gavl_track_set_countries(gavl_dictionary_t * track)
+  {
+  int i, num;
+  gavl_dictionary_t * m;
+
+  const gavl_value_t * src;
+  
+  const char * src_str;
+  const char * dst_str;
+
+  gavl_value_t dest;
+  gavl_value_t dest_item;
+  
+  if(!(m = gavl_track_get_metadata_nc(track)))
+    return;
+
+  if((num = gavl_dictionary_get_num_items(m, GAVL_META_COUNTRY_CODE_2)))
+    {
+    if(!gavl_dictionary_get(m, GAVL_META_COUNTRY))
+      {
+      gavl_value_init(&dest);
+      
+      for(i = 0; i < num; i++)
+        {
+        gavl_value_init(&dest_item);
+        
+        if((src = gavl_dictionary_get_item(m, GAVL_META_COUNTRY_CODE_2, i)) &&
+           (src_str = gavl_value_get_string(src)) &&
+           (dst_str = gavl_get_country_label(src_str)))
+          {
+          gavl_value_set_string(&dest_item, dst_str);
+          }
+        else
+          gavl_value_set_string(&dest_item, src_str);
+
+        gavl_value_append_nocopy(&dest, &dest_item);
+        }
+      
+      gavl_dictionary_set_nocopy(m, GAVL_META_COUNTRY, &dest);
+      }
+    }
+#if 0
+  else if((num = gavl_dictionary_get_num_items(m, GAVL_META_COUNTRY_CODE_3)))
+    {
+    int do_code_2 = 0;
+    int do_label = 0;
+
+    gavl_value_t label;
+    gavl_value_t label_item;
+    
+    if(!gavl_dictionary_get(m, GAVL_META_COUNTRY_CODE_2))
+      do_code_2 = 1;
+    
+    if(!gavl_dictionary_get(m, GAVL_META_COUNTRY))
+      do_label = 1;
+
+    if(do_code_2 || do_label)
+      {
+      
+      gavl_value_init(&dest);
+      gavl_value_init(&label);
+      
+      for(i = 0; i < num; i++)
+        {
+        gavl_value_init(&dest_item);
+        gavl_value_init(&label_item);
+        
+        if((src = gavl_dictionary_get_item(m, GAVL_META_COUNTRY_CODE_3, i)) &&
+           (src_str = gavl_value_get_string(src)) &&
+           (dst_str = gavl_get_country_label(src_str)))
+          {
+          gavl_value_set_string(&label_item, dst_str);
+          }
+        else if(src_str)
+          gavl_value_set_string(&label_item, src_str);
+        else
+          gavl_value_set_string(&label_item, "Unknown");
+
+        if(do_code_2)
+          {
+          dst_str = gavl_get_country_code_2_from_label(gavl_value_get_string(&label_item));
+          
+          if(!dst_str)
+            dst_str = "--";
+          
+          gavl_value_set_string(&dest_item, dst_str);
+          }
+        
+        gavl_value_append_nocopy(&label, &label_item);
+        }
+      
+      if(do_label)
+        gavl_dictionary_set_nocopy(m, GAVL_META_COUNTRY, &label);
+      else
+        gavl_value_free(&label);
+      
+      if(do_code_2)
+        gavl_dictionary_set_nocopy(m, GAVL_META_COUNTRY_CODE_2, &dest);
+      else
+        gavl_value_free(&dest);
+      
+      }
+
+    }
+#endif
+  else if((num = gavl_dictionary_get_num_items(m, GAVL_META_COUNTRY)))
+    {
+    /* Set alpha 2 code */
+
+    if(!gavl_dictionary_get(m, GAVL_META_COUNTRY_CODE_2))
+      {
+      gavl_value_init(&dest);
+      
+      for(i = 0; i < num; i++)
+        {
+        gavl_value_init(&dest_item);
+        
+        if((src = gavl_dictionary_get_item(m, GAVL_META_COUNTRY, i)) &&
+           (src_str = gavl_value_get_string(src)) &&
+           (dst_str = gavl_get_country_code_2_from_label(src_str)))
+          {
+          gavl_value_set_string(&dest_item, dst_str);
+          }
+        else
+          gavl_value_set_string(&dest_item, src_str);
+
+        gavl_value_append_nocopy(&dest, &dest_item);
+        }
+      
+      gavl_dictionary_set_nocopy(m, GAVL_META_COUNTRY_CODE_2, &dest);
+      }
+    }
   
   }

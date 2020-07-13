@@ -119,6 +119,7 @@ chapterlist.c \
 colorchannel.c \
 colorspace.c \
 compression.c \
+countrycodes.c \
 cputest.c \
 deinterlace.c \
 deinterlace_blend.c \
