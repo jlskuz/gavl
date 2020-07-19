@@ -13,6 +13,7 @@ gavlstructs.c   \
 io.c            \
 io_mem.c        \
 io_stdio.c      \
+io_tls.c        \
 packetbuffer.c  \
 packetindex.c   \
 pconn.c         \

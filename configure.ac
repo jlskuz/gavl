@@ -61,6 +61,8 @@ fi
 
 AM_CONDITIONAL(HAVE_DOXYGEN, test "x$have_doxygen" = "xtrue")
 
+
+
 dnl
 dnl Check for compiler flags
 dnl  
@@ -128,6 +130,16 @@ dnl maybe we should check here if the user only wants static libs
 
 LIBGAVL_LDFLAGS="-no-undefined $LIBGAVL_LDFLAGS"
 fi
+
+dnl
+dnl gnutls
+dnl
+
+PKG_CHECK_MODULES(GNUTLS, gnutls >= "3.5.18",, AC_MSG_ERROR(["gnutls not found"]))
+
+LIBGAVL_CFLAGS="$LIBGAVL_CFLAGS $GNUTLS_CFLAGS"
+LIBGAVL_LIBS="$LIBGAVL_LIBS $GNUTLS_LIBS"
+
 
 dnl
 dnl Check for Linker flags

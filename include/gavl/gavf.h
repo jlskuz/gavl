@@ -213,6 +213,9 @@ gavf_io_t * gavf_io_create_mem_read(const uint8_t * ptr, int len);
 GAVL_PUBLIC
 gavf_io_t * gavf_io_create_mem_write();
 
+GAVL_PUBLIC
+gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name);
+
 // GAVL_PUBLIC
 // void gavf_io_set_cb(gavf_io_t * io, gavf_io_cb_func cb, void * cb_priv);
 
@@ -234,6 +237,9 @@ int gavf_io_get_data(gavf_io_t * io, uint8_t * buf, int len);
 
 GAVL_PUBLIC
 int gavf_io_write_data(gavf_io_t * io, const uint8_t * buf, int len);
+
+GAVL_PUBLIC
+int gavf_io_read_line(gavf_io_t * io, char ** ret, int * ret_alloc, int max_len);
 
 GAVL_PUBLIC
 int64_t gavf_io_seek(gavf_io_t * io, int64_t pos, int whence);

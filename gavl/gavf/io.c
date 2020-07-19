@@ -1348,3 +1348,68 @@ int gavf_io_align_read(gavf_io_t * io)
     }
   return 1;
   }
+
+#define BYTES_TO_ALLOC 1024
+
+int gavf_io_read_line(gavf_io_t * io, char ** ret, int * ret_alloc, int max_len)
+  {
+  char * pos;
+  char c;
+  int bytes_read;
+  bytes_read = 0;
+  /* Allocate Memory for the case we have none */
+  if(!(*ret_alloc))
+    {
+    *ret_alloc = BYTES_TO_ALLOC;
+    *ret = realloc(*ret, *ret_alloc);
+    }
+  pos = *ret;
+  while(1)
+    {
+    c = 0;
+    if(!gavf_io_read_data(io, (uint8_t*)(&c), 1))
+      {
+      //  bg_log(BG_LOG_ERROR, LOG_DOMAIN, "Reading line failed: %s", strerror(errno));
+
+      if(!bytes_read)
+        {
+        return 0;
+        }
+      break;
+      }
+
+    // fprintf(stderr, "%c", c);
+    
+    if((c > 0x00) && (c < 0x20) && (c != '\r') && (c != '\n'))
+      {
+      // bg_log(BG_LOG_ERROR, LOG_DOMAIN, "Got non ASCII character (%d) while reading line", c);
+      return 0;
+      }
+    
+    /*
+     *  Line break sequence
+     *  is starting, remove the rest from the stream
+     */
+    if(c == '\n')
+      {
+      break;
+      }
+    /* Reallocate buffer */
+    else if((c != '\r') && (c != '\0'))
+      {
+      if(bytes_read+2 >= *ret_alloc)
+        {
+        *ret_alloc += BYTES_TO_ALLOC;
+        *ret = realloc(*ret, *ret_alloc);
+        pos = &((*ret)[bytes_read]);
+        }
+      /* Put the byte and advance pointer */
+      *pos = c;
+      pos++;
+      bytes_read++;
+      }
+    }
+  *pos = '\0';
+  return 1;
+
+  }
