@@ -131,6 +131,7 @@ dsputils.c \
 edl.c \
 frametable.c \
 hw.c \
+http.c \
 interleave.c \
 memalign.c \
 memcpy.c \

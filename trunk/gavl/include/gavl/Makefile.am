@@ -8,6 +8,7 @@ gavl.h \
 gavltime.h \
 gavl_version.h \
 gavldsp.h \
+http.h \
 hw.h \
 hw_glx.h \
 hw_vaapi_x11.h \
