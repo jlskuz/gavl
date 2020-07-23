@@ -318,4 +318,91 @@ gavl_sprintf(const char * format,...)
   return ret;
   }
 
+static char * strip_space(char * str, int do_free)
+  {
+  char * pos = str;
 
+  while(isspace(*pos) && *pos != '\0')
+    pos++;
+
+  if((*pos == '\0'))
+    {
+    if(do_free)
+      {
+      free(str);
+      return NULL;
+      }
+    else
+      {
+      *str = '\0';
+      return str;
+      }
+    }
+  
+  if(pos > str)
+    memmove(str, pos, strlen(pos)+1);
+
+  pos = str + (strlen(str)-1);
+  while(isspace(*pos))
+    pos--;
+
+  pos++;
+  *pos = '\0';
+  return str;
+  }
+
+
+char * gavl_strip_space(char * str)
+  {
+  return strip_space(str, 1);
+  }
+
+char ** gavl_strbreak(const char * str, char delim)
+  {
+  int num_entries;
+  char *pos, *end = NULL;
+  const char *pos_c;
+  char ** ret;
+  int i;
+  if(!str || (*str == '\0'))
+    return NULL;
+    
+  pos_c = str;
+  
+  num_entries = 1;
+  while((pos_c = strchr(pos_c, delim)))
+    {
+    num_entries++;
+    pos_c++;
+    }
+  ret = calloc(num_entries+1, sizeof(char*));
+
+  ret[0] = gavl_strdup(str);
+  
+  pos = ret[0];
+  for(i = 0; i < num_entries; i++)
+    {
+    if(i)
+      {
+      ret[i] = pos;
+      }
+    if(i < num_entries-1)
+      {
+      end = strchr(pos, delim);
+      *end = '\0';
+      }
+    end++;
+    pos = end;
+    }
+
+  for(i = 0; i < num_entries; i++)
+    strip_space(ret[i], 0);
+  
+  return ret;
+  }
+
+void gavl_strbreak_free(char ** retval)
+  {
+  free(retval[0]);
+  free(retval);
+  }
