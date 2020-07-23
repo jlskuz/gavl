@@ -1,4 +1,6 @@
 
+#include <gavl/gavf.h>
+
 /* Special variables for the first line of the HTTP requests and responses */
 
 #define GAVL_HTTP_META_PROTOCOL   "$PROTOCOL"
@@ -72,6 +74,10 @@ GAVL_PUBLIC
 int gavl_http_response_from_string(gavl_dictionary_t * res, const char * buf);
 
 GAVL_PUBLIC
+int gavl_http_request_from_string(gavl_dictionary_t * req, const char * buf);
+
+
+GAVL_PUBLIC
 const char * gavl_http_response_get_protocol(gavl_dictionary_t * res);
 
 GAVL_PUBLIC
@@ -79,4 +85,10 @@ const int gavl_http_response_get_status_int(gavl_dictionary_t * res);
 
 GAVL_PUBLIC
 const char * gavl_http_response_get_status_str(gavl_dictionary_t * res);
+
+GAVL_PUBLIC
+void gavl_http_header_set_empty_var(gavl_dictionary_t * h, const char * name);
+
+GAVL_PUBLIC
+void gavl_http_header_set_date(gavl_dictionary_t * h, const char * name);
 

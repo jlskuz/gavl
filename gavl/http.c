@@ -2,6 +2,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <time.h>
+
 
 #include <gavl/gavf.h>
 #include <gavl/http.h>
@@ -348,6 +350,8 @@ char * gavl_http_response_to_string(const gavl_dictionary_t * res, int * lenp)
   
   io = gavf_io_create_mem_write();
 
+  gavl_http_response_write(io, res);
+  
   buf = gavf_io_mem_get_buf(io, &len);
   
   ret = malloc(len + 1);
@@ -403,17 +407,63 @@ int gavl_http_response_from_string(gavl_dictionary_t * res, const char * buf)
 
 const char * gavl_http_response_get_protocol(gavl_dictionary_t * res)
   {
-  return gavl_dictionary_get_string(res, META_PROTOCOL);
+  return gavl_dictionary_get_string(res, GAVL_HTTP_META_PROTOCOL);
   }
 
 const int gavl_http_response_get_status_int(gavl_dictionary_t * res)
   {
   int ret = 0;
-  gavl_dictionary_get_int(res, META_STATUS_INT, &ret);
+  gavl_dictionary_get_int(res, GAVL_HTTP_META_STATUS_INT, &ret);
   return ret;
   }
 
 const char * gavl_http_response_get_status_str(gavl_dictionary_t * res)
   {
-  return gavl_dictionary_get_string(res, META_STATUS_STR);
+  return gavl_dictionary_get_string(res, GAVL_HTTP_META_STATUS_STR);
+  }
+
+void gavl_http_header_set_empty_var(gavl_dictionary_t * h, const char * name)
+  {
+  gavl_dictionary_set_string(h, name, GAVL_HTTP_META_EMPTY);
+  }
+
+void gavl_http_header_set_date(gavl_dictionary_t * h, const char * name)
+  {
+  char date[30];
+  time_t curtime = time(NULL);
+  struct tm tm;
+  
+  strftime(date, 30,"%a, %d %b %Y %H:%M:%S GMT", gmtime_r(&curtime, &tm));
+  gavl_dictionary_set_string(h, name, date);
+  }
+
+int gavl_http_request_from_string(gavl_dictionary_t * req, const char * buf)
+  {
+  int i;
+  char * pos;
+  int result = 0;
+  char ** str = gavl_strbreak(buf, '\n');
+
+  i = 0;
+  while(str[i])
+    {
+    if((pos = strchr(str[i], '\r')))
+      *pos = '\0';
+    i++;
+    }
+
+  if(!parse_request_line(req, str[0]))
+    goto fail;
+  
+  i = 1;
+  while(str[i])
+    {
+    if(!parse_vars_line(req, str[i]))
+      goto fail;
+    i++;
+    }
+  result = 1;
+  fail:
+  gavl_strbreak_free(str);
+  return result;
   }

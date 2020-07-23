@@ -219,6 +219,13 @@ GAVL_PUBLIC
 const char * gavl_detect_episode_tag(const char * filename, const char * end, 
                                      int * season_p, int * idx_p);
 
+
+char * gavl_strip_space(char * str);
+
+char ** gavl_strbreak(const char * str, char delim);
+
+void gavl_strbreak_free(char ** retval);
+
 /* Buffer */
 
 typedef struct

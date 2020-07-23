@@ -30,6 +30,8 @@
 #define GAVL_MSG_NONE     -1 //!< Reserved ID for non valid message
 #define GAVL_MSG_MAX_ARGS  8 //!< Maximum number of args
 
+#define GAVL_MSG_NS_LOG       1
+
 #define GAVL_MSG_NS_GENERIC   2
 #define GAVL_MSG_NS_SRC       3
 #define GAVL_MSG_NS_GUI       4

@@ -40,7 +40,7 @@ static void tls_global_init()
     {
     fprintf(stderr, "gnutls_certificate_set_x509_system_trust failed\n");
     }
-  
+  tls_initialized = 1;
   pthread_mutex_unlock(&initialized_mutex);
 
   }
@@ -52,8 +52,17 @@ static void cleanup_tls() __attribute__ ((destructor));
 
 static void cleanup_tls()
   {
+  pthread_mutex_lock(&initialized_mutex);
+
+  if(!tls_initialized)
+    {
+    pthread_mutex_unlock(&initialized_mutex);
+    return;
+    }
+
   gnutls_certificate_free_credentials(xcred);
   gnutls_global_deinit();
+  pthread_mutex_unlock(&initialized_mutex);
   }
 
 #endif
