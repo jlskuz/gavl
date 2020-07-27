@@ -75,30 +75,18 @@ typedef struct
   
   gavl_buffer_t read_buffer;
   gavl_buffer_t write_buffer;
+  
+  char * server_name;
   } tls_t;
 
-static int read_record(tls_t * p)
-  {
-  ssize_t result;
-
-  do
-    {
-    result = gnutls_record_recv(p->session, p->read_buffer.buf, BUFFER_SIZE);
-    } while((result == GNUTLS_E_AGAIN) || (result == GNUTLS_E_INTERRUPTED));
-
-  if(result > 0)
-    {
-    p->read_buffer.len = result;
-    p->read_buffer.pos = 0;
-    return 1;
-    }
-  return 0;
-  }
 
 static int flush_tls(void * priv)
   {
   tls_t * p = priv;
 
+  //  fprintf(stderr, "flush_tls\n");
+  //  gavl_hexdump(p->write_buffer.buf, p->write_buffer.len, 16);
+  
   if(p->write_buffer.len > p->write_buffer.pos)
     {
     ssize_t result;
@@ -123,14 +111,34 @@ static int flush_tls(void * priv)
   return 1;
   }
 
+static int read_record(tls_t * p)
+  {
+  ssize_t result;
+
+  if(!flush_tls(p))
+    return 0;
+  
+  do
+    {
+    result = gnutls_record_recv(p->session, p->read_buffer.buf, BUFFER_SIZE);
+    } while((result == GNUTLS_E_AGAIN) || (result == GNUTLS_E_INTERRUPTED));
+
+  if(result > 0)
+    {
+    p->read_buffer.len = result;
+    p->read_buffer.pos = 0;
+    return 1;
+    }
+  return 0;
+  }
+
+
 static int read_tls(void * priv, uint8_t * data, int len)
   {
   tls_t * p = priv;
   int bytes_read = 0;
   int bytes_to_read;
 
-  if(!flush_tls(priv))
-    return 0;
     
   while(bytes_read < len)
     {
@@ -150,12 +158,12 @@ static int read_tls(void * priv, uint8_t * data, int len)
     memcpy(data + bytes_read, p->read_buffer.buf + p->read_buffer.pos, bytes_to_read);
     
     bytes_read += bytes_to_read;
+    
+    p->read_buffer.pos += bytes_to_read;
     }
   
   return bytes_read;
   }
-
-
     
 static int write_tls(void * priv, const uint8_t * data, int len)
   {
@@ -183,7 +191,7 @@ static int write_tls(void * priv, const uint8_t * data, int len)
     p->write_buffer.len += bytes_to_copy;
     bytes_sent += bytes_to_copy;
     }
-  return 1;
+  return bytes_sent;
   }
 
 // static int64_t (*gavf_seek_func)(void * priv, int64_t pos, int whence);
@@ -198,6 +206,9 @@ static void close_tls(void * priv)
   gavl_buffer_free(&p->read_buffer);
   gavl_buffer_free(&p->write_buffer);
 
+  if(p->server_name)
+    free(p->server_name);
+  
   free(p);
   }
 
@@ -210,7 +221,9 @@ gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name)
 
   p = calloc(1, sizeof(*p));
 
+  fprintf(stderr, "gavf_io_create_tls_client %s\n", server_name);
   
+  p->server_name = gavl_strdup(server_name);
   
   gnutls_init(&p->session, GNUTLS_CLIENT);
 
