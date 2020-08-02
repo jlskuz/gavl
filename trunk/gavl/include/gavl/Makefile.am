@@ -13,6 +13,7 @@ hw.h \
 hw_glx.h \
 hw_vaapi_x11.h \
 keycodes.h \
+log.h \
 numptr.h \
 timecode.h \
 trackinfo.h \

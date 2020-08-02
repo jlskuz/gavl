@@ -133,6 +133,7 @@ frametable.c \
 hw.c \
 http.c \
 interleave.c \
+log.c \
 memalign.c \
 memcpy.c \
 metadata.c \
