@@ -151,12 +151,11 @@ dnl
 dnl Check for library functions
 dnl 
 
-AC_CHECK_FUNCS([memalign posix_memalign strdup vasprintf])
+AC_CHECK_FUNCS([memalign posix_memalign strdup vasprintf isatty sched_setaffinity])
 
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
-AC_CHECK_FUNCS([sched_setaffinity])
 
 dnl
 dnl clock_gettime
