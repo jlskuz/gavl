@@ -151,6 +151,12 @@ dnl
 dnl Check for library functions
 dnl 
 
+AC_CHECK_HEADERS([sys/select.h sys/sendfile.h ifaddrs.h])
+
+AC_CHECK_DECLS([MSG_NOSIGNAL, SO_NOSIGPIPE],,,
+               [#include <sys/types.h>
+	       #include <sys/socket.h>])
+
 AC_CHECK_FUNCS([memalign posix_memalign strdup vasprintf isatty sched_setaffinity])
 
 AC_SYS_LARGEFILE
