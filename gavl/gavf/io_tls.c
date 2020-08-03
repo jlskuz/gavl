@@ -1,9 +1,12 @@
 
+#include <config.h>
+
 #include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <gavl/gavf.h>
+#include <gavl/log.h>
 
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
@@ -13,6 +16,8 @@
 static int tls_initialized = 0;
 static pthread_mutex_t initialized_mutex = PTHREAD_MUTEX_INITIALIZER;
 static gnutls_certificate_credentials_t xcred;
+
+#define LOG_DOMAIN "tls"
 
 #define BUFFER_SIZE 10240
 
@@ -28,21 +33,24 @@ static void tls_global_init()
 
   if(gnutls_global_init() < 0)
     {
-    fprintf(stderr, "gnutls_global_init failed\n");
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "gnutls_global_init failed");
+    return;
     }
   
   if(gnutls_certificate_allocate_credentials(&xcred) < 0)
     {
-    fprintf(stderr, "gnutls_certificate_allocate_credentials failed\n");
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "gnutls_certificate_allocate_credentials failed");
+    return;
     }
   
   if(gnutls_certificate_set_x509_system_trust(xcred) < 0)
     {
-    fprintf(stderr, "gnutls_certificate_set_x509_system_trust failed\n");
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "gnutls_certificate_set_x509_system_trust failed");
+    return;
     }
+  
   tls_initialized = 1;
   pthread_mutex_unlock(&initialized_mutex);
-
   }
 
 
@@ -221,7 +229,7 @@ gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name)
 
   p = calloc(1, sizeof(*p));
 
-  fprintf(stderr, "gavf_io_create_tls_client %s\n", server_name);
+  gavl_log(GAVL_LOG_INFO, LOG_DOMAIN, "Establishing TLS connection with %s", server_name);
   
   p->server_name = gavl_strdup(server_name);
   
@@ -259,16 +267,19 @@ gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name)
       status = gnutls_session_get_verify_cert_status(p->session);
 
       gnutls_certificate_verification_status_print(status, type, &out, 0);
-      printf("cert verify output: %s\n", out.data);
+
+      gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "Server certificate verification failed: %s", out.data);
+      
       gnutls_free(out.data);
       }
-    fprintf(stderr, "*** Handshake failed: %s\n", gnutls_strerror(result));
+
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "TLS Handshake failed: %s", gnutls_strerror(result));
     goto fail;
     }
   else
     {
     char * desc = gnutls_session_get_desc(p->session);
-    printf("- Session info: %s\n", desc);
+    gavl_log(GAVL_LOG_INFO, LOG_DOMAIN, "Established TLS connection: %s", desc);
     gnutls_free(desc);
     }
 

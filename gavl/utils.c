@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <unistd.h>
 
 void gavl_dprintf(const char * format, ...)
   {
@@ -405,4 +406,22 @@ void gavl_strbreak_free(char ** retval)
   {
   free(retval[0]);
   free(retval);
+  }
+
+const char * gavl_tempdir()
+  {
+  char * ret = getenv("TMPDIR");
+
+  if(!ret)
+    ret = getenv("TEMP");
+
+  if(!ret)
+    ret = getenv("TMP");
+
+  if(ret)
+    return ret;
+
+  if(!access("/tmp", R_OK|W_OK))
+    return "/tmp";
+  return ".";
   }
