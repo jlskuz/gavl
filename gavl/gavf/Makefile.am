@@ -12,6 +12,7 @@ gavi.c          \
 gavlstructs.c   \
 io.c            \
 io_mem.c        \
+io_socket.c     \
 io_stdio.c      \
 io_tls.c        \
 packetbuffer.c  \

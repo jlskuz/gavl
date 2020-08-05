@@ -195,7 +195,13 @@ GAVL_PUBLIC
 int gavf_io_flush(gavf_io_t *);
 
 GAVL_PUBLIC
-gavf_io_t * gavf_io_create_file(FILE * f, int wr, int can_seek, int close);
+gavf_io_t * gavf_io_create_file(FILE * f, int wr, int can_seek, int do_close);
+
+GAVL_PUBLIC
+gavf_io_t * gavf_io_create_socket(int fd, int read_timeout, int do_close);
+
+GAVL_PUBLIC
+int gavf_io_get_socket(gavf_io_t * io);
 
 GAVL_PUBLIC
 gavf_io_t * gavf_io_create_sub_read(gavf_io_t * io, int64_t offset, int64_t len);
