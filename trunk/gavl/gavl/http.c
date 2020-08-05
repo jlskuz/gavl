@@ -180,8 +180,8 @@ int gavl_http_request_read(gavf_io_t * io,
 
   }
 
-int gavl_http_request_write(gavf_io_t * io,
-                            const gavl_dictionary_t * req)
+static int http_request_write(gavf_io_t * io,
+                                   const gavl_dictionary_t * req)
   {
   const char * method;
   const char * path;
@@ -205,6 +205,7 @@ int gavl_http_request_write(gavf_io_t * io,
   return 1;
   }
 
+
 char * gavl_http_request_to_string(const gavl_dictionary_t * req, int * lenp)
   {
   gavf_io_t * io;
@@ -214,7 +215,7 @@ char * gavl_http_request_to_string(const gavl_dictionary_t * req, int * lenp)
   
   io = gavf_io_create_mem_write();
 
-  if(!gavl_http_request_write(io, req))
+  if(!http_request_write(io, req))
     {
     gavf_io_destroy(io);
     return NULL;
@@ -234,6 +235,27 @@ char * gavl_http_request_to_string(const gavl_dictionary_t * req, int * lenp)
   
   return ret;
   }
+
+int gavl_http_request_write(gavf_io_t * io,
+                            const gavl_dictionary_t * req)
+  {
+  char * buf;
+  int len;
+  int ret;
+  
+  if(!(buf = gavl_http_request_to_string(req, &len)))
+    return 0;
+
+  ret = gavf_io_write_data(io, (uint8_t*)buf, len);
+  
+  free(buf);
+  
+  if(ret == len)
+    return 1;
+  else
+    return 0;
+  }
+
 
 const char * gavl_http_request_get_protocol(const gavl_dictionary_t * req)
   {
