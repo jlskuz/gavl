@@ -208,7 +208,7 @@ static void close_tls(void * priv)
   {
   tls_t * p = priv;
 
-  gnutls_bye(p->session, GNUTLS_SHUT_RDWR);
+  gnutls_bye(p->session, GNUTLS_SHUT_WR);
   gnutls_deinit(p->session);
 
   gavl_buffer_free(&p->read_buffer);
