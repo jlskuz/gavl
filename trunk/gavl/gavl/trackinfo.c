@@ -1330,11 +1330,28 @@ static void finalize_video(gavl_dictionary_t * dict)
     gavl_dictionary_set_string(m, GAVL_META_VIDEO_CODEC, var);
   }
 
+static void add_country_flag(gavl_dictionary_t * m,
+                             const char * code,
+                             int size)
+  {
+  gavl_dictionary_t * u;
+  
+  char * uri = gavl_sprintf("https://www.countryflags.io/%s/flat/%d.png", code, size);
+
+  u = gavl_metadata_add_src(m, GAVL_META_ICON_URL, "image/png", uri);
+
+  gavl_dictionary_set_int(u, GAVL_META_WIDTH, size);
+  gavl_dictionary_set_int(u, GAVL_META_HEIGHT, size);
+  
+  free(uri);
+  }
+
 void gavl_track_finalize(gavl_dictionary_t * dict)
   {
   gavl_time_t duration = GAVL_TIME_UNDEFINED;
   
   const char * media_class = NULL;
+  const char * countrycode = NULL;
   gavl_dictionary_t * m;
   
   int num_audio_streams;
@@ -1453,6 +1470,33 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
   
   if(basename)
     free(basename);
+
+  /* Add country flag */
+
+  media_class = gavl_dictionary_get_string(m, GAVL_META_MEDIA_CLASS);
+  
+  if(media_class &&
+     !strcmp(media_class, GAVL_META_MEDIA_CLASS_CONTAINER_COUNTRY) &&
+     !gavl_dictionary_get(m, GAVL_META_ICON_URL))
+    {
+    if(!(countrycode = gavl_dictionary_get_string(m, GAVL_META_COUNTRY_CODE_2)))
+      {
+      const char * label = gavl_dictionary_get_string(m, GAVL_META_LABEL);
+      if(label)
+        countrycode = gavl_get_country_code_2_from_label(label);
+      }
+
+    if(countrycode)
+      {
+      add_country_flag(m, countrycode, 16);
+      add_country_flag(m, countrycode, 24);
+      add_country_flag(m, countrycode, 32);
+      add_country_flag(m, countrycode, 48);
+      add_country_flag(m, countrycode, 64);
+      }
+    
+    }
+
   }
 
 gavl_time_t gavl_track_get_duration(const gavl_dictionary_t * dict)
