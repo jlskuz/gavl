@@ -37,6 +37,15 @@ int gavf_io_can_seek(gavf_io_t * io)
   return io->seek_func ? 1 : 0;
   }
 
+int gavf_io_can_read(gavf_io_t * io, int timeout)
+  {
+  if(io->poll_func)
+    return io->poll_func(io->priv, timeout);
+  else
+    return 1;
+  }
+
+
 gavf_io_t * gavf_io_create(gavf_read_func  r,
                            gavf_write_func w,
                            gavf_seek_func  s,
@@ -78,6 +87,12 @@ void gavf_io_set_info(gavf_io_t * io, int64_t total_bytes, const char * filename
   io->filename = gavl_strrep(io->filename, filename);
   io->mimetype = gavl_strrep(io->filename, mimetype);
   }
+
+void gavf_io_set_poll_func(gavf_io_t * io, gavf_poll_func f)
+  {
+  io->poll_func = f;
+  }
+
 
 int64_t gavf_io_total_bytes(gavf_io_t * io)
   {

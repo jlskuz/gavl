@@ -141,10 +141,19 @@ typedef int (*gavf_write_func)(void * priv, const uint8_t * data, int len);
 typedef int64_t (*gavf_seek_func)(void * priv, int64_t pos, int whence);
 typedef void (*gavf_close_func)(void * priv);
 typedef int (*gavf_flush_func)(void * priv);
+typedef int (*gavf_poll_func)(void * priv, int timeout);
+
+
 
 // typedef int (*gavf_io_cb_func)(void * priv, int type, const void * data);
 
 typedef struct gavl_io_s gavf_io_t;
+
+GAVL_PUBLIC
+void gavf_io_set_poll_func(gavf_io_t * io, gavf_poll_func f);
+
+GAVL_PUBLIC
+int gavf_io_can_read(gavf_io_t * io, int timeout);
 
 GAVL_PUBLIC
 int gavf_read_dictionary(gavf_io_t * io,

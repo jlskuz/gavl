@@ -11,6 +11,7 @@ struct gavl_io_s
   gavf_seek_func seek_func;
   gavf_close_func close_func;
   gavf_flush_func flush_func;
+  gavf_poll_func poll_func;
   
   void * priv;
   
