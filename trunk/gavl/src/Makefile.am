@@ -30,6 +30,7 @@ pixelformat_penalty \
 plot_scale_kernels \
 scale_time \
 timescale_test \
+value_test \
 volume_test
 
 bin_PROGRAMS = \
@@ -50,6 +51,9 @@ gavfdump_LDADD = ../gavl/libgavl.la
 
 volume_test_SOURCES = volume_test.c
 volume_test_LDADD = -lm ../gavl/libgavl.la
+
+value_test_SOURCES = value_test.c
+value_test_LDADD = -lm ../gavl/libgavl.la
 
 dump_frame_table_SOURCES = dump_frame_table.c
 dump_frame_table_LDADD = ../gavl/libgavl.la
