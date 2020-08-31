@@ -8,6 +8,9 @@
 #include <gavl/gavf.h>
 #include <gavl/http.h>
 
+// #define DUMP_REQUESTS_READ
+
+
 
 /* Utils */
 
@@ -169,6 +172,12 @@ int gavl_http_request_read(gavf_io_t * io,
     goto fail;
   
   result = read_vars(io, &line, &line_alloc, req);
+
+#ifdef DUMP_REQUESTS_READ
+  gavl_dprintf("Got HTTP request\n");
+  gavl_dictionary_dump(req, 2);
+#endif
+  
   //  log_request(req);
 
   fail:
