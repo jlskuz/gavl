@@ -20,6 +20,8 @@
  * *****************************************************************/
 
 #include <stdlib.h>
+#include <stdio.h>
+
 #include <gavl/connectors.h>
 
 #define FLAG_GET_CALLED (1<<0)
@@ -101,7 +103,10 @@ gavl_video_sink_put_frame(gavl_video_sink_t * s,
 
   if(s->lock_func)
     s->lock_func(s->lock_priv);
-  
+
+  //  fprintf(stderr, "gavl_video_sink_put_frame s: %p f: %p get_called %d get_func %p\n", 
+  //          s, f, s->flags & FLAG_GET_CALLED, s->get_func);
+          
   if(!(s->flags & FLAG_GET_CALLED) &&
      s->get_func &&
      (df = s->get_func(s->priv)))
