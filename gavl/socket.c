@@ -1,5 +1,5 @@
 
-#include <config.h>
+#include <gavl/config.h>
 
 #include <ctype.h>
 #include <stdlib.h>

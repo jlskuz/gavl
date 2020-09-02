@@ -4,7 +4,7 @@ AC_INIT([gavl], [1.4.0])
 AC_CONFIG_SRCDIR([include/gavl/gavl.h])
 AM_INIT_AUTOMAKE
 
-AM_CONFIG_HEADER(include/gavl/config.h)
+AM_CONFIG_HEADER(include/config.h)
 
 GAVL_VERSION=$VERSION
 
