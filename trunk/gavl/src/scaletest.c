@@ -20,7 +20,7 @@
  * *****************************************************************/
 #include <stdlib.h>
 #include <gavl.h>
-#include <gavl_version.h>
+#include <gavl/gavl_version.h>
 //#include "colorspace.h" // Common routines
 #include <stdio.h>
 #include <png.h>

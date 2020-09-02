@@ -21,7 +21,7 @@
 #include <png.h>
 #include <stdio.h>
 #include <gavl.h>
-#include <gavl_version.h>
+#include <gavl/gavl_version.h>
 #include <pngutil.h>
 #include <stdlib.h>
 
