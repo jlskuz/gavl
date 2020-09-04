@@ -496,8 +496,8 @@ void gavl_msg_set_arg_string(gavl_msg_t * msg, int arg, const char * value);
  *  and must free() it, when you are done with it
  */
 
-GAVL_PUBLIC
-char * gavl_msg_get_arg_string(gavl_msg_t * msg, int arg);
+// GAVL_PUBLIC
+// char * gavl_msg_get_arg_string(gavl_msg_t * msg, int arg);
 
 /** \brief Get a string argument
  *  \param msg A message
@@ -704,7 +704,7 @@ GAVL_PUBLIC void
 gavl_msg_set_progress(gavl_msg_t * msg, const char * activity, float perc);
 
 GAVL_PUBLIC void
-gavl_msg_get_progress(gavl_msg_t * msg, char ** activity, float * perc);
+gavl_msg_get_progress(gavl_msg_t * msg, const char ** activity, float * perc);
 
 
 GAVL_PUBLIC void
