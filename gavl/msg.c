@@ -277,6 +277,7 @@ void gavl_msg_get_arg_position(gavl_msg_t * msg, int arg, double * val)
   }
 
 
+#if 0
 char * gavl_msg_get_arg_string(gavl_msg_t * msg, int arg)
   {
   char * ret;
@@ -286,6 +287,7 @@ char * gavl_msg_get_arg_string(gavl_msg_t * msg, int arg)
   msg->args[arg].v.str = NULL;
   return ret;
   }
+#endif
 
 const char * gavl_msg_get_arg_string_c(const gavl_msg_t * msg, int arg)
   {
@@ -473,10 +475,10 @@ gavl_msg_set_progress(gavl_msg_t * msg, const char * activity, float perc)
   }
 
 void
-gavl_msg_get_progress(gavl_msg_t * msg, char ** activity, float * perc)
+gavl_msg_get_progress(gavl_msg_t * msg, const char ** activity, float * perc)
   {
   if(activity)
-    *activity = gavl_msg_get_arg_string(msg, 0);
+    *activity = gavl_msg_get_arg_string_c(msg, 0);
   if(perc)
     *perc = gavl_msg_get_arg_float(msg, 1);
   }
