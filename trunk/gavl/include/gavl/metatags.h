@@ -343,7 +343,8 @@
 #define GAVL_META_IDX                "idx"         // Index in parent container
 #define GAVL_META_TOTAL              "total"       // Total number (maximum idx + 1)
 #define GAVL_META_SHOW               "Show"        // TV Show, this item belongs to
-#define GAVL_META_SEASON             "Season"      // Season, this episode belongs to (integer but can be non-continuous)
+#define GAVL_META_SEASON             "Season"      // Season, this episode belongs to (integer but can be non-continuos
+#define GAVL_META_EPISODENUMBER      "EPNum"       // Number of the Episode (starting with 1)
 #define GAVL_META_RATING             "Rating"      // Rating (float, 0.0..1.0)
 #define GAVL_META_PARENTAL_CONTROL   "ParentalControl" // mpaa or FSK (or whatever) rating
 #define GAVL_META_TAG                "Tag" // Arbitrary tag
@@ -406,6 +407,8 @@
 #define GAVL_META_CHILD_CLASS                     "ChildClass"
 
 /* Value for class */
+#define GAVL_META_MEDIA_CLASS_ITEM                "item"
+
 #define GAVL_META_MEDIA_CLASS_AUDIO_FILE          "item.audio"
 #define GAVL_META_MEDIA_CLASS_VIDEO_FILE          "item.video"
 #define GAVL_META_MEDIA_CLASS_AUDIO_DISK_TRACK    "item.audio.disktrack"

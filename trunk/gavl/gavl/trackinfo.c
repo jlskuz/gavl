@@ -1129,7 +1129,7 @@ static int detect_episode(const char * filename, gavl_dictionary_t * dict)
   
   gavl_dictionary_set_string_nocopy(dict, GAVL_META_SHOW, gavl_strndup(filename, pos));
   gavl_dictionary_set_int(dict, GAVL_META_SEASON, season);
-  gavl_dictionary_set_int(dict, GAVL_META_IDX, idx-1);
+  gavl_dictionary_set_int(dict, GAVL_META_EPISODENUMBER, idx);
   return 1;  
   }
 
@@ -1353,6 +1353,8 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
   const char * media_class = NULL;
   const char * countrycode = NULL;
   gavl_dictionary_t * m;
+
+  const char * var;
   
   int num_audio_streams;
   int num_video_streams;
@@ -1465,7 +1467,10 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
         }
       }
     }
-  if(media_class && !gavl_dictionary_get_string(m, GAVL_META_MEDIA_CLASS))
+
+  if(media_class &&
+     (!(var = gavl_dictionary_get_string(m, GAVL_META_MEDIA_CLASS)) ||
+      !strcmp(var, GAVL_META_MEDIA_CLASS_ITEM)))
     gavl_dictionary_set_string(m, GAVL_META_MEDIA_CLASS, media_class);
   
   if(basename)
