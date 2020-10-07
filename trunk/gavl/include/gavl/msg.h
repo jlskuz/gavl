@@ -28,7 +28,7 @@
 #define GAVL_MSG_HEADER_TIMESTAMP "timestamp" // Always GAVL_TIME_SCALE
 
 #define GAVL_MSG_NONE     -1 //!< Reserved ID for non valid message
-#define GAVL_MSG_MAX_ARGS  8 //!< Maximum number of args
+#define GAVL_MSG_MAX_ARGS  16 //!< Maximum number of args
 
 #define GAVL_MSG_NS_LOG       1
 
