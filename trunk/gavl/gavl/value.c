@@ -91,6 +91,15 @@ gavl_type_t gavl_type_from_string(const char * str)
 int gavl_value_compare(const gavl_value_t * v1, const gavl_value_t * v2)
   {
   int i, res;
+
+  if(!v1 && v2)
+    return 1;
+
+  if(v1 && !v2)
+    return 1;
+
+  if(!v1 && !v2)
+    return 0;
   
   if(v1->type != v2->type)
     return 1;
