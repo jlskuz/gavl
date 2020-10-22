@@ -52,9 +52,7 @@ AC_ARG_WITH(doxygen,
 
 if test "x$test_doxygen" = "xtrue"; then
   AC_CHECK_PROG(DOXYGEN, doxygen, "doxygen")
-  if test -z "$DOXYGEN"; then
-    AC_MSG_ERROR([Doxygen not found, use --without-doxygen to disable documentation generation])
-  else
+  if test !-z "$DOXYGEN"; then
     have_doxygen="true"
   fi
 fi
