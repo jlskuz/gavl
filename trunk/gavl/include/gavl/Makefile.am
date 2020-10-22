@@ -12,6 +12,7 @@ gavlsocket.h \
 http.h \
 hw.h \
 hw_glx.h \
+hw_vaapi.h \
 hw_vaapi_x11.h \
 keycodes.h \
 log.h \
