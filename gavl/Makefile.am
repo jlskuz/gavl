@@ -188,7 +188,6 @@ AM_LDFLAGS = -export-symbols-regex 'gav(l|f)' -version-info \
 
 
 libgavl_la_LIBADD = \
-@GMERLIN_DEP_LIBS@ \
 $(mmx_libs) \
 $(sse_libs) \
 $(sse2_libs) \
