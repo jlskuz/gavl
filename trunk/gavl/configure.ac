@@ -52,7 +52,7 @@ AC_ARG_WITH(doxygen,
 
 if test "x$test_doxygen" = "xtrue"; then
   AC_CHECK_PROG(DOXYGEN, doxygen, "doxygen")
-  if test !-z "$DOXYGEN"; then
+  if test "x$DOXYGEN" != "x"; then
     have_doxygen="true"
   fi
 fi
