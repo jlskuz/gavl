@@ -242,7 +242,11 @@ dnl
 
 GMERLIN_CHECK_OPENGL
 
+dnl
+dnl MMAL
+dnl
 
+GMERLIN_CHECK_MMAL
 
 dnl
 dnl Now, build the final CFLAGS.
