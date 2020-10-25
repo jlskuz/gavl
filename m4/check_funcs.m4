@@ -31,232 +31,6 @@ AC_SUBST(GMERLIN_EXE_LDFLAGS)
 ])
 
 dnl
-dnl AVCodec
-dnl
-
-AC_DEFUN([GMERLIN_CHECK_AVCODEC],[
-
-AH_TEMPLATE([HAVE_LIBAVCODEC],
-            [Do we have libavcodec installed?])
-
-have_avcodec=false
-
-dnl 54.1.0
-AVCODEC_BUILD="3539200"
-
-AC_ARG_ENABLE(libavcodec,
-[AC_HELP_STRING([--disable-libavcodec],[Disable libavcodec (default: autodetect)])],
-[case "${enableval}" in
-   yes) test_avcodec=true ;;
-   no)  test_avcodec=false ;;
-esac],[test_avcodec=true])
-
-
-if test x$test_avcodec = xtrue; then
-ACL_PATH_AVCODEC($AVCODEC_BUILD , have_avcodec="true", have_avcodec="false")
-AVCODEC_REQUIRED=$AVCODEC_VERSION
-
-fi
-
-AM_CONDITIONAL(HAVE_LIBAVCODEC, test x$have_avcodec = xtrue)
-
-AC_SUBST(AVCODEC_REQUIRED)
-AC_SUBST(AVCODEC_LIBS)
-AC_SUBST(AVCODEC_CFLAGS)
-
-if test "x$have_avcodec" = "xtrue"; then
-AC_DEFINE([HAVE_LIBAVCODEC])
-fi
-
-])
-
-dnl
-dnl Avformat
-dnl
-
-AC_DEFUN([GMERLIN_CHECK_AVFORMAT],[
-
-AH_TEMPLATE([HAVE_LIBAVFORMAT], [Do we have libavformat installed?])
-AH_TEMPLATE([AVFORMAT_HEADER], [libavformat header])
-
-have_avformat=false
-
-dnl 53.10.0
-AVFORMAT_BUILD="3475968"
-
-AC_ARG_ENABLE(libavformat,
-[AC_HELP_STRING([--disable-libavformat],[Disable libavformat (default: autodetect)])],
-[case "${enableval}" in
-   yes) test_avformat=true ;;
-   no)  test_avformat=false ;;
-esac],[test_avformat=true])
-
-if test x$test_avformat = xtrue; then
-
-ACL_PATH_AVFORMAT($AVFORMAT_BUILD , have_avformat="true", have_avformat="false")
-AVFORMAT_REQUIRED=$AVFORMAT_VERSION
-
-fi
-
-AM_CONDITIONAL(HAVE_LIBAVFORMAT, test x$have_avformat = xtrue)
-
-AC_SUBST(AVFORMAT_REQUIRED)
-AC_SUBST(AVFORMAT_LIBS)
-AC_SUBST(AVFORMAT_CFLAGS)
-
-if test "x$have_avformat" = "xtrue"; then
-AC_DEFINE([HAVE_LIBAVFORMAT])
-AC_DEFINE_UNQUOTED(AVFORMAT_HEADER, $AVFORMAT_HEADER)
-fi
-
-])
-
-
-dnl
-dnl libpostproc
-dnl
-
-AC_DEFUN([GMERLIN_CHECK_LIBPOSTPROC],[
-
-AH_TEMPLATE([HAVE_LIBPOSTPROC],
-            [Do we have libpostproc installed?])
-AH_TEMPLATE([POSTPROC_HEADER], [libpostproc header])
-
-have_libpostproc=false
-
-LIBPOSTPROC_REQUIRED="51.0.0"
-
-AC_ARG_ENABLE(libpostproc,
-[AC_HELP_STRING([--disable-libpostproc],[Disable libpostproc (default: autodetect)])],
-[case "${enableval}" in
-   yes) test_libpostproc=true ;;
-   no)  test_libpostproc=false ;;
-esac],[test_libpostproc=true])
-
-if test x$test_libpostproc = xtrue; then
-
-PKG_CHECK_MODULES(LIBPOSTPROC, libpostproc >= $LIBPOSTPROC_REQUIRED,
-                  have_libpostproc="true", have_libpostproc="false")
-fi
-
-if test x$have_libpostproc = xtrue; then
-
-CFLAGS_save=$CFLAGS
-CFLAGS="$CFLAGS $GMERLIN_DEP_CFLAGS $LIBPOSTPROC_CFLAGS"
-found_header="false"
-
-AC_TRY_COMPILE([
-#include <inttypes.h>
-#include <libpostproc/postprocess.h>],[], [found_header="true";POSTPROC_HEADER="<libpostproc/postprocess.h>" ],)
-
-
-if test $found_header = "false"; then
-AC_TRY_COMPILE([
-#include <inttypes.h> 
-#include <postproc/postprocess.h>],[], [found_header="true";POSTPROC_HEADER="<postproc/postprocess.h>" ],)
-fi
-
-if test $found_header = "false"; then
-AC_TRY_COMPILE([
-#include <inttypes.h> 
-#include <postprocess.h>],[],[found_header="true";POSTPROC_HEADER="<postprocess.h>"])
-fi
-
-if test $found_header = "false"; then
-have_libpostproc=false
-else
-CFLAGS="-DPOSTPROC_HEADER=$POSTPROC_HEADER $CFLAGS"
-AC_CHECK_TYPES([pp_context_t, pp_context, pp_mode_t, pp_mode], [], [], [[
-#ifdef POSTPROC_HEADER
-#include POSTPROC_HEADER
-#endif
-]])
-fi
-
-CFLAGS="$CFLAGS_save"
-       
-fi
-
-AC_SUBST(LIBPOSTPROC_REQUIRED)
-AC_SUBST(LIBPOSTPROC_LIBS)
-AC_SUBST(LIBPOSTPROC_CFLAGS)
-
-AM_CONDITIONAL(HAVE_LIBPOSTPROC, test x$have_libpostproc = xtrue)
-
-if test "x$have_libpostproc" = "xtrue"; then
-AC_DEFINE([HAVE_LIBPOSTPROC])
-AC_DEFINE_UNQUOTED(POSTPROC_HEADER, $POSTPROC_HEADER)
-fi
-
-])
-
-dnl
-dnl libswscale
-dnl
-
-AC_DEFUN([GMERLIN_CHECK_LIBSWSCALE],[
-
-AH_TEMPLATE([HAVE_LIBSWSCALE],
-            [Do we have libswscale installed?])
-AH_TEMPLATE([SWSCALE_HEADER], [libswscale header])
-
-have_libswscale=false
-
-LIBSWSCALE_REQUIRED="0.5.0"
-
-AC_ARG_ENABLE(libswscale,
-[AC_HELP_STRING([--disable-libswscale],[Disable libswscale (default: autodetect)])],
-[case "${enableval}" in
-   yes) test_libswscale=true ;;
-   no)  test_libswscale=false ;;
-esac],[test_libswscale=true])
-
-if test x$test_libswscale = xtrue; then
-
-PKG_CHECK_MODULES(LIBSWSCALE, libswscale >= $LIBSWSCALE_REQUIRED,
-                  have_libswscale="true", have_libswscale="false")
-fi
-
-if test x$have_libswscale = xtrue; then
-
-CFLAGS_save=$CFLAGS
-CFLAGS="$CFLAGS $GMERLIN_DEP_CFLAGS $LIBSWSCALE_CFLAGS"
-found_header="false"
-
-AC_TRY_COMPILE([
-#include <inttypes.h>
-#include <libswscale/swscale.h>],[], [found_header="true";SWSCALE_HEADER="<libswscale/swscale.h>"],)
-
-if test $found_header = "false"; then
-AC_TRY_COMPILE([
-#include <inttypes.h>
-#include <swscale/swscale.h>],[], [found_header="true";SWSCALE_HEADER="<swscale/swscale.h>"],)
-fi
-
-if test $found_header = "false"; then
-AC_TRY_COMPILE([
-#include <inttypes.h>
-#include <swscale.h>],[],[found_header="true";SWSCALE_HEADER="<swscale.h>"])
-fi
-
-CFLAGS="$CFLAGS_save"
-       
-fi
-
-AC_SUBST(LIBSWSCALE_REQUIRED)
-AC_SUBST(LIBSWSCALE_LIBS)
-AC_SUBST(LIBSWSCALE_CFLAGS)
-
-AM_CONDITIONAL(HAVE_LIBSWSCALE, test x$have_libswscale = xtrue)
-
-if test "x$have_libswscale" = "xtrue"; then
-AC_DEFINE([HAVE_LIBSWSCALE])
-AC_DEFINE_UNQUOTED(SWSCALE_HEADER, $SWSCALE_HEADER)
-fi
-
-])
-
-dnl
 dnl Check for theora decoder
 dnl
 
@@ -330,6 +104,107 @@ fi
 
 ])
 
+dnl
+dnl Check for libavcodec
+dnl
+
+AC_DEFUN([GMERLIN_CHECK_AVCODEC],[
+
+AH_TEMPLATE([HAVE_AVCODEC],
+            [Do we have libavcodec installed?])
+
+have_libavcodec="false"
+
+AVCODEC_REQUIRED="58.54.100"
+
+AC_ARG_ENABLE(avcodec,
+[AC_HELP_STRING([--disable-avcodec],[Disable libavcodec (default: autodetect)])],
+[case "${enableval}" in
+   yes) test_avcodec=true ;;
+   no)  test_avcodec=false ;;
+esac],[test_avcodec=true])
+
+if test x$test_avcodec = xtrue; then
+
+PKG_CHECK_MODULES(AVCODEC, libavcodec, have_avcodec="true", have_avcodec="false")
+fi
+
+AC_SUBST(AVCODEC_REQUIRED)
+AC_SUBST(AVCODEC_LIBS)
+AC_SUBST(AVCODEC_CFLAGS)
+
+AM_CONDITIONAL(HAVE_AVCODEC, test x$have_avcodec = xtrue)
+
+if test "x$have_avcodec" = "xtrue"; then
+AC_DEFINE([HAVE_AVCODEC])
+fi
+
+])
+
+AC_DEFUN([GMERLIN_CHECK_AVFORMAT],[
+
+AH_TEMPLATE([HAVE_AVFORMAT],
+            [Do we have libavformat installed?])
+
+have_libavformat="false"
+
+AVFORMAT_REQUIRED="58.29.100"
+
+AC_ARG_ENABLE(avformat,
+[AC_HELP_STRING([--disable-avformat],[Disable libavformat (default: autodetect)])],
+[case "${enableval}" in
+   yes) test_avformat=true ;;
+   no)  test_avformat=false ;;
+esac],[test_avformat=true])
+
+if test x$test_avformat = xtrue; then
+
+PKG_CHECK_MODULES(AVFORMAT, libavformat, have_avformat="true", have_avformat="false")
+fi
+
+AC_SUBST(AVFORMAT_REQUIRED)
+AC_SUBST(AVFORMAT_LIBS)
+AC_SUBST(AVFORMAT_CFLAGS)
+
+AM_CONDITIONAL(HAVE_AVFORMAT, test x$have_avformat = xtrue)
+
+if test "x$have_avformat" = "xtrue"; then
+AC_DEFINE([HAVE_AVFORMAT])
+fi
+
+])
+
+dnl
+dnl Check for mmal (Raspberry pi)
+dnl
+
+AC_DEFUN([GMERLIN_CHECK_MMAL],[
+
+have_mmal="false"
+
+pkg_config_path_save=$PKG_CONFIG_PATH
+
+export PKG_CONFIG_PATH="/opt/vc/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+AH_TEMPLATE([HAVE_MMAL], [Do we have MMAL?])
+
+PKG_CHECK_MODULES(MMAL, mmal, have_mmal="true", have_mmal="false")
+
+AC_SUBST(MMAL_LIBS)
+AC_SUBST(MMAL_CFLAGS)
+
+AM_CONDITIONAL(HAVE_MMAL, test x$have_mmal = xtrue)
+
+if test "x$have_mmal" = "xtrue"; then
+AC_DEFINE([HAVE_MMAL])
+fi
+
+export PKG_CONFIG_PATH="$pkg_config_path_save"
+
+	     
+])
+
+	     
 
 dnl
 dnl Check for schroedinger
