@@ -45,18 +45,20 @@ pixelformats[] =
 #define NUM_PIXELFORMATS (sizeof(pixelformats)/sizeof(pixelformats[0]))
 #endif
 
+
+#if 0
 static void destroy_native(void * native)
   {
   /* Nothing */
   }
-
+#endif
 
 
 static void get_image_formats
 
 static const gavl_hw_funcs_t funcs =
   {
-    .destroy_native = destroy_native,
+   //    .destroy_native = destroy_native,
 #if 0
     .get_image_formats = gavl_vaapi_get_image_formats,
     .get_overlay_formats = gavl_vaapi_get_overlay_formats,
@@ -72,6 +74,6 @@ static const gavl_hw_funcs_t funcs =
 
 gavl_hw_context_t * gavl_hw_ctx_create_mmal(void)
   {
-  return gavl_hw_context_create_internal(priv, &funcs, GAVL_HW_MMAL);
+  return gavl_hw_context_create_internal(NULL, &funcs, GAVL_HW_MMAL);
   }
 
