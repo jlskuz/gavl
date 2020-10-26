@@ -21,6 +21,9 @@
  * *****************************************************************/
 
 
+#include <stdlib.h>
+
+
 #include <gavl/gavl.h>
 #include <gavl/hw_mmal.h>
 #include <hw_private.h>
