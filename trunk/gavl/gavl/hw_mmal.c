@@ -54,7 +54,7 @@ static void destroy_native(void * native)
 #endif
 
 
-static void get_image_formats
+// static void get_image_formats
 
 static const gavl_hw_funcs_t funcs =
   {
