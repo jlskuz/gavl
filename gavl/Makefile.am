@@ -79,8 +79,19 @@ hw_glx_cflags =
 hw_glx_libs = 
 endif
 
+if HAVE_MMAL
+hw_mmal_sources = hw_mmal.c
+hw_mmal_cflags = @MMAL_CFLAGS@
+hw_mmal_libs   = @MMAL_LIBS@
+else
+hw_mmal_sources = 
+hw_mmal_cflags =
+hw_mmal_libs   =
+endif
 
-AM_CFLAGS = @LIBGAVL_CFLAGS@ $(hw_libva_cflags) $(hw_libva_x11_cflags) $(hw_glx_cflags)
+
+
+AM_CFLAGS = @LIBGAVL_CFLAGS@ $(hw_libva_cflags) $(hw_libva_x11_cflags) $(hw_glx_cflags) $(hw_mmal_cflags)
 
 
 SUBDIRS = \
@@ -103,6 +114,7 @@ libgavl_la_SOURCES = \
 $(hw_libva_sources) \
 $(hw_libva_x11_sources) \
 $(hw_glx_sources) \
+$(hw_mmal_sources) \
 absdiff.c \
 arith128.c \
 array.c \
@@ -203,6 +215,7 @@ libsamplerate/libsamplerate.la \
 $(hw_libva_x11_libs) \
 $(hw_libva_libs) \
 $(hw_glx_libs) \
+$(hw_mmal_libs) \
 -lpthread \
 -lm
 
