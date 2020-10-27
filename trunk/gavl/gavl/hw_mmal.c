@@ -25,9 +25,11 @@
 
 
 #include <gavl/gavl.h>
-#include <gavl/hw_mmal.h>
-#include <hw_private.h>
+
 #include <interface/mmal/mmal.h>
+#include <gavl/hw_mmal.h>
+
+#include <hw_private.h>
 
 
 #if 0
