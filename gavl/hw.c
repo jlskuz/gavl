@@ -165,10 +165,20 @@ int gavl_video_frame_hw_to_ram(const gavl_video_format_t * fmt,
   {
   gavl_hw_context_t * ctx = dst->hwctx;
   gavl_video_frame_copy_metadata(dst, src);
-  return ctx->funcs->video_frame_to_ram ?
-    ctx->funcs->video_frame_to_ram(fmt, dst, src) : 0;
+  
+  if(ctx->funcs->video_frame_to_ram)
+    {
+    ctx->funcs->video_frame_to_ram(fmt, dst, src);
+    return 1;
+    }
+  else if(src->planes[0])
+    {
+    gavl_video_frame_copy(fmt, dst, src);
+    return 1;
+    }
+  else
+    return 0;
   }
-
 
 void 
 gavl_hw_destroy_video_frame(gavl_hw_context_t * ctx,
@@ -197,6 +207,7 @@ types[] =
   {
     { GAVL_HW_GLX, "GLX Texture" },
     { GAVL_HW_VAAPI_X11, "vaapi through X11" },
+    { GAVL_HW_MMAL, "MMAL" },
     { /* End  */ },
   };
   
