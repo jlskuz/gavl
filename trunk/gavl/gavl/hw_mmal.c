@@ -27,6 +27,8 @@
 #include <gavl/gavl.h>
 #include <gavl/hw_mmal.h>
 #include <hw_private.h>
+#include <interface/mmal/mmal.h>
+
 
 #if 0
 static const struct
