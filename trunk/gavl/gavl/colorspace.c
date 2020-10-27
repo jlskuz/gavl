@@ -139,9 +139,12 @@ int gavl_pixelformat_num_planes(gavl_pixelformat_t csp)
   return 0;
   }
 
-void gavl_pixelformat_chroma_sub(gavl_pixelformat_t csp, int * sub_h,
-                                int * sub_v)
+void gavl_pixelformat_chroma_sub(gavl_pixelformat_t csp, int * sub_hp,
+                                int * sub_vp)
   {
+  int sub_h = 0;
+  int sub_v = 0;
+  
   switch(csp)
     {
     case GAVL_RGB_15:
@@ -170,35 +173,40 @@ void gavl_pixelformat_chroma_sub(gavl_pixelformat_t csp, int * sub_h,
     case GAVL_GRAYA_16:
     case GAVL_GRAYA_32:
     case GAVL_GRAYA_FLOAT:
-      *sub_h = 1;
-      *sub_v = 1;
+      sub_h = 1;
+      sub_v = 1;
       break;
     case GAVL_YUV_420_P:
     case GAVL_YUVJ_420_P:
-      *sub_h = 2;
-      *sub_v = 2;
+      sub_h = 2;
+      sub_v = 2;
       break;
     case GAVL_YUV_422_P:
     case GAVL_YUV_422_P_16:
     case GAVL_YUVJ_422_P:
     case GAVL_YUY2:
     case GAVL_UYVY:
-      *sub_h = 2;
-      *sub_v = 1;
+      sub_h = 2;
+      sub_v = 1;
       break;
     case GAVL_YUV_411_P:
-      *sub_h = 4;
-      *sub_v = 1;
+      sub_h = 4;
+      sub_v = 1;
       break;
     case GAVL_YUV_410_P:
-      *sub_h = 4;
-      *sub_v = 4;
+      sub_h = 4;
+      sub_v = 4;
       break;
     case GAVL_PIXELFORMAT_NONE:
-      *sub_h = 0;
-      *sub_v = 0;
       break;
     }
+
+  if(sub_hp)
+    *sub_hp = sub_h;
+
+  if(sub_vp)
+    *sub_vp = sub_v;
+  
   }
 
 
