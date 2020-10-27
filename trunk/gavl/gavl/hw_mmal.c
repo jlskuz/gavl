@@ -50,9 +50,9 @@ pixelformats[] =
 #define NUM_PIXELFORMATS (sizeof(pixelformats)/sizeof(pixelformats[0]))
 #endif
 
-void gavl_mmal_set_frame(const gavl_video_format_t * fmt,
-                         MMAL_BUFFER_HEADER_T * buf,
-                         gavl_video_frame_t * ret)
+static void gavl_mmal_set_frame(const gavl_video_format_t * fmt,
+                                MMAL_BUFFER_HEADER_T * buf,
+                                gavl_video_frame_t * ret)
   {
   /* Assume adjusted format */
   gavl_video_frame_set_planes(ret, fmt, buf->data + buf->type->video.offset[0]);
