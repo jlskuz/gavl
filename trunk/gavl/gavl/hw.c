@@ -170,7 +170,7 @@ int gavl_video_frame_hw_to_ram(const gavl_video_format_t * fmt,
                                gavl_video_frame_t * dst,
                                gavl_video_frame_t * src)
   {
-  gavl_hw_context_t * ctx = dst->hwctx;
+  gavl_hw_context_t * ctx = src->hwctx;
   gavl_video_frame_copy_metadata(dst, src);
   
   if(ctx->funcs->video_frame_to_ram)
