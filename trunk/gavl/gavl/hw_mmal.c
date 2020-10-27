@@ -55,7 +55,7 @@ void gavl_mmal_set_frame(const gavl_video_format_t * fmt,
                          gavl_video_frame_t * ret)
   {
   /* Assume adjusted format */
-  gavl_video_frame_set_planes(ret, fmt, buffer->data + buffer->type->video.offset[0]);
+  gavl_video_frame_set_planes(ret, fmt, buf->data + buf->type->video.offset[0]);
   }
 
 
