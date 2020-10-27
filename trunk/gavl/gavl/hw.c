@@ -90,10 +90,11 @@ gavl_hw_ctx_get_overlay_formats(gavl_hw_context_t * ctx)
 void gavl_hw_video_format_adjust(gavl_hw_context_t * ctx,
                                  gavl_video_format_t * fmt)
   {
-  fmt->pixelformat = gavl_pixelformat_get_best(fmt->pixelformat,
-                                               gavl_hw_ctx_get_image_formats(ctx),
-                                               NULL);
-
+  if(ctx->funcs->get_image_formats)
+    fmt->pixelformat = gavl_pixelformat_get_best(fmt->pixelformat,
+                                                 gavl_hw_ctx_get_image_formats(ctx),
+                                                 NULL);
+  
   if(ctx->funcs->video_format_adjust)
     ctx->funcs->video_format_adjust(ctx, fmt);
   }
@@ -101,9 +102,10 @@ void gavl_hw_video_format_adjust(gavl_hw_context_t * ctx,
 void gavl_hw_overlay_format_adjust(gavl_hw_context_t * ctx,
                                    gavl_video_format_t * fmt)
   {
-  fmt->pixelformat = gavl_pixelformat_get_best(fmt->pixelformat,
-                                               gavl_hw_ctx_get_overlay_formats(ctx),
-                                               NULL);
+  if(ctx->funcs->get_overlay_formats)
+    fmt->pixelformat = gavl_pixelformat_get_best(fmt->pixelformat,
+                                                 gavl_hw_ctx_get_overlay_formats(ctx),
+                                                 NULL);
 
   if(ctx->funcs->overlay_format_adjust)
     ctx->funcs->overlay_format_adjust(ctx, fmt);
