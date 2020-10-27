@@ -25,3 +25,7 @@
 
 GAVL_PUBLIC gavl_hw_context_t * gavl_hw_ctx_create_mmal();
 
+
+GAVL_PUBLIC void gavl_mmal_set_frame(const gavl_video_format_t * fmt,
+                                     MMAL_BUFFER_HEADER_T * buf,
+                                     gavl_video_frame_t * ret);
