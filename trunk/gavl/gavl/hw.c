@@ -30,8 +30,13 @@ gavl_hw_context_t * gavl_hw_context_create_internal(void * native,
   ret->type = type;
   ret->native = native;
   ret->funcs = funcs;
-  ret->image_formats = ret->funcs->get_image_formats(ret);
-  ret->overlay_formats = ret->funcs->get_overlay_formats(ret);
+  
+  if(ret->funcs->get_image_formats)
+    ret->image_formats = ret->funcs->get_image_formats(ret);
+
+  if(ret->funcs->get_overlay_formats)
+    ret->overlay_formats = ret->funcs->get_overlay_formats(ret);
+  
   return ret;
   }
 
