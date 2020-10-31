@@ -167,7 +167,7 @@ void gavl_mmal_set_frame(const gavl_video_format_t * fmt,
 
 
 #if 1
-static void destroy_native(void * native)
+static void destroy_native_mmal(void * native)
   {
   int i;
   
@@ -220,9 +220,9 @@ static int video_frame_to_hw_mmal(const gavl_video_format_t * fmt,
 
 static const gavl_hw_funcs_t funcs =
   {
-   .destroy_native = destroy_native,
-   .get_image_formats = gavl_vaapi_get_image_formats,
-   .get_overlay_formats = gavl_vaapi_get_overlay_formats,
+   .destroy_native = destroy_native_mmal,
+   .get_image_formats = get_image_formats_mmal,
+   .get_overlay_formats = get_overlay_formats_mmal,
 
    .video_frame_to_ram = video_frame_to_ram_mmal,
    .video_frame_to_hw  = video_frame_to_hw_mmal,
