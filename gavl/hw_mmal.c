@@ -200,7 +200,7 @@ static int video_frame_to_ram_mmal(const gavl_video_format_t * fmt,
     }
   
   //  MMAL_COMPONENT_DEFAULT_VIDEO_CONVERTER
-  
+  return 0;
   }
 
 static int video_frame_to_hw_mmal(const gavl_video_format_t * fmt,
@@ -214,6 +214,7 @@ static int video_frame_to_hw_mmal(const gavl_video_format_t * fmt,
     
     }
   
+  return 0;
   }
 
 
