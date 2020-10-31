@@ -80,7 +80,7 @@ static format_context_t * get_format_context(gavl_hw_context_t * ctx, const gavl
   format_context_t * ret;
   mmal_priv_t * priv = ctx->native;
 
-  gavl_video_forma_t fmt;
+  gavl_video_format_t fmt;
   gavl_video_format_copy(&fmt, fmt1);
   video_format_adjust_mmal(ctx, &fmt);
   
