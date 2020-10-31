@@ -87,9 +87,9 @@ static format_context_t * get_format_context(gavl_hw_context_t * ctx, const gavl
   for(i = 0; i < priv->num_formats; i++)
     {
 
-    if((priv->formats[i].frame_width == fmt.frame_width) &&
-       (priv->formats[i].frame_height == fmt.frame_height) &&
-       (priv->formats[i].pixelformat == fmt.pixelformat))
+    if((priv->formats[i].fmt.frame_width == fmt.frame_width) &&
+       (priv->formats[i].fmt.frame_height == fmt.frame_height) &&
+       (priv->formats[i].fmt.pixelformat == fmt.pixelformat))
       {
       return &priv->formats[i];
       }
