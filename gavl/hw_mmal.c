@@ -36,7 +36,7 @@
 static const struct
   {
   const gavl_pixelformat_t gavl;
-  uint32_t mmal_fourcc;
+  uint32_t mmal;
   }
 pixelformats[] =
   {
@@ -117,8 +117,8 @@ static gavl_pixelformat_t * get_image_formats_mmal(gavl_hw_context_t * ctx)
 
   while(1)
     {
-    ret[idx] = pixelformats[idx].fmt;
-    if(pixelformats[idx].fmt == GAVL_PIXELFORMAT_NONE)
+    ret[idx] = pixelformats[idx].gavl;
+    if(pixelformats[idx].gavl == GAVL_PIXELFORMAT_NONE)
       break;
     idx++;
     }
@@ -137,12 +137,12 @@ static gavl_pixelformat_t * get_overlay_formats_mmal(gavl_hw_context_t * ctx)
 
   while(1)
     {
-    if(pixelformats[idx1].fmt == GAVL_PIXELFORMAT_NONE)
+    if(pixelformats[idx1].gavl == GAVL_PIXELFORMAT_NONE)
       break;
     
-    if(gavl_pixelformat_has_alpha(pixelformats[idx1].fmt))
+    if(gavl_pixelformat_has_alpha(pixelformats[idx1].gavl))
       {
-      ret[idx2] = pixelformats[idx1].fmt;
+      ret[idx2] = pixelformats[idx1].gavl;
       idx2++;
       }
     idx1++;
