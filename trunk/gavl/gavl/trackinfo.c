@@ -2155,7 +2155,7 @@ void gavl_track_set_countries(gavl_dictionary_t * track)
 
   const gavl_value_t * src;
   
-  const char * src_str;
+  const char * src_str = NULL;
   const char * dst_str;
 
   gavl_value_t dest;

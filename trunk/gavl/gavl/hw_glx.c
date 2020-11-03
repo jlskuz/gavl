@@ -28,44 +28,10 @@
 
 #include <gavl/gavl.h>
 #include <gavl/hw_glx.h>
+#include <gavl/hw_gl.h>
 
 #include <hw_private.h>
 
-static const struct
-  {
-  const gavl_pixelformat_t fmt;
-  const GLenum format;
-  const GLenum type;
-  }
-pixelformats[] =
-  {
-    { GAVL_RGB_24,     GL_RGB,  GL_UNSIGNED_BYTE },
-    { GAVL_RGBA_32,    GL_RGBA, GL_UNSIGNED_BYTE },
-    { GAVL_RGB_48,     GL_RGB,  GL_SHORT },
-    { GAVL_RGBA_64,    GL_RGBA, GL_SHORT },
-    { GAVL_RGB_FLOAT,  GL_RGB,  GL_FLOAT },
-    { GAVL_RGBA_FLOAT, GL_RGBA, GL_FLOAT },
-    { GAVL_PIXELFORMAT_NONE    /* End */ },
-  };
-
-#define NUM_PIXELFORMATS (sizeof(pixelformats)/sizeof(pixelformats[0]))
-
-static int get_gl_format(gavl_pixelformat_t fmt, GLenum * format, GLenum * type)
-  {
-  int i = 0;
-
-  while(pixelformats[i].fmt != GAVL_PIXELFORMAT_NONE)
-    {
-    if(pixelformats[i].fmt == fmt)
-      {
-      *format = pixelformats[i].format;
-      *type   = pixelformats[i].type;
-      return 1;
-      }
-    i++;
-    }
-  return 0;
-  }
 
 typedef struct
   {
@@ -107,77 +73,14 @@ static void destroy_native_glx(void * native)
   free(priv);
 
   }
-
-static gavl_pixelformat_t * get_image_formats_glx(gavl_hw_context_t * ctx)
-  {
-  int idx = 0;
   
-  gavl_pixelformat_t * ret;
-  //  glx_t * priv = ctx->native;
-
-  ret = calloc(NUM_PIXELFORMATS, sizeof(*ret));
-
-  while(1)
-    {
-    ret[idx] = pixelformats[idx].fmt;
-    if(pixelformats[idx].fmt == GAVL_PIXELFORMAT_NONE)
-      break;
-    idx++;
-    }
-  
-  return ret;
-  }
-
-static gavl_pixelformat_t * get_overlay_formats_glx(gavl_hw_context_t * ctx)
-  {
-  int idx1 = 0;
-  int idx2 = 0;
-  
-  gavl_pixelformat_t * ret;
-  //  glx_t * priv = ctx->native;
-
-  ret = calloc(NUM_PIXELFORMATS, sizeof(*ret));
-
-  while(1)
-    {
-    if(pixelformats[idx1].fmt == GAVL_PIXELFORMAT_NONE)
-      break;
-    
-    if(gavl_pixelformat_has_alpha(pixelformats[idx1].fmt))
-      {
-      ret[idx2] = pixelformats[idx1].fmt;
-      idx2++;
-      }
-    idx1++;
-    }
-
-  ret[idx2] = GAVL_PIXELFORMAT_NONE;
-  
-  return ret;
-  }
-  
-static void video_format_adjust_glx(gavl_hw_context_t * ctx,
-                                    gavl_video_format_t * fmt)
-  {
-  gavl_video_format_set_frame_size(fmt, 8, 1);
-  }
-
-static void overlay_format_adjust_glx(gavl_hw_context_t * ctx,
-                                      gavl_video_format_t * fmt)
-  {
-  gavl_video_format_set_frame_size(fmt, 8, 1);
-  }
 
 static gavl_video_frame_t * video_frame_create_hw_glx(gavl_hw_context_t * ctx,
                                                       gavl_video_format_t * fmt)
   {
   GLuint * tex;
   gavl_video_frame_t * ret;
-  GLenum type = 0, format = 0;
   
-  if(!get_gl_format(fmt->pixelformat, &format, &type))
-    return 0;
-
   //  fprintf(stderr, "video_frame_create_hw_glx\n");
   //  gavl_video_format_dump(fmt);
   
@@ -185,27 +88,11 @@ static gavl_video_frame_t * video_frame_create_hw_glx(gavl_hw_context_t * ctx,
 
   tex = calloc(1, sizeof(*tex));
   
-  ret->user_data = tex;
-
   gavl_hw_glx_set_current(ctx, None);
-
-  glGenTextures(1,tex);
-  glBindTexture(GL_TEXTURE_2D, *tex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  
-  glTexImage2D(GL_TEXTURE_2D, 0,
-               GL_RGBA,
-               fmt->image_width,
-               fmt->image_height,
-               0,
-               format,
-               type,
-               NULL);
-  
+  *tex = gavl_gl_create_texture(fmt);
   gavl_hw_glx_unset_current(ctx);
+
+  ret->user_data = tex;
   
   return ret;
   }
@@ -233,21 +120,12 @@ static int video_frame_to_ram_glx(const gavl_video_format_t * fmt,
                                   gavl_video_frame_t * src)
   {
   GLuint * tex;
-  GLenum type = 0, format = 0;
-
-  get_gl_format(fmt->pixelformat, &format, &type);
-
 
   gavl_hw_glx_set_current(src->hwctx, None);
 
   tex = src->user_data;
-  
-  glBindTexture(GL_TEXTURE_2D, *tex);
-  glPixelStorei(GL_PACK_ALIGNMENT, 8);
+  gavl_gl_frame_to_ram(fmt, dst, *tex);
 
-  glGetTexImage(GL_TEXTURE_2D,
-                0, format, type, dst->planes[0]);
-  
   gavl_hw_glx_unset_current(src->hwctx);
   
   return 1;
@@ -258,20 +136,11 @@ static int video_frame_to_hw_glx(const gavl_video_format_t * fmt,
                                  gavl_video_frame_t * src)
   {
   GLuint * tex;
-  GLenum type = 0, format = 0;
-  
-  get_gl_format(fmt->pixelformat, &format, &type);
   
   gavl_hw_glx_set_current(dst->hwctx, None);
 
   tex = dst->user_data;
-
-  glBindTexture(GL_TEXTURE_2D, *tex);
-  glPixelStorei(GL_PACK_ALIGNMENT, 8);
-  
-  glTexSubImage2D(GL_TEXTURE_2D,
-                  0, 0, 0, fmt->image_width, fmt->image_height,
-                  format, type, src->planes[0]);
+  gavl_gl_frame_to_hw(fmt, *tex, src);
   
   gavl_hw_glx_unset_current(dst->hwctx);
   
@@ -281,15 +150,14 @@ static int video_frame_to_hw_glx(const gavl_video_format_t * fmt,
 static const gavl_hw_funcs_t funcs =
   {
     .destroy_native         = destroy_native_glx,
-    .get_image_formats      = get_image_formats_glx,
-    .get_overlay_formats    = get_overlay_formats_glx,
+    .get_image_formats      = gavl_gl_get_image_formats,
+    .get_overlay_formats    = gavl_gl_get_overlay_formats,
     .video_frame_create_hw  = video_frame_create_hw_glx,
     .video_frame_destroy    = video_frame_destroy_glx,
     .video_frame_to_ram     = video_frame_to_ram_glx,
     .video_frame_to_hw      = video_frame_to_hw_glx,
-    .video_format_adjust    = video_format_adjust_glx,
-    .overlay_format_adjust  =  overlay_format_adjust_glx,
-    
+    .video_format_adjust    = gavl_gl_adjust_video_format,
+    .overlay_format_adjust  = gavl_gl_adjust_video_format,
   };
 
 gavl_hw_context_t * gavl_hw_ctx_create_glx(Display * dpy, const int * attrs)
