@@ -33,6 +33,7 @@ typedef enum
   {
     GAVL_HW_NONE = 0,  // Frames in RAM
     GAVL_HW_GLX,       // GLX Texture, also with a GLX pixmap to use as render target
+    GAVL_HW_EGL,       // EGL Texture
     GAVL_HW_VAAPI_X11,
     GAVL_HW_MMAL,      // Multi media abstraction layer (Raspberry PI)
   } gavl_hw_type_t;

@@ -1545,6 +1545,7 @@ dnl
 AC_DEFUN([GMERLIN_CHECK_OPENGL],[
 AH_TEMPLATE([HAVE_GL],[OpenGL available])
 AH_TEMPLATE([HAVE_GLX],[GLX available])
+AH_TEMPLATE([HAVE_EGL],[EGL available])
 
 dnl
 dnl Search for OpenGL libraries
@@ -1586,6 +1587,26 @@ GLX_LIBS=$LIBS
 
 LIBS="$OLD_LIBS"
 
+dnl
+dnl Check for EGL
+dnl
+
+OLD_LIBS=$LIBS
+
+have_EGL="true"
+AC_SEARCH_LIBS([eglGetCurrentDisplay], [GL EGL], [], [have_EGL="false"], [])
+
+if test "x$have_GL" = "xtrue"; then
+AC_TRY_RUN([
+#include <EGL/egl.h>
+int main() { if(0) eglGetCurrentDisplay(); return 0;}],[],[have_EGL="false"])
+fi
+
+EGL_LIBS=$LIBS
+
+LIBS="$OLD_LIBS"
+
+
 if test "x$have_GL" = "xtrue"; then
 AC_DEFINE(HAVE_GL)
 
@@ -1593,15 +1614,22 @@ if test "x$have_GLX" = "xtrue"; then
 AC_DEFINE(HAVE_GLX)
 fi
 
+if test "x$have_EGL" = "xtrue"; then
+AC_DEFINE(HAVE_EGL)
+fi
+
 fi
 
 AM_CONDITIONAL(HAVE_GL, test x$have_GL = xtrue)
 AM_CONDITIONAL(HAVE_GLX, test x$have_GLX = xtrue)
+AM_CONDITIONAL(HAVE_EGL, test x$have_EGL = xtrue)
 
 AC_SUBST(GL_CFLAGS)
 AC_SUBST(GL_LIBS)
 AC_SUBST(GLX_CFLAGS)
 AC_SUBST(GLX_LIBS)
+AC_SUBST(EGL_CFLAGS)
+AC_SUBST(EGL_LIBS)
 
 ])
 

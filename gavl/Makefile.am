@@ -69,15 +69,38 @@ hw_libva_x11_cflags =
 hw_libva_x11_libs   =
 endif
 
+if HAVE_GL
+hw_gl_sources = hw_gl.c
+hw_gl_cflags = @GL_CFLAGS@
+hw_gl_libs =   @GL_LIBS@
+else
+hw_gl_sources = 
+hw_gl_cflags = 
+hw_gl_libs = 
+endif
+
+
 if HAVE_GLX
 hw_glx_sources = hw_glx.c
-hw_glx_cflags = @GL_CFLAGS@ @GLX_CFLAGS@
-hw_glx_libs = @GL_LIBS@ @GLX_LIBS@
+hw_glx_cflags = @GLX_CFLAGS@
+hw_glx_libs =   @GLX_LIBS@
 else
 hw_glx_sources = 
 hw_glx_cflags = 
 hw_glx_libs = 
 endif
+
+if HAVE_EGL
+hw_egl_sources = hw_egl.c
+hw_egl_cflags = @EGL_CFLAGS@
+hw_egl_libs =   @EGL_LIBS@
+else
+hw_egl_sources = 
+hw_egl_cflags = 
+hw_egl_libs = 
+endif
+
+
 
 if HAVE_MMAL
 hw_mmal_sources = hw_mmal.c
@@ -91,7 +114,14 @@ endif
 
 
 
-AM_CFLAGS = @LIBGAVL_CFLAGS@ $(hw_libva_cflags) $(hw_libva_x11_cflags) $(hw_glx_cflags) $(hw_mmal_cflags)
+AM_CFLAGS = \
+@LIBGAVL_CFLAGS@ \
+$(hw_libva_cflags) \
+$(hw_libva_x11_cflags) \
+$(hw_gl_cflags) \
+$(hw_glx_cflags) \
+$(hw_egl_cflags) \
+$(hw_mmal_cflags)
 
 
 SUBDIRS = \
@@ -113,6 +143,8 @@ lib_LTLIBRARIES= libgavl.la
 libgavl_la_SOURCES = \
 $(hw_libva_sources) \
 $(hw_libva_x11_sources) \
+$(hw_egl_sources) \
+$(hw_gl_sources) \
 $(hw_glx_sources) \
 $(hw_mmal_sources) \
 absdiff.c \
@@ -214,7 +246,9 @@ libsamplerate/libsamplerate.la \
 @LIBGAVL_LIBS@ \
 $(hw_libva_x11_libs) \
 $(hw_libva_libs) \
+$(hw_gl_libs) \
 $(hw_glx_libs) \
+$(hw_egl_libs) \
 $(hw_mmal_libs) \
 -lpthread \
 -lm
