@@ -30,6 +30,9 @@
 #endif
 
 #include <GL/gl.h>
+
+#define EGL_EGLEXT_PROTOTYPES
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
@@ -57,6 +60,11 @@ typedef struct
   
   void * native_display;
   void * native_display_priv;
+
+  /* Function pointers */
+
+  EGLDisplay (*eglGetPlatformDisplay)(EGLenum, void *, const EGLAttrib *);
+  EGLSurface (*eglCreatePlatformWindowSurface)(EGLDisplay, EGLConfig, void *, EGLAttrib const *);
   
   } egl_t;
 
@@ -199,8 +207,12 @@ gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs, gavl_hw_type_t 
 
   priv->native_display = native_display;
   priv->native_display_priv = native_display_priv;
+
+  priv->eglGetPlatformDisplay          = (void*)eglGetProcAddress("eglGetPlatformDisplayEXT");
+  priv->eglCreatePlatformWindowSurface = (void*)eglGetProcAddress("eglCreatePlatformWindowSurfaceEXT");
   
-  if((priv->display = eglGetPlatformDisplay(platform, native_display, NULL)) == EGL_NO_DISPLAY)
+  
+  if((priv->display = priv->eglGetPlatformDisplay(platform, native_display, NULL)) == EGL_NO_DISPLAY)
     goto fail;
 
   if(eglInitialize(priv->display, NULL, NULL) == EGL_FALSE)
@@ -237,7 +249,7 @@ void * gavl_hw_ctx_egl_get_native_display(gavl_hw_context_t * ctx)
 EGLSurface gavl_hw_ctx_egl_create_window_surface(gavl_hw_context_t * ctx, void * native_window)
   {
   egl_t * p = ctx->native;
-  return eglCreatePlatformWindowSurface(p->display, p->config, native_window, NULL);
+  return p->eglCreatePlatformWindowSurface(p->display, p->config, native_window, NULL);
   }
 
 void gavl_hw_ctx_egl_destroy_surface(gavl_hw_context_t * ctx, EGLSurface surf)
