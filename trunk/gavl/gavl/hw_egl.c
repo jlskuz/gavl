@@ -23,14 +23,22 @@
 #include <stdio.h>
 #include <string.h>
 
-// #include <X11/Xlib.h>
+#include <config.h>
+
+#ifdef HAVE_XLIB
+#include <X11/Xlib.h>
+#endif
 
 #include <GL/gl.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 
 #include <gavl/gavl.h>
 #include <gavl/hw_gl.h>
 #include <gavl/hw_egl.h>
+#include <gavl/log.h>
+#define LOG_DOMAIN "egl"
 
 #include <hw_private.h>
 
@@ -43,6 +51,12 @@ typedef struct
 
   /* If off-screen rendering is used */
   EGLSurface surf;
+
+  /* Current rendering target */
+  EGLSurface current_surf;
+  
+  void * native_display;
+  void * native_display_priv;
   
   } egl_t;
 
@@ -146,18 +160,51 @@ static const gavl_hw_funcs_t funcs =
     .overlay_format_adjust  = gavl_gl_adjust_video_format,
   };
 
-gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs)
+gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs, gavl_hw_type_t type, void * native_display)
   {
   egl_t * priv;
 
   EGLint num_configs = 0;
+
+  void * native_display_priv = NULL;
+  EGLenum platform;
+
+  eglBindAPI(EGL_OPENGL_API);
+  
+  switch(type)
+    {
+    case GAVL_HW_NONE:  // Autodetect
+      break;
+    case GAVL_HW_EGL_X11:  // X11
+#ifdef HAVE_XLIB
+      if(!native_display)
+        {
+        native_display_priv = XOpenDisplay(NULL);
+        native_display = native_display_priv;
+        }
+      /* X11 connection failed */
+      if(!native_display)
+        return NULL;
+      platform = EGL_PLATFORM_X11_EXT;
+#else
+      gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "Compiled without XLIB support");
+      return NULL;
+#endif
+      break;
+    default:
+      return NULL;
+    }
   
   priv = calloc(1, sizeof(*priv));
 
-  if((priv->display = eglGetDisplay(EGL_DEFAULT_DISPLAY)) == EGL_NO_DISPLAY)
+  priv->native_display = native_display;
+  priv->native_display_priv = native_display_priv;
+  
+  if((priv->display = eglGetPlatformDisplay(platform, native_display, NULL)) == EGL_NO_DISPLAY)
     goto fail;
 
-  eglInitialize(priv->display, NULL, NULL);
+  if(eglInitialize(priv->display, NULL, NULL) == EGL_FALSE)
+    goto fail;
   
   if(eglChooseConfig(priv->display, attrs, &priv->config, 1, &num_configs) == EGL_FALSE)
     goto fail;
@@ -170,7 +217,7 @@ gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs)
 
   priv->surf = EGL_NO_SURFACE;
   
-  return gavl_hw_context_create_internal(priv, &funcs, GAVL_HW_EGL);
+  return gavl_hw_context_create_internal(priv, &funcs, type);
   
   fail:
 
@@ -178,6 +225,25 @@ gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs)
     destroy_native_egl(priv);
 
   return NULL;
+  }
+
+void * gavl_hw_ctx_egl_get_native_display(gavl_hw_context_t * ctx)
+  {
+  egl_t * p = ctx->native;
+  
+  return p->native_display;
+  }
+
+EGLSurface gavl_hw_ctx_egl_create_window_surface(gavl_hw_context_t * ctx, void * native_window)
+  {
+  egl_t * p = ctx->native;
+  return eglCreatePlatformWindowSurface(p->display, p->config, native_window, NULL);
+  }
+
+void gavl_hw_ctx_egl_destroy_surface(gavl_hw_context_t * ctx, EGLSurface surf)
+  {
+  egl_t * p = ctx->native;
+  eglDestroySurface(p->display, surf);
   }
 
 #if 0
@@ -218,19 +284,20 @@ void gavl_hw_egl_set_current(gavl_hw_context_t * ctx, EGLSurface surf)
   
   if(surf == EGL_NO_SURFACE)
     {
-
     if(p->surf == EGL_NO_SURFACE)
       {
       p->surf = eglCreatePbufferSurface(p->display,
                                         p->config,
                                         surface_attribs); 
       }
-    eglMakeCurrent(p->display, p->surf, p->surf, p->context);
+    p->current_surf = p->surf;
     
     }
   else
-    eglMakeCurrent(p->display, surf, surf, p->context);
+    p->current_surf = surf;
   
+  if(!eglMakeCurrent(p->display, p->current_surf, p->current_surf, p->context))
+    fprintf(stderr, "eglMakeCurrent failed\n");
   }
 
 void gavl_hw_egl_unset_current(gavl_hw_context_t * ctx)
@@ -240,4 +307,13 @@ void gavl_hw_egl_unset_current(gavl_hw_context_t * ctx)
   //  fprintf(stderr, "gavl_hw_glx_unset %p\n", ctx);
 
   eglMakeCurrent(p->display, EGL_NO_CONTEXT, EGL_NO_SURFACE, EGL_NO_SURFACE);
+  p->current_surf = EGL_NO_SURFACE;
+  }
+
+void gavl_hw_egl_swap_buffers(gavl_hw_context_t * ctx)
+  {
+  egl_t * p = ctx->native;
+  
+  eglSwapBuffers(p->display, p->current_surf);
+ 
   }

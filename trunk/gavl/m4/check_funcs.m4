@@ -1872,6 +1872,8 @@ have_x="false"
 X_CFLAGS=""
 X_LIBS=""
 
+AH_TEMPLATE([HAVE_XLIB],
+            [Do we have xlib installed?])
 
 AC_PATH_X
 
@@ -1896,6 +1898,7 @@ fi
 
 if test x$have_x = xtrue; then
   X_LIBS="$X_LIBS -lXext"
+  AC_DEFINE([HAVE_XLIB])
 fi
 
 
