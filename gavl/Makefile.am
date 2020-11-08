@@ -121,6 +121,7 @@ $(hw_libva_x11_cflags) \
 $(hw_gl_cflags) \
 $(hw_glx_cflags) \
 $(hw_egl_cflags) \
+-I/usr/include \
 $(hw_mmal_cflags)
 
 
