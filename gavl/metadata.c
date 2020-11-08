@@ -550,7 +550,10 @@ gavl_dictionary_get_image_max_proto(const gavl_dictionary_t * m,
     if(*uri == '/')
       {
       if(access(uri, R_OK))
+        {
+        i++;
         continue;
+        }
       }
     
     if((i_max < 0) || ((val_w > 0) && (w_max < val_w)))
