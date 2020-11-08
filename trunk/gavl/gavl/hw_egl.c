@@ -63,8 +63,8 @@ typedef struct
 
   /* Function pointers */
 
-  EGLDisplay (*eglGetPlatformDisplay)(EGLenum, void *, const EGLAttribKHR *);
-  EGLSurface (*eglCreatePlatformWindowSurface)(EGLDisplay, EGLConfig, void *, const EGLAttribKHR *);
+  EGLDisplay (*eglGetPlatformDisplay)(EGLenum, void *, const EGLAttrib*);
+  EGLSurface (*eglCreatePlatformWindowSurface)(EGLDisplay, EGLConfig, void *, const EGLAttrib *);
   
   } egl_t;
 
