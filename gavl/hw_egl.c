@@ -45,6 +45,10 @@
 
 #include <hw_private.h>
 
+#ifndef EGL_PLATFORM_X11_EXT
+#define EGL_PLATFORM_X11_EXT 0x31D5
+#endif
+
 
 typedef struct
   {
@@ -63,8 +67,14 @@ typedef struct
 
   /* Function pointers */
 
-  EGLDisplay (*eglGetPlatformDisplay)(EGLenum, void *, const EGLAttrib*);
-  EGLSurface (*eglCreatePlatformWindowSurface)(EGLDisplay, EGLConfig, void *, const EGLAttrib *);
+  /* Originally the last argument the next 2 functions  const EGLAttrib*.
+   * We change it to void* to enable compilation against older GLE headers
+   * (e.g. on Raspbian).
+   * We don't use them anyway.
+   */
+  
+  EGLDisplay (*eglGetPlatformDisplay)(EGLenum, void *, const void*);
+  EGLSurface (*eglCreatePlatformWindowSurface)(EGLDisplay, EGLConfig, void *, const void*);
   
   } egl_t;
 
