@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 /* Time <-> String */
 
@@ -498,6 +499,7 @@ gavl_dictionary_get_image_max_proto(const gavl_dictionary_t * m,
   int val_w = -1;
   int val_h = -1;
   const char * val_string;
+  const char * uri;
   
   while((dict = get_image(m, key, i)))
     {
@@ -534,14 +536,23 @@ gavl_dictionary_get_image_max_proto(const gavl_dictionary_t * m,
       continue;
       }
 
-    if(protocol && (val_string = gavl_dictionary_get_string(dict, GAVL_META_URI)) &&
-       (!gavl_string_starts_with(val_string, protocol) ||
-        !gavl_string_starts_with(val_string + strlen(protocol), "://")))
+    uri = gavl_dictionary_get_string(dict, GAVL_META_URI);
+    
+    if(protocol && 
+       (!gavl_string_starts_with(uri, protocol) ||
+        !gavl_string_starts_with(uri + strlen(protocol), "://")))
       {
       i++;
       continue;
       }
-      
+
+    /* Check if the file is accessible */
+    if(*uri == '/')
+      {
+      if(access(uri, R_OK))
+        continue;
+      }
+    
     if((i_max < 0) || ((val_w > 0) && (w_max < val_w)))
       {
       i_max = i;
