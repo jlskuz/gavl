@@ -22,9 +22,12 @@
 #include <GL/gl.h>
 #include <stdlib.h>
 
+#include <config.h>
 
 #include <gavl/gavl.h>
 #include <gavl/hw_gl.h>
+#include <gavl/log.h>
+#define LOG_DOMAIN "gl"
 
 #include <hw_private.h>
 
@@ -36,13 +39,13 @@ static const struct
   }
 pixelformats[] =
   {
-    { GAVL_RGB_24,     GL_RGB,  GL_UNSIGNED_BYTE },
-    { GAVL_RGBA_32,    GL_RGBA, GL_UNSIGNED_BYTE },
-    { GAVL_RGB_48,     GL_RGB,  GL_SHORT },
-    { GAVL_RGBA_64,    GL_RGBA, GL_SHORT },
-    { GAVL_RGB_FLOAT,  GL_RGB,  GL_FLOAT },
-    { GAVL_RGBA_FLOAT, GL_RGBA, GL_FLOAT },
-    { GAVL_PIXELFORMAT_NONE    /* End */ },
+   //   { GAVL_RGB_24,     GL_RGB,  GL_UNSIGNED_BYTE },
+   { GAVL_RGBA_32,    GL_RGBA, GL_UNSIGNED_BYTE },
+   //   { GAVL_RGB_48,     GL_RGB,  GL_SHORT },
+   { GAVL_RGBA_64,    GL_RGBA, GL_SHORT },
+   //   { GAVL_RGB_FLOAT,  GL_RGB,  GL_FLOAT },
+   { GAVL_RGBA_FLOAT, GL_RGBA, GL_FLOAT },
+   { GAVL_PIXELFORMAT_NONE    /* End */ },
   };
 
 #define NUM_PIXELFORMATS (sizeof(pixelformats)/sizeof(pixelformats[0]))
@@ -134,6 +137,8 @@ GLuint gavl_gl_create_texture(const gavl_video_format_t * fmt)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+  gavl_gl_flush_errors();
   
   glTexImage2D(GL_TEXTURE_2D, 0,
                GL_RGBA,
@@ -144,6 +149,8 @@ GLuint gavl_gl_create_texture(const gavl_video_format_t * fmt)
                type,
                NULL);
 
+  gavl_gl_log_error("glTexImage2D");
+  
   return tex;
   }
 
@@ -163,6 +170,57 @@ void gavl_gl_frame_to_ram(const gavl_video_format_t * fmt,
 
   }
 
+static const struct
+  {
+  GLenum err;
+  const char * msg;
+  }
+error_codes[] =
+  {
+    { GL_INVALID_ENUM,                  "Invalid enum"      },
+    { GL_INVALID_VALUE,                 "Invalid value"     },
+    { GL_INVALID_OPERATION,             "Invalid operation" },
+    { GL_STACK_OVERFLOW,                "Stack overflow"    },
+    { GL_STACK_UNDERFLOW,               "Stack underflow"   },
+    { GL_OUT_OF_MEMORY,                 "Out of memory"     },
+    { GL_INVALID_FRAMEBUFFER_OPERATION, "Invalid framebuffer operation" },
+    { 0, NULL                          },
+  };
+
+const char * gavl_gl_get_error_string(GLenum err)
+  {
+  int idx = 0;
+
+  if(!err)
+    return "No error";
+  
+  while(error_codes[idx].msg)
+    {
+    if(error_codes[idx].err == err)
+      return error_codes[idx].msg;
+    idx++;
+    }
+  return "Unkown error";
+  }
+
+void gavl_gl_log_error(const char * funcname)
+  {
+  GLenum err;
+  
+  while((err = glGetError()))
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "%s failed: %s\n",
+             funcname, gavl_gl_get_error_string(err));
+    }
+  
+  }
+
+void gavl_gl_flush_errors()
+  {
+  while((glGetError()))
+    ;
+  }
+
 void gavl_gl_frame_to_hw(const gavl_video_format_t * fmt,
                          GLuint dst,
                          gavl_video_frame_t * src)
@@ -177,6 +235,6 @@ void gavl_gl_frame_to_hw(const gavl_video_format_t * fmt,
   glTexSubImage2D(GL_TEXTURE_2D,
                   0, 0, 0, fmt->image_width, fmt->image_height,
                   format, type, src->planes[0]);
-
-
+  
+  //  gavl_gl_log_error("glTexSubImage2D");
   }
