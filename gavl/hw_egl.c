@@ -178,6 +178,13 @@ static const gavl_hw_funcs_t funcs =
     .overlay_format_adjust  = gavl_gl_adjust_video_format,
   };
 
+static const EGLint
+gles_attributes[] =
+  {
+    EGL_CONTEXT_MAJOR_VERSION, 3,
+    EGL_NONE
+  };
+
 gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs, gavl_hw_type_t type, void * native_display)
   {
   egl_t * priv;
@@ -187,13 +194,35 @@ gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs, gavl_hw_type_t 
   void * native_display_priv = NULL;
   EGLenum platform;
 
-  eglBindAPI(EGL_OPENGL_API);
+  const EGLint * attributes = NULL;
+  
+  //  
   
   switch(type)
     {
     case GAVL_HW_NONE:  // Autodetect
       break;
-    case GAVL_HW_EGL_X11:  // X11
+    case GAVL_HW_EGL_GLES_X11:  // X11
+      attributes = gles_attributes;
+
+#ifdef HAVE_XLIB
+      if(!native_display)
+        {
+        native_display_priv = XOpenDisplay(NULL);
+        native_display = native_display_priv;
+        }
+      /* X11 connection failed */
+      if(!native_display)
+        return NULL;
+      platform = EGL_PLATFORM_X11_EXT;
+#else
+      gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "Compiled without XLIB support");
+      return NULL;
+#endif
+      break;
+      
+    case GAVL_HW_EGL_GL_X11:  // X11
+      eglBindAPI(EGL_OPENGL_API);
 #ifdef HAVE_XLIB
       if(!native_display)
         {
@@ -234,9 +263,9 @@ gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs, gavl_hw_type_t 
   if((priv->context = eglCreateContext(priv->display,
                                        priv->config,
                                        EGL_NO_CONTEXT,
-                                       NULL)) == EGL_NO_CONTEXT)
+                                       attributes)) == EGL_NO_CONTEXT)
     goto fail;
-
+  
   priv->surf = EGL_NO_SURFACE;
   
   return gavl_hw_context_create_internal(priv, &funcs, type);

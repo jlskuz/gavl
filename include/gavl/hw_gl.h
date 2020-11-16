@@ -43,3 +43,8 @@ void gavl_gl_frame_to_hw(const gavl_video_format_t * fmt,
                          gavl_video_frame_t * src);
 
 
+/* Generic utilities */
+
+const char * gavl_gl_get_error_string(GLenum err);
+void gavl_gl_log_error(const char * funcname);
+void gavl_gl_flush_errors();
