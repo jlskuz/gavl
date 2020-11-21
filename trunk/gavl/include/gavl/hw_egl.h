@@ -36,6 +36,9 @@ GAVL_PUBLIC void gavl_hw_egl_swap_buffers(gavl_hw_context_t * ctx);
 GAVL_PUBLIC EGLSurface gavl_hw_ctx_egl_create_window_surface(gavl_hw_context_t * ctx, void * native_window);
 GAVL_PUBLIC void gavl_hw_ctx_egl_destroy_surface(gavl_hw_context_t * ctx, EGLSurface surf);
 
+GAVL_PUBLIC EGLDisplay gavl_hw_ctx_egl_get_egl_display(gavl_hw_context_t * ctx);
+
+
 
 GAVL_PUBLIC void gavl_hw_egl_set_current(gavl_hw_context_t * ctx, EGLSurface surf);
 GAVL_PUBLIC void gavl_hw_egl_unset_current(gavl_hw_context_t * ctx);
