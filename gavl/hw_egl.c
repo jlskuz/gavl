@@ -299,6 +299,12 @@ void gavl_hw_ctx_egl_destroy_surface(gavl_hw_context_t * ctx, EGLSurface surf)
   eglDestroySurface(p->display, surf);
   }
 
+EGLDisplay gavl_hw_ctx_egl_get_egl_display(gavl_hw_context_t * ctx)
+  {
+  egl_t * p = ctx->native;
+  return p->display;
+  }
+
 #if 0
 
 Display * gavl_hw_ctx_egl_get_display(gavl_hw_context_t * ctx)
