@@ -181,8 +181,10 @@ static const gavl_hw_funcs_t funcs =
 static const EGLint
 gles_attributes[] =
   {
-    EGL_CONTEXT_MAJOR_VERSION, 3,
-    EGL_NONE
+#ifdef EGL_CONTEXT_MAJOR_VERSION
+   EGL_CONTEXT_MAJOR_VERSION, 3,
+#endif
+   EGL_NONE
   };
 
 gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs, gavl_hw_type_t type, void * native_display)
