@@ -31,6 +31,14 @@
 
 #include <hw_private.h>
 
+/*
+
+1) *egl_image = eglCreateImageKHR(display, EGL_NO_CONTEXT, EGL_IMAGE_BRCM_MULTIMEDIA, mmal_buffer_opaque, NULL);
+2) glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, *egl_image);
+
+*/
+
+
 static const struct
   {
   const gavl_pixelformat_t fmt;
