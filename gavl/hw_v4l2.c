@@ -87,6 +87,25 @@ capabilities[] =
    
   };
 
+static void enum_formats(int fd, int type)
+  {
+  int idx = 0;
+  struct v4l2_fmtdesc fmt;
+
+  while(1)
+    {
+    fmt.index = idx++;
+    fmt.type = type;
+
+    if(my_ioctl(fd, VIDIOC_ENUM_FMT, &fmt) == -1)
+      {
+      return;
+      }
+    
+    gavl_dprintf("  Format %d: %s\n", idx, fmt.description);
+    
+    }
+  }
 
 void gavl_v4l_device_info(const char * dev)
   {
@@ -128,6 +147,25 @@ void gavl_v4l_device_info(const char * dev)
 
   if(flag_str)
     free(flag_str);
+
+
+  if(cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT | V4L2_CAP_VIDEO_M2M_MPLANE | V4L2_CAP_VIDEO_M2M))
+    {
+    gavl_dprintf("Output formats\n");
+    enum_formats(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT);
+    
+    gavl_dprintf("Output formats (planar)\n");
+    enum_formats(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE);
+    }
+
+  if(cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VIDEO_M2M_MPLANE | V4L2_CAP_VIDEO_M2M))
+    {
+    gavl_dprintf("Capture formats\n");
+    enum_formats(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE);
+
+    gavl_dprintf("Capture formats (planar)\n");
+    enum_formats(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE);
+    }
   
   close(fd);
 
