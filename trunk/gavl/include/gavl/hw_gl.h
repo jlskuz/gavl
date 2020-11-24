@@ -21,30 +21,30 @@
 
 // #include <gavl/gavldefs.h>
 
-int gavl_get_gl_format(gavl_pixelformat_t fmt, GLenum * format, GLenum * type);
+GAVL_PUBLIC int gavl_get_gl_format(gavl_pixelformat_t fmt, GLenum * format, GLenum * type);
 
-gavl_pixelformat_t * gavl_gl_get_image_formats(gavl_hw_context_t * ctx);
-gavl_pixelformat_t * gavl_gl_get_overlay_formats(gavl_hw_context_t * ctx);
+GAVL_PUBLIC gavl_pixelformat_t * gavl_gl_get_image_formats(gavl_hw_context_t * ctx);
+GAVL_PUBLIC gavl_pixelformat_t * gavl_gl_get_overlay_formats(gavl_hw_context_t * ctx);
 
 
-void gavl_gl_adjust_video_format(gavl_hw_context_t * ctx,
+GAVL_PUBLIC void gavl_gl_adjust_video_format(gavl_hw_context_t * ctx,
                                  gavl_video_format_t * fmt);
 
 
 /* The following functions require a current GL context */
-GLuint gavl_gl_create_texture(const gavl_video_format_t * fmt);
+GAVL_PUBLIC GLuint gavl_gl_create_texture(const gavl_video_format_t * fmt);
 
-void gavl_gl_frame_to_ram(const gavl_video_format_t * fmt,
+GAVL_PUBLIC void gavl_gl_frame_to_ram(const gavl_video_format_t * fmt,
                           gavl_video_frame_t * dst,
                           GLuint src);
 
-void gavl_gl_frame_to_hw(const gavl_video_format_t * fmt,
+GAVL_PUBLIC void gavl_gl_frame_to_hw(const gavl_video_format_t * fmt,
                          GLuint dst,
                          gavl_video_frame_t * src);
 
 
 /* Generic utilities */
 
-const char * gavl_gl_get_error_string(GLenum err);
-void gavl_gl_log_error(const char * funcname);
-void gavl_gl_flush_errors();
+GAVL_PUBLIC const char * gavl_gl_get_error_string(GLenum err);
+GAVL_PUBLIC void gavl_gl_log_error(const char * funcname);
+GAVL_PUBLIC void gavl_gl_flush_errors();
