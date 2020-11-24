@@ -112,6 +112,12 @@ hw_mmal_cflags =
 hw_mmal_libs   =
 endif
 
+if HAVE_V4L2
+hw_v4l2_sources = hw_v4l2.c
+else
+hw_v4l2_sources = 
+endif
+
 
 
 AM_CFLAGS = \
@@ -148,6 +154,7 @@ $(hw_egl_sources) \
 $(hw_gl_sources) \
 $(hw_glx_sources) \
 $(hw_mmal_sources) \
+$(hw_v4l2_sources) \
 absdiff.c \
 arith128.c \
 array.c \

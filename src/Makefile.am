@@ -6,6 +6,12 @@ else
 libva_x11_programs = 
 endif
 
+if HAVE_V4L2
+v4l2_programs = v4linfo
+else
+v4l2_programs = 
+endif
+
 
 if HAVE_LIBPNG
 png_programs = \
@@ -22,6 +28,7 @@ endif
 noinst_PROGRAMS = \
 $(png_programs) \
 $(libva_x11_programs) \
+$(v4l2_programs) \
 benchmark \
 colorspace_time \
 deinterlace_time \
@@ -57,6 +64,9 @@ value_test_LDADD = -lm ../gavl/libgavl.la
 
 dump_frame_table_SOURCES = dump_frame_table.c
 dump_frame_table_LDADD = ../gavl/libgavl.la
+
+v4linfo_SOURCES = v4linfo.c
+v4linfo_LDADD = -lm ../gavl/libgavl.la
 
 
 colorspace_test_SOURCES = colorspace_test.c
