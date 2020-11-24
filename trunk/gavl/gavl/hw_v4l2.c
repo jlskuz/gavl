@@ -75,8 +75,11 @@ capabilities[] =
    { V4L2_CAP_READWRITE, "read/write" },                    // read/write systemcalls
    { V4L2_CAP_ASYNCIO, "Async I/O" },                       // async I/O
    { V4L2_CAP_STREAMING, "Streaming" },                     // streaming I/O ioctls
-   { V4L2_CAP_META_OUTPUT, "metadata output" },             // Is a metadata output device
 
+#ifdef V4L2_CAP_META_OUTPUT
+   { V4L2_CAP_META_OUTPUT, "metadata output" },             // Is a metadata output device
+#endif
+   
    { V4L2_CAP_TOUCH, "Touch" },                             // Is a touch device
 
    { V4L2_CAP_DEVICE_CAPS, "Device caps" },                 // sets device capabilities field
