@@ -10,10 +10,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <glob.h>
+#include <string.h>
 
 
 #include <gavl/gavl.h>
 #include <gavl/compression.h>
+#include <gavl/metatags.h>
 
 #include <gavl/log.h>
 #define LOG_DOMAIN "v4l"
@@ -103,7 +105,12 @@ static void enum_formats(int fd, int type)
       return;
       }
     
-    gavl_dprintf("  Format %d: %s\n", idx, fmt.description);
+    gavl_dprintf("  Format %d: %c%c%c%c %s\n", idx,
+                 fmt.pixelformat & 0xff,
+                 (fmt.pixelformat>>8) & 0xff,
+                 (fmt.pixelformat>>16) & 0xff,
+                 (fmt.pixelformat>>24) & 0xff,
+                 fmt.description);
     
     }
   }
@@ -196,14 +203,98 @@ void gavl_v4l_device_infos()
 static gavl_v4l_device_type_t detect_device_type(int fd, struct v4l2_capability * cap)
   {
   /* Encoder, Decoder, Converter Check in- and output formats */
-
+  
   if(cap->capabilities & (V4L2_CAP_VIDEO_M2M_MPLANE | V4L2_CAP_VIDEO_M2M))
     {
-    int in_compressed = 0;
-    int out_compressed = 0;
+    int idx = 0;
+    int reads_compressed = 0;
+    int writes_compressed = 0;
+    struct v4l2_fmtdesc fmt;
 
-    
-    
+    if(cap->capabilities & V4L2_CAP_VIDEO_M2M_MPLANE)
+      {
+      idx = 0;
+      
+      while(1)
+        {
+        fmt.index = idx++;
+        fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+        
+        if(my_ioctl(fd, VIDIOC_ENUM_FMT, &fmt) == -1)
+          break;
+
+        if(fmt.flags & V4L2_FMT_FLAG_COMPRESSED)
+          {
+          reads_compressed = 1;
+          break;
+          }
+        }
+
+      idx = 0;
+      
+      while(1)
+        {
+        fmt.index = idx++;
+        fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+        
+        if(my_ioctl(fd, VIDIOC_ENUM_FMT, &fmt) == -1)
+          break;
+
+        if(fmt.flags & V4L2_FMT_FLAG_COMPRESSED)
+          {
+          writes_compressed = 1;
+          break;
+          }
+        }
+      
+      }
+    else if(cap->capabilities & V4L2_CAP_VIDEO_M2M)
+      {
+      
+      idx = 0;
+      
+      while(1)
+        {
+        fmt.index = idx++;
+        fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        
+        if(my_ioctl(fd, VIDIOC_ENUM_FMT, &fmt) == -1)
+          break;
+
+        if(fmt.flags & V4L2_FMT_FLAG_COMPRESSED)
+          {
+          reads_compressed = 1;
+          break;
+          }
+        }
+      
+      idx = 0;
+      
+      while(1)
+        {
+        fmt.index = idx++;
+        fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+        
+        if(my_ioctl(fd, VIDIOC_ENUM_FMT, &fmt) == -1)
+          break;
+
+        if(fmt.flags & V4L2_FMT_FLAG_COMPRESSED)
+          {
+          writes_compressed = 1;
+          break;
+          }
+        }
+      
+      }
+
+    if(reads_compressed && !writes_compressed)
+      return GAVL_V4L_DEVICE_ENCODER;
+    else if(!reads_compressed && writes_compressed)
+      return GAVL_V4L_DEVICE_DECODER;
+    else if(!reads_compressed && !writes_compressed)
+      return GAVL_V4L_DEVICE_CONVERTER;
+    else
+      return GAVL_V4L_DEVICE_UNKNOWN;
     }
 
   else if(cap->capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_CAPTURE))
@@ -219,19 +310,49 @@ static gavl_v4l_device_type_t detect_device_type(int fd, struct v4l2_capability 
   return GAVL_V4L_DEVICE_UNKNOWN;
   }
 
-gavl_array_t * gavl_v4l_devices_scan_by_type(int type_mask)
+static const struct
+  {
+  gavl_v4l_device_type_t type;
+  const char * name;
+  }
+device_types[] =
+  {
+    { GAVL_V4L_DEVICE_SOURCE,  "Source"  },
+    { GAVL_V4L_DEVICE_SINK,    "Sink"    },
+    { GAVL_V4L_DEVICE_ENCODER, "Encoder" },
+    { GAVL_V4L_DEVICE_DECODER, "Decoder" },
+    { GAVL_V4L_DEVICE_UNKNOWN, "Unknown" },
+    { },
+  };
+
+static const char * get_type_label(gavl_v4l_device_type_t type)
+  {
+  int idx = 0;
+  
+  while(device_types[idx].name)
+    {
+    if(type == device_types[idx].type)
+      return device_types[idx].name;
+    idx++;
+    }
+  return NULL;
+  }
+
+void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
   {
   int i;
   glob_t g;
+
+  gavl_value_t dev_val;
+  gavl_dictionary_t * dev;
   
   glob("/dev/video*", 0, NULL, &g);
 
   for(i = 0; i < g.gl_pathc; i++)
     {
-    int do_continue = 0;
     int fd;
     gavl_v4l_device_type_t type;
-
+    
     struct v4l2_capability cap;
     memset(&cap, 0, sizeof(cap));
     
@@ -244,29 +365,34 @@ gavl_array_t * gavl_v4l_devices_scan_by_type(int type_mask)
       continue;
       } 
 
+    type = detect_device_type(fd, &cap);
     
-    
-    if(type_mask)
+    if(type_mask && !(type & type_mask))
       {
-      do_continue = 1;
+      close(fd);
+      continue;
+      }
 
-      
-      
-      }
+    gavl_value_init(&dev_val);
+    dev = gavl_value_set_dictionary(&dev_val);
+
+    gavl_dictionary_set_string(dev, GAVL_META_LABEL, (const char*)cap.card);
+    gavl_dictionary_set_string(dev, GAVL_META_URI, g.gl_pathv[i]);
+
+    gavl_dictionary_set_int(dev, GAVL_V4L_TYPE, type);
     
-    if(cap.capabilities & (V4L2_CAP_VIDEO_M2M_MPLANE | V4L2_CAP_VIDEO_M2M))
-      {
-      
-      }
+    gavl_dictionary_set_string(dev, GAVL_V4L_TYPE_STRING, get_type_label(type));
+
+    gavl_array_splice_val_nocopy(ret, -1, 0, &dev_val);
     
     }
   
   globfree(&g);
   }
 
-gavl_array_t * gavl_v4l_devices_scan()
+void gavl_v4l_devices_scan(gavl_array_t * ret)
   {
-  return gavl_v4l_devices_scan_by_type(0);
+  return gavl_v4l_devices_scan_by_type(0, ret);
   }
 
   
