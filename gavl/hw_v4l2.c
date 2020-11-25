@@ -321,6 +321,7 @@ device_types[] =
     { GAVL_V4L_DEVICE_SINK,    "Sink"    },
     { GAVL_V4L_DEVICE_ENCODER, "Encoder" },
     { GAVL_V4L_DEVICE_DECODER, "Decoder" },
+    { GAVL_V4L_DEVICE_CONVERTER, "Converter" },
     { GAVL_V4L_DEVICE_UNKNOWN, "Unknown" },
     { },
   };
