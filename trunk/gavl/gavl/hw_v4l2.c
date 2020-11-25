@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <glob.h>
 
 
 #include <gavl/gavl.h>
@@ -149,20 +150,26 @@ void gavl_v4l_device_info(const char * dev)
     free(flag_str);
 
 
-  if(cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT | V4L2_CAP_VIDEO_M2M_MPLANE | V4L2_CAP_VIDEO_M2M))
+  if(cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT | V4L2_CAP_VIDEO_M2M))
     {
     gavl_dprintf("Output formats\n");
     enum_formats(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT);
-    
+    }
+  
+  if(cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
+    {
     gavl_dprintf("Output formats (planar)\n");
     enum_formats(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE);
     }
 
-  if(cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VIDEO_M2M_MPLANE | V4L2_CAP_VIDEO_M2M))
+  if(cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VIDEO_M2M))
     {
     gavl_dprintf("Capture formats\n");
     enum_formats(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE);
-
+    }
+  
+  if(cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
+    {
     gavl_dprintf("Capture formats (planar)\n");
     enum_formats(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE);
     }
@@ -184,7 +191,82 @@ void gavl_v4l_device_infos()
     gavl_v4l_device_info(dev);
     free(dev);
     }
+  }
+
+static gavl_v4l_device_type_t detect_device_type(int fd, struct v4l2_capability * cap)
+  {
+  /* Encoder, Decoder, Converter Check in- and output formats */
+
+  if(cap->capabilities & (V4L2_CAP_VIDEO_M2M_MPLANE | V4L2_CAP_VIDEO_M2M))
+    {
+    int in_compressed = 0;
+    int out_compressed = 0;
+
+    
+    
+    }
+
+  else if(cap->capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_CAPTURE))
+    {
+    return GAVL_V4L_DEVICE_SOURCE;
+    }
+
+  else if(cap->capabilities & (V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_OUTPUT))
+    {
+    return GAVL_V4L_DEVICE_SINK;
+    }
   
+  return GAVL_V4L_DEVICE_UNKNOWN;
+  }
+
+gavl_array_t * gavl_v4l_devices_scan_by_type(int type_mask)
+  {
+  int i;
+  glob_t g;
+  
+  glob("/dev/video*", 0, NULL, &g);
+
+  for(i = 0; i < g.gl_pathc; i++)
+    {
+    int do_continue = 0;
+    int fd;
+    gavl_v4l_device_type_t type;
+
+    struct v4l2_capability cap;
+    memset(&cap, 0, sizeof(cap));
+    
+    if((fd = open(g.gl_pathv[i], O_RDWR /* required */ | O_NONBLOCK, 0)) < 0)
+      continue;
+    
+    if(my_ioctl(fd, VIDIOC_QUERYCAP, &cap) == -1)
+      {
+      close(fd);
+      continue;
+      } 
+
+    
+    
+    if(type_mask)
+      {
+      do_continue = 1;
+
+      
+      
+      }
+    
+    if(cap.capabilities & (V4L2_CAP_VIDEO_M2M_MPLANE | V4L2_CAP_VIDEO_M2M))
+      {
+      
+      }
+    
+    }
+  
+  globfree(&g);
+  }
+
+gavl_array_t * gavl_v4l_devices_scan()
+  {
+  return gavl_v4l_devices_scan_by_type(0);
   }
 
   
@@ -193,11 +275,12 @@ void gavl_v4l_device_infos()
 
 static const struct
   {
+  uint32_t           v4l2;
+
   gavl_pixelformat_t pixelformat;
 
-  uint32_t           v4l2;
   
-  gavl_codec_id_t compression_id;
+  gavl_codec_id_t codec_id;
   }
 pixelformats[] =
   {
@@ -297,10 +380,35 @@ pixelformats[] =
     // #define V4L2_PIX_FMT_PWC1     v4l2_fourcc('P','W','C','1') /* pwc older webcam */
     // #define V4L2_PIX_FMT_PWC2     v4l2_fourcc('P','W','C','2') /* pwc newer webcam */
     // #define V4L2_PIX_FMT_ET61X251 v4l2_fourcc('E','6','2','5') /* ET61X251 compression */
-    
+   
+   { },
   };
 
+gavl_codec_id_t gavl_v4l_pix_fmt_to_codec_id(uint32_t fmt)
+  {
+  int idx = 0;
 
+  while(pixelformats[idx].v4l2)
+    {
+    if(pixelformats[idx].v4l2 == fmt)
+      return pixelformats[idx].codec_id;
+    idx++;
+    }
+  return GAVL_CODEC_ID_NONE;
+  }
+
+gavl_pixelformat_t gavl_v4l_pix_fmt_to_pixelformat(uint32_t fmt)
+  {
+  int idx = 0;
+
+  while(pixelformats[idx].v4l2)
+    {
+    if(pixelformats[idx].v4l2 == fmt)
+      return pixelformats[idx].pixelformat;
+    idx++;
+    }
+  return GAVL_PIXELFORMAT_NONE;
+  }
    
 struct gavl_v4l_device_s
   {
@@ -309,26 +417,6 @@ struct gavl_v4l_device_s
   };
 
 gavl_v4l_device_t * gavl_v4l_device_open(const char * dev)
-  {
-  
-  }
-
-int gavl_v4l_device_reads_video(gavl_v4l_device_t * dev)
-  {
-  
-  }
-
-int gavl_v4l_device_writes_video(gavl_v4l_device_t *  dev)
-  {
-  
-  }
-
-int gavl_v4l_device_reads_packets(gavl_v4l_device_t * dev)
-  {
-
-  }
-
-int gavl_v4l_device_writes_packets(gavl_v4l_device_t * dev)
   {
   
   }
