@@ -19,12 +19,13 @@ typedef enum
  *
  */
 
-#define GAVL_V4L_TYPE "type"
+#define GAVL_V4L_TYPE        "type"
+#define GAVL_V4L_TYPE_STRING "typestr"
 
 typedef struct gavl_v4l_device_s gavl_v4l_device_t;
 
-GAVL_PUBLIC gavl_array_t * gavl_v4l_devices_scan();
-GAVL_PUBLIC gavl_array_t * gavl_v4l_devices_scan_by_type(int type_mask);
+GAVL_PUBLIC void gavl_v4l_devices_scan(gavl_array_t * ret);
+GAVL_PUBLIC void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret);
 
 GAVL_PUBLIC gavl_codec_id_t gavl_v4l_pix_fmt_to_codec_id(uint32_t fmt);
 GAVL_PUBLIC gavl_pixelformat_t gavl_v4l_pix_fmt_to_pixelformat(uint32_t fmt);
