@@ -200,6 +200,44 @@ void gavl_v4l_device_infos()
     }
   }
 
+static void query_formats(int fd, int buf_type, gavl_array_t * ret)
+  {
+  int idx = 0;
+  struct v4l2_fmtdesc fmt;
+
+  gavl_value_t val;
+  gavl_dictionary_t * dict;
+  
+  while(1)
+    {
+    memset(&fmt, 0, sizeof(fmt));
+    
+    fmt.index = idx++;
+    fmt.type = buf_type;
+  
+    if(my_ioctl(fd, VIDIOC_ENUM_FMT, &fmt) == -1)
+      break;
+
+    gavl_value_init(&val);
+    dict = gavl_value_set_dictionary(&val);
+
+    gavl_dictionary_set_int(dict, GAVL_V4L_FORMAT_V4L_PIX_FMT, fmt.pixelformat);
+    gavl_dictionary_set_int(dict, GAVL_V4L_FORMAT_V4L_FLAGS, fmt.flags);
+
+    gavl_dictionary_set_string(dict, GAVL_META_LABEL, (char*)fmt.description);
+
+    if(fmt.flags & V4L2_FMT_FLAG_COMPRESSED)
+      gavl_dictionary_set_int(dict, GAVL_V4L_FORMAT_GAVL_CODEC_ID,
+                              gavl_v4l_pix_fmt_to_codec_id(fmt.pixelformat));
+    else
+      gavl_dictionary_set_int(dict, GAVL_V4L_FORMAT_GAVL_PIXELFORMAT,
+                              gavl_v4l_pix_fmt_to_pixelformat(fmt.pixelformat));
+
+    gavl_array_splice_val_nocopy(ret, -1, 0, &val);
+    }
+  
+  }
+
 static gavl_v4l_device_type_t detect_device_type(int fd, struct v4l2_capability * cap)
   {
   /* Encoder, Decoder, Converter Check in- and output formats */
@@ -339,6 +377,24 @@ static const char * get_type_label(gavl_v4l_device_type_t type)
   return NULL;
   }
 
+static int formats_compressed(const gavl_array_t * arr)
+  {
+  const gavl_dictionary_t * fmt;
+  int flags;
+  
+  /* Just checking the first format should be sufficient */
+
+  if(arr->num_entries < 1)
+    return 0;
+  
+  if((fmt = gavl_value_get_dictionary(&arr->entries[0])) &&
+     gavl_dictionary_get_int(fmt, GAVL_V4L_FORMAT_V4L_FLAGS, &flags) &&
+     (flags & V4L2_FMT_FLAG_COMPRESSED))
+    return 1;
+  else
+    return 0;
+  }
+  
 void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
   {
   int i;
@@ -346,6 +402,9 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
 
   gavl_value_t dev_val;
   gavl_dictionary_t * dev;
+
+  gavl_array_t * src_formats = NULL;
+  gavl_array_t * sink_formats = NULL;
   
   glob("/dev/video*", 0, NULL, &g);
 
@@ -366,25 +425,79 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
       continue;
       } 
 
-    type = detect_device_type(fd, &cap);
-    
-    if(type_mask && !(type & type_mask))
-      {
-      close(fd);
-      continue;
-      }
-
     gavl_value_init(&dev_val);
     dev = gavl_value_set_dictionary(&dev_val);
 
     gavl_dictionary_set_string(dev, GAVL_META_LABEL, (const char*)cap.card);
     gavl_dictionary_set_string(dev, GAVL_META_URI, g.gl_pathv[i]);
-
-    gavl_dictionary_set_int(dev, GAVL_V4L_TYPE, type);
+       
+    /* Get source formats */
+    if(cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
+      {
+      src_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SRC_FORMATS);
+      query_formats(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE, src_formats);
+      }
+    else if(cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VIDEO_M2M))
+      {
+      src_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SRC_FORMATS);
+      query_formats(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE, src_formats);
+      }
     
+    /* Get output formats */
+    if(cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
+      {
+      sink_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SRC_FORMATS);
+      query_formats(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE, sink_formats);
+      }
+    else if(cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT | V4L2_CAP_VIDEO_M2M))
+      {
+      sink_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SRC_FORMATS);
+      query_formats(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT, sink_formats);
+      }
+
+    if(src_formats && !sink_formats)
+      {
+      type = GAVL_V4L_DEVICE_SOURCE;
+      
+      }
+    else if(!src_formats && sink_formats)
+      {
+      type = GAVL_V4L_DEVICE_SINK;
+      
+      }
+    else if(src_formats && sink_formats)
+      {
+      int src_compressed;
+      int sink_compressed;
+      
+      src_compressed = formats_compressed(src_formats);
+      sink_compressed = formats_compressed(sink_formats);
+
+      if(!src_compressed && sink_compressed)
+        type = GAVL_V4L_DEVICE_DECODER;
+      else if(src_compressed && !sink_compressed)
+        type = GAVL_V4L_DEVICE_ENCODER;
+      else if(!src_compressed && !sink_compressed)
+        type = GAVL_V4L_DEVICE_CONVERTER;
+      else
+        type = GAVL_V4L_DEVICE_UNKNOWN;
+      }
+    else
+      type = GAVL_V4L_DEVICE_UNKNOWN;
+    
+    gavl_dictionary_set_int(dev, GAVL_V4L_TYPE, type);
     gavl_dictionary_set_string(dev, GAVL_V4L_TYPE_STRING, get_type_label(type));
 
-    gavl_array_splice_val_nocopy(ret, -1, 0, &dev_val);
+    close(fd);
+    
+    if(type_mask && !(type & type_mask))
+      {
+      gavl_value_free(&dev_val);
+      }
+    else
+      {
+      gavl_array_splice_val_nocopy(ret, -1, 0, &dev_val);
+      }
     
     }
   
