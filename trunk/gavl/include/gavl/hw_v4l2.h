@@ -22,6 +22,17 @@ typedef enum
 #define GAVL_V4L_TYPE        "type"
 #define GAVL_V4L_TYPE_STRING "typestr"
 
+
+#define GAVL_V4L_SRC_FORMATS  "src_fmts"
+#define GAVL_V4L_SINK_FORMATS "sink_fmts"
+
+#define GAVL_V4L_FORMAT_V4L_PIX_FMT "pixfmt"
+#define GAVL_V4L_FORMAT_V4L_FLAGS   "flags"
+
+#define GAVL_V4L_FORMAT_GAVL_PIXELFORMAT "pixelformat"
+#define GAVL_V4L_FORMAT_GAVL_CODEC_ID    "codecid"
+
+
 typedef struct gavl_v4l_device_s gavl_v4l_device_t;
 
 GAVL_PUBLIC void gavl_v4l_devices_scan(gavl_array_t * ret);
