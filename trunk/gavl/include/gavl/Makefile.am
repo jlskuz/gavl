@@ -14,6 +14,7 @@ hw.h \
 hw_egl.h \
 hw_glx.h \
 hw_mmal.h \
+hw_v4l2.h \
 hw_vaapi.h \
 hw_vaapi_x11.h \
 keycodes.h \

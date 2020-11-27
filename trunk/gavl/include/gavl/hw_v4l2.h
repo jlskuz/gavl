@@ -32,17 +32,20 @@ typedef enum
 #define GAVL_V4L_FORMAT_GAVL_PIXELFORMAT "pixelformat"
 #define GAVL_V4L_FORMAT_GAVL_CODEC_ID    "codecid"
 
-
 typedef struct gavl_v4l_device_s gavl_v4l_device_t;
 
 GAVL_PUBLIC void gavl_v4l_devices_scan(gavl_array_t * ret);
 GAVL_PUBLIC void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret);
+
+GAVL_PUBLIC int gavl_v4l_has_decoder(gavl_array_t * arr, gavl_codec_id_t id);
 
 GAVL_PUBLIC gavl_codec_id_t gavl_v4l_pix_fmt_to_codec_id(uint32_t fmt);
 GAVL_PUBLIC gavl_pixelformat_t gavl_v4l_pix_fmt_to_pixelformat(uint32_t fmt);
 
 
 GAVL_PUBLIC gavl_v4l_device_t * gavl_v4l_device_open(const char * dev);
+
+GAVL_PUBLIC const char * gavl_v4l_get_decoder(const gavl_array_t * arr, gavl_codec_id_t id);
 
 
 GAVL_PUBLIC gavl_packet_sink_t * gavl_v4l_device_get_packet_sink(gavl_v4l_device_t * dev);

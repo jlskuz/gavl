@@ -508,6 +508,39 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
   globfree(&g);
   }
 
+const char * gavl_v4l_get_decoder(const gavl_array_t * arr, gavl_codec_id_t id)
+  {
+  int i, j;
+
+  const gavl_array_t * formats;
+  
+  const gavl_dictionary_t * dev;
+  const gavl_dictionary_t * fmt;
+
+  int type = GAVL_V4L_DEVICE_UNKNOWN;
+  int codec_id;
+  
+  for(i = 0; i < arr->num_entries; i++)
+    {
+    if((dev = gavl_value_get_dictionary(&arr->entries[i])) &&
+       gavl_dictionary_get_int(dev, GAVL_V4L_TYPE, &type) &&
+       (type == GAVL_V4L_DEVICE_DECODER) &&
+       (formats = gavl_dictionary_get_array(dev, GAVL_V4L_SINK_FORMATS)))
+      {
+      for(j = 0; j < formats->num_entries; j++)
+        {
+        if((fmt = gavl_value_get_dictionary(&arr->entries[j])) &&
+           gavl_dictionary_get_int(fmt, GAVL_V4L_FORMAT_GAVL_CODEC_ID, &codec_id) &&
+           (codec_id == id))
+          return gavl_dictionary_get_string(dev, GAVL_META_URI);
+        }
+      }
+    }
+  
+  return NULL;
+  }
+
+
 void gavl_v4l_devices_scan(gavl_array_t * ret)
   {
   return gavl_v4l_devices_scan_by_type(0, ret);

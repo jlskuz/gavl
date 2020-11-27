@@ -252,20 +252,7 @@ dnl
 dnl Video4linux2
 dnl
 
-have_v4l2=false
-AC_ARG_ENABLE(v4l2,
-              AC_HELP_STRING(--disable-v4l2, [Disable Video4Linux (default: autodetect)]),
-              [case "${enableval}" in
-                 yes) test_v4l2=true ;;
-                 no) test_v4l2=false ;;
-               esac],
-	       test_v4l2=true)
-
-if test x$test_v4l2 = xtrue; then
-AC_CHECK_HEADERS(linux/videodev2.h, have_v4l2=true)
-fi
-
-AM_CONDITIONAL(HAVE_V4L2, test x$have_v4l2 = xtrue)
+GMERLIN_CHECK_V4L2
 
 dnl
 dnl Now, build the final CFLAGS.
