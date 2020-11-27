@@ -446,12 +446,12 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
     /* Get output formats */
     if(cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
       {
-      sink_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SRC_FORMATS);
+      sink_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SINK_FORMATS);
       query_formats(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE, sink_formats);
       }
     else if(cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT | V4L2_CAP_VIDEO_M2M))
       {
-      sink_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SRC_FORMATS);
+      sink_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SINK_FORMATS);
       query_formats(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT, sink_formats);
       }
 
