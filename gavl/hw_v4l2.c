@@ -403,8 +403,8 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
   gavl_value_t dev_val;
   gavl_dictionary_t * dev;
 
-  gavl_array_t * src_formats = NULL;
-  gavl_array_t * sink_formats = NULL;
+  gavl_array_t * src_formats;
+  gavl_array_t * sink_formats;
   
   glob("/dev/video*", 0, NULL, &g);
 
@@ -415,6 +415,10 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
     
     struct v4l2_capability cap;
     memset(&cap, 0, sizeof(cap));
+
+    src_formats = NULL;
+    sink_formats = NULL;
+
     
     if((fd = open(g.gl_pathv[i], O_RDWR /* required */ | O_NONBLOCK, 0)) < 0)
       continue;
