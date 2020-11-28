@@ -17,6 +17,7 @@
 #include <gavl/gavl.h>
 #include <gavl/compression.h>
 #include <gavl/metatags.h>
+#include <gavl/trackinfo.h>
 
 #include <gavl/log.h>
 #define LOG_DOMAIN "v4l"
@@ -680,6 +681,21 @@ gavl_codec_id_t gavl_v4l_pix_fmt_to_codec_id(uint32_t fmt)
   return GAVL_CODEC_ID_NONE;
   }
 
+uint32_t gavl_v4l_codec_id_to_pix_fmt(gavl_codec_id_t id)
+  {
+  int idx = 0;
+
+  while(pixelformats[idx].v4l2)
+    {
+    if(pixelformats[idx].codec_id == id)
+      return pixelformats[idx].v4l2;
+    idx++;
+    }
+  return 0;
+  
+  }
+
+
 gavl_pixelformat_t gavl_v4l_pix_fmt_to_pixelformat(uint32_t fmt)
   {
   int idx = 0;
@@ -736,30 +752,58 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   {
   int caps = 0;
   int ret = 0;
-  
+  gavl_video_format_t * gavl_format;
+
+  gavl_compression_info_t ci;
+    
   struct v4l2_format fmt;
+  memset(&fmt, 0, sizeof(fmt));
   
   fprintf(stderr, "gavl_v4l_device_init_decoder\n");
   gavl_dictionary_dump(stream, 2);
 
-  memset(&fmt, 0, sizeof(fmt));
+  gavl_format = gavl_stream_get_video_format_nc(stream);
 
+  memset(&ci, 0, sizeof(ci));
+  
+  if(!gavl_stream_get_compression_info(stream, &ci))
+    goto fail;
+
+    
   if(gavl_dictionary_get_int(&dev->dev, GAVL_V4L_CAPABILITIES, &caps) &&
      (caps & V4L2_CAP_VIDEO_M2M_MPLANE))
     {
     dev->is_planar = 1;
-    fprintf(stderr, "Usign planar API\n");
+    fprintf(stderr, "Using planar API\n");
 
+    fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+          
+    fmt.fmt.pix_mp.width = gavl_format->image_width;
+    fmt.fmt.pix_mp.height = gavl_format->image_height;
+
+    fmt.fmt.pix_mp.pixelformat = gavl_v4l_codec_id_to_pix_fmt(ci.id);
+    fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_DEFAULT;
+
+    fmt.fmt.pix_mp.num_planes = 1;
+
+    /* Estimate taken from ffmpeg. TODO: Used stream stats if available e.g. from mp4 files */
     
-    
+    fmt.fmt.pix_mp.plane_fmt[0].sizeimage = (gavl_format->image_width * gavl_format->image_width * 3) / 4 + 128;
+    //fmt.fmt.pix_mp.plane_fmt[0].bytesperline = 0;
+        
     }
   else
     {
-    
+    fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+    }
+
+  if(my_ioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1)
+    {
+
     }
   
   //  ret = 1;
-  //  fail:
+  fail:
   
   
   return ret;

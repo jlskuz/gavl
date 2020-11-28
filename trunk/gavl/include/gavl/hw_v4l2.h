@@ -41,6 +41,9 @@ GAVL_PUBLIC int gavl_v4l_has_decoder(gavl_array_t * arr, gavl_codec_id_t id);
 
 GAVL_PUBLIC gavl_codec_id_t gavl_v4l_pix_fmt_to_codec_id(uint32_t fmt);
 GAVL_PUBLIC gavl_pixelformat_t gavl_v4l_pix_fmt_to_pixelformat(uint32_t fmt);
+GAVL_PUBLIC uint32_t gavl_v4l_codec_id_to_pix_fmt(gavl_codec_id_t id);
+
+
 
 GAVL_PUBLIC gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev);
 
