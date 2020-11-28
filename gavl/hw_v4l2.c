@@ -529,7 +529,7 @@ const char * gavl_v4l_get_decoder(const gavl_array_t * arr, gavl_codec_id_t id)
       {
       for(j = 0; j < formats->num_entries; j++)
         {
-        if((fmt = gavl_value_get_dictionary(&arr->entries[j])) &&
+        if((fmt = gavl_value_get_dictionary(&formats->entries[j])) &&
            gavl_dictionary_get_int(fmt, GAVL_V4L_FORMAT_GAVL_CODEC_ID, &codec_id) &&
            (codec_id == id))
           return gavl_dictionary_get_string(dev, GAVL_META_URI);
