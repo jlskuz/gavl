@@ -21,7 +21,7 @@ typedef enum
 
 #define GAVL_V4L_TYPE        "type"
 #define GAVL_V4L_TYPE_STRING "typestr"
-
+#define GAVL_V4L_CAPABILITIES "caps"
 
 #define GAVL_V4L_SRC_FORMATS  "src_fmts"
 #define GAVL_V4L_SINK_FORMATS "sink_fmts"
@@ -42,10 +42,14 @@ GAVL_PUBLIC int gavl_v4l_has_decoder(gavl_array_t * arr, gavl_codec_id_t id);
 GAVL_PUBLIC gavl_codec_id_t gavl_v4l_pix_fmt_to_codec_id(uint32_t fmt);
 GAVL_PUBLIC gavl_pixelformat_t gavl_v4l_pix_fmt_to_pixelformat(uint32_t fmt);
 
+GAVL_PUBLIC gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev);
 
-GAVL_PUBLIC gavl_v4l_device_t * gavl_v4l_device_open(const char * dev);
+GAVL_PUBLIC void gavl_v4l_device_close(gavl_v4l_device_t * dev);
 
-GAVL_PUBLIC const char * gavl_v4l_get_decoder(const gavl_array_t * arr, gavl_codec_id_t id);
+GAVL_PUBLIC int gavl_v4l_device_get_fd(gavl_v4l_device_t * dev);
+
+
+GAVL_PUBLIC const gavl_dictionary_t * gavl_v4l_get_decoder(const gavl_array_t * arr, gavl_codec_id_t id);
 
 
 GAVL_PUBLIC gavl_packet_sink_t * gavl_v4l_device_get_packet_sink(gavl_v4l_device_t * dev);
@@ -53,8 +57,7 @@ GAVL_PUBLIC gavl_packet_source_t * gavl_v4l_device_get_packet_source(gavl_v4l_de
 GAVL_PUBLIC gavl_video_sink_t * gavl_v4l_device_get_video_sink(gavl_v4l_device_t * dev);
 GAVL_PUBLIC gavl_video_source_t * gavl_v4l_device_get_video_source(gavl_v4l_device_t * dev);
 
-
-
+#if 0
 GAVL_PUBLIC int gavl_v4l_device_init_capture(gavl_v4l_device_t * dev,
                                              gavl_video_format_t * fmt);
 
@@ -68,7 +71,9 @@ GAVL_PUBLIC int gavl_v4l_device_init_encoder(gavl_v4l_device_t * dev,
 GAVL_PUBLIC int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev,
                                              gavl_video_format_t * fmt,
                                              const gavl_compression_info_t * cmp);
+#endif
 
+GAVL_PUBLIC int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream);
 
 GAVL_PUBLIC void gavl_v4l_device_info(const char * dev);
 GAVL_PUBLIC void gavl_v4l_device_infos();
