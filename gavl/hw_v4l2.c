@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <glob.h>
 #include <string.h>
+#include <stdio.h>
 
 
 #include <gavl/gavl.h>
@@ -238,6 +239,7 @@ static void query_formats(int fd, int buf_type, gavl_array_t * ret)
   
   }
 
+#if 0
 static gavl_v4l_device_type_t detect_device_type(int fd, struct v4l2_capability * cap)
   {
   /* Encoder, Decoder, Converter Check in- and output formats */
@@ -348,6 +350,8 @@ static gavl_v4l_device_type_t detect_device_type(int fd, struct v4l2_capability 
   return GAVL_V4L_DEVICE_UNKNOWN;
   }
 
+#endif
+
 static const struct
   {
   gavl_v4l_device_type_t type;
@@ -434,7 +438,9 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
 
     gavl_dictionary_set_string(dev, GAVL_META_LABEL, (const char*)cap.card);
     gavl_dictionary_set_string(dev, GAVL_META_URI, g.gl_pathv[i]);
-       
+
+    gavl_dictionary_set_int(dev, GAVL_V4L_CAPABILITIES, cap.capabilities);
+    
     /* Get source formats */
     if(cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
       {
@@ -508,7 +514,7 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
   globfree(&g);
   }
 
-const char * gavl_v4l_get_decoder(const gavl_array_t * arr, gavl_codec_id_t id)
+const gavl_dictionary_t * gavl_v4l_get_decoder(const gavl_array_t * arr, gavl_codec_id_t id)
   {
   int i, j;
 
@@ -532,7 +538,7 @@ const char * gavl_v4l_get_decoder(const gavl_array_t * arr, gavl_codec_id_t id)
         if((fmt = gavl_value_get_dictionary(&formats->entries[j])) &&
            gavl_dictionary_get_int(fmt, GAVL_V4L_FORMAT_GAVL_CODEC_ID, &codec_id) &&
            (codec_id == id))
-          return gavl_dictionary_get_string(dev, GAVL_META_URI);
+          return dev;
         }
       }
     }
@@ -693,10 +699,65 @@ struct gavl_v4l_device_s
   
   };
 
-gavl_v4l_device_t * gavl_v4l_device_open(const char * dev)
+gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev)
   {
+  gavl_v4l_device_t * ret = calloc(1, sizeof(*ret));
+  
+  const char * path;
+
+  
+  
+  if(!(path = gavl_dictionary_get_string(dev, GAVL_META_URI)))
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "BUG: Path member missing");
+    goto fail;
+    }
+    
+  if((ret->fd = open(path, O_RDWR /* required */ | O_NONBLOCK, 0)) < 0)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "Couldn't open %s: %s", path, strerror(errno));
+    goto fail;
+    }
+  
+  return ret;
+
+  fail:
+
+  if(ret)
+    gavl_v4l_device_close(ret);
+  
+  return NULL;
+  }
+
+int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream)
+  {
+  int ret = 0;
+
+  fprintf(stderr, "gavl_v4l_device_init_decoder\n");
+  gavl_dictionary_dump(stream, 2);
+  
+  //  ret = 1;
+  //  fail:
+
+  
+  return ret;
   
   }
+
+int gavl_v4l_device_get_fd(gavl_v4l_device_t * dev)
+  {
+  return dev->fd;
+  }
+
+void gavl_v4l_device_close(gavl_v4l_device_t * dev)
+  {
+  if(dev->fd >= 0)
+    close(dev->fd);
+  
+  free(dev);
+  }
+
+#if 0
 
 gavl_packet_sink_t * gavl_v4l_device_get_packet_sink(gavl_v4l_device_t * dev)
   {
@@ -719,7 +780,7 @@ gavl_video_source_t * gavl_v4l_device_get_video_source(gavl_v4l_device_t * dev)
 
 
 int gavl_v4l_device_init_capture(gavl_v4l_device_t * dev,
-                            gavl_video_format_t * fmt)
+                                 gavl_video_format_t * fmt)
   {
   
   } 
@@ -731,18 +792,10 @@ int gavl_v4l_device_init_output(gavl_v4l_device_t * dev,
   }
 
 /* Unused for now */
-#if 0
 int v4l_device_init_encoder(gavl_v4l_device_t * dev,
                             gavl_video_format_t * fmt,
                             gavl_compression_info_t * cmp);
 
 #endif
-
-int v4l_device_init_decoder(gavl_v4l_device_t * dev,
-                            gavl_video_format_t * fmt,
-                            const gavl_compression_info_t * cmp)
-  {
-  
-  }
 
 
