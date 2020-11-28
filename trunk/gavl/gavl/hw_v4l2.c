@@ -27,6 +27,14 @@
 
 #include <hw_private.h>
 
+typedef struct
+  {
+  int index;
+  void * buf;
+  int size;
+  
+  } buffer_t;
+  
 static int my_ioctl(int fd, int request, void * arg)
   {
   int r;
@@ -794,14 +802,27 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     }
   else
     {
+    /* Untested */
     fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+    
+    fmt.fmt.pix.width = gavl_format->image_width;
+    fmt.fmt.pix.height = gavl_format->image_height;
+
+    fmt.fmt.pix.pixelformat = gavl_v4l_codec_id_to_pix_fmt(ci.id);
+    fmt.fmt.pix.colorspace = V4L2_COLORSPACE_DEFAULT;
+    fmt.fmt.pix.sizeimage = (gavl_format->image_width * gavl_format->image_width * 3) / 4 + 128;
     }
 
   if(my_ioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1)
     {
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_S_FMT failed: %s", strerror(errno));
+    goto fail;
     }
+
   
+  
+  /* */
+    
   //  ret = 1;
   fail:
   
