@@ -695,7 +695,10 @@ gavl_pixelformat_t gavl_v4l_pix_fmt_to_pixelformat(uint32_t fmt)
    
 struct gavl_v4l_device_s
   {
+  gavl_dictionary_t dev;
   int fd;
+
+  int is_planar;
   
   };
 
@@ -705,7 +708,7 @@ gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev)
   
   const char * path;
 
-  
+  gavl_dictionary_copy(&ret->dev, dev);
   
   if(!(path = gavl_dictionary_get_string(dev, GAVL_META_URI)))
     {
@@ -731,14 +734,33 @@ gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev)
 
 int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream)
   {
+  int caps = 0;
   int ret = 0;
-
+  
+  struct v4l2_format fmt;
+  
   fprintf(stderr, "gavl_v4l_device_init_decoder\n");
   gavl_dictionary_dump(stream, 2);
+
+  memset(&fmt, 0, sizeof(fmt));
+
+  if(gavl_dictionary_get_int(&dev->dev, GAVL_V4L_CAPABILITIES, &caps) &&
+     (caps & V4L2_CAP_VIDEO_M2M_MPLANE))
+    {
+    dev->is_planar = 1;
+    fprintf(stderr, "Usign planar API\n");
+
+    
+    
+    }
+  else
+    {
+    
+    }
   
   //  ret = 1;
   //  fail:
-
+  
   
   return ret;
   
@@ -753,6 +775,8 @@ void gavl_v4l_device_close(gavl_v4l_device_t * dev)
   {
   if(dev->fd >= 0)
     close(dev->fd);
+
+  gavl_dictionary_free(&dev->dev);
   
   free(dev);
   }
