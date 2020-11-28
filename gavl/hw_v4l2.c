@@ -761,10 +761,12 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   int caps = 0;
   int ret = 0;
   gavl_video_format_t * gavl_format;
-
   gavl_compression_info_t ci;
-    
   struct v4l2_format fmt;
+  gavl_stream_stats_t stats;
+  
+  int max_packet_size;
+  
   memset(&fmt, 0, sizeof(fmt));
   
   fprintf(stderr, "gavl_v4l_device_init_decoder\n");
@@ -777,7 +779,14 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   if(!gavl_stream_get_compression_info(stream, &ci))
     goto fail;
 
-    
+  gavl_stream_stats_init(&stats);
+  gavl_stream_get_stats(stream, &stats);
+
+  if(stats.size_max > 0)
+    max_packet_size = stats.size_max;
+  else
+    max_packet_size = (gavl_format->image_width * gavl_format->image_width * 3) / 4 + 128;
+  
   if(gavl_dictionary_get_int(&dev->dev, GAVL_V4L_CAPABILITIES, &caps) &&
      (caps & V4L2_CAP_VIDEO_M2M_MPLANE))
     {
@@ -796,7 +805,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
     /* Estimate taken from ffmpeg. TODO: Used stream stats if available e.g. from mp4 files */
     
-    fmt.fmt.pix_mp.plane_fmt[0].sizeimage = (gavl_format->image_width * gavl_format->image_width * 3) / 4 + 128;
+    fmt.fmt.pix_mp.plane_fmt[0].sizeimage = max_packet_size;
     //fmt.fmt.pix_mp.plane_fmt[0].bytesperline = 0;
         
     }
@@ -810,9 +819,9 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
     fmt.fmt.pix.pixelformat = gavl_v4l_codec_id_to_pix_fmt(ci.id);
     fmt.fmt.pix.colorspace = V4L2_COLORSPACE_DEFAULT;
-    fmt.fmt.pix.sizeimage = (gavl_format->image_width * gavl_format->image_width * 3) / 4 + 128;
+    fmt.fmt.pix.sizeimage = max_packet_size;
     }
-
+  
   if(my_ioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1)
     {
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_S_FMT failed: %s", strerror(errno));
