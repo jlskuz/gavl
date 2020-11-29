@@ -726,6 +726,44 @@ struct gavl_v4l_device_s
   
   };
 
+static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count)
+  {
+  int i;
+  
+  struct v4l2_buffer buf;
+  struct v4l2_requestbuffers req;
+
+  memset(&req, 0, sizeof(req));
+  
+  req.count = count;
+  req.type = type;
+  req.memory = V4L2_MEMORY_MMAP;
+
+  if(my_ioctl(dev->fd, VIDIOC_REQBUFS, &req) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "Requesting buffers failed: %s", strerror(errno));
+    return 0;
+    }
+
+  gavl_log(GAVL_LOG_INFO, LOG_DOMAIN, "Requested %d buffers, got %d", count, req.count);
+
+  for(i = 0; i < req.count; i++)
+    {
+    memset(&buf, 0, sizeof(buf));
+    buf.index = i;
+    buf.type = type;
+
+    if(my_ioctl(dev->fd, VIDIOC_QUERYBUF, &buf) == -1)
+      {
+      gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_QUERYBUF failed: %s", strerror(errno));
+      return 0;
+      }
+
+    }
+  
+  
+  }
+
 gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev)
   {
   gavl_v4l_device_t * ret = calloc(1, sizeof(*ret));
@@ -746,6 +784,7 @@ gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev)
     goto fail;
     }
   
+  
   return ret;
 
   fail:
@@ -764,8 +803,9 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   gavl_compression_info_t ci;
   struct v4l2_format fmt;
   gavl_stream_stats_t stats;
-  
   int max_packet_size;
+
+  int buf_type;
   
   memset(&fmt, 0, sizeof(fmt));
   
@@ -828,8 +868,14 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
     }
 
+  if(dev->is_planar)
+    buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+  else
+    buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
   
-  
+  if(!request_buffers_mmap(dev, buf_type, 4))
+    goto fail;
+     
   /* */
     
   //  ret = 1;
