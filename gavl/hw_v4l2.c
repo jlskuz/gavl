@@ -768,13 +768,13 @@ static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, bu
   for(i = 0; i < req.count; i++)
     {
     memset(&buf, 0, sizeof(buf));
-    memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
     
     buf.index = i;
     buf.type = type;
 
     if(dev->is_planar)
       {
+      memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
       buf.length = GAVL_MAX_PLANES;
       buf.m.planes = planes;
       }
