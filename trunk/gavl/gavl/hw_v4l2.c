@@ -749,6 +749,8 @@ static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, bu
   struct v4l2_buffer buf;
   struct v4l2_requestbuffers req;
 
+  struct v4l2_plane planes[GAVL_MAX_PLANES];
+  
   memset(&req, 0, sizeof(req));
   
   req.count = count;
@@ -766,9 +768,17 @@ static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, bu
   for(i = 0; i < req.count; i++)
     {
     memset(&buf, 0, sizeof(buf));
+    memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
+    
     buf.index = i;
     buf.type = type;
 
+    if(dev->is_planar)
+      {
+      buf.length = GAVL_MAX_PLANES;
+      buf.m.planes = planes;
+      }
+    
     if(my_ioctl(dev->fd, VIDIOC_QUERYBUF, &buf) == -1)
       {
       gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_QUERYBUF failed: %s", strerror(errno));
