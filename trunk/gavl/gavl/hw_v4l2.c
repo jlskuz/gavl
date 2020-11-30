@@ -12,6 +12,7 @@
 #include <glob.h>
 #include <string.h>
 #include <stdio.h>
+#include <sys/mman.h>
 
 
 #include <gavl/gavl.h>
@@ -27,12 +28,20 @@
 
 #include <hw_private.h>
 
+#define MAX_BUFFERS 8
+
+typedef struct
+  {
+  void * buf;
+  size_t size;   // For munmap
+  } plane_t;
+
 typedef struct
   {
   int index;
-  void * buf;
-  int size;
   
+  plane_t planes[GAVL_MAX_PLANES];
+  int num_planes;
   } buffer_t;
   
 static int my_ioctl(int fd, int request, void * arg)
@@ -716,19 +725,26 @@ gavl_pixelformat_t gavl_v4l_pix_fmt_to_pixelformat(uint32_t fmt)
     }
   return GAVL_PIXELFORMAT_NONE;
   }
-   
+
 struct gavl_v4l_device_s
   {
   gavl_dictionary_t dev;
   int fd;
 
+  int num_out_bufs;
+  int num_in_bufs;
+  
+  buffer_t out_bufs[MAX_BUFFERS]; // Output
+  buffer_t in_bufs[MAX_BUFFERS];  // Capture
+  
+  
   int is_planar;
   
   };
 
-static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count)
+static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, buffer_t * bufs)
   {
-  int i;
+  int i, j;
   
   struct v4l2_buffer buf;
   struct v4l2_requestbuffers req;
@@ -759,8 +775,50 @@ static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count)
       return 0;
       }
 
+    if(dev->is_planar)
+      {
+      if(buf.length > GAVL_MAX_PLANES)
+        {
+        gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "%d planes not supported", buf.length);
+        return 0;
+        }
+
+      bufs[i].num_planes = buf.length;
+      
+      for(j = 0; j < buf.length; j++)
+        {
+        bufs[i].planes[j].buf = mmap(NULL, buf.m.planes[j].length,
+                                     PROT_READ | PROT_WRITE, MAP_SHARED,
+                                     dev->fd, buf.m.planes[j].m.mem_offset);
+        }
+
+      }
+    else
+      {
+      bufs[i].planes[0].buf = mmap(NULL, buf.length,
+                                   PROT_READ | PROT_WRITE, MAP_SHARED,
+                                   dev->fd, buf.m.offset);
+      bufs[i].planes[0].size = buf.length;
+      bufs[i].num_planes = 1;
+      }
+    
     }
+  return req.count;
+  }
+
+static void release_buffers_mmap(buffer_t * bufs, int num)
+  {
+  int i, j;
   
+  for(i = 0; i < num; i++)
+    {
+    for(j = 0; j < bufs[i].num_planes; j++)
+      {
+      munmap(bufs[i].planes[j].buf, bufs[i].planes[j].size);
+      }
+    
+    
+    }
   
   }
 
@@ -873,9 +931,10 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   else
     buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
   
-  if(!request_buffers_mmap(dev, buf_type, 4))
+  if(!(dev->num_out_bufs = request_buffers_mmap(dev, buf_type, 4, dev->out_bufs)))
     goto fail;
-     
+
+  
   /* */
     
   //  ret = 1;
@@ -896,6 +955,9 @@ void gavl_v4l_device_close(gavl_v4l_device_t * dev)
   if(dev->fd >= 0)
     close(dev->fd);
 
+  release_buffers_mmap(dev->out_bufs, dev->num_out_bufs);
+  release_buffers_mmap(dev->in_bufs, dev->num_in_bufs);
+  
   gavl_dictionary_free(&dev->dev);
   
   free(dev);
