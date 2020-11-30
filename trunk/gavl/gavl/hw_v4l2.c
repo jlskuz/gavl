@@ -800,6 +800,7 @@ static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, bu
         bufs[i].planes[j].buf = mmap(NULL, buf.m.planes[j].length,
                                      PROT_READ | PROT_WRITE, MAP_SHARED,
                                      dev->fd, buf.m.planes[j].m.mem_offset);
+        bufs[i].planes[j].size = buf.m.planes[j].length;
         }
 
       }
