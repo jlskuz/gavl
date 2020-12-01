@@ -440,7 +440,6 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
 
     src_formats = NULL;
     sink_formats = NULL;
-
     
     if((fd = open(g.gl_pathv[i], O_RDWR /* required */ | O_NONBLOCK, 0)) < 0)
       continue;
@@ -737,10 +736,27 @@ struct gavl_v4l_device_s
   buffer_t out_bufs[MAX_BUFFERS]; // Output
   buffer_t in_bufs[MAX_BUFFERS];  // Capture
   
-  
   int is_planar;
+
+  gavl_video_frame_t * vframe;
+  gavl_packet_t packet;
   
   };
+
+gavl_packet_t * gavl_v4l_device_get_packet_write(gavl_v4l_device_t * dev)
+  {
+  
+  }
+
+gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * dev)
+  {
+  
+  }
+
+gavl_source_status_t gavl_v4l_device_read_frame(gavl_v4l_device_t * dev, gavl_video_frame_t ** frame)
+  {
+  
+  }
 
 static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, buffer_t * bufs)
   {
@@ -864,6 +880,44 @@ gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev)
   return NULL;
   }
 
+static void handle_decoder_event(gavl_v4l_device_t * dev)
+  {
+  struct v4l2_event ev;
+  
+  while(!my_ioctl(dev->fd, VIDIOC_DQEVENT, &ev))
+    {
+    switch(ev.type)
+      {
+      case V4L2_EVENT_SOURCE_CHANGE:
+        fprintf(stderr, "Source changed\n");
+        break;
+      case V4L2_EVENT_EOS:
+        fprintf(stderr, "EOS\n");
+        break;
+      }
+    }
+  }
+
+static int stream_on(gavl_v4l_device_t * dev, int type)
+  {
+  if(my_ioctl(dev->fd, VIDIOC_STREAMON, &type) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_STREAMON failed: %s", strerror(errno));
+    return 0;
+    }
+  return 1;
+  }
+
+static int stream_off(gavl_v4l_device_t * dev, int type)
+  {
+  if(my_ioctl(dev->fd, VIDIOC_STREAMOFF, &type) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_STREAMOFF failed: %s", strerror(errno));
+    return 0;
+    }
+  return 1;
+  }
+
 int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream)
   {
   int caps = 0;
@@ -873,7 +927,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   struct v4l2_format fmt;
   gavl_stream_stats_t stats;
   int max_packet_size;
-
+  struct v4l2_event_subscription sub;
   int buf_type;
   
   memset(&fmt, 0, sizeof(fmt));
@@ -945,9 +999,37 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   if(!(dev->num_out_bufs = request_buffers_mmap(dev, buf_type, 4, dev->out_bufs)))
     goto fail;
 
+  /* Subscribe to events */
   
+  memset(&sub, 0, sizeof(sub));
+
+  sub.type = V4L2_EVENT_EOS;
+  if(my_ioctl(dev->fd, VIDIOC_SUBSCRIBE_EVENT, &sub) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_SUBSCRIBE_EVENT failed: %s", strerror(errno));
+    goto fail;
+    }
+  
+  sub.type = V4L2_EVENT_SOURCE_CHANGE;
+  
+  if(my_ioctl(dev->fd, VIDIOC_SUBSCRIBE_EVENT, &sub) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_SUBSCRIBE_EVENT failed: %s", strerror(errno));
+    goto fail;
+    }
+
+  if(!stream_on(dev, buf_type))
+    goto fail;
+ 
   /* */
+
+  /* Queue header */
+
+  if(ci.global_header)
+    {
     
+    }
+  
   //  ret = 1;
   fail:
   
