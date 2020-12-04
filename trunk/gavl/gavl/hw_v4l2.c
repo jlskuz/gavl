@@ -392,20 +392,55 @@ gavl_packet_t * gavl_v4l_device_get_packet_write(gavl_v4l_device_t * dev)
   
   dev->packet.data       = dev->out_buf->planes[0].buf;
   dev->packet.data_alloc = dev->out_buf->planes[0].size;
+  dev->packet.data_len   = 0;
   
-  &dev->packet;
+  return &dev->packet;
   
   }
 
 gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * dev)
   {
   /* Queue compressed frame */
+  struct v4l2_buffer buf;
+  struct v4l2_plane planes[GAVL_MAX_PLANES];
+
+  /* Queue buffer */
+  memset(&buf, 0, sizeof(buf));
   
+  if(dev->is_planar)
+    {
+    buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+    memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
+    buf.m.planes = planes;
+
+    buf.m.planes[0].bytesused = dev->packet.data_len;
+    }
+  else
+    {
+    buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+    buf.bytesused = dev->packet.data_len;
+    }
+  
+  buf.memory = V4L2_MEMORY_MMAP;
+  buf.index =  dev->out_buf->index;
+
+  buf.timestamp.tv_sec = dev->packet.pts / 1000000;
+  buf.timestamp.tv_usec = dev->packet.pts % 1000000;
+
+  //  buf.timestamp.field = V4L2_FIELD_NONE;
+  
+  if(my_ioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_QBUF failed for output: %s", strerror(errno));
+    return GAVL_SINK_ERROR;
+    }
+  
+  return GAVL_SINK_OK;
   }
 
 gavl_source_status_t gavl_v4l_device_read_frame(gavl_v4l_device_t * dev, gavl_video_frame_t ** frame)
   {
-  
+  return GAVL_SOURCE_EOF;
   }
 
 static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, buffer_t * bufs)
@@ -451,10 +486,12 @@ static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, bu
       return 0;
       }
 
+#if 0    
     if(buf.flags & V4L2_BUF_FLAG_TIMESTAMP_COPY)
       {
       fprintf(stderr, "Copy timestamps\n");
       }
+#endif
     
     bufs[i].index = i;
     
@@ -687,7 +724,13 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
   if(ci.global_header)
     {
-    
+    gavl_packet_t * p;
+    p = gavl_v4l_device_get_packet_write(dev);
+    memcpy(p->data, ci.global_header, ci.global_header_len);
+    p->data_len = ci.global_header_len;
+
+    if(gavl_v4l_device_put_packet_write(dev) != GAVL_SINK_OK)
+      goto fail;
     }
   
   //  ret = 1;
