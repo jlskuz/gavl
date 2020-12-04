@@ -415,8 +415,8 @@ gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * dev)
     buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
     memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
     buf.m.planes = planes;
-
     buf.m.planes[0].bytesused = dev->packet.data_len;
+    buf.length = 1;
     }
   else
     {
