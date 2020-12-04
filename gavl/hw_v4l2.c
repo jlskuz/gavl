@@ -432,7 +432,7 @@ gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * dev)
 
   //  buf.timestamp.field = V4L2_FIELD_NONE;
   
-  if(my_ioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1)
+  if(my_ioctl(dev->fd, VIDIOC_QBUF, &buf) == -1)
     {
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_QBUF failed for output: %s", strerror(errno));
     return GAVL_SINK_ERROR;
