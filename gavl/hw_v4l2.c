@@ -341,7 +341,10 @@ static buffer_t * get_buffer_output(gavl_v4l_device_t * dev)
   for(i = 0; i < dev->num_out_bufs; i++)
     {
     if(!(dev->out_bufs[i].flags & BUFFER_FLAG_QUEUED))
-      return &dev->out_bufs[i];
+      {
+      dev->out_buf = &dev->out_bufs[i];
+      return dev->out_buf;
+      }
     }
 
   /* Dequeue buffer */
