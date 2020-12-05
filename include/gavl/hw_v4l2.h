@@ -80,7 +80,8 @@ GAVL_PUBLIC int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev,
                                              const gavl_compression_info_t * cmp);
 #endif
 
-GAVL_PUBLIC int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream);
+GAVL_PUBLIC int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream,
+                                             gavl_packet_source_t * psrc);
 
 GAVL_PUBLIC void gavl_v4l_device_info(const char * dev);
 GAVL_PUBLIC void gavl_v4l_device_infos();

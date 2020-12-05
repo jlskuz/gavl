@@ -329,6 +329,16 @@ struct gavl_v4l_device_s
   gavl_packet_t packet;
 
   int timescale;
+
+  
+  gavl_video_source_t * vsrc_priv;
+  gavl_packet_source_t * psrc;
+  
+  //  gavl_video_source_t * vsrc_;
+  
+  //  gavl_packet_source_t * psrc_priv;
+  
+  
   
   };
 
@@ -616,7 +626,19 @@ static int stream_off(gavl_v4l_device_t * dev, int type)
   return 1;
   }
 
-int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream)
+static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t ** frame)
+  {
+  gavl_v4l_device_t * dev = priv;
+  
+  while(1)
+    {
+    
+    }
+  return GAVL_SOURCE_EOF;
+  }
+
+int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream,
+                                 gavl_packet_source_t * psrc)
   {
   int caps = 0;
   int ret = 0;
@@ -718,8 +740,6 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
     }
 
-  if(!stream_on(dev, buf_type))
-    goto fail;
  
   /* */
 
@@ -735,6 +755,16 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     if(gavl_v4l_device_put_packet_write(dev) != GAVL_SINK_OK)
       goto fail;
     }
+
+  dev->psrc = psrc;
+
+  if(!stream_on(dev, buf_type))
+    goto fail;
+  
+  /* TODO: Set format */
+  handle_decoder_event(dev);
+  
+  dev->vsrc_priv = gavl_video_source_create(get_frame_decoder, dev, GAVL_SOURCE_SRC_ALLOC, gavl_format);
   
   //  ret = 1;
   fail:
@@ -762,6 +792,13 @@ void gavl_v4l_device_close(gavl_v4l_device_t * dev)
   free(dev);
   }
 
+
+gavl_video_source_t * gavl_v4l_device_get_video_source(gavl_v4l_device_t * dev)
+  {
+  return dev->vsrc_priv;
+  }
+
+
 #if 0
 
 gavl_packet_sink_t * gavl_v4l_device_get_packet_sink(gavl_v4l_device_t * dev)
@@ -776,11 +813,6 @@ gavl_packet_source_t * gavl_v4l_device_get_packet_source(gavl_v4l_device_t * dev
 
 gavl_video_sink_t * gavl_v4l_device_get_video_sink(gavl_v4l_device_t * dev)
   {
-  }
-
-gavl_video_source_t * gavl_v4l_device_get_video_source(gavl_v4l_device_t * dev)
-  {
-
   }
 
 
