@@ -591,7 +591,7 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
   {
   struct v4l2_event ev;
   
-  while(!my_ioctl(dev->fd, VIDIOC_DQEVENT, &ev))
+  while(my_ioctl(dev->fd, VIDIOC_DQEVENT, &ev))
     {
     switch(ev.type)
       {
