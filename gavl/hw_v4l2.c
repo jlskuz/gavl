@@ -830,13 +830,14 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     packets_to_send--;
     }
 
+  dev->psrc = psrc;
+
   for(i = 0; i < packets_to_send; i++)
     {
     if(!send_decoder_packet(dev))
       fprintf(stderr, "sending decoder packet failed\n");
     }
   
-  dev->psrc = psrc;
 
   if(!stream_on(dev, buf_type))
     goto fail;
