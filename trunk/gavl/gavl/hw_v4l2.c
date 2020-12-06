@@ -445,6 +445,8 @@ static gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * d
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_QBUF failed for output: %s", strerror(errno));
     return GAVL_SINK_ERROR;
     }
+
+  dev->out_buf->flags |= BUFFER_FLAG_QUEUED;
   
   return GAVL_SINK_OK;
   }
