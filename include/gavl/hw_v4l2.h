@@ -43,9 +43,9 @@ GAVL_PUBLIC gavl_codec_id_t gavl_v4l_pix_fmt_to_codec_id(uint32_t fmt);
 GAVL_PUBLIC gavl_pixelformat_t gavl_v4l_pix_fmt_to_pixelformat(uint32_t fmt);
 GAVL_PUBLIC uint32_t gavl_v4l_codec_id_to_pix_fmt(gavl_codec_id_t id);
 
-GAVL_PUBLIC gavl_packet_t * gavl_v4l_device_get_packet_write(gavl_v4l_device_t * dev);
-GAVL_PUBLIC gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * dev);
-GAVL_PUBLIC gavl_source_status_t gavl_v4l_device_read_frame(gavl_v4l_device_t * dev, gavl_video_frame_t ** frame);
+// GAVL_PUBLIC gavl_packet_t * gavl_v4l_device_get_packet_write(gavl_v4l_device_t * dev);
+// GAVL_PUBLIC gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * dev);
+// GAVL_PUBLIC gavl_source_status_t gavl_v4l_device_read_frame(gavl_v4l_device_t * dev, gavl_video_frame_t ** frame);
 
 
 

@@ -339,7 +339,7 @@ struct gavl_v4l_device_s
   
   //  gavl_packet_source_t * psrc_priv;
   
-  
+  gavl_packet_pts_cache_t * cache;
   
   };
 
@@ -384,10 +384,6 @@ static buffer_t * get_buffer_output(gavl_v4l_device_t * dev)
   return dev->out_buf;
   }
 
-static int put_buffer_output(gavl_v4l_device_t * dev)
-  {
-  return 0;
-  }
 
 static buffer_t * get_buffer_capture(gavl_v4l_device_t * dev)
   {
@@ -399,8 +395,9 @@ static buffer_t * done_buffer_capture(gavl_v4l_device_t * dev)
   return NULL;
   }
 
-gavl_packet_t * gavl_v4l_device_get_packet_write(gavl_v4l_device_t * dev)
+static gavl_packet_t * gavl_v4l_device_get_packet_write(gavl_v4l_device_t * dev)
   {
+  
   if(!get_buffer_output(dev))
     return NULL;
   
@@ -412,7 +409,7 @@ gavl_packet_t * gavl_v4l_device_get_packet_write(gavl_v4l_device_t * dev)
   
   }
 
-gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * dev)
+static gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * dev)
   {
   /* Queue compressed frame */
   struct v4l2_buffer buf;
@@ -452,10 +449,18 @@ gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * dev)
   return GAVL_SINK_OK;
   }
 
-gavl_source_status_t gavl_v4l_device_read_frame(gavl_v4l_device_t * dev, gavl_video_frame_t ** frame)
+static int send_decoder_packet(gavl_v4l_device_t * dev)
   {
-  return GAVL_SOURCE_EOF;
+  gavl_packet_t * p = gavl_v4l_device_get_packet_write(dev);
+
+  if((gavl_packet_source_read_packet(dev->psrc, &p) != GAVL_SOURCE_OK) ||
+     (gavl_v4l_device_put_packet_write(dev) != GAVL_SINK_OK))
+    return 0;
+  
+  gavl_packet_pts_cache_push(dev->cache, p);
+  return 1;
   }
+
 
 static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, buffer_t * bufs)
   {
@@ -710,6 +715,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   int max_packet_size;
   struct v4l2_event_subscription sub;
   int buf_type;
+  int packets_to_send;
+  int i;
   
   memset(&fmt, 0, sizeof(fmt));
   
@@ -719,6 +726,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   gavl_format = gavl_stream_get_video_format_nc(stream);
   
   dev->timescale = gavl_format->timescale;
+
+  dev->cache = gavl_packet_pts_cache_create(MAX_BUFFERS);
   
   memset(&ci, 0, sizeof(ci));
   
@@ -801,22 +810,32 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
     }
 
- 
+  packets_to_send = dev->num_out_bufs;
+  
   /* */
 
   /* Queue header */
 
+      
   if(ci.global_header)
     {
     gavl_packet_t * p;
     p = gavl_v4l_device_get_packet_write(dev);
     memcpy(p->data, ci.global_header, ci.global_header_len);
     p->data_len = ci.global_header_len;
-
+    
     if(gavl_v4l_device_put_packet_write(dev) != GAVL_SINK_OK)
       goto fail;
+
+    packets_to_send--;
     }
 
+  for(i = 0; i < packets_to_send; i++)
+    {
+    if(!send_decoder_packet(dev))
+      fprintf(stderr, "sending decoder packet failed\n");
+    }
+  
   dev->psrc = psrc;
 
   if(!stream_on(dev, buf_type))
@@ -827,10 +846,10 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   do_poll(dev, NULL, NULL, &has_event);
   
   handle_decoder_event(dev);
-
   
-  
-  dev->vsrc_priv = gavl_video_source_create(get_frame_decoder, dev, GAVL_SOURCE_SRC_ALLOC, gavl_format);
+  dev->vsrc_priv = gavl_video_source_create(get_frame_decoder, dev,
+                                            GAVL_SOURCE_SRC_ALLOC,
+                                            gavl_format);
   
   //  ret = 1;
   fail:
