@@ -197,6 +197,7 @@ packetsink.c \
 packetsource.c \
 peakdetector.c \
 psnr.c \
+ptscache.c \
 rectangle.c \
 sampleformat.c \
 samplerate.c \

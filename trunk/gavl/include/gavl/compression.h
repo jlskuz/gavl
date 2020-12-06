@@ -503,6 +503,29 @@ int gavl_stream_get_stats(const gavl_dictionary_t * s, gavl_stream_stats_t * sta
 GAVL_PUBLIC
 void gavl_stream_set_stats(gavl_dictionary_t * s, const gavl_stream_stats_t * stats);
 
+/* PTS Cache */
+  
+typedef struct gavl_packet_pts_cache_s gavl_packet_pts_cache_t;
+
+GAVL_PUBLIC
+gavl_packet_pts_cache_t * gavl_packet_pts_cache_create(int size);
+
+GAVL_PUBLIC
+void gavl_packet_pts_cache_destroy(gavl_packet_pts_cache_t *);
+
+GAVL_PUBLIC
+void gavl_packet_pts_cache_push(gavl_packet_pts_cache_t *m, const gavl_packet_t * pkt);
+
+GAVL_PUBLIC
+int gavl_packet_pts_cache_get_first(gavl_packet_pts_cache_t *m, gavl_packet_t * pkt);
+
+GAVL_PUBLIC
+int gavl_packet_pts_cache_get_by_pts(gavl_packet_pts_cache_t *m, gavl_packet_t * pkt,
+                                     int64_t pts);
+
+GAVL_PUBLIC
+int gavl_packet_pts_cache_clear(gavl_packet_pts_cache_t *m);
+
   
 #if 0
 GAVL_PUBLIC
