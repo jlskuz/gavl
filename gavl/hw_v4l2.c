@@ -715,6 +715,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   gavl_stream_stats_t stats;
 
   int has_event = 0;
+  int can_read = 0;
+  int can_write = 0;
   
   int max_packet_size;
   struct v4l2_event_subscription sub;
@@ -848,7 +850,9 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   
   /* TODO: Set format */
 
-  do_poll(dev, NULL, NULL, &has_event);
+  do_poll(dev, &can_read, &can_write, &has_event);
+
+  fprintf(stderr, "do_poll %d %d %d\n", can_read, can_write, has_event);
   
   handle_decoder_event(dev);
   
