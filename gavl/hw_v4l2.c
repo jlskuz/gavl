@@ -647,7 +647,7 @@ static int do_poll(gavl_v4l_device_t * dev,
   fds.events = 0;
   
   if(can_read)
-    fds.events |= POLLPRI;
+    fds.events |= POLLIN;
 
   if(can_write)
     fds.events |= POLLOUT;
@@ -836,6 +836,9 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     packets_to_send--;
     }
 
+  if(!stream_on(dev, buf_type))
+    goto fail;
+  
   dev->psrc = psrc;
 
   for(i = 0; i < packets_to_send; i++)
@@ -845,8 +848,6 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     }
   
 
-  if(!stream_on(dev, buf_type))
-    goto fail;
   
   /* TODO: Set format */
 
