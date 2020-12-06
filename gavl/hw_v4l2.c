@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <sys/mman.h>
 
+#include <poll.h>
 
 #include <gavl/gavl.h>
 #include <gavl/compression.h>
@@ -626,6 +627,63 @@ static int stream_off(gavl_v4l_device_t * dev, int type)
   return 1;
   }
 
+static int do_poll(gavl_v4l_device_t * dev,
+                   int * can_read, int * can_write, int * has_event)
+  {
+  int result;
+  struct pollfd fds;
+
+  fds.fd = dev->fd;
+
+  fds.events = 0;
+  
+  if(can_read)
+    fds.events |= POLLPRI;
+
+  if(can_write)
+    fds.events |= POLLOUT;
+
+  if(has_event)
+    fds.events |= POLLPRI;
+  
+  fds.revents = 0;
+  
+  result = poll(&fds, 1, 1000);
+
+  if(result == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "poll() failed: %s", strerror(errno));
+    return 0;
+    }
+
+  if(can_read)
+    {
+    if(fds.revents & POLLIN)
+      *can_read = 1;
+    else
+      *can_read = 0;
+    }
+
+  if(can_write)
+    {
+    if(fds.revents & POLLOUT)
+      *can_write = 1;
+    else
+      *can_write = 0;
+    }
+
+  if(has_event)
+    {
+    if(fds.revents & POLLPRI)
+      *has_event = 1;
+    else
+      *has_event = 0;
+    }
+  
+  
+  return 1;
+  }
+
 static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t ** frame)
   {
   gavl_v4l_device_t * dev = priv;
@@ -646,6 +704,9 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   gavl_compression_info_t ci;
   struct v4l2_format fmt;
   gavl_stream_stats_t stats;
+
+  int has_event = 0;
+  
   int max_packet_size;
   struct v4l2_event_subscription sub;
   int buf_type;
@@ -762,6 +823,9 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
   
   /* TODO: Set format */
+
+  do_poll(dev, NULL, NULL, &has_event);
+  
   handle_decoder_event(dev);
 
   
