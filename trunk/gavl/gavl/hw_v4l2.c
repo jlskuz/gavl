@@ -459,7 +459,7 @@ static int send_decoder_packet(gavl_v4l_device_t * dev)
      (gavl_v4l_device_put_packet_write(dev) != GAVL_SINK_OK))
     return 0;
 
-  gavl_packet_dump(p);
+  //  gavl_packet_dump(p);
   
   gavl_packet_pts_cache_push(dev->cache, p);
   return 1;
