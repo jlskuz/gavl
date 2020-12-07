@@ -797,7 +797,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   else
     buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
   
-  if(!(dev->num_out_bufs = request_buffers_mmap(dev, buf_type, 4, dev->out_bufs)))
+  if(!(dev->num_out_bufs = request_buffers_mmap(dev, buf_type, 8, dev->out_bufs)))
     goto fail;
 
   /* Subscribe to events */
