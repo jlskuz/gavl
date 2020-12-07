@@ -737,6 +737,24 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   dev->timescale = gavl_format->timescale;
 
   dev->cache = gavl_packet_pts_cache_create(MAX_BUFFERS);
+
+  /* Subscribe to events */
+  
+  memset(&sub, 0, sizeof(sub));
+
+  sub.type = V4L2_EVENT_EOS;
+  if(my_ioctl(dev->fd, VIDIOC_SUBSCRIBE_EVENT, &sub) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_SUBSCRIBE_EVENT failed: %s", strerror(errno));
+    goto fail;
+    }
+  
+  sub.type = V4L2_EVENT_SOURCE_CHANGE;
+  if(my_ioctl(dev->fd, VIDIOC_SUBSCRIBE_EVENT, &sub) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_SUBSCRIBE_EVENT failed: %s", strerror(errno));
+    goto fail;
+    }
   
   memset(&ci, 0, sizeof(ci));
   
@@ -797,27 +815,9 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   else
     buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
   
-  if(!(dev->num_out_bufs = request_buffers_mmap(dev, buf_type, 8, dev->out_bufs)))
+  if(!(dev->num_out_bufs = request_buffers_mmap(dev, buf_type, 4, dev->out_bufs)))
     goto fail;
 
-  /* Subscribe to events */
-  
-  memset(&sub, 0, sizeof(sub));
-
-  sub.type = V4L2_EVENT_EOS;
-  if(my_ioctl(dev->fd, VIDIOC_SUBSCRIBE_EVENT, &sub) == -1)
-    {
-    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_SUBSCRIBE_EVENT failed: %s", strerror(errno));
-    goto fail;
-    }
-  
-  sub.type = V4L2_EVENT_SOURCE_CHANGE;
-  
-  if(my_ioctl(dev->fd, VIDIOC_SUBSCRIBE_EVENT, &sub) == -1)
-    {
-    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_SUBSCRIBE_EVENT failed: %s", strerror(errno));
-    goto fail;
-    }
 
   packets_to_send = dev->num_out_bufs;
   
@@ -839,7 +839,6 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
     packets_to_send--;
     }
-
   
   dev->psrc = psrc;
 
