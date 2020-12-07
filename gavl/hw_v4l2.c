@@ -726,8 +726,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   int buf_type;
   int packets_to_send;
   int i;
-  
-  memset(&fmt, 0, sizeof(fmt));
+ 
   
   fprintf(stderr, "gavl_v4l_device_init_decoder\n");
   gavl_dictionary_dump(stream, 2);
@@ -741,7 +740,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   /* Subscribe to events */
   
   memset(&sub, 0, sizeof(sub));
-
+  
   sub.type = V4L2_EVENT_EOS;
   if(my_ioctl(dev->fd, VIDIOC_SUBSCRIBE_EVENT, &sub) == -1)
     {
@@ -768,6 +767,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     max_packet_size = stats.size_max;
   else
     max_packet_size = (gavl_format->image_width * gavl_format->image_width * 3) / 4 + 128;
+
+  memset(&fmt, 0, sizeof(fmt));
   
   if(gavl_dictionary_get_int(&dev->dev, GAVL_V4L_CAPABILITIES, &caps) &&
      (caps & V4L2_CAP_VIDEO_M2M_MPLANE))
@@ -777,11 +778,11 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
     fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
           
-    //    fmt.fmt.pix_mp.width = gavl_format->image_width;
-    //    fmt.fmt.pix_mp.height = gavl_format->image_height;
+    fmt.fmt.pix_mp.width = gavl_format->image_width;
+    fmt.fmt.pix_mp.height = gavl_format->image_height;
 
-    //    fmt.fmt.pix_mp.pixelformat = gavl_v4l_codec_id_to_pix_fmt(ci.id);
-    //    fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_DEFAULT;
+    fmt.fmt.pix_mp.pixelformat = gavl_v4l_codec_id_to_pix_fmt(ci.id);
+    fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_DEFAULT;
 
     fmt.fmt.pix_mp.num_planes = 1;
 
@@ -852,6 +853,21 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   
   /* TODO: Set format */
 
+  memset(&fmt, 0, sizeof(fmt));
+
+  if(dev->is_planar)
+    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+  else 
+    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+  if(my_ioctl(dev->fd, VIDIOC_G_FMT, &fmt) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_G_FMT failed: %s", strerror(errno));
+    goto fail;
+    }
+
+  
+  
   do_poll(dev, &can_read, &can_write, &has_event);
 
   fprintf(stderr, "do_poll %d %d %d\n", can_read, can_write, has_event);
