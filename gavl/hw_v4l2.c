@@ -431,6 +431,9 @@ static gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * d
     buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
     buf.bytesused = dev->packet.data_len;
     }
+
+  if(dev->packet.flags & GAVL_PACKET_KEYFRAME)
+    buf.flags |= V4L2_BUF_FLAG_KEYFRAME;
   
   buf.memory = V4L2_MEMORY_MMAP;
   buf.index =  dev->out_buf->index;
