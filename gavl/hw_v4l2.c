@@ -650,10 +650,10 @@ static int do_poll(gavl_v4l_device_t * dev,
   fds.events = 0;
   
   if(can_read)
-    fds.events |= POLLIN;
+    fds.events |= (POLLIN|POLLRDNORM);
 
   if(can_write)
-    fds.events |= POLLOUT;
+    fds.events |= (POLLOUT|POLLWRNORM);
 
   if(has_event)
     fds.events |= POLLPRI;
@@ -670,7 +670,7 @@ static int do_poll(gavl_v4l_device_t * dev,
 
   if(can_read)
     {
-    if(fds.revents & POLLIN)
+    if(fds.revents & (POLLIN|POLLRDNORM))
       *can_read = 1;
     else
       *can_read = 0;
@@ -678,7 +678,7 @@ static int do_poll(gavl_v4l_device_t * dev,
 
   if(can_write)
     {
-    if(fds.revents & POLLOUT)
+    if(fds.revents & (POLLOUT|POLLWRNORM))
       *can_write = 1;
     else
       *can_write = 0;
@@ -777,11 +777,11 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
     fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
           
-    fmt.fmt.pix_mp.width = gavl_format->image_width;
-    fmt.fmt.pix_mp.height = gavl_format->image_height;
+    //    fmt.fmt.pix_mp.width = gavl_format->image_width;
+    //    fmt.fmt.pix_mp.height = gavl_format->image_height;
 
-    fmt.fmt.pix_mp.pixelformat = gavl_v4l_codec_id_to_pix_fmt(ci.id);
-    fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_DEFAULT;
+    //    fmt.fmt.pix_mp.pixelformat = gavl_v4l_codec_id_to_pix_fmt(ci.id);
+    //    fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_DEFAULT;
 
     fmt.fmt.pix_mp.num_planes = 1;
 
