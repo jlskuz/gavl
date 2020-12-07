@@ -438,7 +438,7 @@ static gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * d
   buf.timestamp.tv_sec = dev->packet.pts / 1000000;
   buf.timestamp.tv_usec = dev->packet.pts % 1000000;
 
-  //  buf.timestamp.field = V4L2_FIELD_NONE;
+  buf.field = V4L2_FIELD_NONE;
   
   if(my_ioctl(dev->fd, VIDIOC_QBUF, &buf) == -1)
     {
@@ -821,8 +821,9 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   /* */
 
   /* Queue header */
-
-      
+  if(!stream_on(dev, buf_type))
+    goto fail;
+        
   if(ci.global_header)
     {
     gavl_packet_t * p;
@@ -836,8 +837,6 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     packets_to_send--;
     }
 
-  if(!stream_on(dev, buf_type))
-    goto fail;
   
   dev->psrc = psrc;
 
