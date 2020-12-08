@@ -711,7 +711,7 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
 
     if(has_event)
       {
-      
+      handle_decoder_event(dev);
       }
 
     if(can_write)
