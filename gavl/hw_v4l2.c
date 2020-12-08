@@ -930,7 +930,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
                                             GAVL_SOURCE_SRC_ALLOC,
                                             gavl_format);
   
-  //  ret = 1;
+  ret = 1;
   fail:
   
   
