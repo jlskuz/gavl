@@ -367,6 +367,7 @@ static buffer_t * get_buffer_output(gavl_v4l_device_t * dev)
     buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
     memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
     buf.m.planes = planes;
+    buf.length = GAVL_MAX_PLANES;
     }
   else
     buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
