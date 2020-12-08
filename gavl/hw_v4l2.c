@@ -137,7 +137,6 @@ static void enum_formats(int fd, int type)
                  (fmt.pixelformat>>16) & 0xff,
                  (fmt.pixelformat>>24) & 0xff,
                  fmt.description);
-    
     }
   }
 
@@ -699,10 +698,31 @@ static int do_poll(gavl_v4l_device_t * dev,
 
 static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t ** frame)
   {
+  int can_read, can_write, has_event;
+  
   gavl_v4l_device_t * dev = priv;
   
   while(1)
     {
+    do_poll(dev, &can_read, &can_write, &has_event);
+
+    fprintf(stderr, "Do poll 1: %d %d %d\n", can_read, can_write, has_event);
+
+    if(has_event)
+      {
+      
+      }
+
+    if(can_write)
+      {
+      if(!send_decoder_packet(dev))
+        return GAVL_SOURCE_EOF;
+      }
+    
+    if(can_read)
+      {
+      
+      }
     
     }
   return GAVL_SOURCE_EOF;
