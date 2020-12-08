@@ -31,7 +31,7 @@
 
 #define MAX_BUFFERS 16
 #define DECODER_NUM_PACKETS 16
-#define DECODER_NUM_FRAMES  8
+#define DECODER_NUM_FRAMES  16
 
 #define BUFFER_FLAG_QUEUED (1<<0)
 
@@ -611,6 +611,30 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
       {
       case V4L2_EVENT_SOURCE_CHANGE:
         fprintf(stderr, "Source changed\n");
+
+        if(ev.u.src_change.changes & V4L2_EVENT_SRC_CH_RESOLUTION)
+          {
+          int buf_type;
+          struct v4l2_format fmt;
+
+          memset(&fmt, 0, sizeof(fmt));
+          
+          fprintf(stderr, "Resolution changed\n");
+          
+          if(dev->is_planar)
+            buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+          else 
+            buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  
+          fmt.type = buf_type;
+          
+          if(my_ioctl(dev->fd, VIDIOC_G_FMT, &fmt) == -1)
+            {
+            gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_G_FMT failed: %s", strerror(errno));
+            }
+          
+          }
+
         break;
       case V4L2_EVENT_EOS:
         fprintf(stderr, "EOS\n");
