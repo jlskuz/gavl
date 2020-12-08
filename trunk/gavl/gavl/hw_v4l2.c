@@ -610,10 +610,10 @@ static void dump_fmt(gavl_v4l_device_t * dev, const struct v4l2_format * fmt)
             fmt->fmt.pix_mp.height);
     
     fprintf(stderr, "  Pixelformat: %c%c%c%c\n",
-            (fmt->fmt.pix_mp.pixelformat >> 24) & 0xff,
-            (fmt->fmt.pix_mp.pixelformat >> 16) & 0xff,
+            (fmt->fmt.pix_mp.pixelformat) & 0xff,
             (fmt->fmt.pix_mp.pixelformat >> 8) & 0xff,
-            (fmt->fmt.pix_mp.pixelformat) & 0xff);
+            (fmt->fmt.pix_mp.pixelformat >> 16) & 0xff,
+            (fmt->fmt.pix_mp.pixelformat >> 24) & 0xff);
     
     fprintf(stderr, "  Planes:      %d\n", fmt->fmt.pix_mp.num_planes);
     }
