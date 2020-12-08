@@ -884,13 +884,18 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
     }
 
+  if(my_ioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_S_FMT failed: %s", strerror(errno));
+    goto fail;
+    }
+  
   /* Create buffers */
 
   if(!(dev->num_in_bufs = request_buffers_mmap(dev, buf_type, 4, dev->in_bufs)))
     goto fail;
   
-  
-  if(!stream_on(dev, fmt.type))
+  if(!stream_on(dev, buf_type))
     goto fail;
   
   do_poll(dev, &can_read, &can_write, &has_event);
