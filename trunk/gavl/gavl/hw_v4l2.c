@@ -603,6 +603,7 @@ gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev)
 
 static void dump_fmt(gavl_v4l_device_t * dev, const struct v4l2_format * fmt)
   {
+  int i;
   fprintf(stderr, "Format\n");
   if(dev->is_planar)
     {
@@ -616,6 +617,16 @@ static void dump_fmt(gavl_v4l_device_t * dev, const struct v4l2_format * fmt)
             (fmt->fmt.pix_mp.pixelformat >> 24) & 0xff);
     
     fprintf(stderr, "  Planes:      %d\n", fmt->fmt.pix_mp.num_planes);
+
+    for(i = 0; i < fmt->fmt.pix_mp.num_planes; i++)
+      {
+      fprintf(stderr, "  Plane %d:\n", i);
+      fprintf(stderr, "    Sizeimage:    %d\n", fmt->fmt.pix_mp.plane_fmt[i].sizeimage);
+      fprintf(stderr, "    Bytesperline: %d\n", fmt->fmt.pix_mp.plane_fmt[i].bytesperline);
+      }
+
+    
+    
     }
   }
 
