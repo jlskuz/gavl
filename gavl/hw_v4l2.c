@@ -919,6 +919,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   if(dev->is_planar)
     {
     gavl_format->pixelformat = gavl_v4l_pix_fmt_to_pixelformat(fmt.fmt.pix_mp.pixelformat);
+
+    
     }
   else
     {
