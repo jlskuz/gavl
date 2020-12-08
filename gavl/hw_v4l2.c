@@ -589,7 +589,6 @@ gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev)
     goto fail;
     }
   
-  
   return ret;
 
   fail:
@@ -855,24 +854,50 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
   memset(&fmt, 0, sizeof(fmt));
 
+  
+  
   if(dev->is_planar)
-    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+    buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
   else 
-    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-
+    buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  
+  fmt.type = buf_type;
+  
   if(my_ioctl(dev->fd, VIDIOC_G_FMT, &fmt) == -1)
     {
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_G_FMT failed: %s", strerror(errno));
     goto fail;
     }
 
+  if(dev->is_planar)
+    {
+    gavl_format->pixelformat = gavl_v4l_pix_fmt_to_pixelformat(fmt.fmt.pix_mp.pixelformat);
+    }
+  else
+    {
+    gavl_format->pixelformat = gavl_v4l_pix_fmt_to_pixelformat(fmt.fmt.pix.pixelformat);
+    }
+
+  if(gavl_format->pixelformat == GAVL_PIXELFORMAT_NONE)
+    {
+    /* TODO: Negotiate format */
+    goto fail;
+    }
+
+  /* Create buffers */
+
+  if(!(dev->num_in_bufs = request_buffers_mmap(dev, buf_type, 4, dev->in_bufs)))
+    goto fail;
   
+  
+  if(!stream_on(dev, fmt.type))
+    goto fail;
   
   do_poll(dev, &can_read, &can_write, &has_event);
 
   fprintf(stderr, "do_poll %d %d %d\n", can_read, can_write, has_event);
   
-  handle_decoder_event(dev);
+  //  handle_decoder_event(dev);
   
   dev->vsrc_priv = gavl_video_source_create(get_frame_decoder, dev,
                                             GAVL_SOURCE_SRC_ALLOC,
