@@ -601,6 +601,24 @@ gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev)
   return NULL;
   }
 
+static void dump_fmt(gavl_v4l_device_t * dev, const struct v4l2_format * fmt)
+  {
+  fprintf(stderr, "Format\n");
+  if(dev->is_planar)
+    {
+    fprintf(stderr, "  Size:        %dx%d\n", fmt->fmt.pix_mp.width, 
+            fmt->fmt.pix_mp.height);
+    
+    fprintf(stderr, "  Pixelformat: %c%c%c%c\n",
+            (fmt->fmt.pix_mp.pixelformat >> 24) & 0xff,
+            (fmt->fmt.pix_mp.pixelformat >> 16) & 0xff,
+            (fmt->fmt.pix_mp.pixelformat >> 8) & 0xff,
+            (fmt->fmt.pix_mp.pixelformat) & 0xff);
+    
+    fprintf(stderr, "  Planes:      %d\n", fmt->fmt.pix_mp.num_planes);
+    }
+  }
+
 static void handle_decoder_event(gavl_v4l_device_t * dev)
   {
   struct v4l2_event ev;
@@ -632,7 +650,7 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
             {
             gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_G_FMT failed: %s", strerror(errno));
             }
-          
+          dump_fmt(dev, &fmt);
           }
 
         break;
@@ -753,6 +771,8 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
   return GAVL_SOURCE_EOF;
   }
 
+                     
+
 int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream,
                                  gavl_packet_source_t * psrc)
   {
@@ -836,7 +856,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     
     fmt.fmt.pix_mp.plane_fmt[0].sizeimage = max_packet_size;
     //fmt.fmt.pix_mp.plane_fmt[0].bytesperline = 0;
-        
+    
     }
   else
     {
@@ -915,11 +935,12 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_G_FMT failed: %s", strerror(errno));
     goto fail;
     }
-
+  
+  dump_fmt(dev, &fmt);
+  
   if(dev->is_planar)
     {
     gavl_format->pixelformat = gavl_v4l_pix_fmt_to_pixelformat(fmt.fmt.pix_mp.pixelformat);
-
     
     }
   else
