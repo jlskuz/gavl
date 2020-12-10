@@ -701,16 +701,8 @@ static int do_poll(gavl_v4l_device_t * dev,
 
   fds.fd = dev->fd;
 
-  fds.events = 0;
-  
-  if(can_read)
-    fds.events |= (POLLIN|POLLRDNORM);
-
-  if(can_write)
-    fds.events |= (POLLOUT|POLLWRNORM);
-
-  if(has_event)
-    fds.events |= POLLPRI;
+  //  fds.events = POLLIN|POLLRDNORM|POLLOUT|POLLWRNORM|POLLPRI;
+  fds.events = POLLIN|POLLRDNORM|POLLPRI;
   
   fds.revents = 0;
   
@@ -722,29 +714,20 @@ static int do_poll(gavl_v4l_device_t * dev,
     return 0;
     }
 
-  if(can_read)
-    {
-    if(fds.revents & (POLLIN|POLLRDNORM))
-      *can_read = 1;
-    else
-      *can_read = 0;
-    }
-
-  if(can_write)
-    {
-    if(fds.revents & (POLLOUT|POLLWRNORM))
-      *can_write = 1;
-    else
-      *can_write = 0;
-    }
-
-  if(has_event)
-    {
-    if(fds.revents & POLLPRI)
-      *has_event = 1;
-    else
-      *has_event = 0;
-    }
+  if(fds.revents & (POLLIN|POLLRDNORM))
+    *can_read = 1;
+  else
+    *can_read = 0;
+  
+  if(fds.revents & (POLLOUT|POLLWRNORM))
+    *can_write = 1;
+  else
+    *can_write = 0;
+  
+  if(fds.revents & POLLPRI)
+    *has_event = 1;
+  else
+    *has_event = 0;
   
   
   return 1;
@@ -970,6 +953,13 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_S_FMT failed: %s", strerror(errno));
     goto fail;
     }
+
+  /* Wait for source_change event */
+  
+  do_poll(dev, &can_read, &can_write, &has_event);
+
+  fprintf(stderr, "do_poll (init) %d %d %d\n", can_read, can_write, has_event);
+
   
   /* Create buffers */
 
@@ -979,9 +969,6 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   if(!stream_on(dev, buf_type))
     goto fail;
   
-  do_poll(dev, &can_read, &can_write, &has_event);
-
-  fprintf(stderr, "do_poll %d %d %d\n", can_read, can_write, has_event);
   
   //  handle_decoder_event(dev);
   
