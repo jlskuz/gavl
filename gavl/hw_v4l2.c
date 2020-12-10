@@ -989,6 +989,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
                                             GAVL_SOURCE_SRC_ALLOC,
                                             gavl_format);
   
+  dev->vframe = gavl_video_frame_create(NULL);
+  
   ret = 1;
   fail:
   
@@ -1011,6 +1013,12 @@ void gavl_v4l_device_close(gavl_v4l_device_t * dev)
   release_buffers_mmap(dev->in_bufs, dev->num_in_bufs);
   
   gavl_dictionary_free(&dev->dev);
+
+  if(dev->vframe)
+    {
+    gavl_video_frame_null(dev->vframe);
+    gavl_video_frame_destroy(dev->vframe);
+    }
   
   free(dev);
   }
