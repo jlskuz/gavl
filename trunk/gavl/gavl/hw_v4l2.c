@@ -953,13 +953,6 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_S_FMT failed: %s", strerror(errno));
     goto fail;
     }
-
-  /* Wait for source_change event */
-  
-  do_poll(dev, &can_read, &can_write, &has_event);
-
-  fprintf(stderr, "do_poll (init) %d %d %d\n", can_read, can_write, has_event);
-
   
   /* Create buffers */
 
@@ -968,6 +961,10 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   
   if(!stream_on(dev, buf_type))
     goto fail;
+
+  /* Wait for source_change event */
+  do_poll(dev, &can_read, &can_write, &has_event);
+  fprintf(stderr, "do_poll (init) %d %d %d\n", can_read, can_write, has_event);
   
   
   //  handle_decoder_event(dev);
