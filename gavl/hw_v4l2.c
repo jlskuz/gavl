@@ -954,18 +954,18 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
     }
   
-  /* Create buffers */
-
-  if(!(dev->num_in_bufs = request_buffers_mmap(dev, buf_type, DECODER_NUM_FRAMES, dev->in_bufs)))
-    goto fail;
-  
   if(!stream_on(dev, buf_type))
     goto fail;
 
   /* Wait for source_change event */
   do_poll(dev, &can_read, &can_write, &has_event);
   fprintf(stderr, "do_poll (init) %d %d %d\n", can_read, can_write, has_event);
+
+  /* Create buffers */
   
+  if(!(dev->num_in_bufs = request_buffers_mmap(dev, buf_type, DECODER_NUM_FRAMES, dev->in_bufs)))
+    goto fail;
+
   
   //  handle_decoder_event(dev);
   
