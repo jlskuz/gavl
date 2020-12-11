@@ -889,9 +889,9 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
       gavl_packet_t pkt;
       
       if(dev->is_planar)
-        buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+        buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
       else
-        buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+        buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
       
       idx = dequeue_buffer(dev, buf_type);
 
