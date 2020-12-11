@@ -765,7 +765,27 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
   return GAVL_SOURCE_EOF;
   }
 
-                     
+static int queue_frame_decoder(gavl_v4l_device_t * dev, int idx)
+  {
+  struct v4l2_buffer buf;
+  
+  memset(&buf, 0, sizeof(buf));
+
+  if(dev->is_planar)
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+  else
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  
+  buf.index = idx;
+
+  if(my_ioctl(dev->fd, VIDIOC_QBUF, &buf) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_QBUF failed: %s", strerror(errno));
+    return 0;
+    }
+  return 1;
+  
+  }
 
 int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream,
                                  gavl_packet_source_t * psrc)
@@ -958,6 +978,11 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   
   if(!(dev->num_in_bufs = request_buffers_mmap(dev, buf_type, DECODER_NUM_FRAMES, dev->in_bufs)))
     goto fail;
+
+  for(i = 0; i < dev->num_in_bufs; i++)
+    {
+    queue_frame_decoder(dev, i);
+    }
   
   if(!stream_on(dev, buf_type))
     goto fail;
