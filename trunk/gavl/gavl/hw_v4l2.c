@@ -777,7 +777,8 @@ static int queue_frame_decoder(gavl_v4l_device_t * dev, int idx)
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   
   buf.index = idx;
-
+  buf.memory = V4L2_MEMORY_MMAP;
+  
   if(my_ioctl(dev->fd, VIDIOC_QBUF, &buf) == -1)
     {
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_QBUF failed: %s", strerror(errno));
