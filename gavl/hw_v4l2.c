@@ -701,8 +701,8 @@ static int do_poll(gavl_v4l_device_t * dev,
 
   fds.fd = dev->fd;
 
-  //  fds.events = POLLIN|POLLRDNORM|POLLOUT|POLLWRNORM|POLLPRI;
-  fds.events = POLLIN|POLLRDNORM|POLLPRI;
+  fds.events = POLLIN|POLLRDNORM|POLLOUT|POLLWRNORM|POLLPRI;
+  // fds.events = POLLIN|POLLRDNORM|POLLPRI;
   
   fds.revents = 0;
   
