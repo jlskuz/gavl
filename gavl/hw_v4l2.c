@@ -905,8 +905,10 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
       buffer_to_video_frame(dev, dev->in_buf, &dev->capture_fmt);
 
       gavl_packet_pts_cache_get_first(dev->cache, &pkt);
-      gavl_packet_to_videoframe(&pkt, *frame);
+      gavl_packet_to_videoframe(&pkt, dev->vframe);
 
+      *frame = dev->vframe;
+      
       return GAVL_SOURCE_OK;
       }
     
