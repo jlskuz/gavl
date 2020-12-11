@@ -364,14 +364,12 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
 
   if(dev->is_planar)
     {
-    buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
     memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
     buf.m.planes = planes;
     buf.length = GAVL_MAX_PLANES;
     }
-  else
-    buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
-
+  
+  buf.type = type;
   buf.memory = V4L2_MEMORY_MMAP;
   
   if(my_ioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1)
