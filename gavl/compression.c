@@ -596,3 +596,18 @@ uint8_t * gavl_extract_xiph_header(uint8_t * global_header,
   free(buf);
   return ret;
   }
+
+void
+gavl_packet_to_videoframe(const gavl_packet_t * p, 
+                          gavl_video_frame_t * f)
+  {
+  f->timestamp = p->pts;
+  f->duration = p->duration;
+  f->timecode = p->timecode;
+  f->interlace_mode = p->interlace_mode;
+  gavl_rectangle_i_copy(&f->src_rect, &p->src_rect);
+  f->dst_x = &p->dst_x;
+  f->dst_y = &p->dst_y;
+
+  }
+                          

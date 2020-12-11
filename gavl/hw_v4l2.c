@@ -342,9 +342,12 @@ struct gavl_v4l_device_s
   
   gavl_packet_pts_cache_t * cache;
   
+  struct v4l2_format capture_fmt;
+  gavl_video_format_t capture_format;
+  
   };
 
-static buffer_t * get_buffer_output(gavl_v4l_device_t * dev)
+static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
   {
   int i;
   struct v4l2_buffer buf;
@@ -353,12 +356,9 @@ static buffer_t * get_buffer_output(gavl_v4l_device_t * dev)
   for(i = 0; i < dev->num_out_bufs; i++)
     {
     if(!(dev->out_bufs[i].flags & BUFFER_FLAG_QUEUED))
-      {
-      dev->out_buf = &dev->out_bufs[i];
-      return dev->out_buf;
-      }
+      return i;
     }
-
+  
   /* Dequeue buffer */
   memset(&buf, 0, sizeof(buf));
 
@@ -377,24 +377,69 @@ static buffer_t * get_buffer_output(gavl_v4l_device_t * dev)
   if(my_ioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1)
     {
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_DQBUF failed for output: %s", strerror(errno));
-    return NULL;
+    return -1;
     }
+  return buf.index;
+  }
 
-  dev->out_buf = &dev->out_bufs[buf.index];
+
+static buffer_t * get_buffer_output(gavl_v4l_device_t * dev)
+  {
+  int idx;
+  int buf_type;
+  
+  if(dev->is_planar)
+    buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+  else
+    buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+
+  idx = dequeue_buffer(dev, buf_type);
+  
+  dev->out_buf = &dev->out_bufs[idx];
   dev->out_buf->flags &= ~BUFFER_FLAG_QUEUED;
   
   return dev->out_buf;
   }
 
 
-static buffer_t * get_buffer_capture(gavl_v4l_device_t * dev)
+static int done_buffer_capture(gavl_v4l_device_t * dev)
   {
-  return NULL;
-  }
+  struct v4l2_buffer buf;
+  struct v4l2_plane planes[GAVL_MAX_PLANES];
+  
+  if(dev->in_buf)
+    {
+    /* Queue buffer */
+    memset(&buf, 0, sizeof(buf));
+    
+    if(dev->is_planar)
+      {
+      buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+      memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
+      buf.m.planes = planes;
 
-static buffer_t * done_buffer_capture(gavl_v4l_device_t * dev)
-  {
-  return NULL;
+      buf.length = dev->capture_fmt.fmt.pix_mp.num_planes;
+      }
+    else
+      {
+      buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+      }
+    
+    buf.memory = V4L2_MEMORY_MMAP;
+    buf.index =  dev->in_buf->index;
+
+    dev->in_buf->flags |= BUFFER_FLAG_QUEUED;
+    dev->in_buf = NULL;
+    
+    if(my_ioctl(dev->fd, VIDIOC_QBUF, &buf) == -1)
+      {
+      gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_QBUF failed for capture: %s", strerror(errno));
+      return 0;
+      }
+    
+    }
+
+  return 1;
   }
 
 static gavl_packet_t * gavl_v4l_device_get_packet_write(gavl_v4l_device_t * dev)
@@ -644,9 +689,8 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
         if(ev.u.src_change.changes & V4L2_EVENT_SRC_CH_RESOLUTION)
           {
           int buf_type;
-          struct v4l2_format fmt;
 
-          memset(&fmt, 0, sizeof(fmt));
+          memset(&dev->capture_fmt, 0, sizeof(dev->capture_fmt));
           
           fprintf(stderr, "Resolution changed\n");
           
@@ -655,13 +699,13 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
           else 
             buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   
-          fmt.type = buf_type;
+          dev->capture_fmt.type = buf_type;
           
-          if(my_ioctl(dev->fd, VIDIOC_G_FMT, &fmt) == -1)
+          if(my_ioctl(dev->fd, VIDIOC_G_FMT, &dev->capture_fmt) == -1)
             {
             gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_G_FMT failed: %s", strerror(errno));
             }
-          dump_fmt(dev, &fmt);
+          dump_fmt(dev, &dev->capture_fmt);
           }
 
         break;
@@ -733,11 +777,95 @@ static int do_poll(gavl_v4l_device_t * dev,
   return 1;
   }
 
+static void buffer_to_video_frame(gavl_v4l_device_t * dev, buffer_t * buf,
+                                  const struct v4l2_format * fmt)
+  {
+  if(dev->capture_format.pixelformat == GAVL_YUV_420_P)
+    {
+    uint8_t * ptr;
+    int bytesperline = 0;
+    int sizeimage = 0;
+    int sizeimage_y;
+    int sizeimage_cbcr;
+    uint32_t pixfmt = 0;
+    
+    if(dev->is_planar)
+      {
+      const struct v4l2_pix_format_mplane * m = &fmt->fmt.pix_mp;
+
+      pixfmt = m->pixelformat;
+      
+      if(m->num_planes == 1)
+        {
+        sizeimage = m->plane_fmt[0].sizeimage;
+        bytesperline = m->plane_fmt[0].bytesperline;
+        }
+      else
+        {
+        /* ?? */
+        }
+      }
+    else
+      {
+      const struct v4l2_pix_format * p = &fmt->fmt.pix;
+      pixfmt = p->pixelformat;
+      sizeimage = p->sizeimage;
+      bytesperline = p->bytesperline;
+      }
+    
+    ptr = buf->planes[0].buf;
+    sizeimage_y = (sizeimage * 2) / 3;
+    sizeimage_cbcr = (sizeimage - sizeimage_y) / 2;
+    
+    dev->vframe->planes[0] = ptr;
+
+    if(pixfmt == V4L2_PIX_FMT_YUV420)
+      {
+      dev->vframe->planes[1] = dev->vframe->planes[0] + sizeimage_y;
+      dev->vframe->planes[2] = dev->vframe->planes[1] + sizeimage_cbcr;
+      }
+    else
+      {
+      dev->vframe->planes[2] = dev->vframe->planes[0] + sizeimage_y;
+      dev->vframe->planes[1] = dev->vframe->planes[2] + sizeimage_cbcr;
+      }
+    dev->vframe->strides[0] = bytesperline;
+    dev->vframe->strides[1] = bytesperline / 2;
+    dev->vframe->strides[2] = bytesperline / 2;
+    }
+  else if(gavl_pixelformat_is_planar(dev->capture_format.pixelformat))
+    {
+    /* TODO */
+    }
+  else // Packed
+    {
+    int bytesperline = 0;
+    
+    if(dev->is_planar)
+      {
+      bytesperline = fmt->fmt.pix_mp.plane_fmt[0].bytesperline;
+      }
+    else
+      {
+      bytesperline = fmt->fmt.pix.bytesperline;;
+      }
+
+    dev->vframe->planes[0] = buf->planes[0].buf;
+    dev->vframe->strides[0] = bytesperline;
+    }
+  
+  }
+
+
 static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t ** frame)
   {
   int can_read, can_write, has_event;
   
   gavl_v4l_device_t * dev = priv;
+
+  /* Send frame back to the queue */
+  
+  done_buffer_capture(dev);
   
   while(1)
     {
@@ -758,7 +886,30 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
     
     if(can_read)
       {
+      int idx;
+      int buf_type;
+      gavl_packet_t pkt;
       
+      if(dev->is_planar)
+        buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+      else
+        buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+      
+      idx = dequeue_buffer(dev, buf_type);
+
+      if(idx < 0)
+        return GAVL_SOURCE_EOF;
+
+      /* Set output buffer to frame */
+
+      dev->in_buf = &dev->in_bufs[idx];
+      
+      buffer_to_video_frame(dev, dev->in_buf, &dev->capture_fmt);
+
+      gavl_packet_pts_cache_get_first(dev->cache, &pkt);
+      gavl_packet_to_videoframe(&pkt, *frame);
+
+      return GAVL_SOURCE_OK;
       }
     
     }
@@ -793,6 +944,9 @@ static int queue_frame_decoder(gavl_v4l_device_t * dev, int idx)
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_QBUF failed: %s", strerror(errno));
     return 0;
     }
+  
+  dev->in_bufs[idx].flags |= BUFFER_FLAG_QUEUED;
+  
   return 1;
   
   }
@@ -1010,6 +1164,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
                                             gavl_format);
   
   dev->vframe = gavl_video_frame_create(NULL);
+
+  gavl_video_format_copy(&dev->capture_format, gavl_format);
   
   ret = 1;
   fail:

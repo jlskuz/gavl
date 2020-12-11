@@ -446,6 +446,14 @@ void gavl_packet_save(const gavl_packet_t * p,
                       const char * filename);
 
 
+GAVL_PUBLIC
+void
+gavl_packet_to_videoframe(const gavl_packet_t * p, 
+                          gavl_video_frame_t * f);
+  
+
+
+  
 typedef struct
   {
   int32_t size_min;
