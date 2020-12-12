@@ -1086,7 +1086,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     }
   
   dev->psrc = psrc;
-
+  
   for(i = 0; i < packets_to_send; i++)
     {
     if(!send_decoder_packet(dev))
