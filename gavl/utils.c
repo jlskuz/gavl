@@ -269,6 +269,7 @@ int gavl_string_ends_with_i(const char * str, const char * end)
 
 char * gavl_strtrim(char * str)
   {
+  int len;
   char * pos = str;
 
   fprintf(stderr, "gavl_strtrim 1 %s\n", str);
@@ -287,8 +288,12 @@ char * gavl_strtrim(char * str)
 
   /* Trailing */
 
+  len = strlen(str);
+
+  if(!len)
+    return str;
   
-  pos = str + (int)(strlen(str)-1);
+  pos = str + (len-1);
 
   fprintf(stderr, "gavl_strtrim 2 %s %s\n", str, pos);
 
