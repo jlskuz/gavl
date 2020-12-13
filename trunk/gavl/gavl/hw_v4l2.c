@@ -1295,8 +1295,7 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
     
     fprintf(stderr, "Blupp 3 %s\n", tmp_string);
     
-    
-    gavl_dictionary_set_string_nocopy(dev, GAVL_META_URI, gavl_strdup(g.gl_pathv[i]));
+    gavl_dictionary_set_string_nocopy(dev, GAVL_META_URI, tmp_string);
 
     fprintf(stderr, "Blupp 4\n");
     
