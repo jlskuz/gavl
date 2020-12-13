@@ -271,7 +271,7 @@ char * gavl_strtrim(char * str)
   {
   char * pos = str;
 
-  fprintf(stderr, "gavl_strtrim %s\n", str);
+  fprintf(stderr, "gavl_strtrim 1 %s\n", str);
   
   while(isspace(*pos) && (*pos != '\0'))
     pos++;
@@ -287,7 +287,11 @@ char * gavl_strtrim(char * str)
 
   /* Trailing */
 
+  
   pos = str + (int)(strlen(str)-1);
+
+  fprintf(stderr, "gavl_strtrim 2 %s %s\n", str, pos);
+
   while(pos >= str)
     {
     if(isspace(*pos))
