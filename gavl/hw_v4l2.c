@@ -1285,12 +1285,11 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
     
     fprintf(stderr, "Blupp 1\n");
 
-    gavl_dictionary_set_string_nocopy(dev, GAVL_META_LABEL,
-                                      gavl_strndup((const char*)cap.card, ((const char*)cap.card) + 32));
-
+    gavl_dictionary_set_string(dev, GAVL_META_LABEL, (const char*)cap.card);
+    
     fprintf(stderr, "Blupp 2\n");
 
-    gavl_dictionary_set_string(dev, GAVL_META_URI, g.gl_pathv[i]);
+    gavl_dictionary_set_string_nocopy(dev, GAVL_META_URI, gavl_strdup(g.gl_pathv[i]));
 
     fprintf(stderr, "Blupp 3\n");
     
