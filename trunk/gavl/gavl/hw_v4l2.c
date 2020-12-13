@@ -1252,6 +1252,8 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
 
   gavl_array_t * src_formats;
   gavl_array_t * sink_formats;
+
+  memset(&g, 0, sizeof(g));
   
   glob("/dev/video*", 0, NULL, &g);
 
@@ -1281,11 +1283,20 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
     fprintf(stderr, "Card:\n");
     gavl_hexdump(cap.card, 32, 16);
     
+    fprintf(stderr, "Blupp 1\n");
+
     gavl_dictionary_set_string_nocopy(dev, GAVL_META_LABEL,
                                       gavl_strndup((const char*)cap.card, ((const char*)cap.card) + 32));
+
+    fprintf(stderr, "Blupp 2\n");
+
     gavl_dictionary_set_string(dev, GAVL_META_URI, g.gl_pathv[i]);
+
+    fprintf(stderr, "Blupp 3\n");
     
     gavl_dictionary_set_int(dev, GAVL_V4L_CAPABILITIES, cap.capabilities);
+
+    fprintf(stderr, "Blupp 4\n");
     
     /* Get source formats */
     if(cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
