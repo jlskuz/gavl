@@ -1278,9 +1278,13 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
     gavl_value_init(&dev_val);
     dev = gavl_value_set_dictionary(&dev_val);
 
-    gavl_dictionary_set_string(dev, GAVL_META_LABEL, (const char*)cap.card);
+    fprintf(stderr, "Card:\n");
+    gavl_hexdump(cap.card, 32, 16);
+    
+    gavl_dictionary_set_string_nocopy(dev, GAVL_META_LABEL,
+                                      gavl_strndup((const char*)cap.card, ((const char*)cap.card) + 32));
     gavl_dictionary_set_string(dev, GAVL_META_URI, g.gl_pathv[i]);
-
+    
     gavl_dictionary_set_int(dev, GAVL_V4L_CAPABILITIES, cap.capabilities);
     
     /* Get source formats */
