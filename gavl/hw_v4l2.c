@@ -1289,7 +1289,7 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
     
     gavl_dictionary_set_string(dev, GAVL_META_LABEL, (const char*)cap.card);
 
-    fprintf(stderr, "Blupp 2 %s\n", (const char*)cap.card);
+    fprintf(stderr, "Blupp 2 %s\n", g.gl_pathv[i]);
 
     tmp_string = gavl_strdup(g.gl_pathv[i]);
     
