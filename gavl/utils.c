@@ -270,6 +270,9 @@ int gavl_string_ends_with_i(const char * str, const char * end)
 char * gavl_strtrim(char * str)
   {
   char * pos = str;
+
+  fprintf(stderr, "gavl_strtrim %s\n", str);
+  
   while(isspace(*pos) && (*pos != '\0'))
     pos++;
 
