@@ -1252,8 +1252,10 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
 
   gavl_array_t * src_formats;
   gavl_array_t * sink_formats;
-
+  struct v4l2_capability * cap;
   char * tmp_string;
+
+  cap = calloc(1, sizeof(*cap));
   
   memset(&g, 0, sizeof(g));
   
@@ -1264,16 +1266,13 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
     int fd;
     gavl_v4l_device_type_t type;
     
-    struct v4l2_capability cap;
-    memset(&cap, 0, sizeof(cap));
-
     src_formats = NULL;
     sink_formats = NULL;
     
     if((fd = open(g.gl_pathv[i], O_RDWR /* required */ | O_NONBLOCK, 0)) < 0)
       continue;
     
-    if(my_ioctl(fd, VIDIOC_QUERYCAP, &cap) == -1)
+    if(my_ioctl(fd, VIDIOC_QUERYCAP, cap) == -1)
       {
       close(fd);
       continue;
@@ -1283,11 +1282,11 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
     dev = gavl_value_set_dictionary(&dev_val);
 
     fprintf(stderr, "Card:\n");
-    gavl_hexdump(cap.card, 32, 16);
+    gavl_hexdump(cap->card, 32, 16);
     
-    fprintf(stderr, "Blupp 1 %s\n", (const char*)cap.card);
+    fprintf(stderr, "Blupp 1 %s\n", (const char*)cap->card);
     
-    gavl_dictionary_set_string(dev, GAVL_META_LABEL, (const char*)cap.card);
+    gavl_dictionary_set_string(dev, GAVL_META_LABEL, (const char*)cap->card);
 
     fprintf(stderr, "Blupp 2 %s\n", g.gl_pathv[i]);
 
@@ -1299,29 +1298,29 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
 
     fprintf(stderr, "Blupp 4\n");
     
-    gavl_dictionary_set_int(dev, GAVL_V4L_CAPABILITIES, cap.capabilities);
+    gavl_dictionary_set_int(dev, GAVL_V4L_CAPABILITIES, cap->capabilities);
 
     fprintf(stderr, "Blupp 5\n");
     
     /* Get source formats */
-    if(cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
+    if(cap->capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
       {
       src_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SRC_FORMATS);
       query_formats(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE, src_formats);
       }
-    else if(cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VIDEO_M2M))
+    else if(cap->capabilities & (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VIDEO_M2M))
       {
       src_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SRC_FORMATS);
       query_formats(fd, V4L2_BUF_TYPE_VIDEO_CAPTURE, src_formats);
       }
     
     /* Get output formats */
-    if(cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
+    if(cap->capabilities & (V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
       {
       sink_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SINK_FORMATS);
       query_formats(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE, sink_formats);
       }
-    else if(cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT | V4L2_CAP_VIDEO_M2M))
+    else if(cap->capabilities & (V4L2_CAP_VIDEO_OUTPUT | V4L2_CAP_VIDEO_M2M))
       {
       sink_formats = gavl_dictionary_get_array_create(dev, GAVL_V4L_SINK_FORMATS);
       query_formats(fd, V4L2_BUF_TYPE_VIDEO_OUTPUT, sink_formats);
@@ -1372,6 +1371,8 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
       }
     
     }
+
+  free(cap);
   
   globfree(&g);
   }
