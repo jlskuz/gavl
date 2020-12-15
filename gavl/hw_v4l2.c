@@ -325,8 +325,11 @@ struct gavl_v4l_device_s
   buffer_t * out_buf;
   buffer_t * in_buf;
   
-  int is_planar;
+  int planar;
 
+  int buf_type_capture;
+  int buf_type_output;
+    
   gavl_video_frame_t * vframe;
   gavl_packet_t packet;
 
@@ -362,7 +365,7 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
   /* Dequeue buffer */
   memset(&buf, 0, sizeof(buf));
 
-  if(dev->is_planar)
+  if(dev->planar)
     {
     memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
     buf.m.planes = planes;
@@ -384,14 +387,8 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
 static buffer_t * get_buffer_output(gavl_v4l_device_t * dev)
   {
   int idx;
-  int buf_type;
-  
-  if(dev->is_planar)
-    buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
-  else
-    buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
 
-  idx = dequeue_buffer(dev, buf_type);
+  idx = dequeue_buffer(dev, dev->buf_type_output);
   
   dev->out_buf = &dev->out_bufs[idx];
   dev->out_buf->flags &= ~BUFFER_FLAG_QUEUED;
@@ -410,19 +407,14 @@ static int done_buffer_capture(gavl_v4l_device_t * dev)
     /* Queue buffer */
     memset(&buf, 0, sizeof(buf));
     
-    if(dev->is_planar)
+    if(dev->planar)
       {
-      buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
       memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
       buf.m.planes = planes;
-
       buf.length = dev->capture_fmt.fmt.pix_mp.num_planes;
       }
-    else
-      {
-      buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-      }
     
+    buf.type = dev->buf_type_capture;
     buf.memory = V4L2_MEMORY_MMAP;
     buf.index =  dev->in_buf->index;
 
@@ -463,9 +455,8 @@ static gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * d
   /* Queue buffer */
   memset(&buf, 0, sizeof(buf));
   
-  if(dev->is_planar)
+  if(dev->planar)
     {
-    buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
     memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
     buf.m.planes = planes;
     buf.m.planes[0].bytesused = dev->packet.data_len;
@@ -473,13 +464,13 @@ static gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * d
     }
   else
     {
-    buf.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
     buf.bytesused = dev->packet.data_len;
     }
-
+  
   if(dev->packet.flags & GAVL_PACKET_KEYFRAME)
     buf.flags |= V4L2_BUF_FLAG_KEYFRAME;
   
+  buf.type = dev->buf_type_output;
   buf.memory = V4L2_MEMORY_MMAP;
   buf.index =  dev->out_buf->index;
 
@@ -544,7 +535,7 @@ static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, bu
     buf.index = i;
     buf.type = type;
 
-    if(dev->is_planar)
+    if(dev->planar)
       {
       memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
       buf.length = GAVL_MAX_PLANES;
@@ -566,7 +557,7 @@ static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, bu
     
     bufs[i].index = i;
     
-    if(dev->is_planar)
+    if(dev->planar)
       {
       if(buf.length > GAVL_MAX_PLANES)
         {
@@ -648,7 +639,7 @@ static void dump_fmt(gavl_v4l_device_t * dev, const struct v4l2_format * fmt)
   {
   int i;
   fprintf(stderr, "Format\n");
-  if(dev->is_planar)
+  if(dev->planar)
     {
     fprintf(stderr, "  Size:        %dx%d\n", fmt->fmt.pix_mp.width, 
             fmt->fmt.pix_mp.height);
@@ -686,18 +677,12 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
 
         if(ev.u.src_change.changes & V4L2_EVENT_SRC_CH_RESOLUTION)
           {
-          int buf_type;
-
+          
           memset(&dev->capture_fmt, 0, sizeof(dev->capture_fmt));
           
           fprintf(stderr, "Resolution changed\n");
           
-          if(dev->is_planar)
-            buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-          else 
-            buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  
-          dev->capture_fmt.type = buf_type;
+          dev->capture_fmt.type = dev->buf_type_capture;
           
           if(my_ioctl(dev->fd, VIDIOC_G_FMT, &dev->capture_fmt) == -1)
             {
@@ -787,7 +772,7 @@ static void buffer_to_video_frame(gavl_v4l_device_t * dev, buffer_t * buf,
     int sizeimage_cbcr;
     uint32_t pixfmt = 0;
     
-    if(dev->is_planar)
+    if(dev->planar)
       {
       const struct v4l2_pix_format_mplane * m = &fmt->fmt.pix_mp;
 
@@ -839,7 +824,7 @@ static void buffer_to_video_frame(gavl_v4l_device_t * dev, buffer_t * buf,
     {
     int bytesperline = 0;
     
-    if(dev->is_planar)
+    if(dev->planar)
       {
       bytesperline = fmt->fmt.pix_mp.plane_fmt[0].bytesperline;
       }
@@ -885,15 +870,10 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
     if(can_read)
       {
       int idx;
-      int buf_type;
       gavl_packet_t pkt;
       
-      if(dev->is_planar)
-        buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-      else
-        buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
       
-      idx = dequeue_buffer(dev, buf_type);
+      idx = dequeue_buffer(dev, dev->buf_type_capture);
 
       if(idx < 0)
         return GAVL_SOURCE_EOF;
@@ -923,18 +903,14 @@ static int queue_frame_decoder(gavl_v4l_device_t * dev, int idx)
   
   memset(&buf, 0, sizeof(buf));
 
-  if(dev->is_planar)
+  if(dev->planar)
     {
-    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-
     memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
     buf.m.planes = planes;
     buf.length = GAVL_MAX_PLANES;
-
-    
     }
-  else
-    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  
+  buf.type = dev->buf_type_capture;
   
   buf.index = idx;
   buf.memory = V4L2_MEMORY_MMAP;
@@ -967,7 +943,6 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   
   int max_packet_size;
   struct v4l2_event_subscription sub;
-  int buf_type;
   int packets_to_send;
   int i;
  
@@ -1019,10 +994,13 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   if(gavl_dictionary_get_int(&dev->dev, GAVL_V4L_CAPABILITIES, &caps) &&
      (caps & V4L2_CAP_VIDEO_M2M_MPLANE))
     {
-    dev->is_planar = 1;
-    fprintf(stderr, "Using planar API\n");
+    dev->planar = 1;
+    dev->buf_type_output = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+    dev->buf_type_capture = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+    
+    //    fprintf(stderr, "Using planar API\n");
 
-    fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+    fmt.type = dev->buf_type_output;
           
     fmt.fmt.pix_mp.width = gavl_format->frame_width;
     fmt.fmt.pix_mp.height = gavl_format->frame_height;
@@ -1032,16 +1010,17 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
     fmt.fmt.pix_mp.num_planes = 1;
 
-    /* Estimate taken from ffmpeg. TODO: Used stream stats if available e.g. from mp4 files */
-    
     fmt.fmt.pix_mp.plane_fmt[0].sizeimage = max_packet_size;
     //fmt.fmt.pix_mp.plane_fmt[0].bytesperline = 0;
     
     }
   else
     {
+    dev->buf_type_output = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+    dev->buf_type_capture = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    
     /* Untested */
-    fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+    fmt.type = dev->buf_type_output;
     
     fmt.fmt.pix.width = gavl_format->frame_width;
     fmt.fmt.pix.height = gavl_format->frame_height;
@@ -1057,12 +1036,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
     }
 
-  if(dev->is_planar)
-    buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
-  else
-    buf_type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
-  
-  if(!(dev->num_out_bufs = request_buffers_mmap(dev, buf_type, DECODER_NUM_PACKETS, dev->out_bufs)))
+  if(!(dev->num_out_bufs = request_buffers_mmap(dev, dev->buf_type_output, DECODER_NUM_PACKETS, dev->out_bufs)))
     goto fail;
 
 
@@ -1071,7 +1045,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   /* */
 
   /* Queue header */
-  if(!stream_on(dev, buf_type))
+  if(!stream_on(dev, dev->buf_type_output))
     goto fail;
         
   if(ci.global_header)
@@ -1100,15 +1074,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   /* TODO: Set format */
 
   memset(&fmt, 0, sizeof(fmt));
-
   
-  
-  if(dev->is_planar)
-    buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-  else 
-    buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  
-  fmt.type = buf_type;
+  fmt.type = dev->buf_type_capture;
   
   if(my_ioctl(dev->fd, VIDIOC_G_FMT, &fmt) == -1)
     {
@@ -1118,7 +1085,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   
   dump_fmt(dev, &fmt);
   
-  if(dev->is_planar)
+  if(dev->planar)
     {
     gavl_format->pixelformat = gavl_v4l_pix_fmt_to_pixelformat(fmt.fmt.pix_mp.pixelformat);
     
@@ -1142,7 +1109,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
   /* Create buffers */
   
-  if(!(dev->num_in_bufs = request_buffers_mmap(dev, buf_type, DECODER_NUM_FRAMES, dev->in_bufs)))
+  if(!(dev->num_in_bufs = request_buffers_mmap(dev, dev->buf_type_capture, DECODER_NUM_FRAMES, dev->in_bufs)))
     goto fail;
 
   for(i = 0; i < dev->num_in_bufs; i++)
@@ -1150,7 +1117,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     queue_frame_decoder(dev, i);
     }
   
-  if(!stream_on(dev, buf_type))
+  if(!stream_on(dev, dev->buf_type_capture))
     goto fail;
 
   /* Wait for source_change event */
@@ -1283,26 +1250,26 @@ void gavl_v4l_devices_scan_by_type(int type_mask, gavl_array_t * ret)
     gavl_value_init(&dev_val);
     dev = gavl_value_set_dictionary(&dev_val);
 
-    fprintf(stderr, "Card:\n");
-    gavl_hexdump(cap->card, 32, 16);
+    //    fprintf(stderr, "Card:\n");
+    //    gavl_hexdump(cap->card, 32, 16);
     
-    fprintf(stderr, "Blupp 1 %s\n", (const char*)cap->card);
+    //    fprintf(stderr, "Blupp 1 %s\n", (const char*)cap->card);
     
     gavl_dictionary_set_string(dev, GAVL_META_LABEL, (const char*)cap->card);
 
-    fprintf(stderr, "Blupp 2 %s\n", g.gl_pathv[i]);
+    //    fprintf(stderr, "Blupp 2 %s\n", g.gl_pathv[i]);
 
     tmp_string = gavl_strdup(g.gl_pathv[i]);
     
-    fprintf(stderr, "Blupp 3 %s\n", tmp_string);
+    //    fprintf(stderr, "Blupp 3 %s\n", tmp_string);
     
     gavl_dictionary_set_string_nocopy(dev, GAVL_META_URI, tmp_string);
 
-    fprintf(stderr, "Blupp 4\n");
+    //    fprintf(stderr, "Blupp 4\n");
     
     gavl_dictionary_set_int(dev, GAVL_V4L_CAPABILITIES, cap->capabilities);
 
-    fprintf(stderr, "Blupp 5\n");
+    //    fprintf(stderr, "Blupp 5\n");
     
     /* Get source formats */
     if(cap->capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE))
