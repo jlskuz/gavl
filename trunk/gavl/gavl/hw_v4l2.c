@@ -1088,7 +1088,6 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   if(dev->planar)
     {
     gavl_format->pixelformat = gavl_v4l_pix_fmt_to_pixelformat(fmt.fmt.pix_mp.pixelformat);
-    
     }
   else
     {
@@ -1109,7 +1108,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
   /* Create buffers */
   
-  if(!(dev->num_in_bufs = request_buffers_mmap(dev, dev->buf_type_capture, DECODER_NUM_FRAMES, dev->in_bufs)))
+  if(!(dev->num_in_bufs = request_buffers_mmap(dev, dev->buf_type_capture,
+                                               DECODER_NUM_FRAMES, dev->in_bufs)))
     goto fail;
 
   for(i = 0; i < dev->num_in_bufs; i++)
@@ -1123,8 +1123,6 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   /* Wait for source_change event */
   do_poll(dev, &can_read, &can_write, &has_event);
   fprintf(stderr, "do_poll (init) %d %d %d\n", can_read, can_write, has_event);
-
-
   
   //  handle_decoder_event(dev);
   
