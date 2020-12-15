@@ -1105,7 +1105,14 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
     }
 
-  /* Create buffers */
+  /* Wait for source_change event */
+
+  do_poll(dev, POLLPRI, &pollev);
+
+  fprintf(stderr, "Do poll init: %d %d %d\n",
+          !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
+  
+  /* Create frame buffers */
   
   if(!(dev->num_in_bufs = request_buffers_mmap(dev, dev->buf_type_capture,
                                                DECODER_NUM_FRAMES, dev->in_bufs)))
@@ -1119,12 +1126,6 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   if(!stream_on(dev, dev->buf_type_capture))
     goto fail;
 
-  /* Wait for source_change event */
-
-  do_poll(dev, POLLPRI, &pollev);
-
-  fprintf(stderr, "Do poll init: %d %d %d\n",
-          !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
 
   
   //  handle_decoder_event(dev);
