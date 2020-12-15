@@ -31,7 +31,7 @@
 
 #define MAX_BUFFERS 16
 #define DECODER_NUM_PACKETS 16
-#define DECODER_NUM_FRAMES  16
+#define DECODER_NUM_FRAMES  8
 
 #define BUFFER_FLAG_QUEUED (1<<0)
 
@@ -972,8 +972,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   int i;
  
   
-  fprintf(stderr, "gavl_v4l_device_init_decoder\n");
-  gavl_dictionary_dump(stream, 2);
+  //  fprintf(stderr, "gavl_v4l_device_init_decoder\n");
+  //  gavl_dictionary_dump(stream, 2);
 
   gavl_format = gavl_stream_get_video_format_nc(stream);
   
