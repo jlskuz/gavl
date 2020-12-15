@@ -1007,11 +1007,13 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   gavl_stream_stats_init(&stats);
   gavl_stream_get_stats(stream, &stats);
 
+  gavl_video_format_set_frame_size(gavl_format, 16, 16);
+  
   if(stats.size_max > 0)
-    max_packet_size = stats.size_max;
+    max_packet_size = stats.size_max + 128;
   else
-    max_packet_size = (gavl_format->image_width * gavl_format->image_width * 3) / 4 + 128;
-
+    max_packet_size = (gavl_format->frame_width * gavl_format->frame_width * 3) / 4 + 128;
+  
   memset(&fmt, 0, sizeof(fmt));
   
   if(gavl_dictionary_get_int(&dev->dev, GAVL_V4L_CAPABILITIES, &caps) &&
@@ -1022,8 +1024,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
     fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
           
-    fmt.fmt.pix_mp.width = gavl_format->image_width;
-    fmt.fmt.pix_mp.height = gavl_format->image_height;
+    fmt.fmt.pix_mp.width = gavl_format->frame_width;
+    fmt.fmt.pix_mp.height = gavl_format->frame_height;
 
     fmt.fmt.pix_mp.pixelformat = gavl_v4l_codec_id_to_pix_fmt(ci.id);
     fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_DEFAULT;
@@ -1041,8 +1043,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     /* Untested */
     fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
     
-    fmt.fmt.pix.width = gavl_format->image_width;
-    fmt.fmt.pix.height = gavl_format->image_height;
+    fmt.fmt.pix.width = gavl_format->frame_width;
+    fmt.fmt.pix.height = gavl_format->frame_height;
 
     fmt.fmt.pix.pixelformat = gavl_v4l_codec_id_to_pix_fmt(ci.id);
     fmt.fmt.pix.colorspace = V4L2_COLORSPACE_DEFAULT;
