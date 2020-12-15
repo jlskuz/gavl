@@ -1105,6 +1105,9 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
     }
 
+  if(!stream_on(dev, dev->buf_type_capture))
+    goto fail;
+  
   /* Wait for source_change event */
 
   do_poll(dev, POLLPRI, &pollev);
@@ -1123,8 +1126,6 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     queue_frame_decoder(dev, i);
     }
   
-  if(!stream_on(dev, dev->buf_type_capture))
-    goto fail;
 
 
   
