@@ -720,16 +720,21 @@ static int stream_off(gavl_v4l_device_t * dev, int type)
   return 1;
   }
 
-static int do_poll(gavl_v4l_device_t * dev,
-                   int * can_read, int * can_write, int * has_event)
+static int do_poll(gavl_v4l_device_t * dev, int events, int * revents)
   {
   int result;
   struct pollfd fds;
 
   fds.fd = dev->fd;
+  
+  
+  fds.events = events;
 
-  fds.events = POLLIN|POLLRDNORM|POLLOUT|POLLWRNORM|POLLPRI;
-  // fds.events = POLLIN|POLLRDNORM|POLLPRI;
+  if(fds.events & POLLIN)
+    fds.events |= POLLRDNORM;
+
+  if(fds.events & POLLOUT)
+    fds.events |= POLLWRNORM;
   
   fds.revents = 0;
   
@@ -741,21 +746,16 @@ static int do_poll(gavl_v4l_device_t * dev,
     return 0;
     }
 
+  *revents = 0;
+  
   if(fds.revents & (POLLIN|POLLRDNORM))
-    *can_read = 1;
-  else
-    *can_read = 0;
-  
+    *revents |= POLLIN;
+
   if(fds.revents & (POLLOUT|POLLWRNORM))
-    *can_write = 1;
-  else
-    *can_write = 0;
-  
+    *revents |= POLLOUT;
+
   if(fds.revents & POLLPRI)
-    *has_event = 1;
-  else
-    *has_event = 0;
-  
+    *revents |= POLLPRI;
   
   return 1;
   }
@@ -842,7 +842,7 @@ static void buffer_to_video_frame(gavl_v4l_device_t * dev, buffer_t * buf,
 
 static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t ** frame)
   {
-  int can_read, can_write, has_event;
+  int pollev;
   
   gavl_v4l_device_t * dev = priv;
 
@@ -852,22 +852,23 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
   
   while(1)
     {
-    do_poll(dev, &can_read, &can_write, &has_event);
+    do_poll(dev, POLLIN|POLLOUT|POLLPRI, &pollev);
 
-    fprintf(stderr, "Do poll 1: %d %d %d\n", can_read, can_write, has_event);
-
-    if(has_event)
+    fprintf(stderr, "Do poll 1: %d %d %d\n",
+            !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
+    
+    if(pollev & POLLPRI)
       {
       handle_decoder_event(dev);
       }
 
-    if(can_write)
+    if(pollev & POLLOUT)
       {
       if(!send_decoder_packet(dev))
         return GAVL_SOURCE_EOF;
       }
     
-    if(can_read)
+    if(pollev & POLLIN)
       {
       int idx;
       gavl_packet_t pkt;
@@ -936,10 +937,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   gavl_compression_info_t ci;
   struct v4l2_format fmt;
   gavl_stream_stats_t stats;
-
-  int has_event = 0;
-  int can_read = 0;
-  int can_write = 0;
+  
+  int pollev;
   
   int max_packet_size;
   struct v4l2_event_subscription sub;
@@ -1121,8 +1120,12 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
 
   /* Wait for source_change event */
-  do_poll(dev, &can_read, &can_write, &has_event);
-  fprintf(stderr, "do_poll (init) %d %d %d\n", can_read, can_write, has_event);
+
+  do_poll(dev, POLLPRI, &pollev);
+
+  fprintf(stderr, "Do poll init: %d %d %d\n",
+          !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
+
   
   //  handle_decoder_event(dev);
   
