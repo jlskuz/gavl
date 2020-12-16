@@ -598,20 +598,30 @@ static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, bu
   return req.count;
   }
 
-static void release_buffers_mmap(buffer_t * bufs, int num)
+static void release_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, buffer_t * bufs)
   {
   int i, j;
+  struct v4l2_requestbuffers req;
   
-  for(i = 0; i < num; i++)
+  memset(&req, 0, sizeof(req));
+  
+  for(i = 0; i < count; i++)
     {
     for(j = 0; j < bufs[i].num_planes; j++)
       {
       munmap(bufs[i].planes[j].buf, bufs[i].planes[j].size);
       }
-    
-    
     }
-  
+
+  req.count = 0;
+  req.type = type;
+  req.memory = V4L2_MEMORY_MMAP;
+
+  if(my_ioctl(dev->fd, VIDIOC_REQBUFS, &type) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_REQBUFS failed: %s", strerror(errno));
+    } 
+  memset(bufs, 0, count * sizeof(*bufs));
   }
 
 gavl_v4l_device_t * gavl_v4l_device_open(const gavl_dictionary_t * dev)
@@ -673,6 +683,27 @@ static void dump_fmt(gavl_v4l_device_t * dev, const struct v4l2_format * fmt)
     }
   }
 
+static int stream_on(gavl_v4l_device_t * dev, int type)
+  {
+  if(my_ioctl(dev->fd, VIDIOC_STREAMON, &type) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_STREAMON failed: %s", strerror(errno));
+    return 0;
+    }
+  return 1;
+  }
+
+static int stream_off(gavl_v4l_device_t * dev, int type)
+  {
+  if(my_ioctl(dev->fd, VIDIOC_STREAMOFF, &type) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_STREAMOFF failed: %s", strerror(errno));
+    return 0;
+    }
+  return 1;
+  }
+
+
 static void handle_decoder_event(gavl_v4l_device_t * dev)
   {
   struct v4l2_event ev;
@@ -698,6 +729,19 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
             gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_G_FMT failed: %s", strerror(errno));
             }
           dump_fmt(dev, &dev->capture_fmt);
+
+          /* Stop capturing and re-create the buffers */
+          stream_off(dev, dev->buf_type_capture);
+
+          /* Unmap buffers */
+          release_buffers_mmap(dev, dev->buf_type_capture, dev->num_in_bufs, dev->in_bufs);
+          
+          dev->num_in_bufs = request_buffers_mmap(dev, dev->buf_type_capture,
+                                                  DECODER_NUM_FRAMES, dev->in_bufs);
+          
+          stream_on(dev, dev->buf_type_capture);
+          
+          fprintf(stderr, "Re-created buffers\n");
           }
 
         break;
@@ -709,25 +753,6 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
   }
 
 
-static int stream_on(gavl_v4l_device_t * dev, int type)
-  {
-  if(my_ioctl(dev->fd, VIDIOC_STREAMON, &type) == -1)
-    {
-    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_STREAMON failed: %s", strerror(errno));
-    return 0;
-    }
-  return 1;
-  }
-
-static int stream_off(gavl_v4l_device_t * dev, int type)
-  {
-  if(my_ioctl(dev->fd, VIDIOC_STREAMOFF, &type) == -1)
-    {
-    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_STREAMOFF failed: %s", strerror(errno));
-    return 0;
-    }
-  return 1;
-  }
 
 static int do_poll(gavl_v4l_device_t * dev, int events, int * revents)
   {
@@ -1197,8 +1222,8 @@ void gavl_v4l_device_close(gavl_v4l_device_t * dev)
   if(dev->fd >= 0)
     close(dev->fd);
 
-  release_buffers_mmap(dev->out_bufs, dev->num_out_bufs);
-  release_buffers_mmap(dev->in_bufs, dev->num_in_bufs);
+  release_buffers_mmap(dev, dev->buf_type_output, dev->num_out_bufs, dev->out_bufs);
+  release_buffers_mmap(dev, dev->buf_type_capture, dev->num_in_bufs, dev->in_bufs);
   
   gavl_dictionary_free(&dev->dev);
 
