@@ -953,8 +953,9 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   struct v4l2_event_subscription sub;
   int packets_to_send;
   int i;
- 
-  
+
+  struct v4l2_cropcap cropcap;
+
   //  fprintf(stderr, "gavl_v4l_device_init_decoder\n");
   //  gavl_dictionary_dump(stream, 2);
 
@@ -998,6 +999,9 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     max_packet_size = (gavl_format->frame_width * gavl_format->frame_width * 3) / 4 + 128;
   
   memset(&fmt, 0, sizeof(fmt));
+
+  /* */
+  
   
   if(gavl_dictionary_get_int(&dev->dev, GAVL_V4L_CAPABILITIES, &caps) &&
      (caps & V4L2_CAP_VIDEO_M2M_MPLANE))
@@ -1043,7 +1047,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_S_FMT failed: %s", strerror(errno));
     goto fail;
     }
-
+  
+  
   if(!(dev->num_out_bufs = request_buffers_mmap(dev, dev->buf_type_output, DECODER_NUM_PACKETS, dev->out_bufs)))
     goto fail;
 
@@ -1082,8 +1087,25 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     if(!send_decoder_packet(dev))
       fprintf(stderr, "sending decoder packet failed\n");
     }
-  
 
+  memset(&cropcap, 0, sizeof(cropcap));
+  cropcap.type = dev->buf_type_output;
+  
+  if(my_ioctl(dev->fd, VIDIOC_CROPCAP, &cropcap) == 0)
+    {
+    struct v4l2_crop crop;
+    
+    fprintf(stderr, "Setting cropcap\n");
+        
+    crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    crop.c = cropcap.defrect; /* reset to default */
+
+    if(my_ioctl(dev->fd, VIDIOC_S_CROP, &crop) == -1)
+      {
+      gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_S_CROP failed: %s", strerror(errno));
+      goto fail;
+      }
+    }
   
   /* TODO: Set format */
 
