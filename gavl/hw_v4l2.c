@@ -1060,7 +1060,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     {
     gavl_packet_t * p;
 
-#ifdef DUMP_PACKET
+#ifdef DUMP_EXTRADATA
     fprintf(stderr, "Sending global header %d bytes\n", ci.global_header_len);
     gavl_hexdump(ci.global_header, ci.global_header_len, 16);
 #endif
