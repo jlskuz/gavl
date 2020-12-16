@@ -1099,21 +1099,14 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
     }
 
+#if 0  
   if(my_ioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1)
     {
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_S_FMT failed: %s", strerror(errno));
     goto fail;
     }
-
-  if(!stream_on(dev, dev->buf_type_capture))
-    goto fail;
+#endif
   
-  /* Wait for source_change event */
-
-  do_poll(dev, POLLPRI, &pollev);
-
-  fprintf(stderr, "Do poll init: %d %d %d\n",
-          !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
   
   /* Create frame buffers */
   
@@ -1126,7 +1119,15 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     queue_frame_decoder(dev, i);
     }
   
+  if(!stream_on(dev, dev->buf_type_capture))
+    goto fail;
 
+  /* Wait for source_change event */
+
+  do_poll(dev, POLLPRI, &pollev);
+
+  fprintf(stderr, "Do poll init: %d %d %d\n",
+          !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
 
   
   //  handle_decoder_event(dev);
