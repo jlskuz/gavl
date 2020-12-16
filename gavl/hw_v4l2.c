@@ -619,7 +619,7 @@ static void release_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, b
 
   if(my_ioctl(dev->fd, VIDIOC_REQBUFS, &type) == -1)
     {
-    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_REQBUFS failed: %s", strerror(errno));
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_REQBUFS for releasing failed: %s", strerror(errno));
     } 
   memset(bufs, 0, count * sizeof(*bufs));
   }
