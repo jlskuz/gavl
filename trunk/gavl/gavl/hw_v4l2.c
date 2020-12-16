@@ -1114,7 +1114,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     goto fail;
     }
 
-#if 0  
+#if 1
   if(my_ioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1)
     {
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_S_FMT failed: %s", strerror(errno));
