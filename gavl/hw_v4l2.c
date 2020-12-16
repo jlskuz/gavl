@@ -1019,7 +1019,8 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
     fmt.fmt.pix_mp.pixelformat = gavl_v4l_codec_id_to_pix_fmt(ci.id);
     fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_DEFAULT;
-
+    fmt.fmt.pix_mp.field      = V4L2_FIELD_NONE;
+    
     fmt.fmt.pix_mp.num_planes = 1;
 
     fmt.fmt.pix_mp.plane_fmt[0].sizeimage = max_packet_size;
@@ -1040,6 +1041,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     fmt.fmt.pix.pixelformat = gavl_v4l_codec_id_to_pix_fmt(ci.id);
     fmt.fmt.pix.colorspace = V4L2_COLORSPACE_DEFAULT;
     fmt.fmt.pix.sizeimage = max_packet_size;
+    fmt.fmt.pix.field      = V4L2_FIELD_NONE;
     }
   
   if(my_ioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1)
@@ -1095,7 +1097,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     {
     struct v4l2_crop crop;
     
-    fprintf(stderr, "Setting cropcap\n");
+    fprintf(stderr, "Setting crop\n");
         
     crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     crop.c = cropcap.defrect; /* reset to default */
