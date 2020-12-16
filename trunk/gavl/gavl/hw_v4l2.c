@@ -35,6 +35,10 @@
 
 #define BUFFER_FLAG_QUEUED (1<<0)
 
+#define DUMP_PACKETS
+#define DUMP_EXTRADATA
+
+
 typedef struct
   {
   void * buf;
@@ -454,6 +458,11 @@ static gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * d
 
   /* Queue buffer */
   memset(&buf, 0, sizeof(buf));
+
+#ifdef DUMP_PACKETS
+  fprintf(stderr, "Sending packet\n");
+  gavl_packet_dump(&dev->packet);
+#endif
   
   if(dev->planar)
     {
@@ -1050,6 +1059,12 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   if(ci.global_header)
     {
     gavl_packet_t * p;
+
+#ifdef DUMP_PACKET
+    fprintf(stderr, "Sending global header %d bytes\n", ci.global_header_len);
+    gavl_hexdump(ci.global_header, ci.global_header_len, 16);
+#endif
+
     p = gavl_v4l_device_get_packet_write(dev);
     memcpy(p->data, ci.global_header, ci.global_header_len);
     p->data_len = ci.global_header_len;
