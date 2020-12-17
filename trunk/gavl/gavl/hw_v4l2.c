@@ -1112,13 +1112,15 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     }
   
   dev->psrc = psrc;
-  
+
+#if 0  
   for(i = 0; i < packets_to_send; i++)
     {
     if(!send_decoder_packet(dev))
       fprintf(stderr, "sending decoder packet failed\n");
     }
-
+#endif
+  
   memset(&cropcap, 0, sizeof(cropcap));
   cropcap.type = dev->buf_type_output;
   
