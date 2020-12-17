@@ -30,8 +30,8 @@
 #include <hw_private.h>
 
 #define MAX_BUFFERS 20 // From libavcodec
-#define DECODER_NUM_PACKETS 16
-#define DECODER_NUM_FRAMES  20
+#define DECODER_NUM_PACKETS 8
+#define DECODER_NUM_FRAMES  8
 
 #define BUFFER_FLAG_QUEUED (1<<0)
 
