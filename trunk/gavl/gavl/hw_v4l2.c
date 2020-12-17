@@ -38,6 +38,7 @@
 // #define DUMP_PACKETS
 // #define DUMP_EXTRADATA
 
+#define DECODER_HAVE_FORMAT (1<<0)
 
 typedef struct
   {
@@ -351,6 +352,8 @@ struct gavl_v4l_device_s
   
   struct v4l2_format capture_fmt;
   gavl_video_format_t capture_format;
+
+  int flags;
   
   };
 
@@ -810,6 +813,8 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
           stream_on(dev, dev->buf_type_capture);
           
           fprintf(stderr, "Re-created buffers\n");
+
+          dev->flags |= DECODER_HAVE_FORMAT;
           }
 
         break;
@@ -1228,8 +1233,22 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
 
   /* Wait for source_change event */
 
-  do_poll(dev, POLLPRI, &pollev);
+  while(!(dev->flags & DECODER_HAVE_FORMAT))
+    {
+    do_poll(dev, POLLOUT | POLLPRI, &pollev);
 
+    if(pollev & POLLPRI)
+      handle_decoder_event(dev);      
+    
+    else if(pollev & POLLOUT)
+      {
+      if(!send_decoder_packet(dev))
+        goto fail;
+      }
+    }
+
+  
+  
   fprintf(stderr, "Do poll init: %d %d %d\n",
           !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
 
