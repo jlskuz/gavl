@@ -399,6 +399,9 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
       {
       fprintf(stderr, "Got B-Frame\n");
       }
+    else
+      fprintf(stderr, "Unknown frametype\n");
+    
     }
   
   return buf.index;
