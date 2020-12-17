@@ -384,6 +384,23 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_DQBUF failed for output: %s", strerror(errno));
     return -1;
     }
+
+  if(type == dev->buf_type_capture)
+    {
+    if(buf.flags & V4L2_BUF_FLAG_KEYFRAME)
+      {
+      fprintf(stderr, "Got I-Frame\n");
+      }
+    else if(buf.flags & V4L2_BUF_FLAG_PFRAME)
+      {
+      fprintf(stderr, "Got P-Frame\n");
+      }
+    else if(buf.flags & V4L2_BUF_FLAG_BFRAME)
+      {
+      fprintf(stderr, "Got B-Frame\n");
+      }
+    }
+  
   return buf.index;
   }
 
