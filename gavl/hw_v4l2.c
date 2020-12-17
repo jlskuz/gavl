@@ -1031,7 +1031,7 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   
   dev->timescale = gavl_format->timescale;
 
-  dev->cache = gavl_packet_pts_cache_create(MAX_BUFFERS);
+  dev->cache = gavl_packet_pts_cache_create(2*MAX_BUFFERS);
 
   /* Subscribe to events */
   
