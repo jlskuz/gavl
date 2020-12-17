@@ -359,12 +359,16 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
   int i;
   struct v4l2_buffer buf;
   struct v4l2_plane planes[GAVL_MAX_PLANES];
-  
-  for(i = 0; i < dev->num_out_bufs; i++)
+
+  if(type == dev->buf_type_output)
     {
-    if(!(dev->out_bufs[i].flags & BUFFER_FLAG_QUEUED))
-      return i;
+    for(i = 0; i < dev->num_out_bufs; i++)
+      {
+      if(!(dev->out_bufs[i].flags & BUFFER_FLAG_QUEUED))
+        return i;
+      }
     }
+  
   
   /* Dequeue buffer */
   memset(&buf, 0, sizeof(buf));
