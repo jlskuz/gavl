@@ -703,6 +703,37 @@ static int stream_off(gavl_v4l_device_t * dev, int type)
   return 1;
   }
 
+static int queue_frame_decoder(gavl_v4l_device_t * dev, int idx)
+  {
+  struct v4l2_buffer buf;
+  struct v4l2_plane planes[GAVL_MAX_PLANES];
+  
+  memset(&buf, 0, sizeof(buf));
+
+  if(dev->planar)
+    {
+    memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
+    buf.m.planes = planes;
+    buf.length = GAVL_MAX_PLANES;
+    }
+  
+  buf.type = dev->buf_type_capture;
+  
+  buf.index = idx;
+  buf.memory = V4L2_MEMORY_MMAP;
+  
+  if(my_ioctl(dev->fd, VIDIOC_QBUF, &buf) == -1)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_QBUF failed: %s", strerror(errno));
+    return 0;
+    }
+  
+  dev->in_bufs[idx].flags |= BUFFER_FLAG_QUEUED;
+  
+  return 1;
+  
+  }
+
 
 static void handle_decoder_event(gavl_v4l_device_t * dev)
   {
@@ -717,7 +748,7 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
 
         if(ev.u.src_change.changes & V4L2_EVENT_SRC_CH_RESOLUTION)
           {
-          
+          int i;
           memset(&dev->capture_fmt, 0, sizeof(dev->capture_fmt));
           
           fprintf(stderr, "Resolution changed\n");
@@ -738,6 +769,9 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
           
           dev->num_in_bufs = request_buffers_mmap(dev, dev->buf_type_capture,
                                                   DECODER_NUM_FRAMES, dev->in_bufs);
+
+          for(i = 0; i < dev->num_in_bufs; i++)
+            queue_frame_decoder(dev, i);
           
           stream_on(dev, dev->buf_type_capture);
           
@@ -931,36 +965,6 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
   return GAVL_SOURCE_EOF;
   }
 
-static int queue_frame_decoder(gavl_v4l_device_t * dev, int idx)
-  {
-  struct v4l2_buffer buf;
-  struct v4l2_plane planes[GAVL_MAX_PLANES];
-  
-  memset(&buf, 0, sizeof(buf));
-
-  if(dev->planar)
-    {
-    memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
-    buf.m.planes = planes;
-    buf.length = GAVL_MAX_PLANES;
-    }
-  
-  buf.type = dev->buf_type_capture;
-  
-  buf.index = idx;
-  buf.memory = V4L2_MEMORY_MMAP;
-  
-  if(my_ioctl(dev->fd, VIDIOC_QBUF, &buf) == -1)
-    {
-    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_QBUF failed: %s", strerror(errno));
-    return 0;
-    }
-  
-  dev->in_bufs[idx].flags |= BUFFER_FLAG_QUEUED;
-  
-  return 1;
-  
-  }
 
 int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream,
                                  gavl_packet_source_t * psrc)
