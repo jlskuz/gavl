@@ -35,8 +35,8 @@
 
 #define BUFFER_FLAG_QUEUED (1<<0)
 
-#define DUMP_PACKETS
-#define DUMP_EXTRADATA
+// #define DUMP_PACKETS
+// #define DUMP_EXTRADATA
 
 
 typedef struct
