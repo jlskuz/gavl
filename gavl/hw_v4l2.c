@@ -389,8 +389,17 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
     return -1;
     }
 
+#if 1 
   if(type == dev->buf_type_capture)
     {
+    gavl_time_t timestamp;
+
+    timestamp = buf.timestamp.tv_sec;
+    timestamp *= 1000000;
+    timestamp += buf.timestamp.tv_usec;
+
+    fprintf(stderr, "Got timestamp: %"PRId64"\n", timestamp);
+    
     if(buf.flags & V4L2_BUF_FLAG_KEYFRAME)
       {
       fprintf(stderr, "Got I-Frame\n");
@@ -407,6 +416,7 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
       fprintf(stderr, "Unknown frametype\n");
     
     }
+#endif
   
   return buf.index;
   }
