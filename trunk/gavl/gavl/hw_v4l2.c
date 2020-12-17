@@ -617,7 +617,7 @@ static void release_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, b
   req.type = type;
   req.memory = V4L2_MEMORY_MMAP;
 
-  if(my_ioctl(dev->fd, VIDIOC_REQBUFS, &type) == -1)
+  if(my_ioctl(dev->fd, VIDIOC_REQBUFS, &req) == -1)
     {
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_REQBUFS for releasing failed: %s", strerror(errno));
     } 
