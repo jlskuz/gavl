@@ -138,7 +138,7 @@ int gavl_packet_pts_cache_get_by_pts(gavl_packet_pts_cache_t *c, gavl_packet_t *
   }
 
 
-int gavl_packet_pts_cache_clear(gavl_packet_pts_cache_t *c)
+void gavl_packet_pts_cache_clear(gavl_packet_pts_cache_t *c)
   {
   c->num_packets = 0;
   }

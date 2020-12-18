@@ -980,7 +980,19 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
   return GAVL_SOURCE_EOF;
   }
 
+void gavl_v4l_device_resync_decoder(gavl_v4l_device_t * dev)
+  {
+  stream_off(dev, dev->buf_type_capture);
+  stream_off(dev, dev->buf_type_output);
 
+  
+  
+  stream_on(dev, dev->buf_type_capture);
+  stream_on(dev, dev->buf_type_output);
+  
+  
+  }
+  
 int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream,
                                  gavl_packet_source_t * psrc)
   {

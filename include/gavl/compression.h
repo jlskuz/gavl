@@ -532,7 +532,7 @@ int gavl_packet_pts_cache_get_by_pts(gavl_packet_pts_cache_t *m, gavl_packet_t *
                                      int64_t pts);
 
 GAVL_PUBLIC
-int gavl_packet_pts_cache_clear(gavl_packet_pts_cache_t *m);
+void gavl_packet_pts_cache_clear(gavl_packet_pts_cache_t *m);
 
   
 #if 0
