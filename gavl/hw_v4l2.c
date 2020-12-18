@@ -321,11 +321,11 @@ struct gavl_v4l_device_s
   gavl_dictionary_t dev;
   int fd;
 
-  int num_out_bufs;
-  int num_in_bufs;
+  int num_output_bufs;
+  int num_capture_bufs;
   
-  buffer_t out_bufs[MAX_BUFFERS]; // Output
-  buffer_t in_bufs[MAX_BUFFERS];  // Capture
+  buffer_t output_bufs[MAX_BUFFERS]; // Output
+  buffer_t capture_bufs[MAX_BUFFERS];  // Capture
 
   buffer_t * out_buf;
   buffer_t * in_buf;
@@ -365,9 +365,9 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
 
   if(type == dev->buf_type_output)
     {
-    for(i = 0; i < dev->num_out_bufs; i++)
+    for(i = 0; i < dev->num_output_bufs; i++)
       {
-      if(!(dev->out_bufs[i].flags & BUFFER_FLAG_QUEUED))
+      if(!(dev->output_bufs[i].flags & BUFFER_FLAG_QUEUED))
         return i;
       }
     }
@@ -431,7 +431,7 @@ static buffer_t * get_buffer_output(gavl_v4l_device_t * dev)
 
   idx = dequeue_buffer(dev, dev->buf_type_output);
   
-  dev->out_buf = &dev->out_bufs[idx];
+  dev->out_buf = &dev->output_bufs[idx];
   dev->out_buf->flags &= ~BUFFER_FLAG_QUEUED;
   
   return dev->out_buf;
@@ -765,7 +765,7 @@ static int queue_frame_decoder(gavl_v4l_device_t * dev, int idx)
     return 0;
     }
   
-  dev->in_bufs[idx].flags |= BUFFER_FLAG_QUEUED;
+  dev->capture_bufs[idx].flags |= BUFFER_FLAG_QUEUED;
   
   return 1;
   
@@ -802,12 +802,12 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
           stream_off(dev, dev->buf_type_capture);
 
           /* Unmap buffers */
-          release_buffers_mmap(dev, dev->buf_type_capture, dev->num_in_bufs, dev->in_bufs);
+          release_buffers_mmap(dev, dev->buf_type_capture, dev->num_capture_bufs, dev->capture_bufs);
           
-          dev->num_in_bufs = request_buffers_mmap(dev, dev->buf_type_capture,
-                                                  DECODER_NUM_FRAMES, dev->in_bufs);
+          dev->num_capture_bufs = request_buffers_mmap(dev, dev->buf_type_capture,
+                                                  DECODER_NUM_FRAMES, dev->capture_bufs);
 
-          for(i = 0; i < dev->num_in_bufs; i++)
+          for(i = 0; i < dev->num_capture_bufs; i++)
             queue_frame_decoder(dev, i);
           
           stream_on(dev, dev->buf_type_capture);
@@ -988,7 +988,7 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
 
       /* Set output buffer to frame */
 
-      dev->in_buf = &dev->in_bufs[idx];
+      dev->in_buf = &dev->capture_bufs[idx];
       
       buffer_to_video_frame(dev, dev->in_buf, &dev->capture_fmt);
 
@@ -1119,11 +1119,11 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
     }
   
   
-  if(!(dev->num_out_bufs = request_buffers_mmap(dev, dev->buf_type_output, DECODER_NUM_PACKETS, dev->out_bufs)))
+  if(!(dev->num_output_bufs = request_buffers_mmap(dev, dev->buf_type_output, DECODER_NUM_PACKETS, dev->output_bufs)))
     goto fail;
 
 
-  packets_to_send = dev->num_out_bufs;
+  packets_to_send = dev->num_output_bufs;
   
   /* */
 
@@ -1219,11 +1219,11 @@ int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * st
   
   /* Create frame buffers */
   
-  if(!(dev->num_in_bufs = request_buffers_mmap(dev, dev->buf_type_capture,
-                                               DECODER_NUM_FRAMES, dev->in_bufs)))
+  if(!(dev->num_capture_bufs = request_buffers_mmap(dev, dev->buf_type_capture,
+                                               DECODER_NUM_FRAMES, dev->capture_bufs)))
     goto fail;
 
-  for(i = 0; i < dev->num_in_bufs; i++)
+  for(i = 0; i < dev->num_capture_bufs; i++)
     {
     queue_frame_decoder(dev, i);
     }
@@ -1278,8 +1278,8 @@ int gavl_v4l_device_get_fd(gavl_v4l_device_t * dev)
 
 void gavl_v4l_device_close(gavl_v4l_device_t * dev)
   {
-  release_buffers_mmap(dev, dev->buf_type_output, dev->num_out_bufs, dev->out_bufs);
-  release_buffers_mmap(dev, dev->buf_type_capture, dev->num_in_bufs, dev->in_bufs);
+  release_buffers_mmap(dev, dev->buf_type_output, dev->num_output_bufs, dev->output_bufs);
+  release_buffers_mmap(dev, dev->buf_type_capture, dev->num_capture_bufs, dev->capture_bufs);
   
   gavl_dictionary_free(&dev->dev);
 
