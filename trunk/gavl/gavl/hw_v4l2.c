@@ -1278,9 +1278,6 @@ int gavl_v4l_device_get_fd(gavl_v4l_device_t * dev)
 
 void gavl_v4l_device_close(gavl_v4l_device_t * dev)
   {
-  if(dev->fd >= 0)
-    close(dev->fd);
-
   release_buffers_mmap(dev, dev->buf_type_output, dev->num_out_bufs, dev->out_bufs);
   release_buffers_mmap(dev, dev->buf_type_capture, dev->num_in_bufs, dev->in_bufs);
   
@@ -1291,6 +1288,9 @@ void gavl_v4l_device_close(gavl_v4l_device_t * dev)
     gavl_video_frame_null(dev->vframe);
     gavl_video_frame_destroy(dev->vframe);
     }
+
+  if(dev->fd >= 0)
+    close(dev->fd);
   
   free(dev);
   }
