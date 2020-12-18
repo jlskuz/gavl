@@ -550,7 +550,6 @@ static int send_decoder_packet(gavl_v4l_device_t * dev)
   return 1;
   }
 
-
 static int request_buffers_mmap(gavl_v4l_device_t * dev, int type, int count, buffer_t * bufs)
   {
   int i, j;
