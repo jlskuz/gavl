@@ -391,43 +391,8 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
     gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "VIDIOC_DQBUF failed for output: %s", strerror(errno));
     return -1;
     }
-
-#if 1 
-  if(type == dev->buf_type_capture)
-    {
-    gavl_time_t timestamp;
-
-    timestamp = buf.timestamp.tv_sec;
-    timestamp *= 1000000;
-    timestamp += buf.timestamp.tv_usec;
-
-    fprintf(stderr, "Got timestamp: %"PRId64"\n", timestamp);
-
-#if 0 
-  
-    if(buf.flags & V4L2_BUF_FLAG_KEYFRAME)
-      {
-      fprintf(stderr, "Got I-Frame\n");
-      }
-    else if(buf.flags & V4L2_BUF_FLAG_PFRAME)
-      {
-      fprintf(stderr, "Got P-Frame\n");
-      }
-    else if(buf.flags & V4L2_BUF_FLAG_BFRAME)
-      {
-      fprintf(stderr, "Got B-Frame\n");
-      }
-    else
-      fprintf(stderr, "Unknown frametype\n");
-#endif
-    
-    
-    }
-#endif
-  
   return buf.index;
   }
-
 
 static buffer_t * get_buffer_output(gavl_v4l_device_t * dev)
   {
