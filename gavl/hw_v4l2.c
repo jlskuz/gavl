@@ -986,10 +986,9 @@ void gavl_v4l_device_resync_decoder(gavl_v4l_device_t * dev)
   stream_off(dev, dev->buf_type_output);
 
   gavl_packet_pts_cache_clear(dev->cache);
-  
-  stream_on(dev, dev->buf_type_capture);
+
   stream_on(dev, dev->buf_type_output);
-  
+  stream_on(dev, dev->buf_type_capture);
   
   }
   
