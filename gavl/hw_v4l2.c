@@ -1278,6 +1278,9 @@ int gavl_v4l_device_get_fd(gavl_v4l_device_t * dev)
 
 void gavl_v4l_device_close(gavl_v4l_device_t * dev)
   {
+  stream_off(dev, dev->buf_type_output);
+  stream_off(dev, dev->buf_type_capture);
+  
   release_buffers_mmap(dev, dev->buf_type_output, dev->num_output_bufs, dev->output_bufs);
   release_buffers_mmap(dev, dev->buf_type_capture, dev->num_capture_bufs, dev->capture_bufs);
   
