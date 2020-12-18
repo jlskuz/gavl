@@ -525,8 +525,8 @@ static gavl_sink_status_t gavl_v4l_device_put_packet_write(gavl_v4l_device_t * d
   buf.index =  dev->out_buf->index;
 
   buf.timestamp.tv_sec = dev->packet.pts / 1000000;
-  buf.timestamp.tv_usec = dev->packet.pts % 1000000;
-
+  buf.timestamp.tv_usec = dev->packet.pts - buf.timestamp.tv_sec * 1000000;
+  
   buf.field = V4L2_FIELD_NONE;
   
   if(my_ioctl(dev->fd, VIDIOC_QBUF, &buf) == -1)
