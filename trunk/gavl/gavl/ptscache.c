@@ -105,6 +105,7 @@ int gavl_packet_pts_cache_get_first(gavl_packet_pts_cache_t *c, gavl_packet_t * 
     if(c->packets[i].pts < min_pts)
       {
       min_idx = i;
+      min_pts = c->packets[i].pts;
       }
     }
   
