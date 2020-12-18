@@ -37,6 +37,7 @@ gavl_packet_pts_cache_t * gavl_packet_pts_cache_create(int size)
   {
   gavl_packet_pts_cache_t * ret = calloc(1, sizeof(*ret));
   ret->packets = calloc(size, sizeof(*ret->packets));
+  ret->packets_alloc = size;
   return ret;
   }
 
@@ -45,7 +46,6 @@ void gavl_packet_pts_cache_destroy(gavl_packet_pts_cache_t * c)
   free(c->packets);
   free(c);
   }
-
 
 void gavl_packet_pts_cache_push(gavl_packet_pts_cache_t *c, const gavl_packet_t * pkt)
   {
@@ -88,8 +88,6 @@ static void return_video_frame(gavl_packet_pts_cache_t *c, int idx, gavl_video_f
   remove_packet(c, idx);
   }
 
-
-
 int gavl_packet_pts_cache_get_first(gavl_packet_pts_cache_t *c, gavl_packet_t * pkt)
   {
   int i;
@@ -98,14 +96,16 @@ int gavl_packet_pts_cache_get_first(gavl_packet_pts_cache_t *c, gavl_packet_t * 
   
   if(c->num_packets == 0)
     return 0;
-
+  
   min_pts = c->packets[0].pts;
   min_idx = 0;
 
   for(i = 1; i < c->num_packets; i++)
     {
     if(c->packets[i].pts < min_pts)
+      {
       min_idx = i;
+      }
     }
   
   return_packet(c, min_idx, pkt);
