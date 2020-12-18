@@ -402,7 +402,9 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
     timestamp += buf.timestamp.tv_usec;
 
     fprintf(stderr, "Got timestamp: %"PRId64"\n", timestamp);
-    
+
+#if 0 
+  
     if(buf.flags & V4L2_BUF_FLAG_KEYFRAME)
       {
       fprintf(stderr, "Got I-Frame\n");
@@ -417,6 +419,8 @@ static int dequeue_buffer(gavl_v4l_device_t * dev, int type)
       }
     else
       fprintf(stderr, "Unknown frametype\n");
+#endif
+    
     
     }
 #endif
@@ -960,8 +964,8 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
     {
     do_poll(dev, POLLIN|POLLOUT|POLLPRI, &pollev);
 
-    fprintf(stderr, "Do poll 1: %d %d %d\n",
-            !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
+    //    fprintf(stderr, "Do poll 1: %d %d %d\n",
+    //            !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
     
     if(pollev & POLLPRI)
       {
