@@ -39,6 +39,8 @@
 // #define DUMP_EXTRADATA
 
 #define DECODER_HAVE_FORMAT (1<<0)
+#define DECODER_SEND_EOS    (1<<1)
+#define DECODER_GOT_EOS     (1<<2)
 
 typedef struct
   {
@@ -517,10 +519,28 @@ static int send_decoder_packet(gavl_v4l_device_t * dev)
   {
   gavl_packet_t * p = gavl_v4l_device_get_packet_write(dev);
 
-  if((gavl_packet_source_read_packet(dev->psrc, &p) != GAVL_SOURCE_OK) ||
-     (gavl_v4l_device_put_packet_write(dev) != GAVL_SINK_OK))
-    return 0;
+  /* Send EOF */
+  
+  if((gavl_packet_source_read_packet(dev->psrc, &p) != GAVL_SOURCE_OK))
+    {
+    /* Send EOF */
 
+    struct v4l2_decoder_cmd cmd;
+    memset(&cmd, 0, sizeof(cmd));
+    
+    cmd.cmd = V4L2_DEC_CMD_STOP;
+
+    if(my_ioctl(dev->fd, VIDIOC_REQBUFS, &req) == -1)
+      {
+      gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "V4L2_DEC_CMD_STOP failed %s", strerror(errno));
+      }
+    dev->flags |= DECODER_SEND_EOS;
+    return 0;
+    }
+
+  if(gavl_v4l_device_put_packet_write(dev) != GAVL_SINK_OK)
+    return 0;
+  
   //  gavl_packet_dump(p);
   
   gavl_packet_pts_cache_push(dev->cache, p);
@@ -937,8 +957,8 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
     {
     do_poll(dev, POLLIN|POLLOUT|POLLPRI, &pollev);
 
-    fprintf(stderr, "Do poll decode: %d %d %d\n",
-            !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
+    //    fprintf(stderr, "Do poll decode: %d %d %d\n",
+    //            !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
     
     if(pollev & POLLPRI)
       {
