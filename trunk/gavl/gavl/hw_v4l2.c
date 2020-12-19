@@ -982,6 +982,8 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
 
 void gavl_v4l_device_resync_decoder(gavl_v4l_device_t * dev)
   {
+  int i;
+  
   fprintf(stderr, "Resync...\n");
   
   stream_off(dev, dev->buf_type_capture);
@@ -992,6 +994,10 @@ void gavl_v4l_device_resync_decoder(gavl_v4l_device_t * dev)
   stream_on(dev, dev->buf_type_output);
   stream_on(dev, dev->buf_type_capture);
 
+  /* Queue frames */
+  for(i = 0; i < dev->num_capture_bufs; i++)
+    queue_frame_decoder(dev, i);
+  
   fprintf(stderr, "Resync done\n");
   
   }
