@@ -997,6 +997,11 @@ void gavl_v4l_device_resync_decoder(gavl_v4l_device_t * dev)
     queue_frame_decoder(dev, i);
     fprintf(stderr, "Capture frame decoder");
     }
+
+  for(i = 0; i < dev->num_output_bufs; i++)
+    {
+    dev->output_bufs[i].flags &= ~BUFFER_FLAG_QUEUED;
+    }
   
   stream_on(dev, dev->buf_type_output);
   stream_on(dev, dev->buf_type_capture);
