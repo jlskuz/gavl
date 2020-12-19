@@ -991,13 +991,16 @@ void gavl_v4l_device_resync_decoder(gavl_v4l_device_t * dev)
 
   gavl_packet_pts_cache_clear(dev->cache);
 
+  /* Queue frames */
+  for(i = 0; i < dev->num_capture_bufs; i++)
+    {
+    queue_frame_decoder(dev, i);
+    fprintf(stderr, "Capture frame decoder");
+    }
+  
   stream_on(dev, dev->buf_type_output);
   stream_on(dev, dev->buf_type_capture);
 
-  /* Queue frames */
-  for(i = 0; i < dev->num_capture_bufs; i++)
-    queue_frame_decoder(dev, i);
-  
   fprintf(stderr, "Resync done\n");
   
   }
