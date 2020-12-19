@@ -980,6 +980,7 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
   return GAVL_SOURCE_EOF;
   }
 
+#if 1
 void gavl_v4l_device_resync_decoder(gavl_v4l_device_t * dev)
   {
   int i;
@@ -998,13 +999,14 @@ void gavl_v4l_device_resync_decoder(gavl_v4l_device_t * dev)
   for(i = 0; i < dev->num_capture_bufs; i++)
     {
     queue_frame_decoder(dev, i);
-    fprintf(stderr, "Capture frame decoder");
     }
-
+  
   for(i = 0; i < dev->num_output_bufs; i++)
     {
     dev->output_bufs[i].flags &= ~BUFFER_FLAG_QUEUED;
     }
+
+  send_decoder_packet(dev);
   
   stream_on(dev, dev->buf_type_output);
   stream_on(dev, dev->buf_type_capture);
@@ -1013,7 +1015,8 @@ void gavl_v4l_device_resync_decoder(gavl_v4l_device_t * dev)
   fprintf(stderr, "Resync done\n");
   
   }
-  
+#endif
+
 int gavl_v4l_device_init_decoder(gavl_v4l_device_t * dev, gavl_dictionary_t * stream,
                                  gavl_packet_source_t * psrc)
   {
