@@ -535,6 +535,7 @@ static int send_decoder_packet(gavl_v4l_device_t * dev)
       gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "V4L2_DEC_CMD_STOP failed %s", strerror(errno));
       }
     dev->flags |= DECODER_SENT_EOS;
+    fprintf(stderr, "Sent EOS\n");
     return 1;
     }
   
