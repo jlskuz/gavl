@@ -37,7 +37,8 @@ typedef enum
     GAVL_HW_EGL_GLES_X11,   // EGL Texture (associated with X11 connection)
     // GAVL_HW_EGL_WAYLAND,  // EGL Texture (wayland) Not implemented yet
     GAVL_HW_VAAPI_X11,
-    GAVL_HW_MMAL,      // Multi media abstraction layer (Raspberry PI)
+    GAVL_HW_V4L2_BUFFER, // V4L2 buffers (mmaped, optionaly also with DMA handles)
+    GAVL_HW_MMAL,        // Multi media abstraction layer (Raspberry PI)
   } gavl_hw_type_t;
 
 /* Global handle for accessing a piece of hardware */
