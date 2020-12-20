@@ -39,7 +39,7 @@
 // #define DUMP_EXTRADATA
 
 #define DECODER_HAVE_FORMAT (1<<0)
-#define DECODER_SEND_EOS    (1<<1)
+#define DECODER_SENT_EOS    (1<<1)
 #define DECODER_GOT_EOS     (1<<2)
 
 typedef struct
@@ -530,14 +530,14 @@ static int send_decoder_packet(gavl_v4l_device_t * dev)
     
     cmd.cmd = V4L2_DEC_CMD_STOP;
 
-    if(my_ioctl(dev->fd, VIDIOC_REQBUFS, &req) == -1)
+    if(my_ioctl(dev->fd, VIDIOC_DECODER_CMD, &cmd) == -1)
       {
       gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "V4L2_DEC_CMD_STOP failed %s", strerror(errno));
       }
-    dev->flags |= DECODER_SEND_EOS;
-    return 0;
+    dev->flags |= DECODER_SENT_EOS;
+    return 1;
     }
-
+  
   if(gavl_v4l_device_put_packet_write(dev) != GAVL_SINK_OK)
     return 0;
   
@@ -815,7 +815,8 @@ static void handle_decoder_event(gavl_v4l_device_t * dev)
 
         break;
       case V4L2_EVENT_EOS:
-        fprintf(stderr, "EOS\n");
+        dev->flags |= DECODER_GOT_EOS;
+        fprintf(stderr, "Got EOS\n");
         break;
       }
     }
@@ -946,17 +947,31 @@ static void buffer_to_video_frame(gavl_v4l_device_t * dev, buffer_t * buf,
 static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t ** frame)
   {
   int pollev;
-  
   gavl_v4l_device_t * dev = priv;
 
+  int events_requested;
+
+  
   /* Send frame back to the queue */
   
   done_buffer_capture(dev);
   
+  if(dev->flags & DECODER_GOT_EOS)
+    return GAVL_SOURCE_EOF;
+  
   while(1)
     {
-    do_poll(dev, POLLIN|POLLOUT|POLLPRI, &pollev);
-
+    if(dev->flags & DECODER_GOT_EOS)
+      return GAVL_SOURCE_EOF;
+    
+    events_requested = POLLIN | POLLPRI;
+    
+    if(!(dev->flags & DECODER_SENT_EOS))
+      events_requested |= POLLOUT;
+    
+    
+    do_poll(dev, events_requested, &pollev);
+    
     //    fprintf(stderr, "Do poll decode: %d %d %d\n",
     //            !!(pollev & POLLIN), !!(pollev & POLLOUT), !!(pollev & POLLPRI));
     
@@ -964,7 +979,7 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
       {
       handle_decoder_event(dev);
       }
-
+    
     if(pollev & POLLOUT)
       {
       if(!send_decoder_packet(dev))
@@ -976,9 +991,8 @@ static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t **
       int idx;
       gavl_packet_t pkt;
       
-      
       idx = dequeue_buffer(dev, dev->buf_type_capture);
-
+      
       if(idx < 0)
         return GAVL_SOURCE_EOF;
 
