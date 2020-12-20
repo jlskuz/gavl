@@ -1020,7 +1020,7 @@ void gavl_v4l_device_resync_decoder(gavl_v4l_device_t * dev)
   {
   int i;
   
-  fprintf(stderr, "Resync...\n");
+  //  fprintf(stderr, "Resync...\n");
   
   stream_off(dev, dev->buf_type_capture);
   stream_off(dev, dev->buf_type_output);
@@ -1045,9 +1045,8 @@ void gavl_v4l_device_resync_decoder(gavl_v4l_device_t * dev)
   
   stream_on(dev, dev->buf_type_output);
   stream_on(dev, dev->buf_type_capture);
-
   
-  fprintf(stderr, "Resync done\n");
+  //  fprintf(stderr, "Resync done\n");
   
   }
 #endif
