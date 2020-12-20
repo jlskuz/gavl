@@ -2600,7 +2600,7 @@ struct gavl_video_frame_s
   int32_t dst_y;                     //!< y offset in the destination frame. (since 1.5.0) */
 
   gavl_hw_context_t * hwctx;         //!< Handle for accessing the frame
-
+  
   };
 
 
@@ -2616,7 +2616,7 @@ struct gavl_video_frame_s
 */
   
 GAVL_PUBLIC
-gavl_video_frame_t * gavl_video_frame_create(const gavl_video_format_t*format);
+gavl_video_frame_t * gavl_video_frame_create(const gavl_video_format_t * format);
 
 /*!
   \ingroup video_frame

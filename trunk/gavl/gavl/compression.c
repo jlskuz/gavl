@@ -606,8 +606,8 @@ gavl_packet_to_videoframe(const gavl_packet_t * p,
   f->timecode = p->timecode;
   f->interlace_mode = p->interlace_mode;
   gavl_rectangle_i_copy(&f->src_rect, &p->src_rect);
-  f->dst_x = &p->dst_x;
-  f->dst_y = &p->dst_y;
+  f->dst_x = p->dst_x;
+  f->dst_y = p->dst_y;
 
   }
                           

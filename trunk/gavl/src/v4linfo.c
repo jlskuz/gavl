@@ -11,7 +11,7 @@ int main()
   gavl_array_t arr;
   gavl_array_init(&arr);
 
-  gavl_v4l_devices_scan(&arr);
+  gavl_v4l2_devices_scan(&arr);
 
   gavl_array_dump(&arr, 0);
   gavl_array_free(&arr);
