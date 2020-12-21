@@ -100,16 +100,6 @@ hw_egl_cflags =
 hw_egl_libs = 
 endif
 
-dnl if HAVE_MMAL
-dnl hw_mmal_sources = hw_mmal.c
-dnl hw_mmal_cflags = @MMAL_CFLAGS@
-dnl hw_mmal_libs   = @MMAL_LIBS@
-dnl else
-dnl hw_mmal_sources = 
-dnl hw_mmal_cflags =
-dnl hw_mmal_libs   =
-dnl endif
-
 if HAVE_V4L2
 hw_v4l2_sources = hw_v4l2.c
 else
