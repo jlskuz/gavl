@@ -117,7 +117,8 @@ gavl_video_frame_t * gavl_hw_video_frame_create_hw(gavl_hw_context_t * ctx,
                                                    gavl_video_format_t * fmt)
   {
   gavl_video_frame_t * ret;
-  gavl_hw_video_format_adjust(ctx, fmt);
+  if(fmt)
+    gavl_hw_video_format_adjust(ctx, fmt);
   if(ctx->funcs->video_frame_create_hw)
     ret = ctx->funcs->video_frame_create_hw(ctx, fmt);
   else

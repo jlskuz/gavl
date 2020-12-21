@@ -136,7 +136,7 @@ GLuint gavl_gl_create_texture(const gavl_video_format_t * fmt)
   GLuint tex = 0;
   GLenum type = 0, format = 0;
   
-  if(!gavl_get_gl_format(fmt->pixelformat, &format, &type))
+  if(fmt && !gavl_get_gl_format(fmt->pixelformat, &format, &type))
     return 0;
 
   glGenTextures(1,&tex);
@@ -147,17 +147,20 @@ GLuint gavl_gl_create_texture(const gavl_video_format_t * fmt)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
   gavl_gl_flush_errors();
-  
-  glTexImage2D(GL_TEXTURE_2D, 0,
-               GL_RGBA,
-               fmt->image_width,
-               fmt->image_height,
-               0,
-               format,
-               type,
-               NULL);
 
-  gavl_gl_log_error("glTexImage2D");
+  if(fmt)
+    {
+    glTexImage2D(GL_TEXTURE_2D, 0,
+                 GL_RGBA,
+                 fmt->image_width,
+                 fmt->image_height,
+                 0,
+                 format,
+                 type,
+                 NULL);
+    gavl_gl_log_error("glTexImage2D");
+    }
+    
   
   return tex;
   }
