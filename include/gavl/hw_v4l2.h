@@ -35,6 +35,7 @@ typedef struct
   {
   int type;
   int index;
+  int total; /* Total number of buffers */
   
   gavl_v4l2_plane_t planes[GAVL_MAX_PLANES];
   int num_planes;
