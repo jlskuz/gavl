@@ -197,6 +197,8 @@ gles_attributes[] =
   {
 #ifdef EGL_CONTEXT_MAJOR_VERSION
    EGL_CONTEXT_MAJOR_VERSION, 3,
+#else
+   EGL_CONTEXT_CLIENT_VERSION, 3,
 #endif
    EGL_NONE
   };
