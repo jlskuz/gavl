@@ -40,6 +40,7 @@
 #include <gavl/gavl.h>
 #include <gavl/hw_gl.h>
 #include <gavl/hw_egl.h>
+
 #include <gavl/log.h>
 #define LOG_DOMAIN "egl"
 
@@ -49,6 +50,12 @@
 #define EGL_PLATFORM_X11_EXT 0x31D5
 #endif
 
+#ifdef HAVE_DRM_DRM_FOURCC_H 
+#include <drm/drm_fourcc.h>
+
+#include <gavl/hw_v4l2.h>
+
+#endif
 
 typedef struct
   {
@@ -76,10 +83,12 @@ typedef struct
   EGLDisplay (*eglGetPlatformDisplay)(EGLenum, void *, const void*);
   EGLSurface (*eglCreatePlatformWindowSurface)(EGLDisplay, EGLConfig, void *, const void*);
 
-  void * (*eglCreateImageKHR)(EGLDisplay dpy, EGLContext ctx, EGLenum target,
+  void * (*eglCreateImage)(EGLDisplay dpy, EGLContext ctx, EGLenum target,
                               EGLClientBuffer buffer, const EGLint *attrib_list);
   
-  EGLBoolean (*eglDestroyImageKHR)(EGLDisplay dpy, void * image);
+  EGLBoolean (*eglDestroyImage)(EGLDisplay dpy, void * image);
+
+  void (*glEGLImageTargetTexture2DOES)(GLenum target, void * image);
   
   } egl_t;
 
@@ -257,7 +266,10 @@ gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs, gavl_hw_type_t 
   priv->eglGetPlatformDisplay          = (void*)eglGetProcAddress("eglGetPlatformDisplayEXT");
   priv->eglCreatePlatformWindowSurface = (void*)eglGetProcAddress("eglCreatePlatformWindowSurfaceEXT");
 
-  
+  priv->eglCreateImage = (void*)eglGetProcAddress("eglCreateImageKHR");
+  priv->eglDestroyImage = (void*)eglGetProcAddress("eglDestroyImageKHR");
+
+  priv->glEGLImageTargetTexture2DOES = (void*)eglGetProcAddress("glEGLImageTargetTexture2DOES");
   
   if((priv->display = priv->eglGetPlatformDisplay(platform, native_display, NULL)) == EGL_NO_DISPLAY)
     goto fail;
@@ -383,24 +395,128 @@ void gavl_hw_egl_swap_buffers(gavl_hw_context_t * ctx)
  
   }
 
-void gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
-                                    const gavl_video_format_t * fmt,
-                                    gavl_video_frame_t * egl_frame,
-                                    gavl_video_frame_t * v4l2_frame)
+int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
+                                   const gavl_video_format_t * fmt,
+                                   gavl_video_frame_t * egl_frame,
+                                   gavl_video_frame_t * v4l2_frame)
   {
+#ifdef HAVE_DRM_DRM_FOURCC_H
+
+  egl_t * egl;
+  
   EGLImageKHR image = EGL_NO_IMAGE_KHR;
   EGLint attrs[128];
+  int aidx = 0;
+  GLuint * tex;
 
   gavl_v4l2_buffer_t * buf = v4l2_frame->user_data;
   
+  egl = egl_frame->hwctx->native;
+  
+  attrs[aidx++] = EGL_WIDTH;
+  attrs[aidx++] = fmt->image_width;
+  attrs[aidx++] = EGL_HEIGHT;
+  attrs[aidx++] = fmt->image_height;
+  
+  
   if(fmt->pixelformat == GAVL_YUV_420_P)
     {
+    /* 420_P is planar in GAVL and elsewhere but in V4L2 all planes
+       are in the first plane of the buffer. Probably an ugly hack to
+       support YUV420 even in the non-planat API.
+    */
+    if(buf->num_planes == 1)
+      {
+      if(v4l2_frame->planes[1] < v4l2_frame->planes[2])
+        {
+        attrs[aidx++] = EGL_LINUX_DRM_FOURCC_EXT;
+        attrs[aidx++] = DRM_FORMAT_YUV420;
+        }
+      else
+        {
+        attrs[aidx++] = EGL_LINUX_DRM_FOURCC_EXT;
+        attrs[aidx++] = DRM_FORMAT_YVU420;
+        }
+
+      /* Plane 0 */
+      attrs[aidx++] = EGL_DMA_BUF_PLANE0_FD_EXT;
+      attrs[aidx++] = buf->planes[0].dma_fd;
+
+      attrs[aidx++] = EGL_DMA_BUF_PLANE0_OFFSET_EXT;
+      attrs[aidx++] = 0;
+
+      attrs[aidx++] = EGL_DMA_BUF_PLANE0_PITCH_EXT;
+      attrs[aidx++] = v4l2_frame->strides[0];
+
+      /* Plane 1 */
+      attrs[aidx++] = EGL_DMA_BUF_PLANE1_FD_EXT;
+      attrs[aidx++] = buf->planes[0].dma_fd;
+
+      attrs[aidx++] = EGL_DMA_BUF_PLANE1_OFFSET_EXT;
+      attrs[aidx++] = v4l2_frame->planes[1] - v4l2_frame->planes[0];
+      
+      attrs[aidx++] = EGL_DMA_BUF_PLANE1_PITCH_EXT;
+      attrs[aidx++] = v4l2_frame->strides[1];
+      
+      /* Plane 2 */
+      attrs[aidx++] = EGL_DMA_BUF_PLANE2_FD_EXT;
+      attrs[aidx++] = buf->planes[0].dma_fd;
+
+      attrs[aidx++] = EGL_DMA_BUF_PLANE2_OFFSET_EXT;
+      attrs[aidx++] = v4l2_frame->planes[2] - v4l2_frame->planes[0];
+      
+      attrs[aidx++] = EGL_DMA_BUF_PLANE2_PITCH_EXT;
+      attrs[aidx++] = v4l2_frame->strides[2];
+      
+      }
+    else
+      {
+      /* TODO */
+      
+      }
     
     }
-  else if(gavl_pixelformat_is_packed(fmt->pixelformat))
+  else if(!gavl_pixelformat_is_planar(fmt->pixelformat))
     {
+    /* TODO */
+    }
+  else
+    {
+    /* TODO */
     
     }
 
+  /* Terminate attributes */
+
+  attrs[aidx++] = EGL_NONE;
+
+  image = egl->eglCreateImage(egl->display, EGL_NO_CONTEXT,
+                              EGL_LINUX_DMA_BUF_EXT,
+                              NULL, attrs);
+
+  if(!image)
+    return 0;
+  
+  gavl_hw_egl_set_current(ctx, EGL_NO_SURFACE);
+
+  tex = egl_frame->user_data;
+
+  /* Associate the texture with the dma buffer */
+  glBindTexture(GL_TEXTURE_2D, *tex);
+  egl->glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
+  
+  /* Destroy image */
+
+  egl->eglDestroyImage(egl->display, image);
+  
+  gavl_hw_egl_unset_current(ctx);
+  
+  return 0;
+
+#else
+  return 0;
+#endif
+  
   }
+
 

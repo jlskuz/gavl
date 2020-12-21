@@ -130,6 +130,8 @@ AC_CHECK_FUNCS([memalign posix_memalign strdup vasprintf isatty sched_setaffinit
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
+AC_CHECK_HEADERS([drm/drm_fourcc.h])
+
 
 dnl
 dnl clock_gettime

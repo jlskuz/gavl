@@ -43,7 +43,7 @@ GAVL_PUBLIC void gavl_hw_egl_unset_current(gavl_hw_context_t * ctx);
 
 /* Works only with OpenGL ES contexts! */
 
-GAVL_PUBLIC void gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
+GAVL_PUBLIC int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
                                                 const gavl_video_format_t * fmt,
                                                 gavl_video_frame_t * egl_frame,
                                                 gavl_video_frame_t * v4l2_frame);
