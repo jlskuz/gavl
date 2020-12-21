@@ -24,13 +24,12 @@
 #include <gavl/log.h>
 #define LOG_DOMAIN "v4l"
 
-#include <gavl/hw.h>
 
 #include <gavl/hw_v4l2.h>
 
 #include <hw_private.h>
 
-#include <hw_private.h>
+
 
 #define MAX_BUFFERS 20 // From libavcodec
 #define DECODER_NUM_PACKETS 8
@@ -43,6 +42,8 @@
 #define DECODER_HAVE_FORMAT (1<<0)
 #define DECODER_SENT_EOS    (1<<1)
 #define DECODER_GOT_EOS     (1<<2)
+
+static gavl_v4l2_device_t * gavl_v4l2_device_open(const gavl_dictionary_t * dev);
 
   
 static int my_ioctl(int fd, int request, void * arg)
@@ -343,6 +344,8 @@ struct gavl_v4l2_device_s
   gavl_video_format_t capture_format;
 
   int flags;
+
+  gavl_hw_context_t * hwctx;
   
   };
 
@@ -586,6 +589,7 @@ static int request_buffers_mmap(gavl_v4l2_device_t * dev, int type, int count, g
 #endif
     
     bufs[i].index = i;
+    bufs[i].type = type;
     
     if(dev->planar)
       {
@@ -630,6 +634,9 @@ static void release_buffers_mmap(gavl_v4l2_device_t * dev, int type, int count, 
     {
     for(j = 0; j < bufs[i].num_planes; j++)
       {
+      if(bufs[i].planes[j].dma_fd > 0)
+        close(bufs[i].planes[j].dma_fd);
+
       munmap(bufs[i].planes[j].buf, bufs[i].planes[j].size);
       }
     }
@@ -789,7 +796,7 @@ static void handle_decoder_event(gavl_v4l2_device_t * dev)
           release_buffers_mmap(dev, dev->buf_type_capture, dev->num_capture_bufs, dev->capture_bufs);
           
           dev->num_capture_bufs = request_buffers_mmap(dev, dev->buf_type_capture,
-                                                  DECODER_NUM_FRAMES, dev->capture_bufs);
+                                                       DECODER_NUM_FRAMES, dev->capture_bufs);
 
           for(i = 0; i < dev->num_capture_bufs; i++)
             queue_frame_decoder(dev, i);
@@ -926,13 +933,16 @@ static void buffer_to_video_frame(gavl_v4l2_device_t * dev, gavl_v4l2_buffer_t *
     dev->vframe->planes[0] = buf->planes[0].buf;
     dev->vframe->strides[0] = bytesperline;
     }
+
+  dev->vframe->hwctx = dev->hwctx;
+  dev->vframe->user_data = buf;
   
   }
 
 
 static gavl_source_status_t get_frame_decoder(void * priv, gavl_video_frame_t ** frame)
   {
-  int pollev;
+  int pollev = 0;
   gavl_v4l2_device_t * dev = priv;
 
   int events_requested;
@@ -1047,7 +1057,7 @@ int gavl_v4l2_device_init_decoder(gavl_v4l2_device_t * dev, gavl_dictionary_t * 
   struct v4l2_format fmt;
   gavl_stream_stats_t stats;
   
-  int pollev;
+  int pollev = 0;
   
   int max_packet_size;
   struct v4l2_event_subscription sub;
@@ -1060,6 +1070,8 @@ int gavl_v4l2_device_init_decoder(gavl_v4l2_device_t * dev, gavl_dictionary_t * 
   //  gavl_dictionary_dump(stream, 2);
 
   gavl_format = gavl_stream_get_video_format_nc(stream);
+
+  gavl_format->hwctx = dev->hwctx;
   
   dev->timescale = gavl_format->timescale;
 
@@ -1723,12 +1735,49 @@ static const gavl_hw_funcs_t funcs =
 
 /* hw context associated with a device */
 
-gavl_hw_context_t * gavl_hw_ctx_create_v4l2(gavl_v4l2_device_t * dev)
+gavl_hw_context_t * gavl_hw_ctx_create_v4l2(const gavl_dictionary_t * dev_info)
   {
-  return gavl_hw_context_create_internal(dev, &funcs, GAVL_HW_V4L2_BUFFER);
+  gavl_hw_context_t * ret;
+  gavl_v4l2_device_t * dev = gavl_v4l2_device_open(dev_info);
+  
+  ret = gavl_hw_context_create_internal(dev, &funcs, GAVL_HW_V4L2_BUFFER);
+  dev->hwctx = ret;
+  return ret;
   }
 
 gavl_v4l2_device_t * gavl_hw_ctx_v4l2_get_device(gavl_hw_context_t * ctx)
   {
   return ctx->native;
+  }
+
+int gavl_v4l2_export_dmabuf_video(gavl_video_frame_t * frame)
+  {
+  int i;
+  gavl_v4l2_device_t * dev = frame->hwctx->native;
+
+  gavl_v4l2_buffer_t * buf = frame->user_data;
+  
+  if(buf->flags & GAVL_V4L2_BUFFER_FLAG_DMA)
+    return 1;
+  
+  for(i = 0; i < buf->num_planes; i++)
+    {
+    struct v4l2_exportbuffer expbuf;
+    
+    memset(&expbuf, 0, sizeof(expbuf));
+    expbuf.type = buf->type;
+    expbuf.index = buf->index;
+    expbuf.plane = i;
+    
+    if(my_ioctl(dev->fd, VIDIOC_EXPBUF, &expbuf) == -1)
+      {
+      gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "Exporting buffer failed: %s", strerror(errno));
+      return 0;
+      }
+    
+    buf->planes[i].dma_fd = expbuf.fd;
+    }
+  
+  buf->flags |= GAVL_V4L2_BUFFER_FLAG_DMA;
+  return 1;
   }

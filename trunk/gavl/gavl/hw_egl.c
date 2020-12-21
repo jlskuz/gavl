@@ -75,6 +75,11 @@ typedef struct
   
   EGLDisplay (*eglGetPlatformDisplay)(EGLenum, void *, const void*);
   EGLSurface (*eglCreatePlatformWindowSurface)(EGLDisplay, EGLConfig, void *, const void*);
+
+  void * (*eglCreateImageKHR)(EGLDisplay dpy, EGLContext ctx, EGLenum target,
+                              EGLClientBuffer buffer, const EGLint *attrib_list);
+  
+  EGLBoolean (*eglDestroyImageKHR)(EGLDisplay dpy, void * image);
   
   } egl_t;
 
@@ -251,6 +256,7 @@ gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs, gavl_hw_type_t 
 
   priv->eglGetPlatformDisplay          = (void*)eglGetProcAddress("eglGetPlatformDisplayEXT");
   priv->eglCreatePlatformWindowSurface = (void*)eglGetProcAddress("eglCreatePlatformWindowSurfaceEXT");
+
   
   
   if((priv->display = priv->eglGetPlatformDisplay(platform, native_display, NULL)) == EGL_NO_DISPLAY)
@@ -376,3 +382,25 @@ void gavl_hw_egl_swap_buffers(gavl_hw_context_t * ctx)
   eglSwapBuffers(p->display, p->current_surf);
  
   }
+
+void gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
+                                    const gavl_video_format_t * fmt,
+                                    gavl_video_frame_t * egl_frame,
+                                    gavl_video_frame_t * v4l2_frame)
+  {
+  EGLImageKHR image = EGL_NO_IMAGE_KHR;
+  EGLint attrs[128];
+
+  gavl_v4l2_buffer_t * buf = v4l2_frame->user_data;
+  
+  if(fmt->pixelformat == GAVL_YUV_420_P)
+    {
+    
+    }
+  else if(gavl_pixelformat_is_packed(fmt->pixelformat))
+    {
+    
+    }
+
+  }
+

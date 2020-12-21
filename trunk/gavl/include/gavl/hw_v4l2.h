@@ -2,6 +2,8 @@
 #include <gavl/connectors.h>
 #include <sys/types.h>
 
+#include <gavl/hw.h>
+
 typedef enum
   {
    GAVL_V4L2_DEVICE_UNKNOWN   = 0,
@@ -31,7 +33,7 @@ typedef struct
 
 typedef struct
   {
-  int buf_type;
+  int type;
   int index;
   
   gavl_v4l2_plane_t planes[GAVL_MAX_PLANES];
@@ -79,9 +81,6 @@ GAVL_PUBLIC uint32_t gavl_v4l2_codec_id_to_pix_fmt(gavl_codec_id_t id);
 // GAVL_PUBLIC gavl_source_status_t gavl_v4l2_device_read_frame(gavl_v4l2_device_t * dev, gavl_video_frame_t ** frame);
 
 
-
-GAVL_PUBLIC gavl_v4l2_device_t * gavl_v4l2_device_open(const gavl_dictionary_t * dev);
-
 GAVL_PUBLIC void gavl_v4l2_device_close(gavl_v4l2_device_t * dev);
 
 GAVL_PUBLIC int gavl_v4l2_device_get_fd(gavl_v4l2_device_t * dev);
@@ -104,6 +103,8 @@ GAVL_PUBLIC void gavl_v4l2_device_resync_decoder(gavl_v4l2_device_t * dev);
 GAVL_PUBLIC void gavl_v4l2_device_info(const char * dev);
 GAVL_PUBLIC void gavl_v4l2_device_infos();
 
-GAVL_PUBLIC gavl_hw_context_t * gavl_hw_ctx_create_v4l2(gavl_v4l2_device_t * dev);
+GAVL_PUBLIC gavl_hw_context_t * gavl_hw_ctx_create_v4l2(const gavl_dictionary_t * dev_info);
 
 GAVL_PUBLIC gavl_v4l2_device_t * gavl_hw_ctx_v4l2_get_device(gavl_hw_context_t * ctx);
+
+GAVL_PUBLIC int gavl_v4l2_export_dmabuf_video(gavl_video_frame_t * frame);
