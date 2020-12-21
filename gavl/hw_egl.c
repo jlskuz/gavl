@@ -512,8 +512,8 @@ int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
   
   gavl_hw_egl_unset_current(ctx);
   
-  return 0;
-
+  return 1;
+  
 #else
   return 0;
 #endif
