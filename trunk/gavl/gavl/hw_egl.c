@@ -493,13 +493,17 @@ int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
 
   attrs[aidx++] = EGL_NONE;
 
+  eglGetError();
+  
   image = egl->eglCreateImage(egl->display, EGL_NO_CONTEXT,
                               EGL_LINUX_DMA_BUF_EXT,
                               NULL, attrs);
-
-  if(!image)
-    return 0;
   
+  if(!image)
+    {
+    fprintf(stderr, "Creating Image failed %08x\n", eglGetError());
+    return 0;
+    }
   gavl_hw_egl_set_current(ctx, EGL_NO_SURFACE);
 
   tex = egl_frame->user_data;
