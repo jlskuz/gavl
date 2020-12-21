@@ -220,7 +220,7 @@ types[] =
     { GAVL_HW_EGL_GL_X11, "Opengl Texture (EGL+X11)" },  // EGL Texture (associated with X11 connection)
     { GAVL_HW_EGL_GLES_X11, "Opengl ES Texture (EGL+X11)" },  // EGL Texture (associated with X11 connection)
     // GAVL_HW_EGL_WAYLAND,  // EGL Texture (wayland) Not implemented yet
-    { GAVL_HW_V4L2_BUFFER, "V4L2 Buffer" }, // V4L2 buffers (mmaped, optionaly also with DMA handles)
+    { GAVL_HW_V4L2_BUFFER, "V4L2 Buffer" }, // V4L2 buffers (mmap()ed, optionaly also with DMA handles)
     
     { /* End  */ },
   };

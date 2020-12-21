@@ -567,7 +567,7 @@ static int request_buffers_mmap(gavl_v4l2_device_t * dev, int type, int count, g
     
     buf.index = i;
     buf.type = type;
-
+    
     if(dev->planar)
       {
       memset(planes, 0, GAVL_MAX_PLANES*sizeof(planes[0]));
@@ -590,6 +590,7 @@ static int request_buffers_mmap(gavl_v4l2_device_t * dev, int type, int count, g
     
     bufs[i].index = i;
     bufs[i].type = type;
+    bufs[i].total = req.count;
     
     if(dev->planar)
       {
