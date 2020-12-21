@@ -196,7 +196,7 @@ static const EGLint
 gles_attributes[] =
   {
 #ifdef EGL_CONTEXT_MAJOR_VERSION
-   EGL_CONTEXT_MAJOR_VERSION, 3,
+   EGL_CONTEXT_MAJOR_VERSION, 2,
 #endif
    EGL_NONE
   };
