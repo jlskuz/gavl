@@ -219,6 +219,7 @@ gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs, gavl_hw_type_t 
     case GAVL_HW_NONE:  // Autodetect
       break;
     case GAVL_HW_EGL_GLES_X11:  // X11
+      eglBindAPI(EGL_OPENGL_ES_API);
       attributes = gles_attributes;
 
 #ifdef HAVE_XLIB
