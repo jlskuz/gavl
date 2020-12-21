@@ -131,7 +131,7 @@ AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
 AC_CHECK_HEADERS([drm/drm_fourcc.h])
-
+AC_CHECK_HEADERS([libdrm/drm_fourcc.h])
 
 dnl
 dnl clock_gettime

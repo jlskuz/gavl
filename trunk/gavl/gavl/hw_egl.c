@@ -52,6 +52,16 @@
 
 #ifdef HAVE_DRM_DRM_FOURCC_H 
 #include <drm/drm_fourcc.h>
+#define HAVE_DRM
+#else
+
+#ifdef HAVE_LIBDRM_DRM_FOURCC_H 
+#include <libdrm/drm_fourcc.h>
+#define HAVE_DRM
+#endif
+
+#endif
+
 
 #include <gavl/hw_v4l2.h>
 
@@ -403,7 +413,7 @@ int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
                                    gavl_video_frame_t * egl_frame,
                                    gavl_video_frame_t * v4l2_frame)
   {
-#ifdef HAVE_DRM_DRM_FOURCC_H
+#ifdef HAVE_DRM
 
   egl_t * egl;
   
@@ -420,7 +430,6 @@ int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
   attrs[aidx++] = fmt->image_width;
   attrs[aidx++] = EGL_HEIGHT;
   attrs[aidx++] = fmt->image_height;
-  
   
   if(fmt->pixelformat == GAVL_YUV_420_P)
     {
