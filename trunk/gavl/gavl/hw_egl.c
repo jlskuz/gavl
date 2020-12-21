@@ -84,7 +84,7 @@ typedef struct
   EGLSurface (*eglCreatePlatformWindowSurface)(EGLDisplay, EGLConfig, void *, const void*);
 
   void * (*eglCreateImage)(EGLDisplay dpy, EGLContext ctx, EGLenum target,
-                              EGLClientBuffer buffer, const EGLint *attrib_list);
+                           EGLClientBuffer buffer, const EGLint *attrib_list);
   
   EGLBoolean (*eglDestroyImage)(EGLDisplay dpy, void * image);
 
@@ -196,7 +196,7 @@ static const EGLint
 gles_attributes[] =
   {
 #ifdef EGL_CONTEXT_MAJOR_VERSION
-   EGL_CONTEXT_MAJOR_VERSION, 2,
+   EGL_CONTEXT_MAJOR_VERSION, 3,
 #endif
    EGL_NONE
   };
