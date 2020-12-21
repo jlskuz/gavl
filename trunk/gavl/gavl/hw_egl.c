@@ -53,14 +53,14 @@
 #ifdef HAVE_DRM_DRM_FOURCC_H 
 #include <drm/drm_fourcc.h>
 #define HAVE_DRM
-#else
+#else // !HAVE_DRM_DRM_FOURCC_H 
 
 #ifdef HAVE_LIBDRM_DRM_FOURCC_H 
 #include <libdrm/drm_fourcc.h>
 #define HAVE_DRM
 #endif
 
-#endif
+#endif // !HAVE_DRM_DRM_FOURCC_H 
 
 #ifdef HAVE_DRM
 #include <gavl/hw_v4l2.h>
