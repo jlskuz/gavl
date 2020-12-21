@@ -100,17 +100,15 @@ hw_egl_cflags =
 hw_egl_libs = 
 endif
 
-
-
-if HAVE_MMAL
-hw_mmal_sources = hw_mmal.c
-hw_mmal_cflags = @MMAL_CFLAGS@
-hw_mmal_libs   = @MMAL_LIBS@
-else
-hw_mmal_sources = 
-hw_mmal_cflags =
-hw_mmal_libs   =
-endif
+dnl if HAVE_MMAL
+dnl hw_mmal_sources = hw_mmal.c
+dnl hw_mmal_cflags = @MMAL_CFLAGS@
+dnl hw_mmal_libs   = @MMAL_LIBS@
+dnl else
+dnl hw_mmal_sources = 
+dnl hw_mmal_cflags =
+dnl hw_mmal_libs   =
+dnl endif
 
 if HAVE_V4L2
 hw_v4l2_sources = hw_v4l2.c
@@ -127,9 +125,7 @@ $(hw_libva_x11_cflags) \
 $(hw_gl_cflags) \
 $(hw_glx_cflags) \
 $(hw_egl_cflags) \
--I/usr/include \
-$(hw_mmal_cflags)
-
+-I/usr/include
 
 SUBDIRS = \
 hq \
@@ -153,7 +149,6 @@ $(hw_libva_x11_sources) \
 $(hw_egl_sources) \
 $(hw_gl_sources) \
 $(hw_glx_sources) \
-$(hw_mmal_sources) \
 $(hw_v4l2_sources) \
 absdiff.c \
 arith128.c \
@@ -258,7 +253,6 @@ $(hw_libva_libs) \
 $(hw_gl_libs) \
 $(hw_glx_libs) \
 $(hw_egl_libs) \
-$(hw_mmal_libs) \
 -lpthread \
 -lm
 

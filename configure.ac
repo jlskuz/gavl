@@ -248,7 +248,7 @@ dnl
 dnl MMAL
 dnl
 
-GMERLIN_CHECK_MMAL
+dnl GMERLIN_CHECK_MMAL
 
 dnl
 dnl Video4linux2
