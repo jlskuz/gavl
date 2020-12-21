@@ -441,12 +441,12 @@ int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
       if(v4l2_frame->planes[1] < v4l2_frame->planes[2])
         {
         attrs[aidx++] = EGL_LINUX_DRM_FOURCC_EXT;
-        attrs[aidx++] = DRM_FORMAT_YUV420;
+        attrs[aidx++] = DRM_FORMAT_YVU420;
         }
       else
         {
         attrs[aidx++] = EGL_LINUX_DRM_FOURCC_EXT;
-        attrs[aidx++] = DRM_FORMAT_YVU420;
+        attrs[aidx++] = DRM_FORMAT_YUV420;
         }
 
       /* Plane 0 */
