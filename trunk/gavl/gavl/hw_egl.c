@@ -62,9 +62,8 @@
 
 #endif
 
-
+#ifdef HAVE_DRM
 #include <gavl/hw_v4l2.h>
-
 #endif
 
 typedef struct
