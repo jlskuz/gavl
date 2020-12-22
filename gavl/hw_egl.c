@@ -421,7 +421,7 @@ void gavl_hw_egl_swap_buffers(gavl_hw_context_t * ctx)
 
 int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
                                    const gavl_video_format_t * fmt,
-                                   gavl_video_frame_t * egl_frame,
+                                   GLuint texture,
                                    gavl_video_frame_t * v4l2_frame)
   {
 #ifdef HAVE_DRM
@@ -431,11 +431,10 @@ int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
   EGLImageKHR image = EGL_NO_IMAGE_KHR;
   EGLint attrs[128];
   int aidx = 0;
-  GLuint * tex;
 
   gavl_v4l2_buffer_t * buf = v4l2_frame->user_data;
   
-  egl = egl_frame->hwctx->native;
+  egl = ctx->native;
   
   attrs[aidx++] = EGL_WIDTH;
   attrs[aidx++] = fmt->image_width;
@@ -526,10 +525,9 @@ int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
     }
   gavl_hw_egl_set_current(ctx, EGL_NO_SURFACE);
 
-  tex = egl_frame->user_data;
 
   /* Associate the texture with the dma buffer */
-  glBindTexture(GL_TEXTURE_EXTERNAL_OES, *tex);
+  glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
   egl->glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, image);
   
   /* Destroy image */
