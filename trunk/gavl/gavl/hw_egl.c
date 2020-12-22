@@ -30,6 +30,7 @@
 #endif
 
 #include <GL/gl.h>
+#include <GL/glext.h>
 
 #define EGL_EGLEXT_PROTOTYPES
 
@@ -64,6 +65,10 @@
 
 #ifdef HAVE_DRM
 #include <gavl/hw_v4l2.h>
+#endif
+
+#ifndef GL_TEXTURE_EXTERNAL_OES
+#define GL_TEXTURE_EXTERNAL_OES 0x8D65
 #endif
 
 typedef struct
@@ -524,8 +529,8 @@ int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
   tex = egl_frame->user_data;
 
   /* Associate the texture with the dma buffer */
-  glBindTexture(GL_TEXTURE_2D, *tex);
-  egl->glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
+  glBindTexture(GL_TEXTURE_EXTERNAL_OES, *tex);
+  egl->glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, image);
   
   /* Destroy image */
 
