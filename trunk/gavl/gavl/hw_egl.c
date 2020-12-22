@@ -212,6 +212,14 @@ gles_attributes[] =
    EGL_NONE
   };
 
+#if 0
+static void dump_dma_buf_formats(EGLDisplay  dpy)
+  {
+  //  EGL_EXT_image_dma_buf_import_modifiers 
+  //  EGLBoolean  eglQueryDmaBufFormatsEXT (EGLDisplay  dpy, EGLint  max_formats, EGLint  *formats, EGLint  *num_formats)
+  }
+#endif
+
 gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs, gavl_hw_type_t type, void * native_display)
   {
   egl_t * priv;
@@ -248,7 +256,6 @@ gavl_hw_context_t * gavl_hw_ctx_create_egl(EGLint const * attrs, gavl_hw_type_t 
       return NULL;
 #endif
       break;
-      
     case GAVL_HW_EGL_GL_X11:  // X11
       eglBindAPI(EGL_OPENGL_API);
 #ifdef HAVE_XLIB
@@ -441,12 +448,12 @@ int gavl_hw_egl_import_v4l2_buffer(gavl_hw_context_t * ctx,
       if(v4l2_frame->planes[1] < v4l2_frame->planes[2])
         {
         attrs[aidx++] = EGL_LINUX_DRM_FOURCC_EXT;
-        attrs[aidx++] = DRM_FORMAT_YVU420;
+        attrs[aidx++] = DRM_FORMAT_YUV420;
         }
       else
         {
         attrs[aidx++] = EGL_LINUX_DRM_FOURCC_EXT;
-        attrs[aidx++] = DRM_FORMAT_YUV420;
+        attrs[aidx++] = DRM_FORMAT_YVU420;
         }
 
       /* Plane 0 */
