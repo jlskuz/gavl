@@ -35,7 +35,6 @@
 #define DECODER_NUM_PACKETS 8
 #define DECODER_NUM_FRAMES  8
 
-
 // #define DUMP_PACKETS
 // #define DUMP_EXTRADATA
 
