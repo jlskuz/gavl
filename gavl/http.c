@@ -14,7 +14,7 @@
 
 /* Utils */
 
-static int parse_vars_line(gavl_dictionary_t * m, char * line)
+int gavl_http_parse_vars_line(gavl_dictionary_t * m, char * line)
   {
   char * pos;
 
@@ -48,7 +48,7 @@ static int read_vars(gavf_io_t * io, char ** line, int * line_alloc,
     if(**line == '\0')
       return 1;
     
-    if(!parse_vars_line(m, *line))
+    if(!gavl_http_parse_vars_line(m, *line))
       return 0;
     }
   return 1;
@@ -423,7 +423,7 @@ int gavl_http_response_from_string(gavl_dictionary_t * res, const char * buf)
   i = 1;
   while(str[i])
     {
-    if(!parse_vars_line(res, str[i]))
+    if(!gavl_http_parse_vars_line(res, str[i]))
       goto fail;
     i++;
     }
@@ -489,7 +489,7 @@ int gavl_http_request_from_string(gavl_dictionary_t * req, const char * buf)
   i = 1;
   while(str[i])
     {
-    if(!parse_vars_line(req, str[i]))
+    if(!gavl_http_parse_vars_line(req, str[i]))
       goto fail;
     i++;
     }

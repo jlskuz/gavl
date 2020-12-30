@@ -49,7 +49,6 @@ const char * gavl_http_request_get_method(const gavl_dictionary_t * req);
 GAVL_PUBLIC
 const char * gavl_http_request_get_path(const gavl_dictionary_t * req);
 
-
 /* Response */
 
 GAVL_PUBLIC
@@ -75,6 +74,9 @@ int gavl_http_response_from_string(gavl_dictionary_t * res, const char * buf);
 
 GAVL_PUBLIC
 int gavl_http_request_from_string(gavl_dictionary_t * req, const char * buf);
+
+GAVL_PUBLIC
+int gavl_http_parse_vars_line(gavl_dictionary_t * m, char * line);
 
 
 GAVL_PUBLIC
