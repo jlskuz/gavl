@@ -245,12 +245,6 @@ dnl
 GMERLIN_CHECK_OPENGL
 
 dnl
-dnl MMAL
-dnl
-
-dnl GMERLIN_CHECK_MMAL
-
-dnl
 dnl Video4linux2
 dnl
 
