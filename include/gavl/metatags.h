@@ -435,6 +435,7 @@
 #define GAVL_META_MEDIA_CLASS_CONTAINER           "container"       // Generic
 #define GAVL_META_MEDIA_CLASS_MUSICALBUM          "container.musicalbum" 
 #define GAVL_META_MEDIA_CLASS_PLAYLIST            "container.playlist"
+#define GAVL_META_MEDIA_CLASS_PODCAST             "container.podcast"
 #define GAVL_META_MEDIA_CLASS_CONTAINER_ACTOR     "container.category.actor" 
 #define GAVL_META_MEDIA_CLASS_CONTAINER_DIRECTOR  "container.category.director" 
 #define GAVL_META_MEDIA_CLASS_CONTAINER_ARTIST    "container.category.artist" 
@@ -459,6 +460,7 @@
 #define GAVL_META_MEDIA_CLASS_ROOT_WEBRADIO      "container.root.webradio"
 #define GAVL_META_MEDIA_CLASS_ROOT_DIRECTORIES   "container.root.directories"
 #define GAVL_META_MEDIA_CLASS_ROOT_PHOTOS        "container.root.photos"
+#define GAVL_META_MEDIA_CLASS_ROOT_PODCASTS      "container.root.podcasts"
 
 #define GAVL_META_MEDIA_CLASS_ROOT_INCOMING      "container.root.incoming" 
 #define GAVL_META_MEDIA_CLASS_ROOT_FAVORITES     "container.root.favorites" 
