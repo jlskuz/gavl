@@ -209,7 +209,7 @@
 
 #define GAVL_META_STATION           "Station"
 #define GAVL_META_STATION_URL       "StationURL"
-#define GAVL_META_STATION_LOGO_URL  "StationLogo"
+#define GAVL_META_LOGO_URL          "LogoURL"
 
 /** \brief Approximate duration
  */
@@ -265,10 +265,12 @@
 #define GAVL_META_COUNTRY_CODE_2   "CountryCode2"
 
 
+#define GAVL_META_DESCRIPTION "Description"
+
 /** \brief Movie plot.
  */
 
-#define GAVL_META_PLOT             "Plot"
+#define GAVL_META_PLOT     GAVL_META_DESCRIPTION
 
 /** \brief Audio languages
  *  Array of language LABELS (not ISO codes) in the root
@@ -417,6 +419,9 @@
 #define GAVL_META_MEDIA_CLASS_MOVIE               "item.video.movie"
 #define GAVL_META_MEDIA_CLASS_MOVIE_PART          "item.video.movie.part"
 #define GAVL_META_MEDIA_CLASS_MOVIE_MULTIPART     "item.video.movie.multipart"
+
+#define GAVL_META_MEDIA_CLASS_AUDIO_PODCAST_EPISODE "item.audio.podcastepisode"
+#define GAVL_META_MEDIA_CLASS_VIDEO_PODCAST_EPISODE "item.video.podcastepisode"
 
 #define GAVL_META_MEDIA_CLASS_TV_EPISODE          "item.video.episode"
 #define GAVL_META_MEDIA_CLASS_AUDIO_BROADCAST     "item.audio.broadcast"
