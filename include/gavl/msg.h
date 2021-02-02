@@ -165,6 +165,20 @@
 
 #define GAVL_CMD_SRC_START             105
 
+/** \brief Pause the source
+ *
+ *  This signals, that we will pause the read functions for a while.
+ */
+
+#define GAVL_CMD_SRC_PAUSE             106
+
+/** \brief Resume the source
+ *
+ *  Reverse the effect of an earlier pause command
+ */
+
+#define GAVL_CMD_SRC_RESUME            107
+
 /* GUI Events */
 
 /*
