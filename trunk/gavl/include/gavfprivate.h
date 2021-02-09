@@ -7,6 +7,8 @@
 struct gavl_io_s
   {
   gavf_read_func read_func;
+  gavf_read_func read_func_nonblock;
+  
   gavf_write_func write_func;
   gavf_seek_func seek_func;
   gavf_close_func close_func;
@@ -38,12 +40,13 @@ void gavf_io_init(gavf_io_t * ret,
                   void * priv);
 
 
+
 void gavf_io_skip(gavf_io_t * io, int bytes);
 
 void gavf_io_init_buf_read(gavf_io_t * io, gavl_buffer_t * buf);
 void gavf_io_init_buf_write(gavf_io_t * io, gavl_buffer_t * buf);
 
-
+void gavf_io_set_nonblock_read(gavf_io_t * io, gavf_read_func read_nonblock);
 
 /* Packetbuffer */
 

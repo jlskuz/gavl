@@ -1,8 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+
 #include <gavl/gavf.h>
 #include <gavl/gavlsocket.h>
+
+#include <gavfprivate.h>
+
 
 /* 10 kB */
 #define BUFFER_SIZE 10240
@@ -24,9 +29,9 @@ static void do_buffer(socket_t * s)
   {
   int len;
 
-if(!(s->flags & GAVF_IO_SOCKET_BUFFER_READ))
+  if(!(s->flags & GAVF_IO_SOCKET_BUFFER_READ))
     return;
-
+  
   if(s->buf.len < BUFFER_SIZE)
     {
     len  = gavl_socket_read_data_noblock(s->fd, s->buf.buf + s->buf.len,
@@ -40,7 +45,7 @@ if(!(s->flags & GAVF_IO_SOCKET_BUFFER_READ))
     }
   }
 
-static int read_socket(void * priv, uint8_t * data, int len)
+static int do_read_socket(void * priv, uint8_t * data, int len, int block)
   {
   int result;
   int bytes_to_read;
@@ -76,8 +81,12 @@ static int read_socket(void * priv, uint8_t * data, int len)
     
     return bytes_read;
     }
-  result = gavl_socket_read_data(s->fd, data + bytes_read, len, s->timeout);
 
+  if(block)
+    result = gavl_socket_read_data(s->fd, data + bytes_read, len, s->timeout);
+  else
+    result = gavl_socket_read_data_noblock(s->fd, data + bytes_read, len);
+  
   if(result <= 0)
     {
     //    fprintf(stderr, "Read socket 2: %d\n", bytes_read);
@@ -94,6 +103,17 @@ static int read_socket(void * priv, uint8_t * data, int len)
   
   return bytes_read;
   }
+
+static int read_socket(void * priv, uint8_t * data, int len)
+  {
+  return do_read_socket(priv, data, len, 1);
+  }
+  
+static int read_socket_nonblock(void * priv, uint8_t * data, int len)
+  {
+  return do_read_socket(priv, data, len, 0);
+  }
+
 
 static int write_socket(void * priv, const uint8_t * data, int len)
   {
@@ -140,6 +160,7 @@ gavf_io_t * gavf_io_create_socket_1(int fd, int read_timeout, int flags)
                        s);
 
   gavf_io_set_poll_func(ret, poll_socket);
+  gavf_io_set_nonblock_read(ret, read_socket_nonblock);
   
   return ret;
   }
