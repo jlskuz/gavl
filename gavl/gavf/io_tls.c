@@ -5,8 +5,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <gavfprivate.h>
+
+#include <unistd.h>
+#include <fcntl.h>
+
 #include <gavl/gavf.h>
 #include <gavl/log.h>
+#include <gavl/gavlsocket.h>
 
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
@@ -85,8 +91,11 @@ typedef struct
   gavl_buffer_t write_buffer;
   
   char * server_name;
+  
+  int flags;
+  int nonblock;
+  
   } tls_t;
-
 
 static int flush_tls(void * priv)
   {
@@ -119,16 +128,66 @@ static int flush_tls(void * priv)
   return 1;
   }
 
-static int read_record(tls_t * p)
+static int read_record(tls_t * p, int block)
   {
   ssize_t result;
 
+  int bytes_to_read;
+  int bytes_in_buffer;
+  
   if(!flush_tls(p))
     return 0;
+
+  bytes_to_read = BUFFER_SIZE;
+
+  if(!block)
+    {
+    bytes_in_buffer = gnutls_record_check_pending(p->session);
+
+    if(bytes_in_buffer > 0)
+      {
+      if(bytes_to_read > bytes_in_buffer)
+        bytes_to_read = bytes_in_buffer;
+      }
+
+    if(!bytes_in_buffer)
+      {
+      if(!p->nonblock)
+        {
+        /* Blocking mode -> non-blocking mode */
+
+        if(fcntl(p->fd, F_SETFL, O_NONBLOCK) < 0)
+          {
+          
+          }
+        p->nonblock = 1;
+        }
+      }
+    
+    }
+  else
+    {
+    /* Blocking mode -> non-blocking mode */
+    
+    if(p->nonblock)
+      {
+      /* non-blocking mode -> blocking mode */
+      
+      if(fcntl(p->fd, F_SETFL, 0) < 0)
+        {
+        
+        }
+      p->nonblock = 0;
+      }
+    }
   
   do
     {
-    result = gnutls_record_recv(p->session, p->read_buffer.buf, BUFFER_SIZE);
+    result = gnutls_record_recv(p->session, p->read_buffer.buf, bytes_to_read);
+
+    if((result == GNUTLS_E_AGAIN) && !block)
+      break;
+    
     } while((result == GNUTLS_E_AGAIN) || (result == GNUTLS_E_INTERRUPTED));
 
   if(result > 0)
@@ -141,7 +200,7 @@ static int read_record(tls_t * p)
   }
 
 
-static int read_tls(void * priv, uint8_t * data, int len)
+static int do_read_tls(void * priv, uint8_t * data, int len, int block)
   {
   tls_t * p = priv;
   int bytes_read = 0;
@@ -152,7 +211,7 @@ static int read_tls(void * priv, uint8_t * data, int len)
     {
     if(p->read_buffer.pos >= p->read_buffer.len)
       {
-      if(!read_record(p))
+      if(!read_record(p, block))
         break;
       }
 
@@ -172,7 +231,18 @@ static int read_tls(void * priv, uint8_t * data, int len)
   
   return bytes_read;
   }
-    
+
+static int read_tls(void * priv, uint8_t * data, int len)
+  {
+  return do_read_tls(priv, data, len, 1);
+  }
+
+static int read_nonblock_tls(void * priv, uint8_t * data, int len)
+  {
+  return do_read_tls(priv, data, len, 0);
+  }
+
+
 static int write_tls(void * priv, const uint8_t * data, int len)
   {
   int bytes_to_copy;
@@ -216,19 +286,28 @@ static void close_tls(void * priv)
 
   if(p->server_name)
     free(p->server_name);
+
+  if(p->flags & GAVF_IO_SOCKET_DO_CLOSE)
+    gavl_socket_close(p->fd);
   
   free(p);
   }
 
 
-gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name)
+gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name, int flags)
   {
   tls_t * p;
   int result;
+  gavf_io_t * io;
+
   tls_global_init();
 
+  
   p = calloc(1, sizeof(*p));
 
+  p->flags = flags;
+  p->fd = fd;
+  
   gavl_log(GAVL_LOG_INFO, LOG_DOMAIN, "Establishing TLS connection with %s", server_name);
   
   p->server_name = gavl_strdup(server_name);
@@ -286,12 +365,16 @@ gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name)
   gavl_buffer_alloc(&p->read_buffer, BUFFER_SIZE);
   gavl_buffer_alloc(&p->write_buffer, BUFFER_SIZE);
   
-  return gavf_io_create(read_tls,
-                        write_tls,
-                        NULL,
-                        close_tls,
-                        flush_tls,
-                        p);
+  io = gavf_io_create(read_tls,
+                      write_tls,
+                      NULL,
+                      close_tls,
+                      flush_tls,
+                      p);
+  
+  gavf_io_set_nonblock_read(io, read_nonblock_tls);
+
+  return io;
   
   fail:
 

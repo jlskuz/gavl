@@ -27,6 +27,12 @@ void gavf_io_init(gavf_io_t * ret,
   ret->priv = priv;
   }
 
+void gavf_io_set_nonblock_read(gavf_io_t * io, gavf_read_func read_nonblock)
+  {
+  io->read_func_nonblock = read_nonblock;
+  }
+  
+
 void * gavf_io_get_priv(gavf_io_t * io)
   {
   return io->priv;
@@ -134,7 +140,7 @@ int64_t gavf_io_position(gavf_io_t * io)
   return io->position;
   }
 
-int gavf_io_read_data(gavf_io_t * io, uint8_t * buf, int len)
+static int io_read_data(gavf_io_t * io, uint8_t * buf, int len, int block)
   {
   int ret = 0;
   int result;
@@ -162,7 +168,10 @@ int gavf_io_read_data(gavf_io_t * io, uint8_t * buf, int len)
 
   if(len > 0)
     {
-    result = io->read_func(io->priv, buf, len);
+    if(!block && io->read_func_nonblock)
+      result = io->read_func_nonblock(io->priv, buf, len);
+    else
+      result = io->read_func(io->priv, buf, len);
     
     if(result > 0)
       {
@@ -171,6 +180,16 @@ int gavf_io_read_data(gavf_io_t * io, uint8_t * buf, int len)
       }
     }
   return ret;
+  }
+
+int gavf_io_read_data(gavf_io_t * io, uint8_t * buf, int len)
+  {
+  return io_read_data(io, buf, len, 1);
+  }
+
+int gavf_io_read_data_nonblock(gavf_io_t * io, uint8_t * buf, int len)
+  {
+  return io_read_data(io, buf, len, 0);
   }
 
 int gavf_io_get_data(gavf_io_t * io, uint8_t * buf, int len)

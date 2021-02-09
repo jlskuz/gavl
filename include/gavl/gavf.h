@@ -235,7 +235,7 @@ GAVL_PUBLIC
 gavf_io_t * gavf_io_create_mem_write();
 
 GAVL_PUBLIC
-gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name);
+gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name, int flags);
 
 // GAVL_PUBLIC
 // void gavf_io_set_cb(gavf_io_t * io, gavf_io_cb_func cb, void * cb_priv);
@@ -251,6 +251,9 @@ int gavf_io_can_seek(gavf_io_t * io);
 
 GAVL_PUBLIC
 int gavf_io_read_data(gavf_io_t * io, uint8_t * buf, int len);
+
+GAVL_PUBLIC
+int gavf_io_read_data_nonblock(gavf_io_t * io, uint8_t * buf, int len);
 
 /* Get data but don't remove from input */
 GAVL_PUBLIC
