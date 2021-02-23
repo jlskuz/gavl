@@ -481,7 +481,7 @@ int gavl_msg_get_arg_int(const gavl_msg_t * msg, int arg);
  */
 
 GAVL_PUBLIC
-void gavl_msg_set_arg_time(gavl_msg_t * msg, int arg, gavl_time_t value);
+void gavl_msg_set_arg_long(gavl_msg_t * msg, int arg, gavl_time_t value);
 
 /** \brief Get a time argument
  *  \param msg A message
@@ -490,7 +490,7 @@ void gavl_msg_set_arg_time(gavl_msg_t * msg, int arg, gavl_time_t value);
  */
 
 GAVL_PUBLIC
-gavl_time_t gavl_msg_get_arg_time(const gavl_msg_t * msg, int arg);
+int64_t gavl_msg_get_arg_long(const gavl_msg_t * msg, int arg);
 
 /** \brief Set a string argument
  *  \param msg A message
