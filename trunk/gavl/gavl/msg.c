@@ -104,7 +104,7 @@ void gavl_msg_set_arg_int(gavl_msg_t * msg, int arg, int value)
     msg->num_args = arg + 1;
   }
 
-void gavl_msg_set_arg_time(gavl_msg_t * msg, int arg, gavl_time_t value)
+void gavl_msg_set_arg_long(gavl_msg_t * msg, int arg, int64_t value)
   {
   if(!check_arg(arg))
     return;
@@ -235,7 +235,7 @@ int gavl_msg_get_arg_int(const gavl_msg_t * msg, int arg)
   return msg->args[arg].v.i;
   }
 
-gavl_time_t gavl_msg_get_arg_time(const gavl_msg_t * msg, int arg)
+int64_t gavl_msg_get_arg_long(const gavl_msg_t * msg, int arg)
   {
   if(!check_arg(arg))
     return 0;
@@ -487,7 +487,7 @@ void
 gavl_msg_set_src_metadata(gavl_msg_t * msg, int64_t time, const gavl_dictionary_t * m)
   {
   gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_METADATA_CHANGED, GAVL_MSG_NS_SRC);
-  gavl_msg_set_arg_time(msg, 0, time);
+  gavl_msg_set_arg_long(msg, 0, time);
   gavl_msg_set_arg_dictionary(msg, 1, m);
   }
 
@@ -495,7 +495,7 @@ void
 gavl_msg_get_src_metadata(gavl_msg_t * msg, int64_t * time, gavl_dictionary_t * m)
   {
   if(time)
-    *time = gavl_msg_get_arg_time(msg, 0);
+    *time = gavl_msg_get_arg_long(msg, 0);
   if(m)
     gavl_msg_get_arg_dictionary(msg, 1, m);
   }
@@ -506,7 +506,7 @@ gavl_msg_set_src_aspect(gavl_msg_t * msg, int64_t time, int scale, int stream,
                         int pixel_width, int pixel_height)
   {
   gavl_msg_set_id_ns(msg, GAVL_MSG_SRC_ASPECT_CHANGED, GAVL_MSG_NS_SRC);
-  gavl_msg_set_arg_time(msg, 0, time);
+  gavl_msg_set_arg_long(msg, 0, time);
   gavl_msg_set_arg_int(msg, 1, scale);
   gavl_msg_set_arg_int(msg, 2, stream);
   gavl_msg_set_arg_int(msg, 3, pixel_width);
@@ -520,7 +520,7 @@ gavl_msg_get_src_aspect(gavl_msg_t * msg,
                         int * pixel_width, int * pixel_height)
   {
   if(time)
-    *time = gavl_msg_get_arg_time(msg, 0);
+    *time = gavl_msg_get_arg_long(msg, 0);
   if(scale)
     *scale = gavl_msg_get_arg_int(msg, 1);
   if(stream)
@@ -795,7 +795,7 @@ void gavl_msg_set_src_resync(gavl_msg_t * dst, int64_t t, int scale, int discard
   {
   gavl_msg_set_id_ns(dst, GAVL_MSG_SRC_RESYNC, GAVL_MSG_NS_SRC);
             
-  gavl_msg_set_arg_time(dst, 0, t);
+  gavl_msg_set_arg_long(dst, 0, t);
   gavl_msg_set_arg_int(dst, 1, scale);
   gavl_msg_set_arg_int(dst, 2, discard);
   gavl_msg_set_arg_int(dst, 3, discont);
@@ -804,7 +804,7 @@ void gavl_msg_set_src_resync(gavl_msg_t * dst, int64_t t, int scale, int discard
 void gavl_msg_get_src_resync(const gavl_msg_t * src, int64_t * t, int * scale, int * discard, int * discont)
   {
   if(t)
-    *t = gavl_msg_get_arg_time(src, 0);
+    *t = gavl_msg_get_arg_long(src, 0);
   if(scale)
     *scale = gavl_msg_get_arg_int(src, 1);
   if(discard)
