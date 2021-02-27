@@ -93,7 +93,6 @@ typedef struct
   char * server_name;
   
   int flags;
-  int nonblock;
   
   } tls_t;
 
@@ -149,36 +148,10 @@ static int read_record(tls_t * p, int block)
       if(bytes_to_read > bytes_in_buffer)
         bytes_to_read = bytes_in_buffer;
       }
-
-    if(!bytes_in_buffer)
-      {
-      if(!p->nonblock)
-        {
-        /* Blocking mode -> non-blocking mode */
-
-        if(fcntl(p->fd, F_SETFL, O_NONBLOCK) < 0)
-          {
-          
-          }
-        p->nonblock = 1;
-        }
-      }
-    
-    }
-  else
-    {
-    /* Blocking mode -> non-blocking mode */
-    
-    if(p->nonblock)
-      {
-      /* non-blocking mode -> blocking mode */
-      
-      if(fcntl(p->fd, F_SETFL, 0) < 0)
-        {
         
-        }
-      p->nonblock = 0;
-      }
+    if(!bytes_in_buffer && (!gavl_socket_can_read(p->fd, 0)))
+      return 0;
+    
     }
   
   do
@@ -205,8 +178,7 @@ static int do_read_tls(void * priv, uint8_t * data, int len, int block)
   tls_t * p = priv;
   int bytes_read = 0;
   int bytes_to_read;
-
-    
+  
   while(bytes_read < len)
     {
     if(p->read_buffer.pos >= p->read_buffer.len)
@@ -293,6 +265,20 @@ static void close_tls(void * priv)
   free(p);
   }
 
+static int poll_tls(void * priv, int timeout)
+  {
+  tls_t * p = priv;
+
+  /* Check if we have buffered data */
+  if(p->read_buffer.len > p->read_buffer.pos)
+    return 1;
+
+  /* Check if TLS has buffered data */
+  if(gnutls_record_check_pending(p->session) > 0)
+    return 1;
+  
+  return gavl_socket_can_read(p->fd, timeout);
+  }
 
 gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name, int flags)
   {
@@ -373,7 +359,11 @@ gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name, int flag
                       p);
   
   gavf_io_set_nonblock_read(io, read_nonblock_tls);
+  gavf_io_set_poll_func(io, poll_tls);
+  
+  gavf_io_set_nonblock_read(io, read_nonblock_tls);
 
+  
   return io;
   
   fail:
