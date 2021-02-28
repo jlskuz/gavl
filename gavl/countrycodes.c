@@ -217,6 +217,7 @@ const gavl_country_t gavl_countries[] = {
   { "Seychelles", "SC", "SYC", 690 },
   { "Sierra Leone", "SL", "SLE", 694 },
   { "Singapore", "SG", "SGP", 702 },
+  { "Sint Maarten", "SX", "SXM", 534 },
   { "Slovakia", "SK", "SVK", 703 },
   { "Slovenia", "SI", "SVN", 705 },
   { "Solomon Islands", "SB", "SLB", 90 },
