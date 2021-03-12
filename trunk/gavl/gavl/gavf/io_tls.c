@@ -157,12 +157,17 @@ static int read_record(tls_t * p, int block)
   do
     {
     result = gnutls_record_recv(p->session, p->read_buffer.buf, bytes_to_read);
-
+    
     if((result == GNUTLS_E_AGAIN) && !block)
       break;
     
     } while((result == GNUTLS_E_AGAIN) || (result == GNUTLS_E_INTERRUPTED));
 
+  if(result < 0)
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "Reading TLS record failed: %s", gnutls_strerror(result));
+    }
+  
   if(result > 0)
     {
     p->read_buffer.len = result;
@@ -361,8 +366,6 @@ gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name, int flag
   gavf_io_set_nonblock_read(io, read_nonblock_tls);
   gavf_io_set_poll_func(io, poll_tls);
   
-  gavf_io_set_nonblock_read(io, read_nonblock_tls);
-
   
   return io;
   
