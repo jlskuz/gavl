@@ -274,6 +274,9 @@ static int poll_tls(void * priv, int timeout)
   {
   tls_t * p = priv;
 
+  if(!flush_tls(p))
+    return 0;
+  
   /* Check if we have buffered data */
   if(p->read_buffer.len > p->read_buffer.pos)
     return 1;
