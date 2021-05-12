@@ -362,6 +362,9 @@ GAVL_PUBLIC
 void gavl_array_copy(gavl_array_t * dst, const gavl_array_t * src); 
 
 GAVL_PUBLIC
+void gavl_array_copy_sub(gavl_array_t * dst, const gavl_array_t * src, int start, int num);
+
+GAVL_PUBLIC
 void gavl_array_move(gavl_array_t * dst, gavl_array_t * src); 
 
 GAVL_PUBLIC

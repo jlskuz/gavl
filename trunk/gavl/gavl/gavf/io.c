@@ -178,6 +178,9 @@ static int io_read_data(gavf_io_t * io, uint8_t * buf, int len, int block)
       io->position += result;
       ret += result;
       }
+
+    if(!result)
+      io->got_error = 1;
     }
   return ret;
   }
@@ -841,29 +844,6 @@ int gavf_io_write_buffer(gavf_io_t * io, const gavl_buffer_t * buf)
   }
 
 
-#if 0
-int gavf_io_cb(gavf_io_t * io, int type, const void * data)
-  {
-  int ret;
-  
-  if(!io->msg_callback)
-    return 1;
-  
-  if(io->got_error)
-    return 0;
-
-  switch(type)
-    {
-    
-    }
-  
-  //   ret = io->msg_callback(io->msg_callback_data, type, data);
-  
-  if(!ret)
-    io->got_error = 1;
-  return ret;
-  }
-#endif
 
 /* */
 

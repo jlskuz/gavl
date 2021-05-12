@@ -84,22 +84,34 @@ void gavl_array_reset(gavl_array_t * d)
   gavl_array_init(d);
   }
 
-void gavl_array_copy(gavl_array_t * dst, const gavl_array_t * src)
+void gavl_array_copy_sub(gavl_array_t * dst, const gavl_array_t * src, int start, int num)
   {
   int i;
-  gavl_array_free(dst);
-  gavl_array_init(dst);
+  
+  if(start + num > src->num_entries)
+    num = src->num_entries - start;
 
-  dst->entries_alloc = src->entries_alloc;
-  dst->num_entries   = src->num_entries;
+  
+  gavl_array_reset(dst);
 
+  if(num < 0)
+    return;
+  
+  dst->entries_alloc = num;
+  dst->num_entries   = num;
+  
   if(dst->num_entries)
     {
     dst->entries = calloc(dst->entries_alloc, sizeof(*dst->entries));
   
-    for(i = 0; i < dst->num_entries; i++)
-      gavl_value_copy(dst->entries + i, src->entries + i);
+    for(i = 0; i < num; i++)
+      gavl_value_copy(dst->entries + i, src->entries + start + i);
     }
+  }
+
+void gavl_array_copy(gavl_array_t * dst, const gavl_array_t * src)
+  {
+  gavl_array_copy_sub(dst, src, 0, src->num_entries);
   }
 
 void gavl_array_move(gavl_array_t * dst, gavl_array_t * src)
