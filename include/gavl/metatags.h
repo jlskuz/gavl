@@ -457,6 +457,10 @@
 
 /* Root Containers */
 #define GAVL_META_MEDIA_CLASS_ROOT               "container.root" 
+
+// Mapped locally, not part of database
+#define GAVL_META_MEDIA_CLASS_ROOT_PLAYQUEUE "container.root.playqueue" 
+
 #define GAVL_META_MEDIA_CLASS_ROOT_MUSICALBUMS   "container.root.musicalbums"
 #define GAVL_META_MEDIA_CLASS_ROOT_SONGS         "container.root.songs" 
 #define GAVL_META_MEDIA_CLASS_ROOT_PLAYLISTS     "container.root.playlists" 
@@ -499,7 +503,7 @@
 #define GAVL_META_GUI_SELECTED       "GUISelected"
 
 // Track is current in a GUI
-// #define GAVL_META_GUI_CURRENT        "GUICurrent"
+#define GAVL_META_GUI_CURRENT        "GUICurrent"
 
 /**
  * @}
