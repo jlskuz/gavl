@@ -1687,10 +1687,14 @@ void gavl_track_update_children(gavl_dictionary_t * dict)
   int i;
   const char * klass;
   gavl_dictionary_t * m;
+  gavl_dictionary_t * tm;
   gavl_dictionary_t * track;
   gavl_array_t * arr;
   int num_items = 0;
   int num_containers = 0;
+
+  gavl_time_t duration = 0;
+  gavl_time_t track_duration = GAVL_TIME_UNDEFINED;
   
   arr = gavl_get_tracks_nc(dict);
   m = gavl_dictionary_get_dictionary_create(dict, GAVL_META_METADATA);
@@ -1704,19 +1708,31 @@ void gavl_track_update_children(gavl_dictionary_t * dict)
     //      fprintf(stderr, "Blupp %d %p %d %p\n", i, arr, arr->num_entries, arr->entries);
 
     if((track = gavl_get_track_nc(dict, i)) &&
-       (m = gavl_dictionary_get_dictionary_create(track, GAVL_META_METADATA)))
+       (tm = gavl_dictionary_get_dictionary_create(track, GAVL_META_METADATA)))
       {
-      gavl_dictionary_set_int(m, GAVL_META_IDX, i);
+      gavl_dictionary_set_int(tm, GAVL_META_IDX, i);
       
-      if((klass = gavl_dictionary_get_string(m, GAVL_META_MEDIA_CLASS)))
+      if((klass = gavl_dictionary_get_string(tm, GAVL_META_MEDIA_CLASS)))
         {
         if(gavl_string_starts_with(klass, "item"))
           num_items++;
         else if(gavl_string_starts_with(klass, "container"))
           num_containers++;
         }
+
+      if(duration != GAVL_TIME_UNDEFINED)
+        {
+        if(gavl_dictionary_get_long(tm, GAVL_META_APPROX_DURATION, &track_duration) &&
+           (track_duration > 0))
+          duration += track_duration;
+        else
+          duration = GAVL_TIME_UNDEFINED;
+        }
+      
       }
     }
+
+  gavl_dictionary_set_long(m, GAVL_META_APPROX_DURATION, duration); 
   
   if(num_items + num_containers == arr->num_entries)
     gavl_track_set_num_children(dict, num_containers, num_items);
