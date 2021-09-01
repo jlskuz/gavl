@@ -159,17 +159,12 @@ LIBS=$RT_LIBS
 
 AC_MSG_CHECKING(for CLOCK_MONOTONIC)
 
-AC_TRY_RUN([
+AC_TRY_COMPILE([
   #include <time.h>
   #include <errno.h>
-main()
-  {
+],[
   struct timespec tp;
-  if(clock_gettime(CLOCK_MONOTONIC, &tp))
-    return -1;
-  else
-    return 0;
-  }
+  clock_gettime(CLOCK_MONOTONIC, &tp);
   ],
   [
     # program could be run

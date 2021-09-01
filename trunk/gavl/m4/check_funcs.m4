@@ -746,31 +746,27 @@ dnl
 
 AC_MSG_CHECKING(for neaacdec.h usability for faad2)
 
-  AC_TRY_RUN([
+  AC_TRY_LINK([
     #include <neaacdec.h>
     #include <stdio.h>
-    main()
-    {
-    int faad_major;
-    int faad_minor;
+  ],[
     NeAACDecHandle dec;
 
     dec = NeAACDecOpen();
     if(!dec)
       return -1;
     return 0;
-    }
-  ],
-  [
+  ],[
     # program could be run
     have_faad2="true"
     AC_MSG_RESULT(yes)
     FAAD2_CFLAGS=$CFLAGS
     FAAD2_LIBS=$LIBS
     AC_DEFINE(HAVE_NEAACDEC_H)
-  ],
+  ],[
     # program could not be run
     AC_MSG_RESULT(no)
+  ]
 )
 
 CFLAGS=$OLD_CFLAGS
@@ -816,28 +812,23 @@ LIBS="$GMERLIN_DEP_LIBS -ldvdread"
 
 AC_MSG_CHECKING(for libdvdread >= 0.9.5)
 
-  AC_TRY_RUN([
+  AC_TRY_LINK([
     #include <dvdread/dvd_reader.h>
-    #include <stdio.h>
-    main()
-    {
-#if DVDREAD_VERSION < 905
-    return -1;
-#else
+  ],[
+    #if DVDREAD_VERSION < 905
+    # error libdvdread must be at least 0.9.5
+    #endif
     return 0;
-#endif
-    }
-  ],
-  [
+  ],[
     # program could be run
     have_dvdread="true"
     AC_MSG_RESULT(yes)
     DVDREAD_CFLAGS=""
     DVDREAD_LIBS="-ldvdread"
-
-  ],
+  ],[
     # program could not be run
     AC_MSG_RESULT(no)
+  ]
 )
 
 if test "x$have_dvdread" = "xtrue"; then
@@ -916,13 +907,26 @@ LIBS="$GMERLIN_DEP_LIBS -lFLAC -lm"
     AC_MSG_RESULT(yes)
     FLAC_CFLAGS=$CFLAGS
     FLAC_LIBS=$LIBS
-    BGAV_FLAC_MAJOR=`cat flac_version | cut -d . -f 1`
-    BGAV_FLAC_MINOR=`cat flac_version | cut -d . -f 2`
-    BGAV_FLAC_PATCHLEVEL=`cat flac_version | cut -d . -f 3`
+    BGAV_FLAC_MAJOR=$(cat flac_version | cut -d . -f 1)
+    BGAV_FLAC_MINOR=$(cat flac_version | cut -d . -f 2)
+    BGAV_FLAC_PATCHLEVEL=$(cat flac_version | cut -d . -f 3)
     rm -f flac_version
-  ],
+  ],[
     # program could not be run
     AC_MSG_RESULT(no)
+  ],[
+    if test -n "${FLAC_VERSION}"; then
+      have_flac="true"
+      AC_MSG_RESULT([assuming yes (cross-compiling)])
+      FLAC_CFLAGS=$CFLAGS
+      FLAC_LIBS=$LIBS
+      BGAV_FLAC_MAJOR=$(echo ${FLAC_VERSION} | cut -d . -f 1)
+      BGAV_FLAC_MINOR=$(echo ${FLAC_VERSION} | cut -d . -f 2)
+      BGAV_FLAC_PATCHLEVEL=$(echo ${FLAC_VERSION} | cut -d . -f 3)
+    else
+      AC_MSG_RESULT([no (cross-compiling)])
+    fi
+  ]
 )
 
 CFLAGS=$OLD_CFLAGS
@@ -972,27 +976,23 @@ CFLAGS="$GMERLIN_DEP_CFLAGS"
 AH_TEMPLATE([HAVE_MUSEPACK], [Enable Musepack])
 AC_MSG_CHECKING(for libmpcdec)
 
-  AC_TRY_RUN([
+  AC_TRY_LINK([
     #include <mpcdec/mpcdec.h>
     #include <stdio.h>
-    main()
-    {
+  ],[
     mpc_streaminfo si;
     mpc_streaminfo_init(&si);
     return 0;
-    }
-  ],
-  [
+  ],[
     # program could be run
     have_musepack="true"
     AC_MSG_RESULT(yes)
     MUSEPACK_CFLAGS=$CFLAGS
     MUSEPACK_LIBS=$LIBS
-
-  ],
+  ],[
     # program could not be run
     AC_MSG_RESULT(no)
-)
+  ])
 
 CFLAGS=$OLD_CFLAGS
 LIBS=$OLD_LIBS
@@ -1058,10 +1058,16 @@ AC_MSG_CHECKING(for libmad 0.15.x)
     AC_MSG_RESULT(yes)
     MAD_CFLAGS=$CFLAGS
     MAD_LIBS=$LIBS
-
-  ],
+  ],[
     # program could not be run
     AC_MSG_RESULT(no)
+  ],[
+    # cross-compiling
+    have_mad="true"
+    AC_MSG_RESULT([assuming yes (cross-compiling)])
+    MAD_CFLAGS=$CFLAGS
+    MAD_LIBS=$LIBS
+  ]
 )
 
 CFLAGS=$OLD_CFLAGS
@@ -1105,27 +1111,24 @@ OLD_LIBS=$LIBS
 LIBS="$GMERLIN_DEP_LIBS -la52 -lm"
 CFLAGS="$GMERLIN_DEP_CFLAGS"
 LIBA52_REQUIRED="0.7.4"
-AC_MSG_CHECKING(for liba52)
+AC_MSG_CHECKING([for liba52])
 
-  AC_TRY_RUN([
+  AC_TRY_LINK([
     #include <inttypes.h>
     #include <a52dec/a52.h>
-    main()
-    {
+  ],[
     a52_state_t * state = a52_init(0);
     return 0;
-    }
-  ],
-  [
+  ],[
     # program could be run
     have_liba52="true"
     AC_MSG_RESULT(yes)
     LIBA52_CFLAGS=$CFLAGS
     LIBA52_LIBS=$LIBS
-
-  ],
+  ],[
     # program could not be run
     AC_MSG_RESULT(no)
+  ]
 )
 
 CFLAGS=$OLD_CFLAGS
@@ -1374,10 +1377,16 @@ AC_MSG_CHECKING(for lame)
     AC_MSG_RESULT(yes)
     LAME_CFLAGS=$CFLAGS
     LAME_LIBS=$LIBS
-
-  ],
+  ],[
     # program could not be run
     AC_MSG_RESULT(no)
+  ],[
+    # cross-compiling
+    have_lame="true"
+    AC_MSG_RESULT([assuming yes (cross-compiling)])
+    LAME_CFLAGS=$CFLAGS
+    LAME_LIBS=$LIBS
+  ]
 )
 
 CFLAGS=$OLD_CFLAGS
@@ -1448,9 +1457,16 @@ AC_TRY_RUN([
     FAAC_CFLAGS=$CFLAGS
     FAAC_LIBS=$LIBS
 
-  ],
+  ],[
     # program could not be run
     AC_MSG_RESULT(no)
+  ],[
+    # cross-compiling
+    have_faac="true"
+    AC_MSG_RESULT([assuming yes (cross-compiling)])
+    FAAC_CFLAGS=$CFLAGS
+    FAAC_LIBS=$LIBS
+  ]
 )
 
 CFLAGS=$OLD_CFLAGS
@@ -1496,10 +1512,9 @@ LIBS="$LIBS -ljpeg"
 
 AC_MSG_CHECKING(for libjpeg)
 AC_TRY_LINK([#include <stdio.h>
-             #include <jpeglib.h>],
-            [struct jpeg_decompress_struct cinfo;
-             jpeg_create_decompress(&cinfo);],
-            [have_libjpeg=true])
+             #include <jpeglib.h>],[
+struct jpeg_decompress_struct cinfo; jpeg_create_decompress(&cinfo);
+            ],[have_libjpeg=true])
 case $have_libjpeg in
   true) AC_DEFINE(HAVE_LIBJPEG)
         AC_MSG_RESULT(yes)
@@ -1557,10 +1572,9 @@ have_GL="true"
 AC_SEARCH_LIBS([glBegin], [GL], [], [have_GL="false"], [])
 
 if test "x$have_GL" = "xtrue"; then
-AC_TRY_RUN([
-#include <GL/gl.h>
-int main() { if(0) glBegin(GL_QUADS); return 0;}
-],[],[have_GL="false"])
+AC_TRY_LINK([#include <GL/gl.h>],[
+if(0) glBegin(GL_QUADS); return 0;],
+[],[have_GL="false"])
 fi
 
 GL_LIBS=$LIBS
@@ -1577,10 +1591,9 @@ have_GLX="true"
 AC_SEARCH_LIBS([glXCreateContext], [GL glx], [], [have_GLX="false"], [])
 
 if test "x$have_GL" = "xtrue"; then
-AC_TRY_RUN([
-#include <GL/glx.h>
-int main() { if(0) glXChooseFBConfig(NULL, 0,
-	NULL, NULL); return 0;}],[],[have_GLX="false"])
+AC_TRY_LINK([#include <GL/glx.h>],[
+if(0) glXChooseFBConfig(NULL, 0, NULL, NULL); return 0;
+],[],[have_GLX="false"])
 fi
 
 GLX_LIBS=$LIBS
@@ -1597,9 +1610,9 @@ have_EGL="true"
 AC_SEARCH_LIBS([eglGetCurrentDisplay], [GL EGL], [], [have_EGL="false"], [])
 
 if test "x$have_GL" = "xtrue"; then
-AC_TRY_RUN([
-#include <EGL/egl.h>
-int main() { if(0) eglGetCurrentDisplay(); return 0;}],[],[have_EGL="false"])
+AC_TRY_LINK([#include <EGL/egl.h>],[
+if(0) eglGetCurrentDisplay(); return 0;
+],[],[have_EGL="false"])
 fi
 
 EGL_LIBS=$LIBS
@@ -1648,9 +1661,9 @@ have_GLU="true"
 AC_SEARCH_LIBS([gluLookAt], [GLU], [], [have_GLU="false"], [])
 
 if test "x$have_GLU" = "xtrue"; then
-AC_TRY_RUN([
-#include <GL/glu.h>
-int main() { if(0) gluLookAt(0, 0, 0, 0, 0, 0, 0, 0, 0); return 0;}],[],[have_GLU="false"])
+AC_TRY_LINK([#include <GL/glu.h>],[
+if(0) gluLookAt(0, 0, 0, 0, 0, 0, 0, 0, 0); return 0;
+],[],[have_GLU="false"])
 fi
 
 GLU_CFLAGS=$CFLAGS
@@ -1714,9 +1727,15 @@ AC_MSG_CHECKING([for POSIX unnamed semaphores]);
     have_posix_semaphores="true"
     AC_MSG_RESULT(yes)
     AC_DEFINE(HAVE_POSIX_SEMAPHORES)
-  ],
+  ],[
     # program could not be run
     AC_MSG_RESULT(no)
+  ],[
+    # cross compiling
+    have_posix_semaphores="true"
+    AC_MSG_RESULT([assuming yes (cross compiling)])
+    AC_DEFINE(HAVE_POSIX_SEMAPHORES)
+  ]
 )
 
 LIBS=$OLD_LIBS

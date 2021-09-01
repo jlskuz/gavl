@@ -36,6 +36,9 @@ main()
 
 	return EXIT_MAYBEIEEE;
 #endif
-}],HAVE_IEEEFLOAT=yes, HAVE_IEEEFLOAT=no, :)
+}],HAVE_IEEEFLOAT=yes, HAVE_IEEEFLOAT=no,[
+  AC_MSG_RESULT([cross compiling, assuming yes])
+  HAVE_IEEEFLOAT=yes
+])
 AC_MSG_RESULT($HAVE_IEEEFLOAT)
 ])
