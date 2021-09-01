@@ -85,8 +85,8 @@ AC_DEFUN([AC_C99_FUNC_LRINTF],
 [AC_CACHE_CHECK(for lrintf,
   ac_cv_c99_lrintf,
 [
-lrint_save_CFLAGS=$CFLAGS
-lrint_save_LIBS=$LIBS
+lrintf_save_CFLAGS=$CFLAGS
+lrintf_save_LIBS=$LIBS
 CFLAGS="-O2"
 LIBS="-lm"
 AC_TRY_LINK([
