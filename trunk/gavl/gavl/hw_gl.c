@@ -211,7 +211,7 @@ const char * gavl_gl_get_error_string(GLenum err)
       return error_codes[idx].msg;
     idx++;
     }
-  return "Unkown error";
+  return "Unknown error";
   }
 
 void gavl_gl_log_error(const char * funcname)
