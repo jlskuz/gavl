@@ -183,6 +183,18 @@ char * gavl_strtrim(char * str);
 GAVL_PUBLIC
 char * gavl_escape_string(char * old, const char * escape_chars);
 
+/** \brief Escape a string
+ *  \param old Old string
+ *  \param escape_chars Characters to escape
+ *
+ *  This returns the same string with each backslash in
+ *  front of one of the escape_chars removed
+ */
+
+GAVL_PUBLIC
+char * gavl_unescape_string(char * old_string, const char * escape_chars);
+
+
 /** \brief Check if a string starts with a substring
  *  \param str String
  *  \param start Head to test against

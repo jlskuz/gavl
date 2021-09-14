@@ -237,6 +237,28 @@ char * gavl_escape_string(char * old_string, const char * escape_chars)
   return NULL; // Never get here
   }
 
+char * gavl_unescape_string(char * old_string, const char * escape_chars)
+  {
+  char * pos = old_string;
+  int len = strlen(old_string);
+  
+  while(*pos != '\0')
+    {
+    if((*pos == '\\') && (*(pos+1) != '\0') && strchr(escape_chars, *(pos+1)))
+      {
+      /* len - 1 + 1 (don't count backslash but count '\0') */
+      memmove(pos, pos+1, len);
+      }
+    else
+      {
+      pos++;
+      }
+
+    len--;
+    }
+  return old_string;
+  }
+
 int gavl_string_starts_with(const char * str, const char * start)
   {
   return !strncmp(str, start, strlen(start)) ? 1 : 0;
@@ -370,6 +392,48 @@ char * gavl_strip_space(char * str)
   return strip_space(str, 1);
   }
 
+/* TODO: Support escaped delimiters (with backslash) */
+
+static const char * next_delim_c(const char * start, char delim)
+  {
+  const char * pos = start;
+
+  while(*pos != '\0')
+    {
+    if(*pos == delim)
+      {
+      if(pos > start)
+        {
+        if(*(pos-1) != '\\')
+          return pos;
+        }
+      }
+    pos++;
+    }
+  return NULL;
+  }
+
+static char * next_delim(char * start, char delim)
+  {
+  char * pos = start;
+
+  while(*pos != '\0')
+    {
+    if(*pos == delim)
+      {
+      if(pos > start)
+        {
+        if(*(pos-1) != '\\')
+          return pos;
+        }
+      }
+    pos++;
+    }
+  return NULL;
+  }
+
+
+
 char ** gavl_strbreak(const char * str, char delim)
   {
   int num_entries;
@@ -377,13 +441,18 @@ char ** gavl_strbreak(const char * str, char delim)
   const char *pos_c;
   char ** ret;
   int i;
+
+  char escape_chars[2];
+  escape_chars[0] = delim;
+  escape_chars[1] = '\0';
+  
   if(!str || (*str == '\0'))
     return NULL;
     
   pos_c = str;
   
   num_entries = 1;
-  while((pos_c = strchr(pos_c, delim)))
+  while((pos_c = next_delim_c(pos_c, delim)))
     {
     num_entries++;
     pos_c++;
@@ -401,7 +470,7 @@ char ** gavl_strbreak(const char * str, char delim)
       }
     if(i < num_entries-1)
       {
-      end = strchr(pos, delim);
+      end = next_delim(pos, delim);
       *end = '\0';
       }
     end++;
@@ -409,8 +478,10 @@ char ** gavl_strbreak(const char * str, char delim)
     }
 
   for(i = 0; i < num_entries; i++)
+    {
     strip_space(ret[i], 0);
-  
+    gavl_unescape_string(ret[i], escape_chars);
+    }
   return ret;
   }
 
