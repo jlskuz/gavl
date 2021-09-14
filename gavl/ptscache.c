@@ -80,6 +80,7 @@ static void return_packet(gavl_packet_pts_cache_t *c, int idx, gavl_packet_t * p
   remove_packet(c, idx);
   }
 
+#if 0
 static void return_video_frame(gavl_packet_pts_cache_t *c, int idx, gavl_video_frame_t * frame)
   {
   if(frame)
@@ -87,6 +88,7 @@ static void return_video_frame(gavl_packet_pts_cache_t *c, int idx, gavl_video_f
 
   remove_packet(c, idx);
   }
+#endif
 
 int gavl_packet_pts_cache_get_first(gavl_packet_pts_cache_t *c, gavl_packet_t * pkt)
   {
