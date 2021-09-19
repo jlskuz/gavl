@@ -392,9 +392,9 @@ char * gavl_strip_space(char * str)
   return strip_space(str, 1);
   }
 
-/* TODO: Support escaped delimiters (with backslash) */
+/* Support escaped delimiters (with backslash) */
 
-static const char * next_delim_c(const char * start, char delim)
+const char * gavl_find_char_c(const char * start, char delim)
   {
   const char * pos = start;
 
@@ -407,13 +407,15 @@ static const char * next_delim_c(const char * start, char delim)
         if(*(pos-1) != '\\')
           return pos;
         }
+      else
+        return pos;
       }
     pos++;
     }
   return NULL;
   }
 
-static char * next_delim(char * start, char delim)
+char * gavl_find_char(char * start, char delim)
   {
   char * pos = start;
 
@@ -426,6 +428,8 @@ static char * next_delim(char * start, char delim)
         if(*(pos-1) != '\\')
           return pos;
         }
+      else
+        return pos;
       }
     pos++;
     }
@@ -452,7 +456,7 @@ char ** gavl_strbreak(const char * str, char delim)
   pos_c = str;
   
   num_entries = 1;
-  while((pos_c = next_delim_c(pos_c, delim)))
+  while((pos_c = gavl_find_char_c(pos_c, delim)))
     {
     num_entries++;
     pos_c++;
@@ -470,7 +474,7 @@ char ** gavl_strbreak(const char * str, char delim)
       }
     if(i < num_entries-1)
       {
-      end = next_delim(pos, delim);
+      end = gavl_find_char(pos, delim);
       *end = '\0';
       }
     end++;
