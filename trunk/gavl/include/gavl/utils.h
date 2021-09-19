@@ -241,6 +241,12 @@ char ** gavl_strbreak(const char * str, char delim);
 GAVL_PUBLIC
 void gavl_strbreak_free(char ** retval);
 
+GAVL_PUBLIC
+const char * gavl_find_char_c(const char * start, char delim);
+
+GAVL_PUBLIC
+char * gavl_find_char(char * start, char delim);
+
 /* Buffer */
 
 typedef struct
