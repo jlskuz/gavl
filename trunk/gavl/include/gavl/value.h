@@ -193,6 +193,9 @@ void gavl_dictionary_move(gavl_dictionary_t * dst, gavl_dictionary_t * src);
 GAVL_PUBLIC
 void gavl_dictionary_dump(const gavl_dictionary_t * m, int indent);
 
+/* src1 has priority */
+/* From src2 we take only the tags, which aren't available */
+
 GAVL_PUBLIC
 void gavl_dictionary_merge(gavl_dictionary_t * dst,
                            const gavl_dictionary_t * src1,
