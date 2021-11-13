@@ -512,20 +512,28 @@ static int send_decoder_packet(gavl_v4l2_device_t * dev)
   
   if((gavl_packet_source_read_packet(dev->psrc, &p) != GAVL_SOURCE_OK))
     {
-    /* Send EOF */
 
-    struct v4l2_decoder_cmd cmd;
-    memset(&cmd, 0, sizeof(cmd));
-    
-    cmd.cmd = V4L2_DEC_CMD_STOP;
-
-    if(my_ioctl(dev->fd, VIDIOC_DECODER_CMD, &cmd) == -1)
+    if(!(dev->flags & DECODER_SENT_EOS))
       {
-      gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "V4L2_DEC_CMD_STOP failed %s", strerror(errno));
+      /* Send EOS */
+    
+      struct v4l2_decoder_cmd cmd;
+      memset(&cmd, 0, sizeof(cmd));
+    
+      cmd.cmd = V4L2_DEC_CMD_STOP;
+
+      if(my_ioctl(dev->fd, VIDIOC_DECODER_CMD, &cmd) == -1)
+        {
+        gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "V4L2_DEC_CMD_STOP failed %s", strerror(errno));
+        }
+      dev->flags |= DECODER_SENT_EOS;
+      fprintf(stderr, "Sent EOS\n");
+      return 1;
       }
-    dev->flags |= DECODER_SENT_EOS;
-    fprintf(stderr, "Sent EOS\n");
-    return 1;
+    else
+      {
+      return 0;
+      }
     }
   
   if(gavl_v4l2_device_put_packet_write(dev) != GAVL_SINK_OK)
