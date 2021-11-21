@@ -140,6 +140,12 @@ int64_t gavf_io_position(gavf_io_t * io)
   return io->position;
   }
 
+void gavf_io_reset_position(gavf_io_t * io)
+  {
+  io->position = 0;
+  }
+
+
 static int io_read_data(gavf_io_t * io, uint8_t * buf, int len, int block)
   {
   int ret = 0;
@@ -179,7 +185,7 @@ static int io_read_data(gavf_io_t * io, uint8_t * buf, int len, int block)
       ret += result;
       }
 
-    if(!result)
+    if(!result && block)
       io->got_error = 1;
     }
   return ret;

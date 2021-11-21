@@ -284,6 +284,12 @@ void gavf_io_set_info(gavf_io_t * io, int64_t total_bytes,
 GAVL_PUBLIC
 int64_t gavf_io_position(gavf_io_t * io);
 
+/* Reset position to zero. This is necessary for socket based
+   io to subtract the handshake headers from the file offsets */
+
+GAVL_PUBLIC
+void gavf_io_reset_position(gavf_io_t * io);
+
 GAVL_PUBLIC
 int gavf_io_write_uint64f(gavf_io_t * io, uint64_t num);
 
