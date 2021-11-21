@@ -1142,7 +1142,10 @@ int gavf_open_read(gavf_t * g, gavf_io_t * io)
   gavf_chunk_t head;
   gavl_dictionary_t mi;
   
+  
   g->io = io;
+
+  gavf_io_reset_position(g->io);
   
   gavf_io_set_msg_cb(g->io, g->msg_callback, g->msg_data);
 

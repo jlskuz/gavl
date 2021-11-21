@@ -396,9 +396,6 @@
 
 #define GAVL_META_MSG_TIMESTAMP    "timestamp" // Timestamp of messages embedded into A/V streams
 
-// Address of a (typically) Unix-domain socket to be used as back channel for messages
-#define GAVL_META_MSG_BACK_CHANNEL_ADDRESS "backaddr" 
-
 
 /**
  *
