@@ -80,16 +80,6 @@ hw_gl_libs =
 endif
 
 
-if HAVE_GLX
-hw_glx_sources = hw_glx.c
-hw_glx_cflags = @GLX_CFLAGS@
-hw_glx_libs =   @GLX_LIBS@
-else
-hw_glx_sources = 
-hw_glx_cflags = 
-hw_glx_libs = 
-endif
-
 if HAVE_EGL
 hw_egl_sources = hw_egl.c
 hw_egl_cflags = @EGL_CFLAGS@
@@ -113,7 +103,6 @@ AM_CFLAGS = \
 $(hw_libva_cflags) \
 $(hw_libva_x11_cflags) \
 $(hw_gl_cflags) \
-$(hw_glx_cflags) \
 $(hw_egl_cflags) \
 -I/usr/include
 
@@ -138,7 +127,6 @@ $(hw_libva_sources) \
 $(hw_libva_x11_sources) \
 $(hw_egl_sources) \
 $(hw_gl_sources) \
-$(hw_glx_sources) \
 $(hw_v4l2_sources) \
 absdiff.c \
 arith128.c \
@@ -241,7 +229,6 @@ libsamplerate/libsamplerate.la \
 $(hw_libva_x11_libs) \
 $(hw_libva_libs) \
 $(hw_gl_libs) \
-$(hw_glx_libs) \
 $(hw_egl_libs) \
 -lpthread \
 -lm

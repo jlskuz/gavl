@@ -1559,7 +1559,6 @@ dnl OpenGL
 dnl
 AC_DEFUN([GMERLIN_CHECK_OPENGL],[
 AH_TEMPLATE([HAVE_GL],[OpenGL available])
-AH_TEMPLATE([HAVE_GLX],[GLX available])
 AH_TEMPLATE([HAVE_EGL],[EGL available])
 
 dnl
@@ -1578,25 +1577,6 @@ if(0) glBegin(GL_QUADS); return 0;],
 fi
 
 GL_LIBS=$LIBS
-
-LIBS="$OLD_LIBS"
-
-dnl
-dnl Check for GLX
-dnl
-
-OLD_LIBS=$LIBS
-
-have_GLX="true"
-AC_SEARCH_LIBS([glXCreateContext], [GL glx], [], [have_GLX="false"], [])
-
-if test "x$have_GL" = "xtrue"; then
-AC_TRY_LINK([#include <GL/glx.h>],[
-if(0) glXChooseFBConfig(NULL, 0, NULL, NULL); return 0;
-],[],[have_GLX="false"])
-fi
-
-GLX_LIBS=$LIBS
 
 LIBS="$OLD_LIBS"
 
@@ -1623,9 +1603,6 @@ LIBS="$OLD_LIBS"
 if test "x$have_GL" = "xtrue"; then
 AC_DEFINE(HAVE_GL)
 
-if test "x$have_GLX" = "xtrue"; then
-AC_DEFINE(HAVE_GLX)
-fi
 
 if test "x$have_EGL" = "xtrue"; then
 AC_DEFINE(HAVE_EGL)
@@ -1634,13 +1611,10 @@ fi
 fi
 
 AM_CONDITIONAL(HAVE_GL, test x$have_GL = xtrue)
-AM_CONDITIONAL(HAVE_GLX, test x$have_GLX = xtrue)
 AM_CONDITIONAL(HAVE_EGL, test x$have_EGL = xtrue)
 
 AC_SUBST(GL_CFLAGS)
 AC_SUBST(GL_LIBS)
-AC_SUBST(GLX_CFLAGS)
-AC_SUBST(GLX_LIBS)
 AC_SUBST(EGL_CFLAGS)
 AC_SUBST(EGL_LIBS)
 
@@ -1970,7 +1944,6 @@ AH_TEMPLATE([HAVE_LIBVA_X11],
             [Do we have libva (x11) installed?])
 
 have_libva="false"
-have_libva_glx="false"
 have_libva_x11="false"
 
 LIBVA_CFLAGS=""

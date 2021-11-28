@@ -490,7 +490,7 @@ static int xiph_buffer_get(xiph_buffer_t * ret,
   }
 
 static uint8_t * xiph_buffer_put(xiph_buffer_t * buf, int num,
-                                 int * global_header_len)
+                                 uint32_t * global_header_len)
   {
   int len;
   uint8_t * ret;
@@ -535,7 +535,7 @@ static uint8_t * xiph_buffer_put(xiph_buffer_t * buf, int num,
   }
 
 void gavl_append_xiph_header(uint8_t ** global_header,
-                             int * global_header_len,
+                             uint32_t * global_header_len,
                              uint8_t * header,
                              int header_len)
   {

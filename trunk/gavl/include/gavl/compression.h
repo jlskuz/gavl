@@ -191,7 +191,7 @@ void gavl_compression_info_copy(gavl_compression_info_t * dst,
 
 GAVL_PUBLIC
 void gavl_append_xiph_header(uint8_t ** global_header,
-                             int * global_header_len,
+                             uint32_t * global_header_len,
                              uint8_t * header,
                              int header_len);
 

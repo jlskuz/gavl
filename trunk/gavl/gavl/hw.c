@@ -213,7 +213,6 @@ static const struct
   }
 types[] = 
   {
-    { GAVL_HW_GLX, "GLX Texture" },
     { GAVL_HW_VAAPI_X11, "vaapi through X11" },
     
     { GAVL_HW_EGL_GL_X11, "Opengl Texture (EGL+X11)" },  // EGL Texture (associated with X11 connection)

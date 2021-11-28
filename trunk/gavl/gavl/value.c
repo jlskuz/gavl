@@ -897,58 +897,14 @@ void gavl_value_set_type(gavl_value_t * v, gavl_type_t  t)
 
 char * gavl_value_join_arr(const gavl_value_t * val, const char * glue)
   {
-  char * ret;
-  int ret_len;
-  int glue_len;
-  int i;
-  int idx;
-  const gavl_array_t * arr;
-
-
   if(!val)
     return NULL;
   if(val->type == GAVL_TYPE_STRING)
     return gavl_strdup(val->v.str);
   else if(val->type == GAVL_TYPE_ARRAY)
     {
-    glue_len = strlen(glue);
-    
-    ret_len = 1; // "\0"
-
-    idx = 0;
-    
-    arr = val->v.array;
-    for(i = 0; i < arr->num_entries; i++)
-      {
-      if((arr->entries[i].type != GAVL_TYPE_STRING) || !arr->entries[i].v.str)
-        continue;
-      
-      if(idx)
-        ret_len += glue_len;
-      
-      ret_len += strlen(arr->entries[i].v.str);
-      idx++;
-      }
-
-    ret = malloc(ret_len);
-    *ret = '\0';
-
-    if(!idx)
-      return ret;
-    
-    idx = 0;
-    for(i = 0; i < arr->num_entries; i++)
-      {
-      if((arr->entries[i].type != GAVL_TYPE_STRING) || !arr->entries[i].v.str)
-        continue;
-      
-      if(idx)
-        strncat(ret, glue, ret_len - strlen(ret));
-
-      strncat(ret, arr->entries[i].v.str, ret_len - strlen(ret));
-      idx++;
-      }
-    return ret;
+    const gavl_array_t * arr = val->v.array;
+    return gavl_string_array_join(arr, glue);
     }
   else
     return NULL;
