@@ -1055,6 +1055,14 @@ void gavl_v4l2_device_resync_decoder(gavl_v4l2_device_t * dev)
   }
 #endif
 
+#if 0
+int gavl_v4l_device_init_capture(gavl_v4l2_device_t * dev,
+                                 gavl_video_format_t * fmt)
+  {
+  return 0;
+  }
+#endif
+
 int gavl_v4l2_device_init_decoder(gavl_v4l2_device_t * dev, gavl_dictionary_t * stream,
                                  gavl_packet_source_t * psrc)
   {

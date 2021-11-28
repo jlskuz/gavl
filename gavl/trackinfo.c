@@ -420,6 +420,30 @@ static void init_overlay_stream(gavl_dictionary_t * dict)
 
   }
 
+void gavl_init_audio_stream(gavl_dictionary_t * dict)
+  {
+  init_stream(dict);
+  init_audio_stream(dict);
+  }
+
+void gavl_init_video_stream(gavl_dictionary_t * dict)
+  {
+  init_stream(dict);
+  init_video_stream(dict);
+  }
+
+void gavl_init_text_stream(gavl_dictionary_t * dict)
+  {
+  init_stream(dict);
+  init_text_stream(dict);
+  }
+
+void gavl_init_overlay_stream(gavl_dictionary_t * dict)
+  {
+  init_stream(dict);
+  init_overlay_stream(dict);
+  }
+
 static void init_msg_stream(gavl_dictionary_t * dict)
   {
   gavl_dictionary_t * m;
@@ -459,7 +483,6 @@ gavl_dictionary_t * gavl_track_append_stream(gavl_dictionary_t * d, gavl_stream_
   }
 
 /* Audio */
-
 
 gavl_dictionary_t * gavl_track_get_audio_stream_nc(gavl_dictionary_t * d, int i)
   {
@@ -1971,7 +1994,8 @@ void gavl_stream_set_compression_info(gavl_dictionary_t * s, const gavl_compress
   gavl_dictionary_t * cmp;
   
   cmp = gavl_dictionary_get_dictionary_create(s, COMPRESSION_INFO_KEY);
-
+  gavl_dictionary_reset(cmp);
+  
   SET_INT(COMPRESSION_INFO_KEY_FLAGS,   flags);
   SET_INT(COMPRESSION_INFO_KEY_ID,      id);
   SET_INT(COMPRESSION_INFO_KEY_BITRATE, bitrate);

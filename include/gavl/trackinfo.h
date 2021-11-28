@@ -435,6 +435,18 @@ const char * gavl_get_country_code_2_from_label(const char * label);
 GAVL_PUBLIC
 const char * gavl_get_country_code_3_from_label(const char * label);
 
+GAVL_PUBLIC
+void gavl_init_audio_stream(gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
+void gavl_init_video_stream(gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
+void gavl_init_text_stream(gavl_dictionary_t * dict);
+
+GAVL_PUBLIC
+void gavl_init_overlay_stream(gavl_dictionary_t * dict);
+
 
 /* */
 

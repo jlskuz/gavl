@@ -636,7 +636,8 @@ int gavl_string_array_indexof(const gavl_array_t * arr, const char * str);
 GAVL_PUBLIC
 const char * gavl_string_array_get(const gavl_array_t * arr, int idx);
  
-
+GAVL_PUBLIC
+char * gavl_string_array_join(const gavl_array_t * arr, const char * glue);
 
 /* For initializing values statically */
 #define GAVL_VALUE_INIT_INT(val)               { .type = GAVL_TYPE_INT, .v.i = val }

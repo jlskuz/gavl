@@ -433,6 +433,10 @@
 
 #define GAVL_META_MEDIA_CLASS_LOCATION            "item.location"
 
+// Stream comes from recording device
+#define GAVL_META_MEDIA_CLASS_AUDIO_RECORDER      "item.recorder.audio" 
+#define GAVL_META_MEDIA_CLASS_VIDEO_RECORDER      "item.recorder.video" 
+
 /* Container values */
 #define GAVL_META_MEDIA_CLASS_CONTAINER           "container"       // Generic
 #define GAVL_META_MEDIA_CLASS_MUSICALBUM          "container.musicalbum" 
@@ -467,6 +471,7 @@
 #define GAVL_META_MEDIA_CLASS_ROOT_DIRECTORIES   "container.root.directories"
 #define GAVL_META_MEDIA_CLASS_ROOT_PHOTOS        "container.root.photos"
 #define GAVL_META_MEDIA_CLASS_ROOT_PODCASTS      "container.root.podcasts"
+#define GAVL_META_MEDIA_CLASS_ROOT_RECORDERS     "container.root.recorders"
 
 #define GAVL_META_MEDIA_CLASS_ROOT_INCOMING      "container.root.incoming" 
 #define GAVL_META_MEDIA_CLASS_ROOT_FAVORITES     "container.root.favorites" 

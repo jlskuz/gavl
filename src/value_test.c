@@ -21,12 +21,13 @@ static void set_dict(gavl_dictionary_t * dict)
   gavl_dictionary_set_audio_format(dict, "afmt", &afmt);
   gavl_dictionary_set_video_format(dict, "vfmt", &vfmt);
   }
-
+#if 0
 static void set_msg(gavl_msg_t * msg)
   {
   gavl_msg_init(msg);
   //  gavl_msg_set_
   }
+#endif
 
 int main(int argc, char ** argv)
   {
