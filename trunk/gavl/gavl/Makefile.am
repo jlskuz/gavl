@@ -82,8 +82,8 @@ endif
 
 if HAVE_EGL
 hw_egl_sources = hw_egl.c
-hw_egl_cflags = @EGL_CFLAGS@
-hw_egl_libs =   @EGL_LIBS@
+hw_egl_cflags = @EGL_CFLAGS@  @X_CFLAGS@
+hw_egl_libs =   @EGL_LIBS@ @X_LIBS@
 else
 hw_egl_sources = 
 hw_egl_cflags = 
