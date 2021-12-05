@@ -1355,16 +1355,18 @@ static void finalize_video(gavl_dictionary_t * dict)
 
 static void add_country_flag(gavl_dictionary_t * m,
                              const char * code,
-                             int size)
+                             int width)
   {
-  gavl_dictionary_t * u;
+  //  gavl_dictionary_t * u;
   
-  char * uri = gavl_sprintf("https://www.countryflags.io/%s/flat/%d.png", code, size);
+  //  char * uri = gavl_sprintf("https://www.countryflags.io/%s/flat/%d.png", code, size);
 
-  u = gavl_metadata_add_src(m, GAVL_META_ICON_URL, "image/png", uri);
+  char * uri = gavl_sprintf("https://flagcdn.com/w%d/%c%c.png", width, tolower(code[0]), tolower(code[1]));
+  
+  gavl_metadata_add_src(m, GAVL_META_ICON_URL, "image/png", uri);
 
-  gavl_dictionary_set_int(u, GAVL_META_WIDTH, size);
-  gavl_dictionary_set_int(u, GAVL_META_HEIGHT, size);
+  //  gavl_dictionary_set_int(u, GAVL_META_WIDTH, size);
+  //  gavl_dictionary_set_int(u, GAVL_META_HEIGHT, size);
   
   free(uri);
   }
@@ -1516,11 +1518,11 @@ void gavl_track_finalize(gavl_dictionary_t * dict)
 
     if(countrycode)
       {
-      add_country_flag(m, countrycode, 16);
-      add_country_flag(m, countrycode, 24);
-      add_country_flag(m, countrycode, 32);
-      add_country_flag(m, countrycode, 48);
-      add_country_flag(m, countrycode, 64);
+      add_country_flag(m, countrycode, 160);
+      add_country_flag(m, countrycode, 20);
+      add_country_flag(m, countrycode, 40);
+      add_country_flag(m, countrycode, 320);
+      add_country_flag(m, countrycode, 640);
       }
     
     }
