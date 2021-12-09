@@ -163,8 +163,23 @@ AC_TRY_COMPILE([
   #include <time.h>
   #include <errno.h>
 ],[
-  struct timespec tp;
-  clock_gettime(CLOCK_MONOTONIC, &tp);
+  struct timespec tm;
+  struct timespec rem;
+
+  tm.tv_sec = *t / 1000000;
+  tm.tv_nsec = (*t % 1000000)*1000;
+
+  while(clock_nanosleep(CLOCK_MONOTONIC, 0,
+                        &tm, &rem))
+    {
+    if(errno == EINTR)
+      {
+      tm.tv_sec = rem.tv_sec;
+      tm.tv_nsec = rem.tv_nsec;
+      }
+     else
+       break;
+    }
   ],
   [
     # program could be run
