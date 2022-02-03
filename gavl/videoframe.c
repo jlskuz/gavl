@@ -1720,3 +1720,51 @@ void gavl_video_frame_dump_metadata(const gavl_video_format_t * format,
   gavl_rectangle_i_dump(&frame->src_rect);
   fprintf(stderr, " dst: %d %d\n", frame->dst_x, frame->dst_y);
   }
+
+/* Rotate video frames in multiples of 90 degrees */
+
+#if 0
+static void rotate_8(uint8_t * src, int src_stride, 
+                     uint8_t * dst, int dst_stride,
+                     int ninety_deg_steps,
+                     int src_width, int dst_width)
+  {
+  int i, j;
+
+  uint8_t * src_ptr;
+  uint8_t * dst_ptr;
+  
+  switch(ninety_deg_steps)
+    {
+    case 0:
+      for(i = 0; i < src_height; i++)
+        {
+        src_ptr = src + 
+        
+        for(j = 0; j < src_width; j++)
+          {
+          
+          }
+        }
+      
+      break;
+    case 1:
+      break;
+    case 2:
+      break;
+    case 3:
+      break;
+    }
+  
+  }
+
+                     
+void gavl_video_frame_copy_rotate_clockwise(const gavl_video_format_t * src_format,
+                                            gavl_video_frame_t * dst,
+                                            const gavl_video_frame_t * src,
+                                            int ninety_deg_steps)
+  {
+  ninety_deg_steps = ninety_deg_steps % 4;
+  
+  }
+#endif

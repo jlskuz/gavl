@@ -302,7 +302,7 @@ gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name, int flag
   p->flags = flags;
   p->fd = fd;
   
-  gavl_log(GAVL_LOG_INFO, LOG_DOMAIN, "Establishing TLS connection with %s", server_name);
+  gavl_log(GAVL_LOG_DEBUG, LOG_DOMAIN, "Establishing TLS connection with %s", server_name);
   
   p->server_name = gavl_strdup(server_name);
   
@@ -352,7 +352,7 @@ gavf_io_t * gavf_io_create_tls_client(int fd, const char * server_name, int flag
   else
     {
     char * desc = gnutls_session_get_desc(p->session);
-    gavl_log(GAVL_LOG_INFO, LOG_DOMAIN, "Established TLS connection: %s", desc);
+    gavl_log(GAVL_LOG_DEBUG, LOG_DOMAIN, "Established TLS connection: %s", desc);
     gnutls_free(desc);
     }
 

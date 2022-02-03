@@ -48,10 +48,22 @@
 
 #define GAVL_CMD_QUIT      1
 
+/** \brief Ping
+ *  The other end responds with pong. This is used to keep the
+ *  connections alive
+ */
+
+#define GAVL_CMD_PING      2
+
+
 /** \brief Quit (acknowledge)
  */
 
 #define GAVL_MSG_QUIT      100
+
+
+#define GAVL_MSG_PONG      101
+
 
 /** \brief Generic progress callback
  *

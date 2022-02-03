@@ -336,6 +336,21 @@
 #define GAVL_META_X      "x"
 #define GAVL_META_Y      "y"
 
+
+#define GAVL_META_IMAGE_ORIENTATION "ImageOrientation" // See GAVL_META_IMAGE_ORIENT_ 
+
+#define GAVL_META_IMAGE_ORIENT_NORMAL     0
+#define GAVL_META_IMAGE_ORIENT_ROT90_CW   1
+#define GAVL_META_IMAGE_ORIENT_ROT180_CW  2
+#define GAVL_META_IMAGE_ORIENT_ROT270_CW  3
+
+#define GAVL_META_IMAGE_ORIENT_FLIP_H     (1<<2)
+
+#define GAVL_META_IMAGE_ORIENT_FH            (GAVL_META_IMAGE_ORIENT_FLIP_H | GAVL_META_IMAGE_ORIENT_NORMAL)
+#define GAVL_META_IMAGE_ORIENT_FH_ROT90_CW   (GAVL_META_IMAGE_ORIENT_FLIP_H | GAVL_META_IMAGE_ORIENT_ROT90_CW)
+#define GAVL_META_IMAGE_ORIENT_FH_ROT180_CW  (GAVL_META_IMAGE_ORIENT_FLIP_H | GAVL_META_IMAGE_ORIENT_ROT180_CW)
+#define GAVL_META_IMAGE_ORIENT_FH_ROT270_CW  (GAVL_META_IMAGE_ORIENT_FLIP_H | GAVL_META_IMAGE_ORIENT_ROT270_CW)
+
 #define GAVL_META_NUM_CHILDREN            "NumChildren" // Number of children for container items
 #define GAVL_META_NUM_ITEM_CHILDREN       "NumItemChildren" // Number of children for container items
 #define GAVL_META_NUM_CONTAINER_CHILDREN  "NumContainerChildren" // Number of children for container items
@@ -440,6 +455,7 @@
 /* Container values */
 #define GAVL_META_MEDIA_CLASS_CONTAINER           "container"       // Generic
 #define GAVL_META_MEDIA_CLASS_MUSICALBUM          "container.musicalbum" 
+#define GAVL_META_MEDIA_CLASS_PHOTOALBUM          "container.photoalbum" 
 #define GAVL_META_MEDIA_CLASS_PLAYLIST            "container.playlist"
 #define GAVL_META_MEDIA_CLASS_PODCAST             "container.podcast"
 #define GAVL_META_MEDIA_CLASS_CONTAINER_ACTOR     "container.category.actor" 

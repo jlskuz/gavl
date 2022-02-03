@@ -447,6 +447,31 @@ void gavl_init_text_stream(gavl_dictionary_t * dict);
 GAVL_PUBLIC
 void gavl_init_overlay_stream(gavl_dictionary_t * dict);
 
+/* Generate pages of results */
+
+GAVL_PUBLIC
+void gavl_track_get_page_parent(const gavl_dictionary_t * parent_orig,
+                                 int group_size,
+                                 gavl_dictionary_t * parent_ret);
+
+GAVL_PUBLIC
+void gavl_track_get_page(const gavl_dictionary_t * parent_orig,
+                         int group_size,
+                         int idx,
+                         gavl_dictionary_t * ret);
+
+GAVL_PUBLIC
+void gavl_track_get_page_children_start(const gavl_dictionary_t * parent_orig,
+                                        int group_size,
+                                        int idx,
+                                        int * start, int * len);
+
+GAVL_PUBLIC
+void gavl_track_get_page_children_end(const gavl_dictionary_t * parent_orig,
+                                      int group_size,
+                                      int idx,
+                                      int start, int len,
+                                      gavl_array_t * ret);
 
 /* */
 

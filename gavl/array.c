@@ -138,7 +138,6 @@ gavl_array_compare(const gavl_array_t * m1,
   if(m1->num_entries != m2->num_entries)
     return 1;
   
-  /* Check if tags from m1 are present in m2 */
   for(i = 0; i < m1->num_entries; i++)
     {
     if((result = gavl_value_compare(&m1->entries[i], &m2->entries[i])))

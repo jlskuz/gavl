@@ -4,9 +4,13 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <config.h>
 
 #include <gavl/gavf.h>
 #include <gavl/http.h>
+#include <gavl/log.h>
+
+#define LOG_DOMAIN "gavl.http"
 
 // #define DUMP_REQUESTS_READ
 
@@ -326,11 +330,22 @@ int gavl_http_response_read(gavf_io_t * io,
   char * line = NULL;
   int line_alloc = 0;
   
-  if(!gavf_io_read_line(io, &line, &line_alloc, 1024) ||
-     !parse_response_line(res, line) ||
-     !read_vars(io, &line, &line_alloc, res))
+  if(!gavf_io_read_line(io, &line, &line_alloc, 1024))
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "Reading http status line failed"); 
     goto fail;
+    }
   
+  if(!parse_response_line(res, line))
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "Parsing http status line \"%s\" failed", line); 
+    goto fail;
+    }
+  if(!read_vars(io, &line, &line_alloc, res))
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "Reading http response variables failed"); 
+    goto fail;
+    }
   result = 1;
   fail:
   if(line)

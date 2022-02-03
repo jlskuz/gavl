@@ -257,8 +257,10 @@ int gavl_socket_address_set_local(gavl_socket_address_t * a, int port, const cha
   struct ifaddrs * ifap = NULL;
   struct ifaddrs * addr;
   if(getifaddrs(&ifap))
+    {
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "getifaddrs failed: %s", strerror(errno));
     return 0;
-
+    }
   if(wildcard)
     {
     if(!strcmp(wildcard, "0.0.0.0"))
@@ -291,6 +293,9 @@ int gavl_socket_address_set_local(gavl_socket_address_t * a, int port, const cha
       }
     addr = addr->ifa_next;
     }
+  
+  if(!ret)
+    gavl_log(GAVL_LOG_ERROR, LOG_DOMAIN, "getifaddrs returned only loopback addresses");
   
   freeifaddrs(ifap);
   return ret;
